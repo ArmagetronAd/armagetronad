@@ -1,0 +1,24 @@
+FROM ubuntu:16.04
+
+# skewed installation: add some of our dependencies, most indirect ones
+RUN apt-get -y update && apt-get install \
+mesa-utils \
+#libsdl2-dev \
+libsdl2-2.0-0 \
+#libogg-dev \
+libogg0 \
+#libpng-dev \
+libpng16-16 \
+#libprotobuf-dev \
+libprotobuf9v5 \
+#libjpeg-dev \
+libjpeg8 \
+#libvorbis-dev \
+libvorbis0a \
+libxml2 \
+-y
+
+COPY *.AppImage .
+RUN ./*.AppImage --appimage-extract-and-run --version
+
+RUN LD_DEBUG_APP=true ./*.AppImage --appimage-extract-and-run --version
