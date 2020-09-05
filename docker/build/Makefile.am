@@ -670,7 +670,7 @@ result.deploy_zi: context.deploy_zi deploy_external
 	echo > $@
 
 # deploy to download site (additional dependency here only, standard rules apply)
-result.deploy_download: deploy_external
+result.deploy_download: deploy_external result.update_zi
 
 # individual deploy targets
 deploy_lp: result.deploy_lp
