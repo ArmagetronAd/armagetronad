@@ -16,7 +16,7 @@ cd dist
 wine "$NSIS" armagetronad.nsi || exit $?
 wine "$NSIS" armagetronad_dedicated.nsi || exit $?
 mv *.win32.exe ../ || exit $?
-cd ../
+cd ..
 
 # comment out for debugging
 rm -rf winsource
