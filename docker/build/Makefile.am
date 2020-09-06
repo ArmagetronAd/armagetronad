@@ -525,8 +525,8 @@ winzip.tag: winzip_server.tag winzip_client.tag winzip_source.tag
 
 
 # copy installers into upload
-WININST_CLIENT_NAME:=$(PACKAGE_NAME)-$(PACKAGE_VERSION).gcc.win32.exe
-WININST_SERVER_NAME:=$(PACKAGE_NAME)-dedicated-$(PACKAGE_VERSION).gcc.win32.exe
+WININST_CLIENT_NAME:=$(PACKAGE_NAME)-$(PACKAGE_VERSION).win32.exe
+WININST_SERVER_NAME:=$(PACKAGE_NAME)-dedicated-$(PACKAGE_VERSION).win32.exe
 WININST_CLIENT=upload/$(WININST_CLIENT_NAME)
 WININST_SERVER=upload/$(WININST_SERVER_NAME)
 $(WININST_CLIENT): result.wininst_32 upload/.tag

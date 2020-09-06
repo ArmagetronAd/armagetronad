@@ -13,9 +13,9 @@ Xvfb :99 -screen 1 640x480x8 -nolisten tcp &
 DISPLAY=:99
 sleep 1
 cd dist
-wine "$NSIS" gcc.armagetronad.nsi || exit $?
-wine "$NSIS" gcc.armagetronad_dedicated.nsi || exit $?
-mv *.gcc.win32.exe ../ || exit $?
+wine "$NSIS" armagetronad.nsi || exit $?
+wine "$NSIS" armagetronad_dedicated.nsi || exit $?
+mv *.win32.exe ../ || exit $?
 cd ..
 
 # comment out for debugging
