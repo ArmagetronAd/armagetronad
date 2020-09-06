@@ -533,8 +533,8 @@ winzip.tag: winzip_server.tag winzip_client.tag winzip_source.tag
 
 
 # copy installers into upload
-WININST_CLIENT_NAME:=$(PACKAGE_NAME)-$(PACKAGE_VERSION).gcc.win32.exe
-WININST_SERVER_NAME:=$(PACKAGE_NAME)-dedicated-$(PACKAGE_VERSION).gcc.win32.exe
+WININST_CLIENT_NAME:=$(PACKAGE_NAME)-$(PACKAGE_VERSION).win32.exe
+WININST_SERVER_NAME:=$(PACKAGE_NAME)-dedicated-$(PACKAGE_VERSION).win32.exe
 WININST_CLIENT=upload/$(WININST_CLIENT_NAME)
 WININST_SERVER=upload/$(WININST_SERVER_NAME)
 $(WININST_CLIENT): result.wininst_32 upload/.tag
@@ -625,8 +625,8 @@ deploy_external: deploy_essential deploy_steam
 # targets in our control
 deploy_ours: result.deploy_zi result.deploy_download deploy_external
 
-context.deploy_base_%: rootcontext.64 deploy_base.tag ${srcdir}/../deploy/deploy_%.sh ../deploy/* CI_INFO
-	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' upload ../deploy/'*' ${srcdir}/../deploy/deploy_$*.sh CI_INFO
+context.deploy_base_%: rootcontext.64 deploy_base.tag ${srcdir}/../deploy/deploy_%.sh ${srcdir}/../deploy/wait_for_upload.sh ../deploy/* CI_INFO
+	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' upload ../deploy/'*' ${srcdir}/../deploy/deploy_$*.sh ${srcdir}/../deploy/wait_for_upload.sh CI_INFO
 	echo > $@
 context.deploy_%: context.deploy_base_%
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*'
@@ -674,7 +674,7 @@ context.deploy_zi: context.deploy_base_zeroinstall result.update_zi ${srcdir}/..
 	rm -f $@.dir/image
 	echo "armadeploy_64" > $@.dir/image
 	echo > $@
-result.deploy_zi: context.deploy_zi deploy_external
+result.deploy_zi: context.deploy_zi deploy_external result.deploy_download
 	+$(srcdir)/context_to_result.sh $@.dir ./deploy_zeroinstall.sh
 	echo > $@
 context.deploy_itch: context.deploy_base_itch ${srcdir}/../deploy/*_itch.sh upload/$(APPTAR_CLIENT_64) upload/$(APPTAR_CLIENT_32) $(WINZIP_CLIENT)
@@ -690,7 +690,7 @@ result.deploy_itch: context.deploy_itch
 	echo > $@
 
 # deploy to download site (additional dependency here only, standard rules apply)
-result.deploy_download: deploy_external result.update_zi
+result.deploy_download: deploy_external
 
 # individual deploy targets
 deploy_lp: result.deploy_lp
