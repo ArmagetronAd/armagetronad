@@ -8,7 +8,7 @@ URI="$1"
 
 timeout=10
 while test ${timeout} -gt -1; do
-    if curl ${URI} --fail --silent --show-error > /dev/null; then
+    if curl ${URI} --fail --silent --show-error -L -o /dev/null; then
         exit 0 # success
     elif test ${timeout} -gt 0; then
         echo "Waiting for download ${URI}: ${timeout}"
