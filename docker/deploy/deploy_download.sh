@@ -22,7 +22,7 @@ for f in *; do
     echo $f
 
     URI=${DOWNLOAD_URI_BASE}$f
-    ./wait_for_upload.sh "${URI}" || exit $?
+    ../wait_for_upload.sh "${URI}" || exit $?
 
     case $f in
 	*-dedicated-*.exe)
