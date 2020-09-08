@@ -7,8 +7,11 @@ archive=$1
 # if it already exists (Steam SDK), don't bother
 test -r /usr/include/SDL/SDL_image.h && exit 0
 
-# remove system provided libxml2
-# rm -f /usr/lib/libxml2.so.2 /usr/lib/x86_64-linux-gnu/libxml2.so.2 /usr/lib/i386-linux-gnu/libxml2.so.2
+# from debian, mostly
+confflags="--disable-jpg-shared \
+--disable-tif \
+--disable-png-shared \
+"
 
 # fetch
 curl https://www.libsdl.org/projects/SDL_image/release/${archive}.tar.gz -o ${archive}.tar.gz || exit $?
@@ -17,7 +20,7 @@ curl https://www.libsdl.org/projects/SDL_image/release/${archive}.tar.gz -o ${ar
 tar -xzf ${archive}.tar.gz
 rm ${archive}.tar.gz
 cd ${archive}
-CFLAGS=-Os ./configure --prefix=/usr/ --disable-tif --disable-webp || exit $?
+CFLAGS="-Os -pipe" LDFLAGS="-Wl,--as-needed" ./configure --prefix=/usr/ ${confflags} || exit $?
 make -j 5 || exit $?
 make install || exit $?
 cd .. && rm -rf ${archive}
