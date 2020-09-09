@@ -41,9 +41,8 @@ function copylib()
     done
 }
 
-# Luckily, This seems to only be an OPTIONAL dependency of libxml. It's huge.
-#libicudata \
-#libtiff \
+# dependency scrapyard
+# libstdc++ \
 
 #   include libraries
 mkdir -p ${APPDIR}/usr/lib/
@@ -71,7 +70,6 @@ libprotobuf \
 libSDL-1.2 \
 libslang \
 libsndfile \
-libstdc++ \
 libSDL_image-1.2 \
 libSDL_mixer-1.2 \
 libtiff \
