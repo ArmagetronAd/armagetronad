@@ -34,6 +34,9 @@ case ${BRANCH} in
             SUFFIX=_0.2.9
             MERGE_FROM=legacy_0.2.8.3
         fi
+        if test "${SUFFIX}" = "_0.2.9"; then
+            MERGE_FROM=legacy_0.2.8.3
+        fi
         MERGE_FROM="${MERGE_FROM} release${SUFFIX} beta${SUFFIX}"
         ;;
     trunk)

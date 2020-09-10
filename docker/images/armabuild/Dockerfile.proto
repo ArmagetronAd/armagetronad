@@ -38,6 +38,7 @@ file \
 g++ \
 git \
 make \
+libasound2-dev \
 libboost-dev \
 libboost-thread-dev \
 libfile-mimeinfo-perl \
@@ -57,10 +58,10 @@ libprotobuf-dev \
 #libsdl2-mixer-dev \
 libsndio-dev \
 libvorbis-dev \
-libzthread-dev \
 pkg-config \
 recode \
 libxml2 \
+libx11-dev \
 protobuf-compiler \
 -y
 

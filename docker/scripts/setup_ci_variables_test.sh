@@ -33,18 +33,18 @@ case $1 in
 	;;
     alpha)
 	CI_COMMIT_REF_PROTECTED=true
-	CI_COMMIT_REF_NAME=legacy_0.2.8.3
-	CI_COMMIT_BRANCH=legacy_0.2.8.3
+	CI_COMMIT_REF_NAME=legacy_0.3.1
+	CI_COMMIT_BRANCH=legacy_0.3.1
 	;;
     beta)
 	CI_COMMIT_REF_PROTECTED=true
-	CI_COMMIT_REF_NAME=beta_0.2.8.3
-	CI_COMMIT_BRANCH=beta_0.2.8.3
+	CI_COMMIT_REF_NAME=beta_0.3.1
+	CI_COMMIT_BRANCH=beta_0.3.1
 	;;
     rc)
 	CI_COMMIT_REF_PROTECTED=true
-	CI_COMMIT_REF_NAME=release_0.2.8.3
-	CI_COMMIT_BRANCH=release_0.2.8.3
+	CI_COMMIT_REF_NAME=release_0.3.1
+	CI_COMMIT_BRANCH=release_0.3.1
 	;;
     release)
 	CI_COMMIT_REF_PROTECTED=true
@@ -52,7 +52,7 @@ case $1 in
 	CI_COMMIT_TAG=v0.2.7.3.4
 	;;
     merge)
-	CI_COMMIT_REF_NAME=release_0.2.8.3 # CAN BE ANYTHING, merger chooses
+	CI_COMMIT_REF_NAME=release__0.3.3 # CAN BE ANYTHING, merger chooses
 	CI_MERGE_REQUEST_CHANGED_PAGE_PATHS=
 	CI_MERGE_REQUEST_ID=
 	CI_MERGE_REQUEST_SOURCE_BRANCH_NAME=
