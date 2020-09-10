@@ -36,8 +36,6 @@ curl https://www.libsdl.org/release/${archive}.tar.gz -o ${archive}.tar.gz || ex
 tar -xzf ${archive}.tar.gz
 rm ${archive}.tar.gz
 cd ${archive}
-#patch -Np1 -i ../libsdl-1.2.15-const-xdata32.patch || exit $?
-#rm -f ../libsdl-1.2.15-const-xdata32.patch
 CFLAGS=-Os ./configure --prefix=/usr/ ${confflags_ours} ${confflags} || exit $?
 make -j 5 || exit $?
 make install || exit $?
