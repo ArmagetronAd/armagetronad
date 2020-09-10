@@ -35,6 +35,7 @@ file \
 g++ \
 git \
 make \
+libasound2-dev \
 #libboost-dev \
 #libboost-thread-dev \
 libfile-mimeinfo-perl \
@@ -45,6 +46,7 @@ libgl1-mesa-dev \
 libglu1-mesa-dev \
 libjpeg-dev \
 libpng-dev \
+libpulse-dev \
 #libprotobuf-dev \
 #libsdl1.2-dev \
 #libsdl-image1.2-dev \
@@ -53,9 +55,15 @@ libpng-dev \
 #libsdl2-image-dev \
 #libsdl2-mixer-dev \
 #libxml2-dev \
+libx11-dev \
+#libxext-dev \
+#libxt-dev \
+#libxv-dev \
+#x11proto-core-dev \
 libzthread-dev \
 pkg-config \
 recode \
+#zlib1g-dev \
 -y
 
 # copy appimage tools
