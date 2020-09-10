@@ -60,7 +60,12 @@ libsndio-dev \
 libvorbis-dev \
 pkg-config \
 recode \
+libxcursor-dev \
+libxi-dev \
+libxinerama-dev \
 libxml2 \
+libxrandr-dev \
+libxv-dev \
 libx11-dev \
 protobuf-compiler \
 -y
