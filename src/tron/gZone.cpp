@@ -9082,7 +9082,7 @@ void gZone::GridPosLadderLog()
 
 static eLadderLogWriter sg_collapsezoneWriter("ZONE_COLLAPSED", false);
 
-static void sg_CollapseZone(std::istream &s)
+static void sg_CollapseZone(std::istream &s,bool byId,bool destroyZone)
 {
     eGrid *grid = eGrid::CurrentGrid();
     if (!grid)
@@ -9091,19 +9091,24 @@ static void sg_CollapseZone(std::istream &s)
         return;
     }
 
-    tString params;
-    params.ReadLine( s, true );
-
-    // first parse the line to get the param : object_id
-    int pos = 0;                 //
-    const tString object_id_str = params.ExtractNonBlankSubString(pos);
+    tString object_id_str; s >> object_id_str;
+    int objIntId = atoi(object_id_str);
+    
     // first check for the name
     int zone_id = -1;
-    zone_id = gZone::FindFirst(object_id_str);
+    if(byId)
+        zone_id = gZone::FindIdFirst(objIntId);
+    else
+        zone_id = gZone::FindFirst(object_id_str);
     if (zone_id <= -1)
     {
-        zone_id = atoi(object_id_str);
-        if (zone_id < 0) return;
+        zone_id = gZone::FindIdFirst(objIntId);
+        if(zone_id < 0)
+        {
+            con << "Couldn't find the zone specified.\n";
+            return;
+        }
+        byId = true;
     }
 
     const tList<eGameObject>& gameObjects = grid->GameObjects();
@@ -9118,138 +9123,28 @@ static void sg_CollapseZone(std::istream &s)
             sg_collapsezoneWriter << zone_id << object_id_str << zone->MapPosition().x << zone->MapPosition().y;
             sg_collapsezoneWriter.write();
 
-            zone->Vanish(0.5);
+            if(destroyZone)
+                zone->Collapse();
+            else
+                zone->Vanish(0.5);
         }
-        zone_id = gZone::FindNext(object_id_str, zone_id);
+        if(byId)
+            zone_id=gZone::FindIdNext(objIntId, zone_id);
+        else
+            zone_id=gZone::FindNext(object_id_str, zone_id);
     }
 }
-
+static void sg_CollapseZone(std::istream &s) { sg_CollapseZone(s,false,false); }
 static tConfItemFunc sg_CollapseZone_conf("COLLAPSE_ZONE",&sg_CollapseZone);
 
-static void sg_DestroyZone(std::istream &s)
-{
-    eGrid *grid = eGrid::CurrentGrid();
-    if (!grid)
-    {
-        con << "Must be called while a grid exists!\n";
-        return;
-    }
+static void sg_CollapseZoneId(std::istream &s) { sg_CollapseZone(s,true,false); }
+static tConfItemFunc sg_CollapseZoneId_conf("COLLAPSE_ZONE_ID",&sg_CollapseZoneId);
 
-    tString params;
-    params.ReadLine( s, true );
+static void sg_DestroyZone(std::istream &s) { sg_CollapseZone(s,false,true); }
+static tConfItemFunc sg_DestroyZone_conf("DESTROY_ZONE",&sg_DestroyZone);
 
-    // first parse the line to get the param : object_id
-    int pos = 0;                 //
-    const tString object_id_str = params.ExtractNonBlankSubString(pos);
-    // first check for the name
-    int zone_id = -1;
-    zone_id = gZone::FindFirst(object_id_str);
-    if (zone_id <= -1)
-    {
-        zone_id = atoi(object_id_str);
-        if (zone_id < 0) return;
-    }
-
-    const tList<eGameObject>& gameObjects = grid->GameObjects();
-    if (zone_id >= gameObjects.Len()) return;
-
-    while (zone_id != -1)
-    {
-        // get the zone ...
-        gZone *zone = dynamic_cast<gZone *>(gameObjects(zone_id));
-        if (zone)
-        {
-            sg_collapsezoneWriter << zone_id << object_id_str << zone->MapPosition().x << zone->MapPosition().y;
-            sg_collapsezoneWriter.write();
-
-            zone->Collapse();
-        }
-        zone_id = gZone::FindNext(object_id_str, zone_id);
-    }
-}
-static tConfItemFunc sg_DestroyZoneConf("DESTROY_ZONE", &sg_DestroyZone);
-
-static void sg_CollapseZoneID(std::istream &s)
-{
-    eGrid *grid = eGrid::CurrentGrid();
-    if (!grid)
-    {
-        con << "Must be called while a grid exists!\n";
-        return;
-    }
-
-    tString params;
-    params.ReadLine(s);
-
-    if (params.Filter() == "")
-        return;
-
-    int pos = 0;                 //
-    tString object_id_str = params.ExtractNonBlankSubString(pos);
-
-    int zoneID = atoi(object_id_str);
-
-    const tList<eGameObject>& gameObjects = grid->GameObjects();
-    if ((zoneID < 0) || (zoneID >= gameObjects.Len())) return;
-
-    for(int i = 0; i < gameObjects.Len(); i++)
-    {
-        gZone *Zone = dynamic_cast<gZone *>(gameObjects[i]);
-        if (Zone)
-        {
-            if (Zone->GetID() == zoneID)
-            {
-                sg_collapsezoneWriter << zoneID << object_id_str << Zone->MapPosition().x << Zone->MapPosition().y;
-                sg_collapsezoneWriter.write();
-
-                Zone->Vanish(0.5);
-                break;
-            }
-        }
-    }
-}
-static tConfItemFunc sg_CollapseZoneIDConf("COLLAPSE_ZONE_ID", &sg_CollapseZoneID);
-
-static void sg_DestroyZoneID(std::istream &s)
-{
-    eGrid *grid = eGrid::CurrentGrid();
-    if (!grid)
-    {
-        con << "Must be called while a grid exists!\n";
-        return;
-    }
-
-    tString params;
-    params.ReadLine(s);
-
-    if (params.Filter() == "")
-        return;
-
-    int pos = 0;                 //
-    tString object_id_str = params.ExtractNonBlankSubString(pos);
-
-    int zoneID = atoi(object_id_str);
-
-    const tList<eGameObject>& gameObjects = grid->GameObjects();
-    if ((zoneID < 0) || (zoneID >= gameObjects.Len())) return;
-
-    for(int i = 0; i < gameObjects.Len(); i++)
-    {
-        gZone *Zone = dynamic_cast<gZone *>(gameObjects[i]);
-        if (Zone)
-        {
-            if (Zone->GetID() == zoneID)
-            {
-                sg_collapsezoneWriter << zoneID << object_id_str << Zone->MapPosition().x << Zone->MapPosition().y;
-                sg_collapsezoneWriter.write();
-
-                Zone->Collapse();
-                break;
-            }
-        }
-    }
-}
-static tConfItemFunc sg_DestroyZoneIDConf("DESTROY_ZONE_ID", &sg_DestroyZoneID);
+static void sg_DestroyZoneId(std::istream &s) { sg_CollapseZone(s,true,true); }
+static tConfItemFunc sg_DestroyZoneId_conf("DESTROY_ZONE_ID",&sg_DestroyZoneId);
 
 static void sg_CollapseAll(std::istream &s)
 {
