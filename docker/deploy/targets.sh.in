@@ -36,8 +36,14 @@ case ${SERIES}+${SUFFIX}+@version@ in
 	ZI_SERIES="beta"
 	STEAM_BRANCH="beta"
 	;;
+    CURRENT+alpha+*)
+	SF_DIR="alpha"
+	LP_SERIES="0.2.9-snapshots"
+	ZI_SERIES="alpha"
+	STEAM_BRANCH="alpha"
+	;;
     CURRENT+*)
-	SF_DIR="snapshots"
+	SF_DIR="alpha"
 	LP_SERIES="0.2.9-snapshots"
 	ZI_SERIES="alpha"
 	STEAM_BRANCH="alpha"
@@ -45,7 +51,7 @@ case ${SERIES}+${SUFFIX}+@version@ in
 
     LTS_028*+armagetronad+*_rc_*)
 	SF_DIR="rc"
-	LP_SERIES="0.2.9"
+	LP_SERIES="0.2.8"
 	ZI_SERIES="rc"
 	STEAM_BRANCH=""
 	;;

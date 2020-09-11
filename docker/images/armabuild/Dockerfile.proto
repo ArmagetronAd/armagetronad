@@ -38,6 +38,7 @@ file \
 g++ \
 git \
 make \
+libasound2-dev \
 libboost-dev \
 libboost-thread-dev \
 libfile-mimeinfo-perl \
@@ -57,10 +58,15 @@ libprotobuf-dev \
 #libsdl2-mixer-dev \
 libsndio-dev \
 libvorbis-dev \
-libzthread-dev \
 pkg-config \
 recode \
+libxcursor-dev \
+libxi-dev \
+libxinerama-dev \
 libxml2 \
+libxrandr-dev \
+libxv-dev \
+libx11-dev \
 protobuf-compiler \
 -y
 
@@ -100,22 +106,22 @@ FROM armabuild_base as armabuild
 
 # install our version of libsdl
 #COPY build_libsdl.sh ./
-#RUN ./build_libsdl.sh SDL2-2.0.12 && rm ./build_libsdl.sh
+#RUN ./build_libsdl.sh SDL2-2.0.4 && rm ./build_libsdl.sh
 
 # install our version of libsdl_image
 #COPY build_libsdl_image.sh .
-#RUN ./build_libsdl_image.sh SDL2_image-2.0.5 && rm ./build_libsdl_image.sh
+#RUN ./build_libsdl_image.sh SDL2_image-2.0.1 && rm ./build_libsdl_image.sh
 
 # install our version of libsdl_mixer
 #COPY build_libsdl_mixer.sh .
-#RUN ./build_libsdl_mixer.sh SDL2_mixer-2.0.4 && rm ./build_libsdl_mixer.sh
+#RUN ./build_libsdl_mixer.sh SDL2_mixer-2.0.1 && rm ./build_libsdl_mixer.sh
 
 # for production: do all manual builds in one go, set up builder user
 COPY build*.sh *.patch ./
 RUN ./build_libxml2.sh libxml2-2.9.10 && rm ./build_libxml2.sh && \
-    ./build_libsdl.sh SDL2-2.0.12 && rm ./build_libsdl.sh && \
-    ./build_libsdl_image.sh SDL2_image-2.0.5 && rm ./build_libsdl_image.sh && \
-    ./build_libsdl_mixer.sh SDL2_mixer-2.0.4 && rm ./build_libsdl_mixer.sh && \
+    ./build_libsdl.sh SDL2-2.0.4 && rm ./build_libsdl.sh && \
+    ./build_libsdl_image.sh SDL2_image-2.0.1 && rm ./build_libsdl_image.sh && \
+    ./build_libsdl_mixer.sh SDL2_mixer-2.0.1 && rm ./build_libsdl_mixer.sh && \
     useradd builder && mkdir -p /home/builder && chown builder:builder /home/builder # && chmod 777 /home/builder
 
 # set up rest of builder user
