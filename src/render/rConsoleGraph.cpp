@@ -94,7 +94,7 @@ void rConsole::Render(){
 
     // the text field has an openGL coordinate with of 1.9; cram the specified number
     // of columns in it
-    rCWIDTH_CON=1.9/sr_columns;
+    rCWIDTH_CON=1.9/(sr_columns ? sr_columns : 78);
 
     // get corresponding character height
     rCHEIGHT_CON=rCWIDTH_CON*W*9/(5*H);
