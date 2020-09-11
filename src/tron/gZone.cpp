@@ -9001,9 +9001,10 @@ void gZone::Timesteps(REAL currentTime)
     eGrid *grid = eGrid::CurrentGrid();
     if (!grid) return;
 
-    std::map<REAL, std::set<gZone*> >::iterator it = delayedZones_.begin();
-    for (; it != delayedZones_.end(); it++)
+    std::map<REAL, std::set<gZone*> >::iterator it = delayedZones_.begin(), itNext=it;
+    for (; it != delayedZones_.end(); it=itNext)
     {
+        itNext++;
         if (currentTime >= it->first)
         {
             std::set<gZone*>::iterator sit = it->second.begin();
