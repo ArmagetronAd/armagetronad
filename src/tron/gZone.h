@@ -124,6 +124,9 @@ public:
     gCycle *        GetSeekingCycle     () {return pSeekingCycle_;}  //!< Sets the current seeking cycle
     gZone &         SetTargetRadius     (REAL radius) {targetRadius_ = radius; return *this;}      //!< Sets the target radius
     gZone &         SetFallSpeed        (REAL speed) {fallSpeed_ = speed; return *this;}      //!< Sets the fall speed
+
+	void            OnCycleDestroyed    (gCycle *cycle,REAL time);
+
     void BounceOffPoint(eCoord dest, eCoord collide);
     gZone & AddWaypoint(eCoord const &point);
 	gZone & ClearWaypoints();

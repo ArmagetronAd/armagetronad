@@ -4237,7 +4237,7 @@ void gCycle::Kill(){
             tNEW(gExplosion)(grid, pos,lastTime, color_, this );
             //	 eEdge::SeethroughHasChanged();
 
-            if (this && Player())
+            if(Player())
             {
                 tString logTurnsMsg;
                 logTurnsMsg << "death " << MapPosition().x << " " << MapPosition().y << " " << MapDirection().x << " " << MapDirection().y;
@@ -4254,13 +4254,14 @@ void gCycle::Kill(){
                 Player()->LogActivity(ACTIVITY_DIED);
 
                 sg_cycleRespawnZone_Create(this);
-
-                if (sg_RaceTimerEnabled)
-                {
-                    gRace::ZoneOut(Player(), lastTime);
-                }
             }
 
+            const tList<eGameObject>& gameObjects = grid->GameObjects();
+            for(int i=gameObjects.Len()-1;i>=0;--i)
+            {
+                gZone *zone = dynamic_cast<gZone *>(gameObjects[i]);
+                if(zone) zone->OnCycleDestroyed(this,lastTime);
+            }
 
             if ( currentWall )
             {

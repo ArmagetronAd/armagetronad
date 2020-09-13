@@ -1509,6 +1509,25 @@ void gZone::OnExit( gZone *target, REAL time )
 
 // *******************************************************************************
 // *
+// *    OnCycleDestroyed
+// *
+// *******************************************************************************
+//!
+//!     @param  cycle   the cycle that has been destroyed
+//!     @param  time    the current time
+//!
+// *******************************************************************************
+void gZone::OnCycleDestroyed(gCycle *cycle,REAL time)
+{
+    if(isInside(cycle))
+    {
+        OnExit(cycle,time);
+        RemovePlayerInteraction(cycle);
+    }
+}
+
+// *******************************************************************************
+// *
 // *    OnNear
 // *
 // *******************************************************************************
