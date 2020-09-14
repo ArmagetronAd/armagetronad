@@ -2884,9 +2884,12 @@ bool gCycle::Timestep(REAL currentTime){
 #ifdef DEDICATED
     if ( Alive() && currentTime > lastTime + Lag() + 1 )
     {
-        //sn_ConsoleOut( "0xff7777Admin : 0xffff77BUG had to kill a cycle because it lagged behind in the simulation. Probably the invulnerability bug. Investigate!\n" );
+        sn_ConsoleOut( "0xff7777Admin : 0xffff77BUG had to kill a cycle because it lagged behind in the simulation. Probably the invulnerability bug. Investigate!\n" );
         st_Breakpoint();
-        KillAt( pos );
+        if(Vulnerable())
+            KillAt( pos );
+        else
+            Kill();
         ret = false;
     }
 #endif
