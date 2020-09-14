@@ -1905,7 +1905,7 @@ static tSettingItem<bool> sg_winZonePlayerEnteredWinConf("WINZONE_PLAYER_ENTER_W
 
 void gWinZoneHack::OnEnter( gCycle * target, REAL time )
 {
-    sg_winzonePlayerEnterWriter << this->GetID() << name_ << MapPosition().x << MapPosition().y << target->Player()->GetUserName() << target->MapPosition().x << target->MapPosition().y << target->MapDirection().x << target->MapDirection().y << time;
+    sg_winzonePlayerEnterWriter << this->GetID() << name_ << MapPosition().x << MapPosition().y << target->Player()->GetUserName() << target->MapPosition().x << target->MapPosition().y << target->Direction().x << target->Direction().y << time;
     sg_winzonePlayerEnterWriter.write();
 
     //HACK RACE begin
@@ -6401,7 +6401,7 @@ void gTargetZoneHack::OnEnter( gCycle * target, REAL time )
     // message in edlog
     if (playersFlags[target->Player()->ListID()] != 2)
     {
-        sg_targetzonePlayerEnterWriter << this->GetID() << name_ << MapPosition().x << MapPosition().y << target->Player()->GetUserName() << target->Player()->Object()->MapPosition().x << target->Player()->Object()->MapPosition().y << target->Player()->Object()->MapDirection().x << target->Player()->Object()->MapDirection().y << time;
+        sg_targetzonePlayerEnterWriter << this->GetID() << name_ << MapPosition().x << MapPosition().y << target->Player()->GetUserName() << target->Player()->Object()->MapPosition().x << target->Player()->Object()->MapPosition().y << target->Player()->Object()->Direction().x << target->Player()->Object()->Direction().y << time;
         sg_targetzonePlayerEnterWriter.write();
         playersFlags[target->Player()->ListID()] = 2;
     }
@@ -6427,7 +6427,7 @@ void gTargetZoneHack::OnExit(gCycle *target, REAL time)
     tCurrentAccessLevel elevator( sg_SetTargetCmd_conf.GetRequiredLevel(), true );
     tConfItemBase::LoadAll(stream);
 
-    sg_targetzonePlayerLeftWriter << this->GetID() << name_ << MapPosition().x << MapPosition().y << target->Player()->GetUserName() << target->Player()->Object()->MapPosition().x << target->Player()->Object()->MapPosition().y << target->Player()->Object()->MapDirection().x << target->Player()->Object()->MapDirection().y << time;
+    sg_targetzonePlayerLeftWriter << this->GetID() << name_ << MapPosition().x << MapPosition().y << target->Player()->GetUserName() << target->Player()->Object()->MapPosition().x << target->Player()->Object()->MapPosition().y << target->Player()->Object()->Direction().x << target->Player()->Object()->Direction().y << time;
     sg_targetzonePlayerLeftWriter.write();
 
     if (playersFlags[target->Player()->ListID()])
@@ -7173,7 +7173,7 @@ void gObjectZoneHack::OnEnter( gCycle * target, REAL time )
     ePlayerNetID *p = target->Player();
     if (p)
     {
-        sg_objectZonePlayerEntered << GetID() << name_ << MapPosition().x << MapPosition().y << p->GetUserName() << target->MapPosition().x << target->MapPosition().y << target->MapDirection().x << target->MapDirection().y << time;
+        sg_objectZonePlayerEntered << GetID() << name_ << MapPosition().x << MapPosition().y << p->GetUserName() << target->MapPosition().x << target->MapPosition().y << target->Direction().x << target->Direction().y << time;
         sg_objectZonePlayerEntered.write();
     }
 }

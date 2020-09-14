@@ -395,21 +395,11 @@ void eTeam::UpdateAppearance()
         {
             se_teamRenamedWriter << oldNameFiltered << newNameFiltered << Name();
             se_teamRenamedWriter.write();
-
-            tColoredString coloredName;
-            coloredName << GetColoredName();
-            se_teamColoredName << ePlayerNetID::FilterName(this->Name()) << coloredName;
-            se_teamColoredName.write();
         }
         else if( !empty )
         {
             se_teamCreateWriter << newNameFiltered << Name();
             se_teamCreateWriter.write();
-
-            tColoredString coloredName;
-            coloredName << GetColoredName();
-            se_teamColoredName << ePlayerNetID::FilterName(this->Name()) << coloredName;
-            se_teamColoredName.write();
         }
         else if( !lastEmpty_ )
         {
@@ -417,6 +407,13 @@ void eTeam::UpdateAppearance()
             se_teamDestroyWriter << oldNameFiltered;
             se_teamDestroyWriter.write();
         }
+    }
+    if(!empty)
+    {
+        tColoredString coloredName;
+        coloredName << GetColoredName();
+        se_teamColoredName << ePlayerNetID::FilterName(this->Name()) << coloredName;
+        se_teamColoredName.write();
     }
     lastEmpty_ = empty;
 

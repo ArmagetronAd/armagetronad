@@ -2426,7 +2426,7 @@ gCycle::gCycle(eGrid *grid, const eCoord &pos,const eCoord &d,ePlayerNetID *p)
         currentWall(NULL),
         lastWall(NULL)
 {
-    se_cycleCreatedWriter << p->GetLogName() << this->MapPosition().x << this->MapPosition().y << this->MapDirection().x << this->MapDirection().y;
+    se_cycleCreatedWriter << p->GetLogName() << this->MapPosition().x << this->MapPosition().y << this->Direction().x << this->Direction().y;
     if(p->CurrentTeam())
         se_cycleCreatedWriter << Team()->Name().Filter();
     else
@@ -2455,7 +2455,7 @@ gCycle::gCycle(eGrid *grid, const eCoord &pos,const eCoord &d,ePlayerNetID *p)
     startDir_ = this->dir;
 
     tString logTurnsMsg;
-    logTurnsMsg << "spawned " << this->MapPosition().x << " " << this->MapPosition().y << " " << this->MapDirection().x << " " << this->MapDirection().y;
+    logTurnsMsg << "spawned " << this->MapPosition().x << " " << this->MapPosition().y << " " << this->Direction().x << " " << this->Direction().y;
     LogPlayersCycleTurns(this, logTurnsMsg);
 
     turnedPositions.push_back(startPos_);
@@ -4240,10 +4240,10 @@ void gCycle::Kill(){
             if(Player())
             {
                 tString logTurnsMsg;
-                logTurnsMsg << "death " << MapPosition().x << " " << MapPosition().y << " " << MapDirection().x << " " << MapDirection().y;
+                logTurnsMsg << "death " << MapPosition().x << " " << MapPosition().y << " " << Direction().x << " " << Direction().y;
                 LogPlayersCycleTurns(this, logTurnsMsg);
 
-                se_cycleDestroyedWriter << Player()->GetUserName() << MapPosition().x << MapPosition().y << MapDirection().x << MapDirection().y;
+                se_cycleDestroyedWriter << Player()->GetUserName() << MapPosition().x << MapPosition().y << Direction().x << Direction().y;
                 if(Player()->CurrentTeam())
                     se_cycleDestroyedWriter << ePlayerNetID::FilterName(Team()->Name());
                 else
@@ -5471,7 +5471,7 @@ gCycle::gCycle(nMessage &m)
     startDir_ = this->dir;
 
     tString logTurnsMsg;
-    logTurnsMsg << "spawned " << this->MapPosition().x << " " << this->MapPosition().y << " " << this->MapDirection().x << " " << this->MapDirection().y;
+    logTurnsMsg << "spawned " << this->MapPosition().x << " " << this->MapPosition().y << " " << this->Direction().x << " " << this->Direction().y;
     LogPlayersCycleTurns(this, logTurnsMsg);
 
     turnedPositions.push_back(startPos_);
@@ -5972,7 +5972,7 @@ void gCycle::ReadSync( nMessage &m )
         tNEW(gExplosion)( grid, lastSyncMessage_.pos, lastSyncMessage_.time ,color_, this );
 
         tString logTurnsMsg;
-        logTurnsMsg << "death " << this->MapPosition().x << " " << this->MapPosition().y << " " << this->MapDirection().x << " " << this->MapDirection().y;
+        logTurnsMsg << "death " << this->MapPosition().x << " " << this->MapPosition().y << " " << this->Direction().x << " " << this->Direction().y;
         LogPlayersCycleTurns(this, logTurnsMsg);
 
         return;
