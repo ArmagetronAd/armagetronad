@@ -853,9 +853,11 @@ bool gZone::Timestep( REAL time )
 
     if (!zoneInit_)
     {
+        /*
         sg_OnlineZoneWriter << GetID() << name_ << effect_ << MapPosition().x << MapPosition().y << GetVelocity().x << GetVelocity().y
                             << GetRadius() << GetExpansionSpeed();
 
+        */
         zoneInit_ = true;
     }
 
@@ -1249,18 +1251,22 @@ static void TriggerAvoidZone(gCycle *target, gZone *Zone, REAL currentTime)
 
 void gZone::InteractWith( eGameObject * target, REAL time, int recursion )
 {
+    if(target == this || destroyed_) return;
+    
     gCycle* prey = dynamic_cast< gCycle* >( target );
     if ( prey )
     {
-        REAL r = this->Radius();
-        if (((prey->Position() - this->Position()).NormSquared() > r*r) && ((prey->Position() - this->Position()).NormSquared() < ((r*r) + (sg_cycleZonesApproch * 2))))
+        if(prey->Player() && prey->Alive())
         {
-            TriggerAvoidZone(prey, this, time);
-            OnNear(prey, time);
-        }
-        else if ( ( prey->Position() - this->Position() ).NormSquared() < r*r )
-        {
-            if ( prey->Player() && prey->Alive() )
+            REAL r = GetRadius(), dist = ( prey->Position() - this->Position() ).NormSquared();
+            r *= r;
+            if ((dist > r) && (dist < (r + (sg_cycleZonesApproch * 2))))
+            {
+                TriggerAvoidZone(prey, this, time);
+                OnNear(prey, time);
+                return;
+            }
+            else if ( dist <= r )
             {
                 OnEnter( prey, time );
                 if (!isInside(prey)) // make sure this cycle isn't in zone already
@@ -1268,18 +1274,19 @@ void gZone::InteractWith( eGameObject * target, REAL time, int recursion )
                     //  if not, then add them to the list
                     AddPlayerInteraction(prey);
                 }
+                return;
             }
         }
-        else
+        if (isInside(prey)) // make sure this cycle already is within the zone
         {
-            if (isInside(prey)) // make sure this cycle already is within the zone
-            {
-                OnExit(prey, time); // call the OnExit event
-                RemovePlayerInteraction(prey);  // remove them from the list
-            }
+            OnExit(prey, time); // call the OnExit event
+            RemovePlayerInteraction(prey);  // remove them from the list
         }
+        return;
     }
-    else
+    
+    gZone *zone = dynamic_cast<gZone *>(target);
+    if(zone && !zone->destroyed_)
     {
         // check if the interaction target is a zone
         //gZone *pZone
@@ -1316,7 +1323,7 @@ void gZone::InteractWith( eGameObject * target, REAL time, int recursion )
         gBaseZoneHack *thisBaseZone = dynamic_cast<gBaseZoneHack *>(this);
         if (thisBaseZone)
         {
-            gZone *zone = dynamic_cast<gZone *>(target);
+            //gZone *zone = dynamic_cast<gZone *>(target);
 
             if ((zone) &&
                 (zone != this) &&
