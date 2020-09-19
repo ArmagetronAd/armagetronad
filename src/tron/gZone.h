@@ -125,6 +125,17 @@ public:
     gZone &         SetTargetRadius     (REAL radius) {targetRadius_ = radius; return *this;}      //!< Sets the target radius
     gZone &         SetFallSpeed        (REAL speed) {fallSpeed_ = speed; return *this;}      //!< Sets the fall speed
 
+    bool isInside(gCycle *cycle)
+    {
+        for(int i=cycesInside_.Len()-1;i>=0;--i)
+		{
+            if(cycesInside_[i] == cycle)
+			{
+                return true;
+			}
+		}
+        return false;
+	}
 	void            OnCycleDestroyed    (gCycle *cycle,REAL time);
 
     void BounceOffPoint(eCoord dest, eCoord collide);
@@ -228,18 +239,6 @@ private:
                 break;
             }
         }
-    }
-    bool isInside(gCycle *cycle)
-    {
-        for(int i=0; i < cycesInside_.Len(); i++)
-        {
-            gCycle *p = cycesInside_[i];
-            if (p && (p == cycle))
-            {
-                return true;
-            }
-        }
-        return false;
     }
 
     static std::map<REAL, std::set<gZone*> > delayedZones_;
@@ -564,8 +563,7 @@ class gTargetZoneHack: public gZone
 		static ePlayerNetID *winner_;
 								 //!< first player entering the zone
 		ePlayerNetID *firstPlayer_;
-								 //!< flags for players who already use the zone
-		int playersFlags[MAXCLIENTS+1];
+
 		int zoneInitialScore_;	 //!< score to give to the first player entering the zone
 		int zoneScore_;			 //!< score to give to the next player entering the zone
 		int zoneScoreDeplete_;	 //!< value to substract from score each time a player enter the zone

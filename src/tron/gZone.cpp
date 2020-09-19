@@ -6199,7 +6199,6 @@ gTargetZoneHack::gTargetZoneHack( eGrid * grid, const eCoord & pos, bool dynamic
     timeFirstEntry_ = -1.0;
     targetEmptyTime_ = -1.0;
     currentState_ = State_Safe;
-    for(int i=0; i<MAXCLIENTS; i++) playersFlags[i] = 0;
 
     if (!delayCreation)
         grid->AddGameObjectInteresting(this);
@@ -6234,7 +6233,6 @@ gTargetZoneHack::gTargetZoneHack( nMessage & m )
     timeFirstEntry_ = -1.0;
     targetEmptyTime_ = -1.0;
     currentState_ = State_Safe;
-    for(int i=0; i<MAXCLIENTS; i++) playersFlags[i] = 0;
 }
 
 
@@ -6383,12 +6381,10 @@ void gTargetZoneHack::OnEnter( gCycle * target, REAL time )
 
     // Check if player already entered this zone
     // If not ...
-    if (!playersFlags[target->Player()->ListID()])
+    if(!isInside(target))
     {
         if (zoneScore_>0)
         {
-            //  flag the player
-            playersFlags[target->Player()->ListID()]=1;
             // grant the player
             tOutput win;
             tOutput lose;
@@ -6403,14 +6399,9 @@ void gTargetZoneHack::OnEnter( gCycle * target, REAL time )
             zoneScore_=0;
             targetEmptyTime_=time;
         }
-    }
 
-    // message in edlog
-    if (playersFlags[target->Player()->ListID()] != 2)
-    {
         sg_targetzonePlayerEnterWriter << this->GetID() << name_ << MapPosition().x << MapPosition().y << target->Player()->GetUserName() << target->Player()->Object()->MapPosition().x << target->Player()->Object()->MapPosition().y << target->Player()->Object()->Direction().x << target->Player()->Object()->Direction().y << time;
         sg_targetzonePlayerEnterWriter.write();
-        playersFlags[target->Player()->ListID()] = 2;
     }
 }
 
@@ -6436,9 +6427,6 @@ void gTargetZoneHack::OnExit(gCycle *target, REAL time)
 
     sg_targetzonePlayerLeftWriter << this->GetID() << name_ << MapPosition().x << MapPosition().y << target->Player()->GetUserName() << target->Player()->Object()->MapPosition().x << target->Player()->Object()->MapPosition().y << target->Player()->Object()->Direction().x << target->Player()->Object()->Direction().y << time;
     sg_targetzonePlayerLeftWriter.write();
-
-    if (playersFlags[target->Player()->ListID()])
-        playersFlags[target->Player()->ListID()] = 0;
 
     // RACE HACK begin
     if ( sg_RaceTimerEnabled )
