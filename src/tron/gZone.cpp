@@ -1264,7 +1264,6 @@ void gZone::InteractWith( eGameObject * target, REAL time, int recursion )
             {
                 TriggerAvoidZone(prey, this, time);
                 OnNear(prey, time);
-                return;
             }
             else if ( dist <= r )
             {
