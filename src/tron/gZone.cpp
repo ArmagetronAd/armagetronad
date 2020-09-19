@@ -1007,22 +1007,19 @@ bool gZone::Timestep( REAL time )
                     {
                         // just respawn the ball at the original location
                         thisBallZone->GoHome();
-                    } else
-                    {
-                        //Don't allow going outside, kill it
-                        Collapse();
-                        return false;
-                    }
-
-                    gSoccerZoneHack *thisSockerBall = dynamic_cast<gSoccerZoneHack *>(this);
-                    if (thisSockerBall && (thisSockerBall->GetType() == gSoccerZoneHack::gSoccer_BALL))
-                    {
-                        thisSockerBall->GoHome();
                     }
                     else
                     {
-                        Collapse();
-                        return false;
+                        gSoccerZoneHack *thisSoccerBall = dynamic_cast<gSoccerZoneHack *>(this);
+                        if (thisSoccerBall && (thisSoccerBall->GetType() == gSoccerZoneHack::gSoccer_BALL))
+                        {
+                            thisSoccerBall->GoHome();
+                        }
+                        else
+                        {
+                            Collapse(); //Don't allow going outside, destroy it
+                            return false;
+                        }
                     }
                 }
             }
