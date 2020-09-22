@@ -1874,6 +1874,7 @@ static void sg_AddScoreTeam(std::istream &s)
 
         // Add score to team pTeam then send a message
         pTeam->AddScore(pScore);
+        if(pMessage == "\n") return;
         sn_ConsoleOut( pMessage );
 }
 
