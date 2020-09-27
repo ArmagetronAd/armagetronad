@@ -832,8 +832,10 @@ void eGameObject::TimestepThisWrapper(eGrid * grid, REAL currentTime, eGameObjec
         switch(se_arenaBoundaryKill)
         {
             case 1:
-                c->Kill();
-                break;
+            {
+                gCycle *p = dynamic_cast<gCycle *>(c);
+                if(p) p->Kill("ARENA_BOUNDARY");
+            }   break;
             case 2:
             {
                 gCycle *p = static_cast<gCycle *>(c);

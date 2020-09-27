@@ -302,6 +302,7 @@ protected:
 public:
     virtual void Die ( REAL time )  ;  //!< dies at the specified time
     void KillAt( const eCoord& pos );  //!< kill this cycle at the given position and take care of scoring
+    tString deathReason_;
 
     int WindingNumber() const {return windingNumber_;}
 
@@ -362,6 +363,8 @@ public:
 
     // void Turbo(bool turbo);
 
+    virtual void Kill(const char* reason) { deathReason_ = tString(reason); Kill(); }
+    virtual void Kill(tString reason) { deathReason_ = reason; Kill(); }
     virtual void Kill();
 
     const eTempEdge* Edge();

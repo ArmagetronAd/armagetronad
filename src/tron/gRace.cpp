@@ -949,7 +949,8 @@ void gRace::ZoneHit( ePlayerNetID *player, REAL time )
         //  kill the player if they are not safe
         if (!racePlayer->IsSafe() && sg_RaceUnsafeAnglesKill)
         {
-            player->Object()->Kill();
+            gCycle *c = dynamic_cast<gCycle *>(player->Object());
+            if(c) c->Kill("RACE_UNSAFE_ANGLE");
             return;
         }
 
@@ -1198,7 +1199,10 @@ void gRace::ZoneHit( ePlayerNetID *player, REAL time )
         }
 
         if (sg_raceFinishKill)
-            player->Object()->Kill();
+        {
+            gCycle *c = dynamic_cast<gCycle *>(player->Object());
+            if(c) c->Kill("RACE_FINISH");
+        }
     }
 }
 
@@ -1296,7 +1300,7 @@ void gRace::Sync( int alive, int ai_alive, int humans, REAL time )
                         if (time >= racePlayer->IdleNextTime())
                         {
                             //  time up! Let's kill them!
-                            rPCycle->Kill();
+                            rPCycle->Kill("RACE_IDLE_KILL");
 
                             tOutput msg;
                             msg.SetTemplateParameter(1, racePlayer->Player()->GetName());
@@ -1358,7 +1362,10 @@ void gRace::Sync( int alive, int ai_alive, int humans, REAL time )
                     {
                         ePlayerNetID *p = se_PlayerNetIDs[i];
                         if (p && p->Object() && p->Object()->Alive())
-                            p->Object()->Kill();
+                        {
+                            gCycle *c = dynamic_cast<gCycle *>(p->Object());
+                            if(c) c->Kill("RACE_TIME_OUT");
+                        }
                     }
                 //}
             }
@@ -1384,7 +1391,9 @@ void gRace::Sync( int alive, int ai_alive, int humans, REAL time )
                     if ( racer->Countdown() < 0 )
                     {
                         racer->SetCountdown(-1);
-                        racer->Player()->Object()->Kill();
+                        
+                        gCycle *c = dynamic_cast<gCycle *>(racer->Player()->Object());
+                        if(c) c->Kill("RACE_TIME_OUT");
                     }
                 }
             }

@@ -2251,7 +2251,7 @@ void gDeathZoneHack::OnEnter( gCycle * target, REAL time )
     if (!dynamicCreation_ || ( deathZoneType == TYPE_NORMAL && !team ) )
     {
         target->Player()->AddScore(score_deathzone, tOutput(), "$player_lose_deathzone");
-        target->Kill();
+        target->Kill("DEATHZONE");
         sg_deathDeathZoneWriter << target->Player()->GetUserName();
         sg_deathDeathZoneWriter.write();
     }
@@ -2269,6 +2269,7 @@ void gDeathZoneHack::OnEnter( gCycle * target, REAL time )
         else
         {
             target->Player()->AddScore(score_deathzone_team, "", "player_lose_deathzone_team");
+            target->deathReason_ << "DEATHZONE_TEAM " << ePlayerNetID::FilterName(team->Name());
             target->Kill();
             sg_deathDeathZoneTeamWriter << ePlayerNetID::FilterName( team->Name() ) << target->Player()->GetUserName();
             sg_deathDeathZoneTeamWriter.write();
@@ -2314,7 +2315,7 @@ void gDeathZoneHack::OnEnter( gCycle * target, REAL time )
                     {
                         target->Player()->AddScore(score_shot_suicide, tOutput(), "$player_shot_suicide");
                     }
-                    target->Kill();
+                    target->Kill("SHOT_SUICIDE");
                 }
             }
             else
@@ -2344,6 +2345,7 @@ void gDeathZoneHack::OnEnter( gCycle * target, REAL time )
                     {
                         sg_deathShotFragWriter << prey->GetUserName() << hunter->GetUserName();
                         sg_deathShotFragWriter.write();
+                        target->deathReason_ << "SHOT " << hunter->GetUserName();
                         pWinString = "$player_win_shot";
                         pFreeString = "$player_free_shot";
                         score = score_shot;
@@ -2352,6 +2354,7 @@ void gDeathZoneHack::OnEnter( gCycle * target, REAL time )
                     {
                         sg_deathDeathShotWriter << prey->GetUserName() << hunter->GetUserName();
                         sg_deathDeathShotWriter.write();
+                        target->deathReason_ << "DEATH_SHOT " << hunter->GetUserName();
                         pWinString = "$player_win_death_shot";
                         pFreeString = "$player_free_death_shot";
                         score = score_death_shot;
@@ -2360,6 +2363,7 @@ void gDeathZoneHack::OnEnter( gCycle * target, REAL time )
                     {
                         sg_deathDeathSelfDestructWriter << prey->GetUserName() << hunter->GetUserName();
                         sg_deathDeathSelfDestructWriter.write();
+                        target->deathReason_ << "SELF_DESTRUCT " << hunter->GetUserName();
                         pWinString = "$player_win_self_destruct";
                         pFreeString = "$player_free_self_destruct";
                         score = score_self_destruct;
@@ -2368,6 +2372,7 @@ void gDeathZoneHack::OnEnter( gCycle * target, REAL time )
                     {
                         sg_deathZombieZoneWriter << prey->GetUserName() << hunter->GetUserName();
                         sg_deathZombieZoneWriter.write();
+                        target->deathReason_ << "ZOMBIE_ZONE " << hunter->GetUserName();
                         if (target == pSeekingCycle_)
                         {
                             pWinString = "$player_win_zombie_zone_revenge";
@@ -2410,6 +2415,7 @@ void gDeathZoneHack::OnEnter( gCycle * target, REAL time )
                     {
                         sg_deathShotTeamkillWriter << prey->GetUserName() << hunter->GetUserName();
                         sg_deathShotTeamkillWriter.write();
+                        target->deathReason_ << "SHOT " << hunter->GetUserName();
                         tColoredString hunterName;
                         hunterName << *hunter << tColoredString::ColorString(1,1,1);
                         sn_ConsoleOut( tOutput( "$player_teamkill", hunterName, preyName ) );
@@ -2738,7 +2744,7 @@ void sg_RubberZoneHurt( gCycle * target, gRubberZoneHack *rubberZone,REAL timest
         if ( rubber + newRubber >= sg_rubberCycle )       // max rubber amount reached, kill the cycle
         {
             target->Player()->AddScore( score_rubberzone, tOutput(), "$player_lose_rubberzone" );
-            target->Kill();
+            target->Kill("RUBBERZONE");
             target->SetRubber( sg_rubberCycle );
             sg_deathRubberZoneWriter << target->Player()->GetUserName();
             sg_deathRubberZoneWriter.write();
@@ -3262,7 +3268,9 @@ void gBaseZoneHack::OnVanish( void )
                     playerName = closest->GetColoredName();
                     playerName << tColoredStringProxy(-1,-1,-1);
                     sn_ConsoleOut( tOutput("$player_kill_collapse", playerName ) );
-                    closest->Object()->Kill();
+
+                    gCycle *c = dynamic_cast<gCycle *>(closest->Object());
+                    if(c) c->Kill("BASEZONE_CONQUERED");
                 }
                 else
                 {
@@ -3760,7 +3768,7 @@ void gBaseZoneHack::OnEnter( gCycle * target, REAL time )
             playerName << *target->Player() << tColoredString::ColorString(1,1,1);
             sn_ConsoleOut( tOutput( "$player_base_enemy_kill", playerName ) );
 
-            target->Kill();
+            target->Kill("BASE_ENEMY_KILL");
 
             return;
         }
@@ -4800,7 +4808,7 @@ void gBallZoneHack::OnEnter( gCycle * target, REAL time )
     ePlayerNetID * prey = target->Player();
     if ((sg_ballKiller) && (team) && !(prey->CurrentTeam() == team))
     {
-        target->Kill();
+        target->Kill("BALL");
         // scoring ...
         if ( lastPlayer_ )
         {
@@ -6915,7 +6923,9 @@ static eLadderLogWriter sg_deathDeathBlastZoneWriter("BLASTZONE_PLAYER_ENTER", f
 void gBlastZoneHack::OnEnter( gCycle * target, REAL time )
 {
     target->SetWallBuilding(false);
-    target->Player()->Object()->Kill();
+
+    gCycle *c = dynamic_cast<gCycle *>(target->Player()->Object());
+    if(c) c->Kill("BLASTZONE");;
 
     tOutput lose;
     lose << "$player_blastzone_score";
@@ -7770,7 +7780,7 @@ void gSoccerZoneHack::OnEnter( gCycle *target, REAL time )
             if (target && (Team() != target->Team()))
             {
                 sn_ConsoleOut(tOutput("$soccer_goal_enemy_entered", target->Player()->GetColoredName(), Team()->GetColoredName()));
-                target->Kill();
+                target->Kill("ENEMY_GOAL");
             }
         }
         else
@@ -8250,7 +8260,7 @@ void gRespawnZoneHack::OnEnter( gCycle * target, REAL time )
             msg << "$cycle_respawn_zone_kill_enemy";
             sn_ConsoleOut(msg);
 
-            target->Kill();
+            target->Kill("RESPAWN_ZONE");
             return;
         }
 

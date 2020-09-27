@@ -2886,6 +2886,7 @@ bool gCycle::Timestep(REAL currentTime){
     {
         sn_ConsoleOut( "0xff7777Admin : 0xffff77BUG had to kill a cycle because it lagged behind in the simulation. Probably the invulnerability bug. Investigate!\n" );
         st_Breakpoint();
+        deathReason_ = "BUG_LAG";
         if(Vulnerable())
             KillAt( pos );
         else
@@ -3320,6 +3321,8 @@ void gCycle::KillAt( const eCoord& deathPos){
         MoveSafely( deathPos, lastTime, lastTime );
         return;
     }
+    
+    deathReason_ = "OTHER";
 
     // find the killer from the enemy influence storage
     ePlayerNetID const * constHunter = enemyInfluence.GetEnemy();
@@ -3356,6 +3359,7 @@ void gCycle::KillAt( const eCoord& deathPos){
             sg_deathSuicideWriter << hunter->GetUserName();
             sg_deathSuicideWriter.write();
             tactical_stats[tactical_pos].state = Statistics::Record::TP_Suicide;
+            deathReason_ = "SUICIDE";
 
             if ( score_suicide )
                 hunter->AddScore(score_suicide, tOutput(), "$player_lose_suicide", sg_suicideMessage );
@@ -3384,6 +3388,7 @@ void gCycle::KillAt( const eCoord& deathPos){
                     sg_deathFragWriter << Player()->GetUserName() << hunter->GetUserName();
                     sg_deathFragWriter.write();
                     tactical_stats[tactical_pos].state = Statistics::Record::TP_Killed;
+                    deathReason_ = tString("FRAG ") << hunter->GetUserName();
 
                     win.SetTemplateParameter(3, preyName);
                     win << "$player_win_frag";
@@ -4252,6 +4257,10 @@ void gCycle::Kill(){
                 else
                     se_cycleDestroyedWriter << "";
                 se_cycleDestroyedWriter << se_GameTime();
+                if(deathReason_.Len() == 0) deathReason_ = "UNKNOWN";
+                se_cycleDestroyedWriter << deathReason_;
+                if(deathReason_.StrPos(" ") == -1)
+                    se_cycleDestroyedWriter << "";
                 se_cycleDestroyedWriter.write();
 
                 Player()->LogActivity(ACTIVITY_DIED);
@@ -6550,7 +6559,7 @@ bool gCycle::ActionOnQuit()
     if ( sn_GetNetState() == nSERVER )
     {
         TakeOwnership();
-        Kill();
+        Kill("RAGEQUIT");
         return false;
     }
     else

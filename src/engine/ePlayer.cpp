@@ -10134,9 +10134,9 @@ static void Kill_conf(std::istream &s)
 
         se_playerKilledWriter << p->GetUserName() << nMachine::GetMachine(p->Owner()).GetIP() << p->Object()->Position().x << p->Object()->Position().y << p->Object()->Direction().x << p->Object()->Direction().y;
         se_playerKilledWriter.write();
-        p->Object()->Kill();
-
-
+        
+        gCycle *c = dynamic_cast<gCycle *>(p->Object());
+        if(c) c->Kill("ADMIN_KILL");
     }
 }
 
@@ -10165,7 +10165,9 @@ static void Kill_ID_conf(std::istream &s)
 
             se_playerKilledWriter << p->GetUserName() << nMachine::GetMachine(p->Owner()).GetIP() << p->Object()->Position().x << p->Object()->Position().y << p->Object()->Direction().x << p->Object()->Direction().y;
             se_playerKilledWriter.write();
-            p->Object()->Kill();
+            
+            gCycle *c = dynamic_cast<gCycle *>(p->Object());
+            if(c) c->Kill("ADMIN_KILL");
         }
     }
 }
@@ -11519,7 +11521,10 @@ void ePlayerNetID::Suspend( int rounds, tString reason )
         sn_ConsoleOut( tOutput( "$player_suspended", GetColoredName(), suspended_ ) );
         SetTeam( NULL );
         if ( Object() && Object()->Alive() )
-            Object()->Kill();
+        {
+            gCycle *c = dynamic_cast<gCycle *>(Object());
+            if(c) c->Kill("SUSPENDED");
+        }
 
         suspendReason_= reason;
     }
@@ -12130,7 +12135,10 @@ static void sg_KillChatters(std::istream &s)
             if (p && p->IsChatting())
             {
                 if (p->Object() && p->Object()->Alive())
-                    p->Object()->Kill();
+                {
+                    gCycle *c = dynamic_cast<gCycle *>(p->Object());
+                    if(c) c->Kill("ADMIN_KILL_CHATTERS");
+                }
             }
         }
         sn_ConsoleOut( tOutput( "$player_chatter_die") );

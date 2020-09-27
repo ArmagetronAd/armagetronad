@@ -4431,7 +4431,8 @@ void gGameSpawnTimer::Sync(int alive, int ai_alive, int humans)
                 ePlayerNetID *p = se_PlayerNetIDs[i];
                 if (p && p->Object())
                 {
-                    p->Object()->Kill();
+                    gCycle *c = dynamic_cast<gCycle *>(p->Object());
+                    if(c) c->Kill("TIMER");
                 }
             }
         }
@@ -6093,7 +6094,8 @@ static void sg_KillAllPlayers(std::istream &s)
             ePlayerNetID *p=se_PlayerNetIDs(i);
             if (p->IsActive() && p->Object() && p->Object()->Alive() )
             {
-                p->Object()->Kill();
+                gCycle *c = dynamic_cast<gCycle *>(p->Object());
+                if(c) c->Kill("KILL_ALL");
             }
         }
     }

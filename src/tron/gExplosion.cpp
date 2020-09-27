@@ -302,7 +302,7 @@ void gExplosion::InteractWith( eGameObject *target, REAL time, int recursion )
     gCycle *cycle = dynamic_cast< gCycle* >( target );
     if (cycle && cycle->Alive() && ( cycle->Position() - this->Position() ).NormSquared() < s_explosionRadius * s_explosionRadius)
     {
-        cycle->Kill();
+        cycle->Kill("EXPLOSION");
 
         tColoredString cycleName, ownerName;
         cycleName << *cycle->Player() << tColoredString::ColorString(-1,-1,-1);

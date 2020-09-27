@@ -610,7 +610,7 @@ void sg_TopologyPoliceKill( gCycle* cycle )
         message << "$player_topologypolice";
         sn_ConsoleOut( message );
 
-        cycle->Kill();
+        cycle->Kill("TOPOLOGY_POLICE");
     }
 }
 
