@@ -2536,6 +2536,8 @@ tString htmlentities(tString str)
             case ':':   ret << "&#58;";     break;
             case '?':   ret << "&#63;";     break;
 
+            case '.': if(i == 0) { ret << "&#46;"; break;} //else, falls through...HACK to avoid hidden paths
+
             default: ret << str[i]; break;
         }
     }
