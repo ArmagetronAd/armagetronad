@@ -3043,11 +3043,11 @@ static void handle_chat_admin_commands( ePlayerNetID * p, tString const & comman
     {
         se_AdminAdmin( p, s );
     }
-    else if(command == "/movehere")
+    else if(command == "/movehere" || command == "/reconnect")
     {
         if(!se_MoveHere(p->Owner()))
         {
-            sn_ConsoleOut("/movehere failed for some reason.",p->Owner());
+            sn_ConsoleOut("/reconnect failed for some reason.",p->Owner());
         }
     }
     else
