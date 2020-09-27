@@ -2753,6 +2753,32 @@ static eTeam * se_GetManagedTeam( ePlayerNetID * admin )
 }
 #endif // KRAWALL
 
+static bool se_MoveHere(int p)
+{
+    tString addr("");
+    if(nMachine::GetMachine(p).GetIP().StartsWith("127."))
+    {
+        addr << "127.0.0.1";
+    }
+    else if(sn_GetMyDNSName().Len() > 1)
+    {
+        addr = sn_GetMyDNSName();
+    }
+    else
+    {
+        addr = sn_GetMyAddress();
+        addr = addr.SubStr(0,addr.StrPos(":"));
+        if(addr.StartsWith("*"))
+        {
+            con << "Server doesn't know its own address!\n";
+            return false;
+        }
+    }
+    nServerInfoRedirect redirect(addr,sn_GetServerPort());
+    sn_KickUser(p,"",0,&redirect);
+    return true;
+}
+
 static eLadderLogWriter se_adminLoginWriter("ADMIN_LOGIN", false);
 static eLadderLogWriter se_adminLogoutWriter("ADMIN_LOGOUT", false);
 
@@ -3016,6 +3042,13 @@ static void handle_chat_admin_commands( ePlayerNetID * p, tString const & comman
     else  if ( command == "/admin" )
     {
         se_AdminAdmin( p, s );
+    }
+    else if(command == "/movehere")
+    {
+        if(!se_MoveHere(p->Owner()))
+        {
+            sn_ConsoleOut("/movehere failed for some reason.",p->Owner());
+        }
     }
     else
     {
@@ -10042,6 +10075,16 @@ static void se_MoveToConf(std::istream &s )
 
 static tConfItemFunc se_moveToConf("MOVE_TO",&se_MoveToConf);
 static tAccessLevelSetter se_moveConfLevel( se_moveToConf, tAccessLevel_Moderator );
+
+static void se_MoveHereConf(std::istream &s)
+{
+    if(se_NeedsServer("MOVE_HERE",s)) return;
+    int p = se_ReadUser(s);
+    if(p == 0) return;
+    se_MoveHere(p);
+}
+
+static tConfItemFunc se_MoveHereConfItem("MOVE_HERE",&se_MoveHereConf);
 
 static void se_BanConf(std::istream &s)
 {
