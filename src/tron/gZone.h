@@ -128,14 +128,14 @@ public:
     bool isInside(gCycle *cycle)
     {
         for(int i=cycesInside_.Len()-1;i>=0;--i)
-		{
+        {
             if(cycesInside_[i] == cycle)
-			{
+            {
                 return true;
-			}
-		}
+            }
+        }
         return false;
-	}
+    }
 	void            OnCycleDestroyed    (gCycle *cycle,REAL time);
 
     void BounceOffPoint(eCoord dest, eCoord collide);
