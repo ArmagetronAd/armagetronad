@@ -128,7 +128,7 @@ static inline void arrow(REAL x,REAL y,REAL dy,REAL size){
 #endif
 }
 
-static bool repeat = false;
+static bool s_globalRepeat = false;
 
 #ifndef DEDICATED
 static bool disphelp=false;
@@ -146,6 +146,7 @@ static rNoAutoDisplayAtNewlineCallback su_noNewline( uMenu::MenuActive );
 
 void uMenu::OnEnter(){
 #ifndef DEDICATED
+    bool localRepeat = false;
     float nextrepeat = 0.0f;
     static const float repeatdelay = 0.3f;
     static const float repeatrate  = 0.05f;
@@ -206,12 +207,12 @@ void uMenu::OnEnter(){
                         // don't send keyup events when released.
                         break;
                     }
-                    repeat = true;
+                    localRepeat = s_globalRepeat = true;
                     memcpy( &tEventRepeat, &tEvent, sizeof( SDL_Event ) );
                     nextrepeat = tSysTimeFloat() + repeatdelay;
                     break;
                 case SDL_KEYUP:
-                    repeat = false;
+                    localRepeat = s_globalRepeat = false;
                     break;
                 }
 
@@ -223,11 +224,11 @@ void uMenu::OnEnter(){
 
                 if ( tSysTimeFloat() - entertime > 1 )
                 {
-                    repeat = false;
+                    localRepeat = s_globalRepeat = false;
                 }
             }
 
-            if ( repeat && tSysTimeFloat() > nextrepeat )
+            if ( localRepeat && s_globalRepeat && tSysTimeFloat() > nextrepeat )
             {
                 this->HandleEvent( tEventRepeat );
                 nextrepeat = tSysTimeFloat() + repeatrate;
@@ -347,7 +348,7 @@ void uMenu::OnEnter(){
 #endif
     }
 
-    repeat = false;
+    s_globalRepeat = false;
 
     uCallbackMenuLeave::MenuLeave();
     su_inMenu = false;
@@ -366,7 +367,7 @@ void uMenu::HandleEvent( SDL_Event event )
             switch (event.key.keysym.sym){
 
             case(SDLK_ESCAPE):
-                            repeat = false;
+                s_globalRepeat = false;
                 lastkey=tSysTimeFloat();
                 Exit();
                 break;
@@ -406,7 +407,7 @@ void uMenu::HandleEvent( SDL_Event event )
             case(SDLK_SPACE):
                         case(SDLK_KP_ENTER):
                             case(SDLK_RETURN):
-                                    repeat = false;
+                                    s_globalRepeat = false;
                 try
         {
                     su_inMenu = false;
@@ -437,7 +438,7 @@ void uMenu::HandleEvent( SDL_Event event )
 
                 su_inMenu = true;
 
-                repeat = false;
+                s_globalRepeat = false;
                 lastkey=tSysTimeFloat();
                 break;
 
@@ -1110,7 +1111,7 @@ bool uMenu::IdleInput()
             switch (event.key.keysym.sym)
             {
             case(SDLK_ESCAPE):
-                repeat = false;
+                s_globalRepeat = false;
                 lastkey=tSysTimeFloat();
                 return true;
                 break;
