@@ -63,6 +63,8 @@ function update_stream(){
     
     URI=${DOWNLOAD_URI_BASE}`basename ${FILE}`
 
+    ./wait_for_upload.sh "${URI}" || exit $?
+
     XML=zeroinstall/${PACKAGE_NAME_BASE}-${ZI_SERIES}-${STREAM}.xml
     test -f ${XML} || exit 1
     grep -q version=\"${ZEROVERSION}\" ${XML} && return 0

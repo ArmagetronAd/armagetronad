@@ -50,9 +50,8 @@ function copylib()
     done
 }
 
-# Luckily, This seems to only be an OPTIONAL dependency of libxml. It's huge.
-#libicudata \
-#libtiff \
+# dependency scrapyard
+# libstdc++ \
 
 #   include libraries
 mkdir -p ${APPDIR}/usr/lib/
@@ -68,6 +67,7 @@ libftgl \
 libGLEW \
 libGLU \
 libjbig \
+libjpeg[0-9\.]* \
 libncursesw \
 libnsl \
 libogg \
@@ -79,7 +79,6 @@ libprotobuf \
 libSDL-1.2 \
 libslang \
 libsndfile \
-libstdc++ \
 libSDL_image-1.2 \
 libSDL_mixer-1.2 \
 libtiff \
@@ -102,7 +101,7 @@ done
 
 # ldd ${APPDIR}/usr/bin/${PACKAGE}
 
-if ! echo ${PACKAGE} | grep dedicated; then
+if false && ! echo ${PACKAGE} | grep dedicated; then
 # libraries we know are dynamically loaded later, so they don't appear in ldd's output
 for library in \
 libjpeg.so.8 \
