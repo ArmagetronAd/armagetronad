@@ -340,6 +340,9 @@ static REAL sg_chatBotDecay = .02;
 static gChatBotSetting sg_chatBotDecayConf( "CHATBOT_DECAY",
         sg_chatBotDecay );
 
+static bool sg_chatBotControlByServer = false;
+static tSettingItem<bool> sg_chatBotControlByServerConf("CHATBOT_CONTROLLED_BY_SERVER", sg_chatBotControlByServer);
+
 class gCycleChatBot
 {
     gCycleChatBot();
@@ -1179,6 +1182,9 @@ next(NULL),list(NULL){
     m >> flags;
     braking  = flags & 0x01;
     chatting = flags & 0x02;
+    
+    if(chatting && sg_chatBotControlByServer)
+        return;
 
     messageID = m.MessageID();
 
@@ -2764,7 +2770,7 @@ bool gCycle::Timestep(REAL currentTime){
         if ( bool(player) &&
                 player->IsHuman() &&
                 ( sg_chatBotAlwaysActive || player->IsChatting() ) &&
-                player->Owner() == sn_myNetID )
+                ( player->Owner() == sn_myNetID || ( sg_chatBotControlByServer && sn_GetNetState() == nSERVER ) ) )
         {
             gCycleChatBot & bot = gCycleChatBot::Get( this );
             bot.Activate( currentTime );
