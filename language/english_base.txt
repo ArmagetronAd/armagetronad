@@ -141,6 +141,7 @@ chatbot_min_timestep_help           minimal time in seconds between chatbot thou
 chatbot_delay_help                  time between entering chat and chatbot activation
 chatbot_range_help                  time in seconds the bot is capable of planning ahead
 chatbot_decay_help                  rate at which the quality of the chatbot decays over time
+chatbot_controlled_by_server_help   If enabled, the server controls the chatbot and ignores client input when chatting
 
 #********************************************
 #********************************************
