@@ -7097,7 +7097,7 @@ void gCycle::TeleportTo(eCoord dest, eCoord dir, REAL time) {
 	gNetPlayerWall *nwall = ((CurrentWall())?CurrentWall()->NetWall():0);
 	if (nwall) {
 		DropWall(false);
-		nwall->RequestSync();
+		//nwall->RequestSync();
 	}
 	// Do a safe move to destination
 	MoveSafely(dest,time,time);
