@@ -6843,7 +6843,7 @@ void gCycle::ProcessShoot(bool deathShot)
                 
                 if(shotRadius <= 0) //HACK but useful for scripts that don't actually need a zone
                 {
-                    sg_ZoneShotReleased << deathShot << "-1" << Player()->GetUserName() << shotPos.x << shotPos.y << shotVelocity.x << shotVelocity.y;
+                    sg_ZoneShotReleased << deathShot << "-1" << Player()->GetUserName() << shotPos.x/gArena::SizeMultiplier() << shotPos.y/gArena::SizeMultiplier() << shotVelocity.x << shotVelocity.y;
                     sg_ZoneShotReleased.write();
                     return;
                 }
