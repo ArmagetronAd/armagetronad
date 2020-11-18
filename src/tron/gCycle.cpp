@@ -6859,7 +6859,7 @@ void gCycle::ProcessShoot(bool deathShot)
                 pZone->SetWallPenetrate(sg_shotPenetrateWalls);
 
                 //  write to laddderlog
-                sg_ZoneShotReleased << deathShot << pZone->GOID() << Player()->GetUserName() << pZone->MapPosition().x << pZone->MapPosition().y << pZone->GetVelocity().x << pZone->GetVelocity().y;
+                sg_ZoneShotReleased << deathShot << pZone->GetID() << Player()->GetUserName() << pZone->MapPosition().x << pZone->MapPosition().y << pZone->GetVelocity().x << pZone->GetVelocity().y;
                 sg_ZoneShotReleased.write();
 
                 if (sg_shotExplosion == 1)
@@ -6906,7 +6906,7 @@ void gCycle::ProcessShoot(bool deathShot)
                         pZone->SetWallPenetrate(sg_shotPenetrateWalls);
 
                         //  write to laddderlog
-                        sg_ZoneShotReleased << deathShot << pZone->GOID() << Player()->GetUserName() << pZone->MapPosition().x << pZone->MapPosition().y << pZone->GetVelocity().x << pZone->GetVelocity().y;
+                        sg_ZoneShotReleased << deathShot << pZone->GetID() << Player()->GetUserName() << pZone->MapPosition().x << pZone->MapPosition().y << pZone->GetVelocity().x << pZone->GetVelocity().y;
                         sg_ZoneShotReleased.write();
 
                         if (sg_megashotExplosion >= 2)
