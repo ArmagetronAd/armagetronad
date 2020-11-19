@@ -422,6 +422,11 @@ respawn_help                        Respawns a player that had been killed.\nUSA
 respawn_player_help                 Respawns a player that had been killed.\nUSAGE: RESPAWN_PLAYER <player> <xpos> <ypos> <xdir> <ydir>.
 respawn_all_help                    Respawns all players that were killed during the round at a random spot.
 
+cycle_death_teleport_help           Teleport a player instead of killing them. 1=Start position; 2=Reverse direction;
+cycle_death_teleport_explosion_help Spawn an explosion?
+cycle_death_teleport_reset_help     Reset cycle parameters such as rubber and brakes?
+
+
 #********************************************
 #********************************************
 #
@@ -914,6 +919,7 @@ ladderlog_write_basezone_conquerer_help       Write to ladderlog: BASEZONE_CONQU
 ladderlog_write_basezone_conquerer_team_help  Write to ladderlog: BASEZONE_CONQUERER_TEAM <team> <score>
 ladderlog_write_cycle_created_help            Write to ladderlog: CYCLE_CREATED [auth_name] [posx] [posy] [dirx] [diry] [team_name] [time]
 ladderlog_write_cycle_destroyed_help          Write to ladderlog: CYCLE_DESTROYED [auth_name] [posx] [posy] [dirx] [diry] [team_name] [time] [reason] [predator]
+ladderlog_write_cycle_death_teleport_help     Write to ladderlog: CYCLE_DEATH_TELEPORT [auth_name] [posx] [posy] [dirx] [diry] [team_name] [time] [reason] [predator]
 ladderlog_write_chat_help                     Write to ladderlog: CHAT <chatter> [/me] <chat string>
 ladderlog_write_current_map_help              Write to ladderlog: CURRENT_MAP [size_factor] [size_multiplier] [MAP_FILE]
 ladderlog_write_death_basezone_conquered_help Write to ladderlog: DEATH_BASEZONE_CONQUERED <player> [NO_ENEMIES]

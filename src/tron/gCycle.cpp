@@ -4218,6 +4218,18 @@ static void sg_cycleRespawnZone_Create(gCycle *cycle)
     }
 }
 
+
+static eLadderLogWriter se_cycleDeathTeleportWriter("CYCLE_DEATH_TELEPORT",true);
+
+int sg_cycleDeathTeleport = 0;
+static tSettingItem<int> sg_cycleDeathTeleportConf("CYCLE_DEATH_TELEPORT", sg_cycleDeathTeleport);
+
+bool sg_cycleDeathTeleportExplosion = true;
+static tSettingItem<bool> sg_cycleDeathTeleportExplosionConf("CYCLE_DEATH_TELEPORT_EXPLOSION", sg_cycleDeathTeleportExplosion);
+
+bool sg_cycleDeathTeleportReset = true;
+static tSettingItem<bool> sg_cycleDeathTeleportResetConf("CYCLE_DEATH_TELEPORT_RESET", sg_cycleDeathTeleportReset);
+
 void gCycle::Kill(){
     // keep this cycle alive
     tJUST_CONTROLLED_PTR< gCycle > keep( this->GetRefcount()>0 ? this : 0 );
@@ -4246,6 +4258,45 @@ void gCycle::Kill(){
             lastShotTime = 0;
             shotStarted = 0;
             shotReservoir = 1.0;
+            
+            if(sg_cycleDeathTeleport != 0 && Player())
+            {
+                if(sg_cycleDeathTeleportExplosion)
+                {
+                    tNEW(gExplosion)(grid, pos,lastTime, color_, this );
+                }
+                
+                if(sg_cycleDeathTeleportReset)
+                {
+                    SetRubber(0);
+                    SetBraking(false);
+                    brakingReservoir = 1;
+                    RequestSync();
+                }
+                
+                se_cycleDeathTeleportWriter << Player()->GetUserName() << MapPosition().x << MapPosition().y << Direction().x << Direction().y;
+                if(Player()->CurrentTeam())
+                    se_cycleDeathTeleportWriter << ePlayerNetID::FilterName(Team()->Name());
+                else
+                    se_cycleDeathTeleportWriter << "";
+                se_cycleDeathTeleportWriter << se_GameTime();
+                if(deathReason_.Len() == 0) deathReason_ = "UNKNOWN";
+                se_cycleDeathTeleportWriter << deathReason_;
+                if(deathReason_.StrPos(" ") == -1)
+                    se_cycleDeathTeleportWriter << "";
+                se_cycleDeathTeleportWriter.write();
+                
+                switch(sg_cycleDeathTeleport)
+                {
+                    case 1:
+                        TeleportTo(StartPosition(),StartDirection(),lastTime);
+                        break;
+                    case 2:
+                        TeleportTo(Position(),Direction()*-1,lastTime);
+                        break;
+                }
+                return;
+            }
 
             Die( lastTime );
             tNEW(gExplosion)(grid, pos,lastTime, color_, this );
