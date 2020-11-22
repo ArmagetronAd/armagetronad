@@ -89,7 +89,17 @@ void se_SyncGameTimer();
 void se_ResetGameTimer(REAL t=0);
 void se_MakeGameTimer();
 void se_KillGameTimer();
-void se_PauseGameTimer(bool p);
+
+enum eTimerPauseSource
+{
+    eTIMER_PAUSE_BUTTON = 1, // the dedicated pause button
+    eTIMER_PAUSE_MENU = 2, // pause from opening the menu
+    eTIMER_PAUSE_INACTIVE = 4, // pause from losing application focus
+    eTIMER_PAUSE_GAME = 8, // pause by game control flow
+    eTIMER_PAUSE_NONE = 0
+};
+
+void se_PauseGameTimer(bool p, eTimerPauseSource source);
 
 REAL se_PredictTime();
 REAL se_AverageFrameTime();
