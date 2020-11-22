@@ -505,9 +505,21 @@ void se_ResetGameTimer(REAL t){
         se_mainGameTimer->Reset(t);
 }
 
-void se_PauseGameTimer(bool p){
+void se_PauseGameTimer(bool p,  eTimerPauseSource source){
+    static int pausedBySources = eTimerPauseSource::eTIMER_PAUSE_NONE;
+    if(p)
+    {
+        pausedBySources |= source;
+    }
+    else
+    {
+        pausedBySources &= ~source;
+    }
+
     if (se_mainGameTimer && sn_GetNetState()!=nCLIENT)
-        se_mainGameTimer->pause(p);
+    {
+        se_mainGameTimer->pause(pausedBySources != eTimerPauseSource::eTIMER_PAUSE_NONE);
+    }
 }
 
 REAL se_AverageFrameTime(){
