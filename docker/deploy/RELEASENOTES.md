@@ -6,6 +6,8 @@ compilers and Linux versions and some less important bugfixes.
 
 Target audience for this series are mostly Linux distributors who do not want 
 to upgrade to 0.2.9 just yet.
+If you are in that camp and need help integrating the changes into your build, 
+contact us.
 
 0.2.8.3.6 is the first release using the build system that powers the 0.2.9 series. 
 It should bring more consistency between this and future releases, 
