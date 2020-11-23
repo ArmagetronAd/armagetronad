@@ -1,4 +1,4 @@
-This release welcomes our new ultrawidescreen overlords!
+This release welcomes our new ultrawide monitor using overlords!
 
 And, to be frank, also the old, regular widescreen overlords. 
 All this time, the game had been optimized for 4:3 or 5:4 screens, 
@@ -20,3 +20,6 @@ version 0.2.8.
 What Steam users had for a while is now available for everyone: 
 The onboarding process has been tweaked a little. The intial game is less frustrating, 
 and the tutorial tooltips are spammed less.
+
+Furthermore, compatibility of the generic Linux binaries has been improved, 
+with more systems supported out of the box.
