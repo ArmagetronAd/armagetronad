@@ -1792,7 +1792,7 @@ bool gZone::RendersAlpha() const
 
 void gZone::Vanish( REAL factor )
 {
-    if ( GetExpansionSpeed() >= 0 )
+    if ( GetExpansionSpeed() >= -GetRadius() )
     {
         SetReferenceTime();
         SetExpansionSpeed( -GetRadius() * factor );
