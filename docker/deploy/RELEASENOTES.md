@@ -14,3 +14,5 @@ It should bring more consistency between this and future releases,
 but as newer versions of autotools are now used, differences to 0.2.8.3.5 in the tarball
 are to be expected.
 
+Security related: One fix for a remotely epploitable use after free was backported from 0.2.9 (#34) and one
+client crash exploitable by making you play back a specially prepared recording (#54) was fixed.
