@@ -4,13 +4,18 @@ Changes since 0.2.8.3.5:
   Fixed Bugs
 
 - Windows: DPI scaling behavior wrong (#33)
+- Crash in menu key repeat handling (#66)
+- Use after free in nNetObject::ClearKnows (#34)
+- Client segfaults on OpenBSD (#26)
 - Debian builds: Documentation html files have empty last change (#9)
 - Ubuntu PPA release candidate builds would overwrite previous stable releases (#15)
+- Can't open the .appimage file. Missing libwebp.so.5 (#54)
 - AppRun script does not work if call path contains spaces (#24)
 - Included forum links outdated (#25)
-- Client segfaults on OpenBSD (#26)
+- Missing null check for master server info (#58)
 - Client compiled with clang 10.0 (optimized) sefgaults on logout (#28)
 - Valgrind reports uses of unitialized, freed or invalid memory (#29)
+- AppImage library content still lacking (#63)
 
   New Features
 

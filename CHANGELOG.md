@@ -4,13 +4,18 @@
 ##### Fixed Bugs
 
  * Windows: DPI scaling behavior wrong ([#33](https://gitlab.com/armagetronad/armagetronad/-/issues/33))
+ * Crash in menu key repeat handling ([#66](https://gitlab.com/armagetronad/armagetronad/-/issues/66))
+ * Use after free in nNetObject::ClearKnows ([#34](https://gitlab.com/armagetronad/armagetronad/-/issues/34))
+ * Client segfaults on OpenBSD ([#26](https://gitlab.com/armagetronad/armagetronad/-/issues/26))
  * Debian builds: Documentation html files have empty last change ([#9](https://gitlab.com/armagetronad/armagetronad/-/issues/9))
  * Ubuntu PPA release candidate builds would overwrite previous stable releases ([#15](https://gitlab.com/armagetronad/armagetronad/-/issues/15))
+ * Can't open the .appimage file. Missing libwebp.so.5 ([#54](https://gitlab.com/armagetronad/armagetronad/-/issues/54))
  * AppRun script does not work if call path contains spaces ([#24](https://gitlab.com/armagetronad/armagetronad/-/issues/24))
  * Included forum links outdated ([#25](https://gitlab.com/armagetronad/armagetronad/-/issues/25))
- * Client segfaults on OpenBSD ([#26](https://gitlab.com/armagetronad/armagetronad/-/issues/26))
+ * Missing null check for master server info ([#58](https://gitlab.com/armagetronad/armagetronad/-/issues/58))
  * Client compiled with clang 10.0 (optimized) sefgaults on logout ([#28](https://gitlab.com/armagetronad/armagetronad/-/issues/28))
  * Valgrind reports uses of unitialized, freed or invalid memory ([#29](https://gitlab.com/armagetronad/armagetronad/-/issues/29))
+ * AppImage library content still lacking ([#63](https://gitlab.com/armagetronad/armagetronad/-/issues/63))
 
 ##### New Features
 
