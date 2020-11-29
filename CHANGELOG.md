@@ -1,5 +1,14 @@
 
-#### Changes since 0.2.9.0:
+#### Changes since 0.2.9.0.1:
+
+##### Fixed Bugs
+
+ * Use after free in nNetObject::ClearKnows ([#34](https://gitlab.com/armagetronad/armagetronad/-/issues/34))
+ * Missing null check for master server info ([#58](https://gitlab.com/armagetronad/armagetronad/-/issues/58))
+ * Basic screen aspect ratio failures: Text ([#59](https://gitlab.com/armagetronad/armagetronad/-/issues/59))
+ * Center message issues ([#62](https://gitlab.com/armagetronad/armagetronad/-/issues/62))
+ * AppImage library content still lacking ([#63](https://gitlab.com/armagetronad/armagetronad/-/issues/63))
+ * Crash in menu key repeat handling ([#66](https://gitlab.com/armagetronad/armagetronad/-/issues/66))
 
 ##### New Features
 
@@ -8,16 +17,31 @@
  * Do not show a player's own IP on the client ([#27](https://gitlab.com/armagetronad/armagetronad/-/issues/27))
  * Make --playback optional so recordings can be more easily played back ([#37](https://gitlab.com/armagetronad/armagetronad/-/issues/37))
  * Steam on Windows: Add playback registry keys so .aarec files automatically playback with a doubleclick ([#38](https://gitlab.com/armagetronad/armagetronad/-/issues/38))
+ * Make clientside playback more robust ([#56](https://gitlab.com/armagetronad/armagetronad/-/issues/56))
+ * user.cfg fine grained upgrade system ([#61](https://gitlab.com/armagetronad/armagetronad/-/issues/61))
 
 ##### Other Changes
 
  * Make custom camera the default for new players ([#35](https://gitlab.com/armagetronad/armagetronad/-/issues/35))
  * Turn down tutorial tooltip spam ([#36](https://gitlab.com/armagetronad/armagetronad/-/issues/36))
  * Onboarding game improvements ([#39](https://gitlab.com/armagetronad/armagetronad/-/issues/39))
+ * ROUND_CENTER_MESSAGEs are still displayed in nCLIENT state ([#49](https://gitlab.com/armagetronad/armagetronad/-/issues/49))
+ * Make Full HD players see the small font as little as possible ([#60](https://gitlab.com/armagetronad/armagetronad/-/issues/60))
 
 ##### Contributors
 
 Armanelgtron, Manuel Moos, SwagTron
+
+
+#### Changes since 0.2.9.0:
+
+##### Fixed Bugs
+
+ * Can't open the .appimage file. Missing libwebp.so.5 ([#54](https://gitlab.com/armagetronad/armagetronad/-/issues/54))
+
+##### Contributors
+
+Manuel Moos
 
 
 #### Changes since 0.2.8.3.5:
@@ -44,20 +68,6 @@ Armanelgtron, Manuel Moos, SwagTron
  * Make playback time display optional ([#16](https://gitlab.com/armagetronad/armagetronad/-/issues/16))
  * Deploy to itch.io ([#19](https://gitlab.com/armagetronad/armagetronad/-/issues/19))
  * Credit contributors in patch notes ([#21](https://gitlab.com/armagetronad/armagetronad/-/issues/21))
-
-##### Other Changes
-
- * Debian builds: Documentation html files have empty last change ([#9](https://gitlab.com/armagetronad/armagetronad/-/issues/9))
- * Socket and unclean exit trouble due to fork(), execve() and exit() interaction ([#13](https://gitlab.com/armagetronad/armagetronad/-/issues/13))
- * Ubuntu PPA release candidate builds would overwrite previous stable releases ([#15](https://gitlab.com/armagetronad/armagetronad/-/issues/15))
- * Language string identifier silence_player_text used twice ([#22](https://gitlab.com/armagetronad/armagetronad/-/issues/22))
- * Bad video mode error recovery ([#23](https://gitlab.com/armagetronad/armagetronad/-/issues/23))
- * AppRun script does not work if call path contains spaces ([#24](https://gitlab.com/armagetronad/armagetronad/-/issues/24))
- * Included forum links outdated ([#25](https://gitlab.com/armagetronad/armagetronad/-/issues/25))
- * Client segfaults on OpenBSD ([#26](https://gitlab.com/armagetronad/armagetronad/-/issues/26))
- * Client compiled with clang 10.0 (optimized) sefgaults on logout ([#28](https://gitlab.com/armagetronad/armagetronad/-/issues/28))
- * Valgrind reports uses of unitialized, freed or invalid memory ([#29](https://gitlab.com/armagetronad/armagetronad/-/issues/29))
- * Windows: DPI scaling behavior wrong ([#33](https://gitlab.com/armagetronad/armagetronad/-/issues/33))
 
 ##### Contributors
 
