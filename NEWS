@@ -1,4 +1,13 @@
-Changes since 0.2.9.0:
+Changes since 0.2.9.0.1:
+
+Fixed Bugs
+
+-   Use after free in nNetObject::ClearKnows (#34)
+-   Missing null check for master server info (#58)
+-   Basic screen aspect ratio failures: Text (#59)
+-   Center message issues (#62)
+-   AppImage library content still lacking (#63)
+-   Crash in menu key repeat handling (#66)
 
 New Features
 
@@ -9,12 +18,16 @@ New Features
     (#37)
 -   Steam on Windows: Add playback registry keys so .aarec files
     automatically playback with a doubleclick (#38)
+-   Make clientside playback more robust (#56)
+-   user.cfg fine grained upgrade system (#61)
 
 Other Changes
 
 -   Make custom camera the default for new players (#35)
 -   Turn down tutorial tooltip spam (#36)
 -   Onboarding game improvements (#39)
+-   ROUND_CENTER_MESSAGEs are still displayed in nCLIENT state (#49)
+-   Make Full HD players see the small font as little as possible (#60)
 
 Contributors
 
@@ -22,25 +35,15 @@ Armanelgtron, Manuel Moos, SwagTron
 
 Changes since 0.2.9.0:
 
-  Fixed Bugs
+Fixed Bugs
 
-- Can't open the .appimage file. Missing libwebp.so.5 (#54)
+-   Can’t open the .appimage file. Missing libwebp.so.5 (#54)
 
-  Contributors
+Contributors
 
 Manuel Moos
 
-
 Changes since 0.2.8.3.5:
-
-New Features
-
--   Update German translation (#2)
--   Adapt ChangeLog and fingerprint generation to git (#11)
--   Integrated build system (#14)
--   Make playback time display optional (#16)
--   Deploy to itch.io (#19)
--   Credit contributors in patch notes (#21)
 
 Fixed Bugs
 
@@ -59,6 +62,15 @@ Fixed Bugs
 -   Valgrind reports uses of unitialized, freed or invalid memory (#29)
 -   Windows: DPI scaling behavior wrong (#33)
 
+New Features
+
+-   Update German translation (#2)
+-   Adapt ChangeLog and fingerprint generation to git (#11)
+-   Integrated build system (#14)
+-   Make playback time display optional (#16)
+-   Deploy to itch.io (#19)
+-   Credit contributors in patch notes (#21)
+
 Contributors
 
 Daniel Harple, Hugh McMaster, Luke-Jr, Manuel Moos, Uzix, fman23,
@@ -67,39 +79,63 @@ zolk3ri
 Changes on the 0.2.9 branch
 
 -   Added detection and reaction code for timing assist bots
+
 -   /shuffle now works before you actually join a team
+
 -   Implemented /shout command and associated settings
+
 -   Fixed suspension and silenced status not being re-applied after a
     player disconnects and rejoins a server.
+
 -   Tweaks to enemy influence system.
+
 -   Ingame menu and console now are drawn on top of a semi-transparent,
     darkened area for increased readability.
+
 -   New first start menu with clearer language selection and initial
     setup.
+
 -   Tutorial match against one AI at slower speed.
+
 -   Tutorial tooltips for the most important keybindings.
+
 -   ADD_MASTER_SERVER command to announce a server to a new master
     server. Simplifies the process to list your server on a subculture.
+
 -   Team launch positions logged to ladderlog with POSITIONS event.
     Disabled by default.
+
 -   New command-line option “–input” added to poll for input from a file
     instead of stdin.
+
 -   Added WHITELIST_ENEMIES_[IP/USERNAME] to allow players to be
     enemies, even if they come from the same IP address and
     ALLOW_ENEMIES_SAME_IP is disabled (which is its default setting).
+
 -   GAME_END, NEW_MATCH, and NEW_ROUND ladderlog events include date and
     time.
+
 -   Added ENCODING ladderlog event, which specifies the encoding for
     data in ladderlog.txt.
+
 -   “–input” now can be used more than once to read from multiple files
     or pipes.
--   new team management ladderlog messages: TEAM_CREATED TEAM_DESTROYED
-    TEAM_RENAMED TEAM_PLAYER_ADDED TEAM_PLAYER_REMOVED
+
+-   new team management ladderlog messages:
+
+         TEAM_CREATED <team name>
+         TEAM_DESTROYED <team name>
+         TEAM_RENAMED <old team name> <new team name>
+         TEAM_PLAYER_ADDED <team name> <player>
+         TEAM_PLAYER_REMOVED <team name> <player>
+
 -   Manage external scripts on Unix dedicated servers. New commands:
     SPAWN_SCRIPT, RESPAWN_SCRIPT, FORCE_RESPAWN_SCRIPT, KILL_SCRIPT,
     LIST_SCRIPTS, SCRIPT_ENV.
+
 -   New setting ACCESS_LEVEL_ANNOUNCE_LOGIN that determines if a
     player’s login/logout message can be announced.
+
 -   Authentication is now enabled by default.
 
 Changes since 0.2.8.3.4:
