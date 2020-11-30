@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# push make an entry on the download site
+# make an entry on the download site
 
 set +x
 
@@ -22,38 +22,48 @@ for f in *; do
     echo $f
 
     URI=${DOWNLOAD_URI_BASE}$f
-    ../wait_for_upload.sh "${URI}" || exit $?
+
+	WAIT=true
 
     case $f in
 	*-dedicated-*.exe)
-	    WIN_SERVER=$f
-	    ;;
+		WIN_SERVER=$f
+		;;
 	*.exe)
-	    WIN_CLIENT=$f
-	    ;;
+		WIN_CLIENT=$f
+		;;
 	*Dedicated-32bit-${PACKAGE_VERSION}.AppImage)
-	    LIN32_SERVER=$f
-	    ;;
+		LIN32_SERVER=$f
+		;;
 	*-32bit-${PACKAGE_VERSION}.AppImage)
-	    LIN32_CLIENT=$f
-	    ;;
+		LIN32_CLIENT=$f
+		;;
 	*Dedicated-${PACKAGE_VERSION}.AppImage)
-	    LIN64_SERVER=$f
-	    ;;
+		LIN64_SERVER=$f
+		;;
 	*-${PACKAGE_VERSION}.AppImage)
-	    LIN64_CLIENT=$f
-	    ;;
+		LIN64_CLIENT=$f
+		;;
 	*-client*.tbz|*-server*.tbz)
-	    ;;
+		WAIT=false
+		;;
 	*-${PACKAGE_VERSION}.tbz)
-	    SOURCE_TARBALL=$f
-	    ;;
+		SOURCE_TARBALL=$f
+		;;
 	*win32.zip)
-	    ;;
+		WAIT=false
+		;;
 	*-${PACKAGE_VERSION}.zip)
-	    SOURCE_ZIP=$f
-	    ;;
+		SOURCE_ZIP=$f
+		;;
+	*)
+		WAIT=false
+		;;
     esac
+
+	if test "${WAIT}" == "true"; then
+		../wait_for_upload.sh "${URI}" || exit $?
+	fi
 done
 popd
 

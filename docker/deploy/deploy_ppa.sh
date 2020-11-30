@@ -22,7 +22,7 @@ fi
 SERIES=$1
 test -z ${SERIES} && SERIES=unstable
 
-DEBIAN_VERSION=${DEBIAN_VERSION_BASE}~ppa1~${SERIES} || exit $?
+DEBIAN_VERSION=${DEBIAN_VERSION_BASE}~${SERIES} || exit $?
 
 CHANGES=${PACKAGE_NAME}_${DEBIAN_VERSION}_source.changes || exit $?
 #ls ${CHANGES} || exit $?
