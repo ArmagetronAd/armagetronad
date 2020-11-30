@@ -2,6 +2,7 @@
 
 function test_targets(){
 	. ../deploy/targets.sh
+	. ./context/version.sh
 	echo LP_VERSION=${LP_VERSION}
 	echo DEBIAN_VERSION_BASE=${DEBIAN_VERSION_BASE}
 	echo SERIES=${SERIES}
