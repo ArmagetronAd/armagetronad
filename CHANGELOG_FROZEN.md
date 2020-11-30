@@ -1,3 +1,4 @@
+
 #### Changes since 0.2.9.0:
 
 ##### Fixed Bugs
@@ -34,10 +35,13 @@ Manuel Moos
  * Deploy to itch.io ([#19](https://gitlab.com/armagetronad/armagetronad/-/issues/19))
  * Credit contributors in patch notes ([#21](https://gitlab.com/armagetronad/armagetronad/-/issues/21))
 
+##### Other Changes
+
+ * Make custom camera the default for new players ([#35](https://gitlab.com/armagetronad/armagetronad/-/issues/35))
+
 ##### Contributors
 
 Daniel Harple, Hugh McMaster, Luke-Jr, Manuel Moos, Uzix, fman23, zolk3ri
-
 
 ##### Other changes on the 0.2.9 branch
 
