@@ -1652,6 +1652,7 @@ eTeam::eTeam()
     lastScore_=IMPOSSIBLY_LOW_SCORE;
     position_ = -1;
     locked_ = false;
+    spawnPoint = NULL;
     maxPlayersLocal = maxPlayers;
     maxImbalanceLocal = maxImbalance;
     r = g = b = 32; // initialize color so it will be updated, guaranteed
