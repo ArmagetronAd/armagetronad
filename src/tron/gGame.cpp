@@ -3302,7 +3302,6 @@ void gGame::StateUpdate(){
             //con << ePlayerNetID::Ranking();
 
             se_PauseGameTimer(false, eTIMER_PAUSE_GAME);
-            sg_SoundPause( false, false );
             se_SyncGameTimer();
             sr_con.fullscreen=false;
             sr_con.autoDisplayAtNewline=false;
