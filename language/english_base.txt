@@ -1043,6 +1043,10 @@ color_deathzone_red_help    Default: 15, red portion of the zone's color
 color_deathzone_blue_help   Default: 0, blue portion of the zone's color
 color_deathzone_green_help  Default: 0, green portion of the zone's color
 
+color_teleportzone_red_help    Default: 0, red portion of the zone's color
+color_teleportzone_green_help  Default: 15, green portion of the zone's color
+color_teleportzone_blue_help   Default: 0, blue portion of the zone's color
+
 set_zones_flash             All zones on the field will start flashing with random colors. WARNING: This will cause eye problems. Be carefull!
 random_dz_colors            All deathzones on field will start flashing with random colors. WARNING: This will cause eye problems. Be carefull!
 

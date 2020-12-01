@@ -6716,12 +6716,21 @@ void gKOHZoneHack::OnVanish( void )
 //!
 // *******************************************************************************
 
+static int sg_ColorTeleZoneRed = 0;
+static tSettingItem<int> sg_ColorTeleZoneRedCONF("COLOR_TELEPORTZONE_RED", sg_ColorTeleZoneRed);
+
+static int sg_ColorTeleZoneGreen = 15;
+static tSettingItem<int> sg_ColorTeleZoneGreenCONF("COLOR_TELEPORTZONE_GREEN", sg_ColorTeleZoneGreen);
+
+static int sg_ColorTeleZoneBlue = 0;
+static tSettingItem<int> sg_ColorTeleZoneBlueCONF("COLOR_TELEPORTZONE_BLUE", sg_ColorTeleZoneBlue);
+
 gTeleportZoneHack::gTeleportZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCreation, bool delayCreation)
 :gZone( grid, pos, dynamicCreation, delayCreation)
 {
-    color_.r = 0.0f;
-    color_.g = 1.0f;
-    color_.b = 0.0f;
+    color_.r = sg_ColorTeleZoneRed / 15.0f;//0.0f
+    color_.g = sg_ColorTeleZoneGreen / 15.0f;//1.0f
+    color_.b = sg_ColorTeleZoneBlue / 15.0f;//0.0f
 
     if (!delayCreation)
         grid->AddGameObjectInteresting(this);
@@ -8735,27 +8744,42 @@ static void sg_CreateZone_conf(std::istream &s)
     eCoord ndir;
     REAL reloc=0;
     if(zoneTypeStr == "teleport"){
+        int prevPos = pos;
+        
         tString  zoneJumpXStr;
         tString  zoneJumpYStr;
         zoneJumpXStr = params.ExtractNonBlankSubString(pos);
+        char chint = zoneJumpXStr.ToLower()[0];
+        bool isInter = (chint == 't' || chint == 'f');
         zoneJumpYStr = params.ExtractNonBlankSubString(pos);
-        zoneJump = eCoord(atof(zoneJumpXStr)*sizeMultiplier,atof(zoneJumpYStr)*sizeMultiplier);
+        if(isInter)
+            zoneJump = eCoord(0.f,0.f);
+        else
+            zoneJump = eCoord(atof(zoneJumpXStr)*sizeMultiplier,atof(zoneJumpYStr)*sizeMultiplier);
         tString zoneRelAbsStr = params.ExtractNonBlankSubString(pos);
-        if (zoneRelAbsStr=="") zoneRelAbsStr="rel";
+        if (isInter || zoneRelAbsStr=="") zoneRelAbsStr="rel";
         if (zoneRelAbsStr=="rel") relJump=1;
         else if (zoneRelAbsStr=="cycle") relJump=2;
         else relJump = 0;
+        
+        if(isInter) pos = prevPos;
 
+        prevPos = pos;
         const tString xdir_str = params.ExtractNonBlankSubString(pos);
+        chint = xdir_str.ToLower()[0];
+        isInter = (chint == 't' || chint == 'f');
+        
         REAL xdir = atof(xdir_str);
         const tString ydir_str = params.ExtractNonBlankSubString(pos);
         REAL ydir = atof(ydir_str);
-        if (xdir_str == "") xdir = 0.0;
-        if (ydir_str == "") ydir = 0.0;
+        if (isInter || xdir_str == "") xdir = 0.0;
+        if (isInter || ydir_str == "") ydir = 0.0;
         ndir = eCoord(xdir*sizeMultiplier,ydir*sizeMultiplier);
         const tString reloc_str = params.ExtractNonBlankSubString(pos);
         reloc = atof(reloc_str);
-        if (reloc_str == "") reloc = 1.0;
+        if (isInter || reloc_str == "") reloc = 1.0;
+        
+        if(isInter) pos = prevPos;
     }
     const tString zoneInteractive = params.ExtractNonBlankSubString(pos);
     const tString zoneRedStr      = params.ExtractNonBlankSubString(pos);
@@ -8997,7 +9021,7 @@ static void sg_CreateZone_conf(std::istream &s)
             "SPAWN_ZONE <win|death|ball|target|blast|object|koh> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> <penetrate> \n"
             "SPAWN_ZONE <acceleration|speed> <speed> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> <penetrate> \n"
             "SPAWN_ZONE <rubber|rubberadjust> <x> <y> <size> <growth> <xdir> <ydir> <rubber> <interactive> <r> <g> <b> <target_size> <penetrate> \n"
-            "SPAWN_ZONE teleport <x> <y> <size> <growth> <xdir> <ydir> <xjump> <yjump> <rel|abs> <interactive> <r> <g> <b> <target_size> <penetrate> \n"
+            "SPAWN_ZONE teleport <x> <y> <size> <growth> <xdir> <ydir> [<xjump> <yjump> <rel|abs> [<xdir> <ydir> <reloc>]] <interactive=true|false> <r> <g> <b> <target_size> <penetrate> \n"
             "SPAWN_ZONE <fortress|flag|deathTeam|ballTeam> <team> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> <penetrate> \n"
             "SPAWN_ZONE sumo <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> <penetrate> \n"
             "SPAWN_ZONE zombie <player> <x> <y> <size> <growth> <xdir> <ydir> <interactive> <r> <g> <b> <target_size> <penetrate> \n"
