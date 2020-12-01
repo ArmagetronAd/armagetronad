@@ -899,7 +899,7 @@ extern bool sg_axesIndicator;
 
 void init_game_grid(eGrid *grid, gParser *aParser){
     se_ResetGameTimer();
-    se_PauseGameTimer(true);
+    se_PauseGameTimer(true, eTIMER_PAUSE_GAME);
 
 #ifndef DEDICATED
     if (sr_glOut){
@@ -1314,7 +1314,7 @@ void init_game_camera(eGrid *grid){
     cCockpit::BeforeRoundProcess();
 #else
     se_ResetGameTimer( -PREPARE_TIME - sg_extraRoundTime );
-    se_PauseGameTimer(false);
+    se_PauseGameTimer(false, eTIMER_PAUSE_GAME);
 #endif
     /*
       for(int p=se_PlayerNetIDs.Len()-1;p>=0;p--){
@@ -2664,7 +2664,7 @@ static void ingame_menu()
     {
         se_ChatState( ePlayerNetID::ChatFlags_Menu, true );
         if (sn_GetNetState()==nSTANDALONE)
-            se_PauseGameTimer(true);
+            se_PauseGameTimer(true, eTIMER_PAUSE_MENU);
         MainMenu(true);
     }
     catch ( ... )
@@ -2681,7 +2681,7 @@ static void ingame_menu()
 static void ingame_menu_cleanup()
 {
     if (sn_GetNetState()==nSTANDALONE)
-        se_PauseGameTimer(false);
+        se_PauseGameTimer(false, eTIMER_PAUSE_MENU);
     se_ChatState(ePlayerNetID::ChatFlags_Menu, false);
     if ((bool(sg_currentGame) && sg_currentGame->GetState()!=GS_PLAY))
         //      || se_PlayerNetIDs.Len()==0)
@@ -3301,7 +3301,8 @@ void gGame::StateUpdate(){
             }
             //con << ePlayerNetID::Ranking();
 
-            se_PauseGameTimer(false);
+            se_PauseGameTimer(false, eTIMER_PAUSE_GAME);
+            sg_SoundPause( false, false );
             se_SyncGameTimer();
             sr_con.fullscreen=false;
             sr_con.autoDisplayAtNewline=false;
@@ -4383,7 +4384,7 @@ static bool pausegame_func(REAL x){
 
     if (x>0){
         paused=!paused;
-        se_PauseGameTimer(paused);
+        se_PauseGameTimer(paused, eTIMER_PAUSE_BUTTON);
     }
 
     return true;
@@ -4485,7 +4486,7 @@ bool gGame::GameLoop(bool input){
         time=gtime;
 
         if (sn_GetNetState()==nSTANDALONE && sg_IngameMenu)
-            se_PauseGameTimer(true);
+            se_PauseGameTimer(true, eTIMER_PAUSE_MENU);
 
         static int lastcountdown=0;
         int cd=int(floor(-time))+1;
@@ -4690,7 +4691,7 @@ bool gGame::GameLoop(bool input){
 
             // wait for chatting players
             if ( sn_GetNetState()==nSERVER && gtime < sg_lastChatBreakTime + 1 )
-                se_PauseGameTimer( gtime < sg_lastChatBreakTime && ePlayerNetID::WaitToLeaveChat() );
+                se_PauseGameTimer( gtime < sg_lastChatBreakTime && ePlayerNetID::WaitToLeaveChat(), eTIMER_PAUSE_GAME );
         }
 
         // send game object updates
@@ -5000,7 +5001,7 @@ void Activate(bool act){
     {
         if (sn_GetNetState()==nSTANDALONE)
         {
-            se_PauseGameTimer(!act);
+            se_PauseGameTimer(!act, eTIMER_PAUSE_INACTIVE);
         }
 
         se_ChatState( ePlayerNetID::ChatFlags_Away, !act);
@@ -5030,7 +5031,7 @@ void sg_ClientFullscreenMessage( tOutput const & title, tOutput const & message,
     bool paused = se_mainGameTimer && se_mainGameTimer->speed < .0001;
     if( sn_GetNetState() != nCLIENT )
     {
-        se_PauseGameTimer(true);
+        se_PauseGameTimer(true, eTIMER_PAUSE_GAME);
     }
 
     // put players into idle mode
@@ -5054,7 +5055,7 @@ void sg_ClientFullscreenMessage( tOutput const & title, tOutput const & message,
     // continue the game
     if( sn_GetNetState() != nCLIENT )
     {
-        se_PauseGameTimer(paused);
+        se_PauseGameTimer(paused, eTIMER_PAUSE_GAME);
     }
 
     // get players out of idle mode again
@@ -5099,7 +5100,7 @@ void sg_FullscreenMessageWait()
     {
         // stop the game
         bool paused = se_mainGameTimer && se_mainGameTimer->speed < .0001;
-        se_PauseGameTimer(true);
+        se_PauseGameTimer(true, eTIMER_PAUSE_GAME);
         gGame::NetSyncIdle();
 
         REAL waitTo = tSysTimeFloat() + sg_fullscreenMessageTimeout;
@@ -5112,8 +5113,8 @@ void sg_FullscreenMessageWait()
             sg_FullscreenIdle();
             gameloop_idle();
             if ( se_GameTime() > sg_lastChatBreakTime )
-                se_PauseGameTimer(true);
-
+                se_PauseGameTimer(true, eTIMER_PAUSE_GAME);
+            
             // give the clients a second to enter chat state
             if ( tSysTimeFloat() > waitToMin )
             {
@@ -5128,7 +5129,7 @@ void sg_FullscreenMessageWait()
         }
 
         // continue the game
-        se_PauseGameTimer(paused);
+        se_PauseGameTimer(paused, eTIMER_PAUSE_GAME);
         gGame::NetSyncIdle();
     }
 }
