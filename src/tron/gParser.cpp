@@ -1061,7 +1061,7 @@ gParser::parseZone(eGrid * grid, xmlNodePtr cur, const xmlChar * keyword)
 
             zone->RequestSync();
 
-            sg_createzoneWriter << zoneEffect << zone->GOID() << zoneNamestr << zone->GetPosition().x << zone->GetPosition().y << zone->GetVelocity().x << zone->GetVelocity().y;
+            sg_createzoneWriter << zoneEffect << zone->GetID() << zoneNamestr << zone->GetPosition().x << zone->GetPosition().y << zone->GetVelocity().x << zone->GetVelocity().y;
             sg_createzoneWriter.write();
         }
     }
