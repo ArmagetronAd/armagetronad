@@ -8639,7 +8639,7 @@ static tConfItem<bool> styctcompat_se_spawnZoneConf("STYCT_COMPATIBILITY_SPAWN_Z
 static void sg_CreateZone_conf(std::istream &s)
 {
     eGrid *grid = eGrid::CurrentGrid();
-    if(!grid)
+    if(!grid || grid->GameObjects().Len() == 0)
     {
         con << "Must be called while a grid exists!\n";
         return;

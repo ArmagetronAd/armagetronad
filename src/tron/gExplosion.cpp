@@ -503,7 +503,8 @@ extern REAL se_GameTime();
 static void sg_SetExplosion(std::istream &s)
 {
         eGrid *grid = eGrid::CurrentGrid();
-        if(!grid) {
+        if(!grid || grid->GameObjects().Len() == 0)
+        {
                 con << "Must be called while a grid exists!\n";
                 return;
         }

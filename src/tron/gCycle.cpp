@@ -7217,7 +7217,8 @@ static tConfItem<bool> sg_RespawnPlayerStrictConf("RESPAWN_STRICT",sg_RespawnPla
 static void sg_RespawnPlayer(std::istream &s)
 {
         eGrid *grid = eGrid::CurrentGrid();
-        if(!grid) {
+        if(!grid || grid->GameObjects().Len() == 0)
+        {
                 con << "Must be called while a grid exists!\n";
                 return;
         }
@@ -7297,7 +7298,8 @@ static tConfItemFunc sg_Respawn_conf("RESPAWN",&sg_RespawnPlayer);
 static void sg_TeleportPlayer(std::istream &s)
 {
 	eGrid *grid = eGrid::CurrentGrid();
-	if(!grid) {
+	if(!grid || grid->GameObjects().Len() == 0)
+	{
 		con << "Must be called while a grid exists!\n";
 		return;
 	}
