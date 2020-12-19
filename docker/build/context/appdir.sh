@@ -13,7 +13,16 @@ APPDIR=appdir PACKAGE=${PACKAGE_NAME}${SUFFIX} portable/build || exit $?
 
 # validate
 if appstreamcli --help > /dev/null; then
-    appstreamcli validate-tree appdir || exit $?
+    if test "`appstreamcli --version`" != "AppStream CLI tool version: 0.9.4"; then
+        appstreamcli validate-tree appdir || exit $?
+    else
+        # old version does not support content_rating, transform to something compliant for validation
+        # this case can be removed once we bump the base build system to Ubuntu 20.04 or 18.04
+        cp -a appdir appdir_validate || exit $?
+        find appdir_validate -name *.appdata.xml -exec sed -i \{\} -e s/content_rating/x-content_rating/ \;
+        appstreamcli validate-tree appdir_validate || exit $?
+        rm -rf appdir_validate
+    fi
 fi
 
 # test with and without system libraries
