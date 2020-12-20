@@ -29,6 +29,8 @@ rm -f upload/*.md upload/*.html
 
 if test ${STAGING} == true; then
     echo "Just staging, no upload to Launchpad"
+elif test -z "${LP_SERIES}"; then
+    echo "No LP upload configured"
 else
     EXIT=0
     for f in upload/*${PACKAGE_VERSION}* upload/*.txt; do

@@ -32,13 +32,13 @@ case ${SERIES}+${SUFFIX}+@version@ in
 	;;
     CURRENT+beta+*)
 	SF_DIR="beta"
-	LP_SERIES="0.2.8-snapshots"
+	LP_SERIES=""
 	ZI_SERIES="beta"
 	STEAM_BRANCH="beta"
 	;;
     CURRENT+*)
 	SF_DIR="snapshots"
-	LP_SERIES="0.2.8-snapshots"
+	LP_SERIES=""
 	ZI_SERIES="alpha"
 	STEAM_BRANCH="alpha"
 	;;
@@ -57,20 +57,20 @@ case ${SERIES}+${SUFFIX}+@version@ in
 	;;
     LTS_028*+alpha+*)
 	SF_DIR="alpha"
-	LP_SERIES="0.2.8-snapshots"
+	LP_SERIES=""
 	ZI_SERIES="alpha"
 	STEAM_BRANCH=""
 	;;
     LTS_028*+*)
 	SF_DIR="beta"
-	LP_SERIES="0.2.8-snapshots"
+	LP_SERIES=""
 	ZI_SERIES="beta"
 	STEAM_BRANCH=""
 	;;
 
     *+experimental|EXPERIMENTAL+*)
 	SF_DIR="snapshots"
-	LP_SERIES="trunk-snapshots"
+	LP_SERIES=""
 	ZI_SERIES="experimental"
 	STEAM_BRANCH="experimental"
 	;;
