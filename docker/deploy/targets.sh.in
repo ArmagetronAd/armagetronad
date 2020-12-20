@@ -17,9 +17,12 @@ fi
 test -z ${SERIES} && exit 1
 test -z ${SUFFIX} && exit 1
 
+unix_date=`git log -1 --format=%at`
+YEAR=`date --date=@${unix_date} +%Y`
+
 case ${SERIES}+${SUFFIX}+@version@ in
     CURRENT+armagetronad+*_rc_*)
-	SF_DIR="rc"
+	SF_DIR="rc/${YEAR}"
 	LP_SERIES="0.2.9"
 	ZI_SERIES="rc"
 	STEAM_BRANCH="staging"
@@ -31,26 +34,26 @@ case ${SERIES}+${SUFFIX}+@version@ in
 	STEAM_BRANCH="staging"
 	;;
     CURRENT+beta+*)
-	SF_DIR="beta"
+	SF_DIR="beta/${YEAR}"
 	LP_SERIES="0.2.9-snapshots"
 	ZI_SERIES="beta"
 	STEAM_BRANCH="beta"
 	;;
     CURRENT+alpha+*)
-	SF_DIR="alpha"
-	LP_SERIES="0.2.9-snapshots"
+	SF_DIR="alpha/${YEAR}"
+	LP_SERIES=""
 	ZI_SERIES="alpha"
 	STEAM_BRANCH="alpha"
 	;;
     CURRENT+*)
-	SF_DIR="alpha"
-	LP_SERIES="0.2.9-snapshots"
+	SF_DIR="alpha/${YEAR}"
+	LP_SERIES=""
 	ZI_SERIES="alpha"
 	STEAM_BRANCH="alpha"
 	;;
 
     LTS_028*+armagetronad+*_rc_*)
-	SF_DIR="rc"
+	SF_DIR="rc/${YEAR}"
 	LP_SERIES="0.2.8"
 	ZI_SERIES="rc"
 	STEAM_BRANCH=""
@@ -62,27 +65,27 @@ case ${SERIES}+${SUFFIX}+@version@ in
 	STEAM_BRANCH=""
 	;;
     LTS_028*+alpha+*)
-	SF_DIR="alpha"
-	LP_SERIES="0.2.8-snapshots"
+	SF_DIR="alpha/${YEAR}"
+	LP_SERIES=""
 	ZI_SERIES="alpha"
 	STEAM_BRANCH=""
 	;;
     LTS_028*+*)
-	SF_DIR="beta"
+	SF_DIR="beta/${YEAR}"
 	LP_SERIES="0.2.8-snapshots"
 	ZI_SERIES="beta"
 	STEAM_BRANCH=""
 	;;
 
     *+experimental|EXPERIMENTAL+*)
-	SF_DIR="snapshots"
-	LP_SERIES="trunk-snapshots"
+	SF_DIR="snapshots/${YEAR}"
+	LP_SERIES=""
 	ZI_SERIES="experimental"
 	STEAM_BRANCH="experimental"
 	;;
     
     *)
-	SF_DIR="wip"
+	SF_DIR="wip/${YEAR}"
 	LP_SERIES="hacks"
 	ZI_SERIES="wip"
 	STEAM_BRANCH="experimental"

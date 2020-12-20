@@ -26,8 +26,8 @@ rm -f $1
 ARCH=${ARCH} appimagetool-${ARCH}.AppImage --appimage-extract-and-run appdir $1 || exit $?
 
 # test that the package runs with and without system libraries
-./$1 --appimage-extract --version || exit $?
-LD_LIBRARY_PATH="" LD_DEBUG_APP=true ./$1 --appimage-extract --version || exit $?
+./$1 --appimage-extract-and-run --version || exit $?
+LD_LIBRARY_PATH="" LD_DEBUG_APP=true ./$1 --appimage-extract-and-run --version || exit $?
 
 # comment out to inspect result for debug purposes
 rm -rf appdir
