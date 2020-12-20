@@ -32,7 +32,7 @@ case ${SERIES}+${SUFFIX}+@version@ in
 	;;
     CURRENT+beta+*)
 	SF_DIR="beta"
-	LP_SERIES=""
+	LP_SERIES="0.2.8-snapshots"
 	ZI_SERIES="beta"
 	STEAM_BRANCH="beta"
 	;;
@@ -63,7 +63,7 @@ case ${SERIES}+${SUFFIX}+@version@ in
 	;;
     LTS_028*+*)
 	SF_DIR="beta"
-	LP_SERIES=""
+	LP_SERIES="0.2.8-snapshots"
 	ZI_SERIES="beta"
 	STEAM_BRANCH=""
 	;;
