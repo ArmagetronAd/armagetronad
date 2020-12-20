@@ -79,8 +79,8 @@ case ${SERIES}+${SUFFIX}+@version@ in
 	;;
     
     *)
-	SF_DIR="wip"
-	LP_SERIES="hacks/${YEAR}"
+	SF_DIR="wip/${YEAR}"
+	LP_SERIES="hacks"
 	ZI_SERIES="wip"
 	STEAM_BRANCH="experimental"
 	;;
