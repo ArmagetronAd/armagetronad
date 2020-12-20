@@ -12245,7 +12245,6 @@ static tAccessLevelSetter sg_SuspendChatters_conflevel( sg_SuspendChatters_conf,
 
 static void sg_ListChatters(std::istream &s)
 {
-    ePlayerNetID * receiver=0;
     tColoredString send;
 
     if (se_PlayerNetIDs.Len() > 0)
@@ -12258,8 +12257,7 @@ static void sg_ListChatters(std::istream &s)
                 send << p->GetColoredName() << tColoredString::ColorString( 1,1,.5 ) << ", ";
             }
         }
-        send << "\n";
-        sn_ConsoleOut( send, receiver->Owner() );
+        con << send << "\n";
     }
 }
 

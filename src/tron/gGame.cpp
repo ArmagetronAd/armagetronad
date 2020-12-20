@@ -6217,8 +6217,6 @@ static tConfItemFunc sg_CustomCenterPlayerMessageConf("CUSTOM_CENTER_PLAYER_MESS
 
 static void sg_getCurrentMap(std::istream &s)
 {
-    ePlayerNetID *receiver = 0;
-
     if (mapfile != "")
     {
         //  send the ladderlog string
@@ -6226,9 +6224,7 @@ static void sg_getCurrentMap(std::istream &s)
         sg_currentMapWriter.write();
 
         //  send the message to the caller
-        tString message;
-        message << "Currently the loaded map is: " << mapfile << "\n";
-        sn_ConsoleOut(message, receiver->Owner());
+        con << "Currently the loaded map is: " << mapfile << "\n";
     }
 }
 static tConfItemFunc sg_getCurrentMapConf("GET_CURRENT_MAP", &sg_getCurrentMap);
