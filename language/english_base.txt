@@ -2121,7 +2121,6 @@ welcome_message_vendor		GL Vendor   :
 welcome_message_renderer	GL Renderer : 
 welcome_message_version		GL Version  : 
 welcome_message_finish		\nHave fun!\n
-#\n\nThis Game is supported from KGN (Krawall Gaming Network, www.krawall.de).
 
 #********************************************
 #********************************************
