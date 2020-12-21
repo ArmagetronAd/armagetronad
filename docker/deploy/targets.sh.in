@@ -17,8 +17,12 @@ fi
 test -z ${SERIES} && exit 1
 test -z ${SUFFIX} && exit 1
 
-unix_date=`git -C @top_srcdir@ log -1 --format=%at` || exit $?
-YEAR=`date --date=@${unix_date} +%Y` || exit $?
+if test -r @top_srcdir@/timestamp.tag; then
+	YEAR=`date -r @top_srcdir@/timestamp.tag +%Y` || exit $?
+else
+	unix_date=`git -C @top_srcdir@ log -1 --format=%at` || exit $?
+	YEAR=`date --date=@${unix_date} +%Y` || exit $?
+fi
 
 case ${SERIES}+${SUFFIX}+@version@ in
     CURRENT+armagetronad+*_rc_*)
