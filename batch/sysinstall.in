@@ -299,7 +299,9 @@ install_link ${BINDIR}/@prognamebase@-master-@version@ ${BINDIR}/@prognamebase@-
 # install desktop files
 if test @enable_desktop@ = yes; then
     DESKTOPSOURCE=@aa_datadir@/desktop
-    METADEST=${PREFIX}/share/metainfo
+    DESKTOPDESTDIR=${PREFIX}/share/applications
+    DESKTOPDEST=${DESKTOPDESTDIR}/org.armagetronad.@progname@.desktop
+    METADEST=${PREFIX}/share/appdata
 
     # rebrand icons and desktop file
     if test "$MODE" = "install"; then
@@ -310,7 +312,7 @@ if test @enable_desktop@ = yes; then
         fi
 
         for suffix in .desktop -handler.desktop; do
-            mv ${DESTDIR}${DESKTOPSOURCE}/armagetronad-armagetronad${suffix} ${DESTDIR}${DESKTOPSOURCE}/org.armagetronad.@progname@${suffix} || exit $?
+            mv ${DESTDIR}${DESKTOPSOURCE}/armagetronad-armagetronad${suffix} ${DESTDIR}${DESKTOPDESTDIR}/org.armagetronad.@progname@${suffix} || exit $?
         done
     fi
 
@@ -324,31 +326,31 @@ if test @enable_desktop@ = yes; then
         done
 
         # add standard menu entry
-        xdg-desktop-menu ${MODE} --novendor ${DESTDIR}${DESKTOPSOURCE}/org.armagetronad.@progname@.desktop || exit $?
+        xdg-desktop-menu ${MODE} --novendor ${DESTDIR}${DESKTOPDESTDIR}/org.armagetronad.@progname@.desktop || exit $?
 
         # add standard filetype and association for armagetronad:// links
         xdg-mime ${MODE} ${DESTDIR}${DESKTOPSOURCE}/armagetronad-link.xml || exit $?
-        xdg-desktop-menu ${MODE} --novendor ${DESTDIR}${DESKTOPSOURCE}/org.armagetronad.@progname@-handler.desktop || exit $?
+        xdg-desktop-menu ${MODE} --novendor ${DESTDIR}${DESKTOPDESTDIR}/org.armagetronad.@progname@-handler.desktop || exit $?
     else
         # use plain old shell commands to do pretty much the same as above
         if test "$MODE" = "install"; then
             # add appstream metadata
             mkdir_p ${DESTDIR}${METADEST}
             mv ${DESTDIR}${DESKTOPSOURCE}/armagetronad.appdata.xml ${DESTDIR}${METADEST}/@progname@.appdata.xml || exit $?
-
-            # install icons in canonical locations
-            for f in 16x16 32x32 48x48; do
-                icontarget=${DESTDIR}${PREFIX}/share/icons/hicolor/$f/apps
-                mkdir -p ${icontarget} || exit $?
-                install_link ${DESTDIR}${DESKTOPSOURCE}/icons/$f/@prognamebase@.png ${icontarget}/ || exit $?
-            done
         else
             for f in 16x16 32x32 48x48; do rm -f ${DESTDIR}${DESKTOPSOURCE}/icons/$f/@prognamebase@.png; done
             for suffix in .desktop -handler.desktop; do
-                rm -f ${DESTDIR}${DESKTOPSOURCE}/org.armagetronad.@progname@${suffix}
+                rm -f ${DESTDIR}${DESKTOPDESTDIR}/org.armagetronad.@progname@${suffix}
             done
             rm -f ${DESTDIR}${METADEST}/@progname@.appdata.xml
         fi
+
+        # install icons in canonical locations
+        for f in 16x16 32x32 48x48; do
+            icontarget=${PREFIX}/share/icons/hicolor/$f/apps
+            mkdir -p ${DESTDIR}${icontarget} || exit $?
+            install_link ${DESKTOPSOURCE}/icons/$f/@prognamebase@.png ${icontarget}/ || exit $?
+        done
     fi
 
     # add KDE icons and desktop link
