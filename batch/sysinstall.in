@@ -321,9 +321,9 @@ if test @enable_desktop@ = yes; then
 
     # install icons in canonical locations
     for f in 16x16 32x32 48x48; do
-        icontarget=${DESTDIR}${PREFIX}/share/icons/hicolor/$f/apps
-        mkdir -p ${icontarget} || exit $?
-        install_link ${DESTDIR}${DESKTOPSOURCE}/icons/$f/@prognamebase@.png ${icontarget}/ || exit $?
+        icontarget=${PREFIX}/share/icons/hicolor/$f/apps
+        mkdir -p ${DESTDIR}${icontarget} || exit $?
+        install_link ${DESKTOPSOURCE}/icons/$f/@prognamebase@.png ${icontarget}/ || exit $?
     done
 
     # add KDE icons and desktop link
