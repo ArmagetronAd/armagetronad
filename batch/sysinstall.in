@@ -301,7 +301,7 @@ if test @enable_desktop@ = yes; then
     DESKTOPSOURCE=@aa_datadir@/desktop
     DESKTOPDESTDIR=${PREFIX}/share/applications
     DESKTOPDEST=${DESKTOPDESTDIR}/org.armagetronad.@progname@.desktop
-    METADEST=${PREFIX}/share/metainfo
+    METADEST=${PREFIX}/share/appdata
 
     # rebrand icons and desktop file
     if test "$MODE" = "install"; then
