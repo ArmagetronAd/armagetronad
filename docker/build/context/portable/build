@@ -12,7 +12,7 @@ find ${APPDIR} -type l -name "*.desktop" -exec rm -f \{\} \;
 mkdir -p ${APPDIR}/usr/share/applications/
 cp ${APPDIR}/org.armagetronad.${PACKAGE}.desktop ${APPDIR}/usr/share/applications/ || exit $?
 
-# add appinfo
+# add appinfo (noncanonical place, usually it goes to prefix/share/appdata)
 mkdir -p ${APPDIR}/usr/share/metainfo || exit $?
 cp ${APPDIR}/usr/share/games/${PACKAGE}/desktop/armagetronad.appdata.xml ${APPDIR}/usr/share/metainfo/org.armagetronad.${PACKAGE}.appdata.xml || exit $?
 #sed -i -e 's,type="desktop-id">,type="desktop-id">../../../,' ${APPDIR}/usr/share/metainfo/org.armagetronad.${PACKAGE}.appdata.xml || exit $?

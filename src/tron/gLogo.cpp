@@ -35,14 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "uMenu.h"
 #include "tSysTime.h"
 
-/*
-#include "nConfig.h"
-static tString lala_logoTexture("Anonymous/original/textures/KGN_logo.png");
-static nSettingItem<tString> lalala_logoTexture("TEXTURE_LOGO", lala_logoTexture);
-rFileTexture sg_LogoTexture(rTextureGroups::TEX_FONT, lala_logoTexture, 0,0,1);
-*/
-
-static rFileTexture sg_LogoTexture(rTextureGroups::TEX_FONT, "textures/KGN_logo.png",0,0,1);
+// static rFileTexture sg_LogoTexture(rTextureGroups::TEX_FONT, "textures/KGN_logo.png",0,0,1);
 static rISurfaceTexture* sg_LogoMPTitle = NULL;
 
 static gLogo logo;
