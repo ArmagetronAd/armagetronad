@@ -7,6 +7,7 @@ SERIES=`cat CI_INFO | grep SERIES= | sed -e s/^SERIES=//` || exit $?
 CI_COMMIT_REF_PROTECTED=`cat CI_INFO | grep CI_COMMIT_REF_PROTECTED= | sed -e s/^CI_COMMIT_REF_PROTECTED=//` || exit $?
 CI_COMMIT_SHA=`cat CI_INFO | grep CI_COMMIT_SHA= | sed -e s/^CI_COMMIT_SHA=//` || exit $?
 CI_COMMIT_REF_NAME=`cat CI_INFO | grep CI_COMMIT_REF_NAME= | sed -e s/^CI_COMMIT_REF_NAME=//` || exit $?
+YEAR=`cat CI_INFO | grep CI_RELEASE_YEAR= | sed -e s/^CI_RELEASE_YEAR=//` || exit $?
 
 # if staging is true, hold back release
 if test "${STAGING}" != "false"; then
@@ -16,9 +17,6 @@ fi
 
 test -z ${SERIES} && exit 1
 test -z ${SUFFIX} && exit 1
-
-unix_date=`git log -1 --format=%at`
-YEAR=`date --date=@${unix_date} +%Y`
 
 case ${SERIES}+${SUFFIX}+@version@ in
     CURRENT+armagetronad+*_rc_*)
