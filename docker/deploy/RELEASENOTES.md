@@ -16,3 +16,5 @@ are to be expected.
 
 Security related: One fix for a remotely exploitable use after free was backported from 0.2.9 (#34) and one
 client crash exploitable by making you play back a specially prepared recording (#54) was fixed.
+
+0.2.8.3.6.1 fixes silly build system mistakes and adds ppa support for Ubuntu 21.04.
