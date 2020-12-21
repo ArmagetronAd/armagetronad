@@ -2187,7 +2187,6 @@ welcome_message_vendor       Поставщик GL  :
 welcome_message_renderer     Обработчик GL :
 welcome_message_version      Версия GL     :
 welcome_message_finish       \nНаслаждайтесь!\n
-#\n\nИгра поддерживается KGN (Krawall Gaming Network, www.krawall.de).
 
 #********************************************
 #********************************************
