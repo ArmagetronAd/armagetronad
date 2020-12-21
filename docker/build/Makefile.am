@@ -113,6 +113,7 @@ CI_INFO: ${srcdir}/../scripts/brand.sh
 	echo PROGRAM_TITLE=$${PROGRAM_TITLE} >> $@ && \
 	echo CI_COMMIT_REF_PROTECTED=$${CI_COMMIT_REF_PROTECTED} >> $@ && \
 	echo CI_COMMIT_SHA=$${CI_COMMIT_SHA} >> $@ && \
+	echo CI_RELEASE_YEAR=$${CI_RELEASE_YEAR} >> $@ && \
 	echo CI_COMMIT_REF_NAME=$${CI_COMMIT_REF_NAME} >> $@
 
 .PRECIOUS: CI_INFO
