@@ -299,7 +299,9 @@ install_link ${BINDIR}/@prognamebase@-master-@version@ ${BINDIR}/@prognamebase@-
 # install desktop files
 if test @enable_desktop@ = yes; then
     DESKTOPSOURCE=@aa_datadir@/desktop
-    METADEST=${PREFIX}/share/metainfo
+    DESKTOPDESTDIR=${PREFIX}/share/applications
+    DESKTOPDEST=${DESKTOPDESTDIR}/org.armagetronad.@progname@.desktop
+    METADEST=${PREFIX}/share/appdata
 
     # rebrand icons and desktop file
     if test "$MODE" = "install"; then
@@ -308,22 +310,24 @@ if test @enable_desktop@ = yes; then
         else
             for f in 16x16 32x32 48x48; do mv ${DESTDIR}${DESKTOPSOURCE}/icons/$f/armagetronad.png ${DESTDIR}${DESKTOPSOURCE}/icons/$f/@prognamebase@.png || exit $?; done
         fi
-        mv ${DESTDIR}${DESKTOPSOURCE}/armagetronad.desktop ${DESTDIR}${DESKTOPSOURCE}/org.armagetronad.@progname@.desktop || exit $?
+
+        mkdir -p ${DESTDIR}${DESKTOPDESTDIR}
+        mv ${DESTDIR}${DESKTOPSOURCE}/armagetronad.desktop ${DESTDIR}${DESKTOPDEST} || exit $?
 
         # add appstream metadata
         mkdir_p ${DESTDIR}${METADEST}
         mv ${DESTDIR}${DESKTOPSOURCE}/armagetronad.appdata.xml ${DESTDIR}${METADEST}/@progname@.appdata.xml || exit $?
     else
         for f in 16x16 32x32 48x48; do rm -f ${DESTDIR}${DESKTOPSOURCE}/icons/$f/@prognamebase@.png; done
-        rm -f ${DESTDIR}${DESKTOPSOURCE}/org.armagetronad.@progname@.desktop
+        rm -f ${DESTDIR}${DESKTOPDEST}
         rm -f ${DESTDIR}${METADEST}/@progname@.appdata.xml
     fi
 
     # install icons in canonical locations
     for f in 16x16 32x32 48x48; do
-        icontarget=${DESTDIR}${PREFIX}/share/icons/hicolor/$f/apps
-        mkdir -p ${icontarget} || exit $?
-        install_link ${DESTDIR}${DESKTOPSOURCE}/icons/$f/@prognamebase@.png ${icontarget}/ || exit $?
+        icontarget=${PREFIX}/share/icons/hicolor/$f/apps
+        mkdir -p ${DESTDIR}${icontarget} || exit $?
+        install_link ${DESKTOPSOURCE}/icons/$f/@prognamebase@.png ${icontarget}/ || exit $?
     done
 
     # add KDE icons and desktop link
