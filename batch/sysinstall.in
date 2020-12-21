@@ -311,6 +311,7 @@ if test @enable_desktop@ = yes; then
             for f in 16x16 32x32 48x48; do mv ${DESTDIR}${DESKTOPSOURCE}/icons/$f/armagetronad.png ${DESTDIR}${DESKTOPSOURCE}/icons/$f/@prognamebase@.png || exit $?; done
         fi
 
+        mkdir -p ${DESTDIR}${DESKTOPDESTDIR}
         for suffix in .desktop -handler.desktop; do
             mv ${DESTDIR}${DESKTOPSOURCE}/armagetronad-armagetronad${suffix} ${DESTDIR}${DESKTOPDESTDIR}/org.armagetronad.@progname@${suffix} || exit $?
         done
