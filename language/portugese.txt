@@ -707,6 +707,5 @@ game_menu_disconnect_help     Desconectar do servidor e voltar ao menu principal
 # Room for lost settings in translation files:
 
 #      leaque/highscore messages
-#\n\nThis Game is supported from KGN (Krawall Gaming Network, www.krawall.de).
 # The text item for a configuration
 	
