@@ -978,6 +978,12 @@ AC_SUBST_UNIVERSAL(relocatable)
 AC_USE_SUBST_UNIVERSAL
 AC_AA_REPLACEPATHS
 
+dnl turn progname into canonical progid with three components, keeping the parts already there
+progid=org.armagetronad.${progname}
+echo ${progname} | grep -q "\." && progid=org.${progname}
+echo ${progname} | grep -q "\..*\." && progid=${progname}
+AC_SUBST(progid)
+
 # all include directories added via -I so far should be system level inlcudes, divide them from those added by individual makefiles
 # CPPFLAGS="-I- $CPPFLAGS"
 
