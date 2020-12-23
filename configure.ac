@@ -46,6 +46,20 @@ dnl export version
 version=$VERSION
 AC_SUBST(version)
 
+# determine date, if possible from prerecorded git log
+date_raw_rfc=`grep "Date:" ${srcdir}/ChangeLog | head -n 1 | sed -e 's/Date: *//'`
+dnl echo date_raw_rfc=${date_raw_rfc}
+date_iso=`date -I` || exit $?
+dnl echo date_iso=${date_iso}
+date_rfc=`date -R` || exit $?
+dnl echo date_rfc=${date_rfc}
+test -z "${date_raw_rfc}" || date_iso=`date -I -d "${date_raw_rfc}"` || exit $?
+dnl echo date_iso=${date_iso}
+test -z "${date_raw_rfc}" || date_rfc=`date -R -d "${date_raw_rfc}"` || exit $?
+dnl echo date_rfc=${date_rfc}
+AC_SUBST(date_iso)
+AC_SUBST(date_rfc)
+
 AC_ARG_VAR(CXXFLAGS,Flags passed to the C++ compiler)
 AC_ARG_VAR(DEBUGLEVEL,[Debug level for developers, normal users can safely ignore it. Accepted values go from 0 to 5. See README-DEVELOPER for details.])
 AC_ARG_VAR(CODELEVEL,[Code checking strictness level for developers, normal users can safely ignore it. Accepted values go from 0 to 4. See README-DEVELOPER for details.])
