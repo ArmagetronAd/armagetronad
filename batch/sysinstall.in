@@ -109,25 +109,55 @@ function mkdir_p()
     test -d $1 || mkdir $1
 }
 
+# usage: relative_path absolute_directory absolute_file
+# returns the relative path to absolute_file from absolute_directory
+# absolute_directory must end in a /
+function relative_path()
+{
+    absolute_dir=$1
+    absolute_file=$2
+
+    up=""
+    begin_file=""
+    begin_dir=""
+    while test "${begin_dir}" = "${begin_file}" && ! test -z "${absolute_file}" && ! test -z "${absolute_dir}"; do
+        absolute_dir="`echo ${absolute_dir} | sed -e "s,^${begin_dir},,"`"
+        absolute_file="`echo ${absolute_file} | sed -e "s,^${begin_file},,"`"
+        begin_file="`echo ${absolute_file} | sed -e 's,/.*,,'`/"
+        begin_dir="`echo ${absolute_dir} | sed -e 's,/.*,,'`/"
+    done
+
+    up="`echo ${absolute_dir} | sed -e 's,[^/]*/,../,g'`"
+    echo ${up}${absolute_file}
+}
+
 # install or uninstall a symbolic link depending on mode
 # usage: install_link <source> <destination>
 # source and destination must not come with the ${DEST/ROOTDIR} prefix.
 function install_link()
 {
     # right now, the source should be here:
-    source_now=${DESTDIR}$1
-    # but it will be moved here before it is used:
-    source_final=${ROOTDIR}$1
+    source=${DESTDIR}$1
     # the link should go here:
     target=${DESTDIR}$2
 
-    # if we don't link, but copy, the copy source needs to be the current source position
-    echo "@LN_S@" | grep "cp" > /dev/null && source_final=${source_now}
-
     if test "$MODE" = "install"; then
-        if test -r ${source_now}; then
-            mkdir_p `dirname ${target}`
-            test -f ${target} || @LN_S@ -f ${source_final} ${target} || exit 1
+        if echo "${target}" | grep -q '/$'; then
+            target_dir="${target}"
+            target_file=.
+            mkdir_p "${target_dir}"
+        elif test -d "${target}"; then
+            target_dir="${target}"/
+            target_file=.
+        else
+            target_dir="`dirname "${target}"`"/
+            target_file="`basename "${target}"`"
+            mkdir_p "${target_dir}"
+        fi
+        if ! test -f ${target}; then
+            relative=`relative_path "${target_dir}" "${source}"`
+            echo cd "${target_dir}", @LN_S@ "${relative}" "${target_file}"
+            (cd "${target_dir}" && @LN_S@ "${relative}" "${target_file}")
         fi
     else
         if test -L ${target} ; then
@@ -323,12 +353,14 @@ if test @enable_desktop@ = yes; then
         rm -f ${DESTDIR}${METADEST}/@progid@.appdata.xml
     fi
 
+    # set -x
     # install icons in canonical locations
     for f in 16x16 32x32 48x48; do
         icontarget=${PREFIX}/share/icons/hicolor/$f/apps
         mkdir -p ${DESTDIR}${icontarget} || exit $?
         install_link ${DESKTOPSOURCE}/icons/$f/@prognamebase@.png ${icontarget}/ || exit $?
     done
+    # set +x
 
     # add KDE icons and desktop link
     if kde-config --install icon > /dev/null 2>&1; then
