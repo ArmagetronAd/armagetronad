@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>org.armagetronad.@progname@.desktop</id>
+  <id>@progid@.desktop</id>
   
   <name>@progtitle@</name>
   <summary>3D Lightcycle Game</summary>
@@ -20,7 +20,7 @@
     </p>
   </description>
   
-  <!-- <launchable type="desktop-id">org.armagetronad.@progname@.desktop</launchable> -->
+  <x-flatpak-launchable type="desktop-id">@progid@.desktop</x-flatpak-launchable>
   <screenshots>
     <screenshot type="default">
       <image>http://www.armagetronad.org/screenshots/ss_fort_1.png</image>
@@ -39,5 +39,9 @@
   <releases>
     <release version="@version@" date="@date_iso@"/>
   </releases>
+
+  <x-flatpak-content_rating type="oars-1.1">
+    <content_attribute id="social-chat">moderate</content_attribute>
+  </x-flatpak-content_rating>
 
 </component>

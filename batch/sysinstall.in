@@ -300,7 +300,7 @@ install_link ${BINDIR}/@prognamebase@-master-@version@ ${BINDIR}/@prognamebase@-
 if test @enable_desktop@ = yes; then
     DESKTOPSOURCE=@aa_datadir@/desktop
     DESKTOPDESTDIR=${PREFIX}/share/applications
-    DESKTOPDEST=${DESKTOPDESTDIR}/org.armagetronad.@progname@.desktop
+    DESKTOPDEST=${DESKTOPDESTDIR}/@progid@.desktop
     METADEST=${PREFIX}/share/appdata
 
     # rebrand icons and desktop file
@@ -316,11 +316,11 @@ if test @enable_desktop@ = yes; then
 
         # add appstream metadata
         mkdir_p ${DESTDIR}${METADEST}
-        mv ${DESTDIR}${DESKTOPSOURCE}/armagetronad.appdata.xml ${DESTDIR}${METADEST}/@progname@.appdata.xml || exit $?
+        mv ${DESTDIR}${DESKTOPSOURCE}/armagetronad.appdata.xml ${DESTDIR}${METADEST}/@progid@.appdata.xml || exit $?
     else
         for f in 16x16 32x32 48x48; do rm -f ${DESTDIR}${DESKTOPSOURCE}/icons/$f/@prognamebase@.png; done
         rm -f ${DESTDIR}${DESKTOPDEST}
-        rm -f ${DESTDIR}${METADEST}/@progname@.appdata.xml
+        rm -f ${DESTDIR}${METADEST}/@progid@.appdata.xml
     fi
 
     # install icons in canonical locations
@@ -337,7 +337,7 @@ if test @enable_desktop@ = yes; then
             echo "No permission to write to KDE icons directory."
         else
             echo "${INSTALLING} KDE icon in ${ICONSDEST}..."
-            install_link ${DESKTOPSOURCE}/icons/48x48/@prognamebase@.png ${ICONSDEST}/@progname@.png
+            install_link ${DESKTOPSOURCE}/icons/48x48/@prognamebase@.png ${ICONSDEST}/@progid@.png
         fi
 
         DESKTOPDEST=`kde_get_write_path apps ${DESTDIR}`
@@ -345,7 +345,7 @@ if test @enable_desktop@ = yes; then
             echo "No permission to write to KDE application menu directory."
         else
             echo "${INSTALLING} KDE start menu entry in ${DESKTOPDEST}..."
-            install_link ${DESKTOPSOURCE}/@prognamebase@.desktop ${DESKTOPDEST}/@progname@.desktop
+            install_link ${DESKTOPSOURCE}/@prognamebase@.desktop ${DESKTOPDEST}/@progid@.desktop
         fi
     fi
 
