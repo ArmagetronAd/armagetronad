@@ -240,7 +240,11 @@ static tString st_WwwDir(expand_home_c(WWWROOTDIR));     // directory for dynami
 static tString st_ResourceDir(expand_home_c(RESOURCE_DIR));
 
 #ifndef AUTORESOURCE_DIR
+#ifdef USE_XDG
+#define AUTORESOURCE_DIR "${XDG_CACHE_HOME}/" PROGDIR "/resource"
+#else
 #define AUTORESOURCE_DIR ""
+#endif
 #endif
 static tString st_AutoResourceDir(expand_home_c(AUTORESOURCE_DIR));
 
@@ -499,6 +503,12 @@ char *eh_getdir(const char *da, size_t *len) {
                 {
                     char const * xdg_data = getenv("XDG_DATA_HOME");
                     tString data(xdg_data ? xdg_data : tString(pw->pw_dir) + "/.local/share");
+                    ret = strdup( data );
+                }
+                else if (!strcmp(type, "XDG_CACHE_HOME"))
+                {
+                    char const * xdg_cache = getenv("XDG_CACHE_HOME");
+                    tString data(xdg_cache ? xdg_cache : tString(pw->pw_dir) + "/.cache");
                     ret = strdup( data );
                 }
 
