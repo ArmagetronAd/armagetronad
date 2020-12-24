@@ -19,7 +19,7 @@ if appstreamcli --help > /dev/null; then
         # old version does not support content_rating, transform to something compliant for validation
         # this case can be removed once we bump the base build system to Ubuntu 20.04 or 18.04
         cp -a appdir appdir_validate || exit $?
-        find appdir_validate -name *.appdata.xml -exec sed -i \{\} -e s/content_rating/x-content_rating/ \;
+        find appdir_validate -name *.appdata.xml -exec sed -i \{\} -e s/content_rating/x-content_rating/ -e s/launchable/x-launchable/g \;
         appstreamcli validate-tree appdir_validate || exit $?
         rm -rf appdir_validate
     fi
