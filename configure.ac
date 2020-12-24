@@ -753,13 +753,9 @@ dnl AC_MSG_WARN([C++ standard library not found. You can ignore this warning on 
 dnl AC_CHECK_LIB(z, gzread,,
 dnl AC_MSG_ERROR([You need libz to compile ${progtitle}.]))
 
-AC_MSG_CHECKING(whether libpng is installed)
-if PNGLIBS=`libpng-config --libs`; then
-    AC_MSG_RESULT(yes)
-fi
-
-CPPFLAGS="$CPPFLAGS `libpng-config --cflags`"
-LIBS="$LIBS $PNGLIBS"
+PKG_CHECK_MODULES(LIBPNG, [libpng])
+CXXFLAGS="${CXXFLAGS} ${LIBPNG_CFLAGS}"
+LIBS="${LIBS} ${LIBPNG_LIBS}"
 
 AC_CHECK_FUNC(png_sig_cmp,
 ,
