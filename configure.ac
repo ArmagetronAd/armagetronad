@@ -56,6 +56,21 @@ AC_SUBST(version)
 AC_ARG_VAR(SDL_CONFIG,[Configuration script of SDL to use, defaults to sdl-config])
 AC_ARG_VAR(SDL2_CONFIG,[Configuration script of SDL to use, defaults to sdl2-config])
 AC_ARG_VAR(FREETYPE_CONFIG,[Configuration script of freetype to use, defaults to freetype-config])
+
+# determine date, if possible from prerecorded git log
+date_raw_rfc=`grep "Date:" ${srcdir}/ChangeLog | head -n 1 | sed -e 's/Date: *//'`
+dnl echo date_raw_rfc=${date_raw_rfc}
+date_iso=`date -I` || exit $?
+dnl echo date_iso=${date_iso}
+date_rfc=`date -R` || exit $?
+dnl echo date_rfc=${date_rfc}
+test -z "${date_raw_rfc}" || date_iso=`date -I -d "${date_raw_rfc}"` || exit $?
+dnl echo date_iso=${date_iso}
+test -z "${date_raw_rfc}" || date_rfc=`date -R -d "${date_raw_rfc}"` || exit $?
+dnl echo date_rfc=${date_rfc}
+AC_SUBST(date_iso)
+AC_SUBST(date_rfc)
+
 AC_ARG_VAR(CXXFLAGS,Flags passed to the C++ compiler)
 AC_ARG_VAR(DEBUGLEVEL,[Debug level for developers, normal users can safely ignore it. Accepted values go from 0 to 5. See README-DEVELOPER for details.])
 AC_ARG_VAR(CODELEVEL,[Code checking strictness level for developers, normal users can safely ignore it. Accepted values go from 0 to 4. See README-DEVELOPER for details.])
@@ -1126,13 +1141,9 @@ dnl *************************************************
 dnl         libpng
 dnl *************************************************
 
-AC_MSG_CHECKING(whether libpng is installed)
-if PNGLIBS=`libpng-config --libs`; then
-    AC_MSG_RESULT(yes)
-fi
-
-CPPFLAGS="$CPPFLAGS `libpng-config --cflags`"
-LIBS="$LIBS $PNGLIBS"
+PKG_CHECK_MODULES(LIBPNG, [libpng])
+CXXFLAGS="${CXXFLAGS} ${LIBPNG_CFLAGS}"
+LIBS="${LIBS} ${LIBPNG_LIBS}"
 
 AC_CHECK_FUNC(png_sig_cmp,
 ,
@@ -1463,6 +1474,12 @@ AC_SUBST_UNIVERSAL(relocatable)
 
 AC_USE_SUBST_UNIVERSAL
 AC_AA_REPLACEPATHS
+
+dnl turn progname into canonical progid with three components, keeping the parts already there
+progid=org.armagetronad.${progname}
+echo ${progname} | grep -q "\." && progid=org.${progname}
+echo ${progname} | grep -q "\..*\." && progid=${progname}
+AC_SUBST(progid)
 
 # all include directories added via -I so far should be system level inlcudes, divide them from those added by individual makefiles
 # CPPFLAGS="-I- $CPPFLAGS"
