@@ -18,8 +18,9 @@ cp ${APPDIR}/usr/share/games/${PACKAGE}/desktop/armagetronad.appdata.xml ${APPDI
 #sed -i -e 's,type="desktop-id">,type="desktop-id">../../../,' ${APPDIR}/usr/share/metainfo/org.armagetronad.${PACKAGE}.appdata.xml || exit $?
 
 # hack Icon
+ICON_NAME=`grep 'Icon=' ${APPDIR}/org.armagetronad.${PACKAGE}.desktop | sed -e 's,Icon=,,'`
 for f in $(find ${APPDIR} -type d -name "desktop"); do
-  cp $f/icons/48x48/*.png ${APPDIR}/${PACKAGE}.png
+  cp $f/icons/48x48/*.png ${APPDIR}/${ICON_NAME}.png
 done
 
 # correct absolute symlinks
