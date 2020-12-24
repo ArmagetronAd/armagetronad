@@ -358,7 +358,7 @@ if test @enable_desktop@ = yes; then
     for f in 16x16 32x32 48x48; do
         icontarget=${PREFIX}/share/icons/hicolor/$f/apps
         mkdir -p ${DESTDIR}${icontarget} || exit $?
-        install_link ${DESKTOPSOURCE}/icons/$f/@prognamebase@.png ${icontarget}/ || exit $?
+        install_link ${DESKTOPSOURCE}/icons/$f/@prognamebase@.png ${icontarget}/@progid@.png || exit $?
     done
     # set +x
 
