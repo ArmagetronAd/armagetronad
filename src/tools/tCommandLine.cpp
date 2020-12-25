@@ -103,7 +103,7 @@ bool tCommandLineData::Analyse(int argc,char **argv)
 
         if ( name_.Len() <= 3 )
         {
-            name_ = "Armagetron";
+            name_ = PROGNAME;
         }
     }
 
