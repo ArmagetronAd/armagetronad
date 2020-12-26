@@ -212,6 +212,15 @@ fi
 
 # **********************************************************************
 
+#  Flatpak definition repository
+if test ${STAGING} == true; then
+	FP_GIT=https://gitlab.com/armagetronad/org-armagetronad-ArmagetronAdvanced.git
+else
+	FP_GIT=git@gitlab.com:armagetronad/org-armagetronad-ArmagetronAdvanced.git
+fi
+
+# **********************************************************************
+
 # itch.io release stream follows steam
 # required secret: secrets/butler_creds: the API key stored by 'butler login'
 ITCH_PROJECT=armagetronad/armagetronad
