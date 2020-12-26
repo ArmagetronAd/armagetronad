@@ -81,12 +81,25 @@ case ${SERIES}+${SUFFIX}+@version@ in
 	ZI_SERIES="experimental"
 	STEAM_BRANCH="experimental"
 	;;
-    
-    *)
+
+    HACK*)
 	SF_DIR="wip/${YEAR}"
 	LP_SERIES="hacks"
-	ZI_SERIES="wip"
-	STEAM_BRANCH="experimental"
+	ZI_SERIES="hacks"
+	STEAM_BRANCH=""
+	;;
+    WIP*)
+	SF_DIR="wip/${YEAR}"
+	LP_SERIES=""
+	ZI_SERIES=""
+	STEAM_BRANCH=""
+	;;
+
+    *)
+	SF_DIR="unknown/${YEAR}"
+	LP_SERIES=""
+	ZI_SERIES=""
+	STEAM_BRANCH=""
 	;;
 esac
 
