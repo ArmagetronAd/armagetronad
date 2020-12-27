@@ -20,8 +20,7 @@ flatpak \
 flatpak-builder \
 -y && \
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-RUN flatpak -y install flathub org.freedesktop.Sdk/x86_64/20.08
-RUN flatpak -y install flathub org.freedesktop.Platform/x86_64/20.08
+RUN flatpak -y install flathub org.freedesktop.Sdk/x86_64/20.08 flathub org.freedesktop.Platform/x86_64/20.08
 
 FROM armaflat_base as armaflat
 # set up builder user
