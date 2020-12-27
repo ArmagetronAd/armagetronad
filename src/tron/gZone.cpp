@@ -7987,10 +7987,12 @@ static void sg_SpawnSoccer(std::istream &s)
         
         if(type == "ball" || type == "soccerball")
         {
+            type = "soccerball";
             //nothing additional to be done.
         }
         else if(type == "goal" || type == "soccergoal")
         {
+            type = "soccergoal";
             team = params.ExtractNonBlankSubString(pos);
         }
         else
@@ -8107,14 +8109,14 @@ static void sg_SpawnSoccer(std::istream &s)
         }
 
         //  time to create the zone
-        if(type == "ball" || type == "soccerball")
+        if(type == "soccerball")
         {
             gSoccerZoneHack *sZone = new gSoccerZoneHack(grid, zonePos, true, false);
             sZone->SetType(gSoccerZoneHack::gSoccer_BALL);
 
             Zone = sZone;
         }
-        else if(type == "goal" || type == "soccergoal")
+        else if(type == "soccergoal")
         {
             gSoccerZoneHack *sZone = new gSoccerZoneHack(grid, zonePos, true, zoneTeam, false);
             sZone->SetType(gSoccerZoneHack::gSoccer_GOAL);
@@ -8127,7 +8129,7 @@ static void sg_SpawnSoccer(std::istream &s)
         if (zoneInteractive.ToLower() == "true" || zoneInteractive.ToLower() == "1")
             zoneInteractiveBool = true;
 
-        CreateZone(tString("soccerball"), Zone, zoneSize, zoneGrowth, zoneDir, setColorFlag, zoneColor, zoneInteractiveBool, targetRadius, route, name);
+        CreateZone(type, Zone, zoneSize, zoneGrowth, zoneDir, setColorFlag, zoneColor, zoneInteractiveBool, targetRadius, route, name);
         return;
     }
 
