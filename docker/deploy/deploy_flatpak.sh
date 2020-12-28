@@ -21,7 +21,7 @@ git clone ${FP_GIT} flatpak || exit $?
 BRANCH_BASE=${ZI_SERIES}
 
 pushd flatpak || exit $?
-git checkout ${BRANCH_BASE}_0.2.9_ci || exit $?
+git checkout ${BRANCH_BASE}_trunk_ci || exit $?
 FILENAME=${PACKAGE_NAME}-${PACKAGE_VERSION}.tbz
 
 # scary SED patch in new package source
