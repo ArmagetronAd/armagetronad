@@ -19,17 +19,9 @@ trust_gitlab || exit $?
 git clone ${FP_GIT} flatpak || exit $?
 
 BRANCH_BASE=${ZI_SERIES}
-case ${ZI_SERIES}+${SUFFIX}+@version@ in
-    wip+*+*)
-	BRANCH_BASE="legacy"
-	;;
-    alpha+*+*)
-	BRANCH_BASE="legacy"
-	;;
-esac
 
 pushd flatpak || exit $?
-git checkout ${BRANCH_BASE}_0.2.9 || exit $?
+git checkout ${BRANCH_BASE}_0.2.9_ci || exit $?
 FILENAME=${PACKAGE_NAME}-${PACKAGE_VERSION}.tbz
 
 # scary SED patch in new package source
