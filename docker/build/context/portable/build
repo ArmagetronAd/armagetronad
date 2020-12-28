@@ -23,9 +23,6 @@ for f in $(find ${APPDIR} -type d -name "desktop"); do
   cp $f/icons/48x48/*.png ${APPDIR}/${ICON_NAME}.png
 done
 
-# correct absolute symlinks
-APPDIR=${APPDIR} $(dirname $0)/fixlinks
-
 lastpath=/usr/lib/*linux-gnu
 otherpath=${lastpath}
 

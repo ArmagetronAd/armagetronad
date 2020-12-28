@@ -81,12 +81,25 @@ case ${SERIES}+${SUFFIX}+@version@ in
 	ZI_SERIES="experimental"
 	STEAM_BRANCH="experimental"
 	;;
-    
-    *)
+
+    HACK*)
 	SF_DIR="wip/${YEAR}"
 	LP_SERIES="hacks"
-	ZI_SERIES="wip"
-	STEAM_BRANCH="experimental"
+	ZI_SERIES="hacks"
+	STEAM_BRANCH=""
+	;;
+    WIP*)
+	SF_DIR="wip/${YEAR}"
+	LP_SERIES=""
+	ZI_SERIES=""
+	STEAM_BRANCH=""
+	;;
+
+    *)
+	SF_DIR="unknown/${YEAR}"
+	LP_SERIES=""
+	ZI_SERIES=""
+	STEAM_BRANCH=""
 	;;
 esac
 
@@ -208,6 +221,15 @@ elif test "${SF_DIR}" == "stable"; then
 else
 	# the rest reference to sourceforge
 	DOWNLOAD_URI_BASE=https://sourceforge.net/projects/armagetronad/files/${SF_DIR}/@version@/
+fi
+
+# **********************************************************************
+
+#  Flatpak definition repository
+if test ${STAGING} == true; then
+	FP_GIT=https://gitlab.com/armagetronad/org-armagetronad-ArmagetronAdvanced.git
+else
+	FP_GIT=git@gitlab.com:armagetronad/org-armagetronad-ArmagetronAdvanced.git
 fi
 
 # **********************************************************************

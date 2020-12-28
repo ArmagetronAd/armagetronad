@@ -38,6 +38,11 @@ if test "${CI_COMMIT_REF_PROTECTED}" = "true"; then
 			PROGRAM_NAME="armagetronad-beta"
 			PROGRAM_TITLE="Armagetron Beta"
 			;;
+			legacy_*_*)
+			SERIES="WIP"
+			PROGRAM_NAME="armagetronad-wip"
+			PROGRAM_TITLE="Armagetron WIP"
+			;;
 		    legacy*)
 			PROGRAM_NAME="armagetronad-alpha"
 			PROGRAM_TITLE="Armagetron Alpha"
@@ -46,6 +51,11 @@ if test "${CI_COMMIT_REF_PROTECTED}" = "true"; then
 			SERIES="EXPERIMENTAL"
 			PROGRAM_NAME="armagetronad-experimental"
 			PROGRAM_TITLE="Armagetron Experimental"
+			;;
+			hack*)
+			SERIES="HACK"
+			PROGRAM_NAME="armagetronad-hack"
+			PROGRAM_TITLE="Armagetron Hack"
 			;;
 			*)
 			SERIES="WIP"
