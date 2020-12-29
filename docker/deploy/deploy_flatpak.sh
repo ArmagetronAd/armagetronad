@@ -21,7 +21,11 @@ git clone ${FP_GIT} flatpak || exit $?
 BRANCH_BASE=${ZI_SERIES}
 
 pushd flatpak || exit $?
-git checkout ${BRANCH_BASE}_0.2.9_ci || exit $?
+
+# go back to last human edit
+git checkout ${BRANCH_BASE}_${VERSION_SERIES}_ci || exit $?
+git reset origin/${BRANCH_BASE}_${VERSION_SERIES} --hard || exit $?
+
 FILENAME=${PACKAGE_NAME}-${PACKAGE_VERSION}.tbz
 
 # scary SED patch in new package source
@@ -40,7 +44,7 @@ fi
 # commit and push
 git commit . -m "Update to version ${PACKAGE_VERSION}" || exit $?
 if ! test ${STAGING} == true; then
-    git push || exit $?
+    git push --force || exit $?
 fi
 popd
 
