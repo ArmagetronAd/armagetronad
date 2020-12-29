@@ -1,8 +1,13 @@
 # All secrets are expected in the 'secrets' subfolder of the build directory
 
+# current main version
+VERSION_SERIES=0.2.9
+
+# program identification
 SUFFIX=`echo @prognamebase@ | sed -e s/.*-//` || exit $?
 PACKAGE_NAME_BASE=`echo @prognamebase@ | sed -e s/-.*//` || exit $?
 
+# information from CI system
 SERIES=`cat CI_INFO | grep SERIES= | sed -e s/^SERIES=//` || exit $?
 CI_COMMIT_REF_PROTECTED=`cat CI_INFO | grep CI_COMMIT_REF_PROTECTED= | sed -e s/^CI_COMMIT_REF_PROTECTED=//` || exit $?
 CI_COMMIT_SHA=`cat CI_INFO | grep CI_COMMIT_SHA= | sed -e s/^CI_COMMIT_SHA=//` || exit $?
@@ -21,19 +26,19 @@ test -z ${SUFFIX} && exit 1
 case ${SERIES}+${SUFFIX}+@version@ in
     CURRENT+armagetronad+*_rc_*)
 	SF_DIR="rc/${YEAR}"
-	LP_SERIES="0.2.9"
+	LP_SERIES="${VERSION_SERIES}"
 	ZI_SERIES="rc"
 	STEAM_BRANCH="staging"
 	;;
     CURRENT+armagetronad+*)
 	SF_DIR="stable"
-	LP_SERIES="0.2.9"
+	LP_SERIES="${VERSION_SERIES}"
 	ZI_SERIES="stable"
 	STEAM_BRANCH="staging"
 	;;
     CURRENT+beta+*)
 	SF_DIR="beta/${YEAR}"
-	LP_SERIES="0.2.9-snapshots"
+	LP_SERIES="${VERSION_SERIES}-snapshots"
 	ZI_SERIES="beta"
 	STEAM_BRANCH="beta"
 	;;
