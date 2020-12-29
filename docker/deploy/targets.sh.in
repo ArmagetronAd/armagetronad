@@ -1,7 +1,7 @@
 # All secrets are expected in the 'secrets' subfolder of the build directory
 
 # current main version
-VERSION_SERIES=0.2.9
+VERSION_SERIES=0.4
 
 # program identification
 SUFFIX=`echo @prognamebase@ | sed -e s/.*-//` || exit $?
