@@ -19,8 +19,9 @@ extralib=
 if test "x${LD_DEBUG_APP}" = xtrue; then
   echo "Library debug mode: ignore system libraries."
 else
-  CACHE=~/.${EXEC}/.syslibs
-  mkdir -p ~/.${EXEC}
+  CACHE_DIR=${XDG_CACHE_HOME:-~/.cache}/${EXEC}
+  CACHE=${CACHE_DIR}/syslibs
+  mkdir -p ${CACHE_DIR}
   if test ! -e ${CACHE} || test "${0}" -nt ${CACHE}; then
     # find all directories in ld's cache
     for lib in $({ /sbin/ldconfig -p || ldconfig -p; } | tail -n +2 | sed -e "s,.* =>,," -e "s,/[^/]*$,," | sort -u); do
