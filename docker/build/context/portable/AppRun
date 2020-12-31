@@ -24,7 +24,7 @@ elif ! test -z "${STEAM_RUNTIME_LIBRARY_PATH}"; then
   # Steam already sets up LD_LIBRARY_PATH so all its libraries are found first
   echo "Running in Steam, no tinkering required."
 
-  LOGDIR=~/.${EXEC}/var
+  LOGDIR=${XDG_DATA_HOME:-~/.local/share}/${EXEC}/var
   mkdir -p ${LOGDIR}
   LOG=${LOGDIR}/steamlog.txt
 
