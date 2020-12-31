@@ -29,7 +29,7 @@ elif ! test -z "${STEAM_RUNTIME_LIBRARY_PATH}"; then
   LOG=${LOGDIR}/steamlog.txt
 
   date > ${LOG}
-  set | grep 'STEAM\|PRESSURE_VESSEL\|PATH' >> ${LOG}
+  set | grep 'STEAM\|PRESSURE_VESSEL\|PATH\|XDG.*HOME=' >> ${LOG}
 else
   CACHE=~/.${EXEC}/.syslibs
   mkdir -p ~/.${EXEC}
