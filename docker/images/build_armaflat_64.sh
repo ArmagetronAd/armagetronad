@@ -1,5 +1,7 @@
 #!/bin/bash
 
+exit 0
+
 # builds everything required for flatpak builds
 
 #wd="`dirname $0`"
