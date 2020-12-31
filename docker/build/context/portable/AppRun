@@ -15,9 +15,21 @@ test -d .${EXEC} && extraarg="--userdatadir .${EXEC} --vardir .${EXEC}/var --use
 # for debugging: if LD_DEBUG_APP=true, use the included libraries first.
 # you can then use strace to check no non-standard external libraries are needed. 
 
+LOG=
+
 extralib=
 if test "x${LD_DEBUG_APP}" = xtrue; then
   echo "Library debug mode: ignore system libraries."
+elif ! test -z "${STEAM_RUNTIME_LIBRARY_PATH}"; then
+  # Steam already sets up LD_LIBRARY_PATH so all its libraries are found first
+  echo "Running in Steam, no tinkering required."
+
+  LOGDIR=~/.${EXEC}/var
+  mkdir -p ${LOGDIR}
+  LOG=${LOGDIR}/steamlog.txt
+
+  date > ${LOG}
+  set | grep 'STEAM\|PRESSURE_VESSEL\|PATH' >> ${LOG}
 else
   CACHE=~/.${EXEC}/.syslibs
   mkdir -p ~/.${EXEC}
@@ -35,4 +47,11 @@ LD_LIBRARY_PATH="${extralib}:${LD_LIBRARY_PATH}:${root}/usr/lib"
 PATH="${root}/usr/bin:${PATH}" 
 export LD_LIBRARY_PATH
 export PATH
-exec $EXEC ${extraarg} "$@"
+if test -z "${LOG}"; then
+  exec $EXEC ${extraarg} "$@"
+else
+  echo extralib=${extralib} >> ${LOG}
+  echo LD_LIBRARY_PATH=${LD_LIBRARY_PATH} >> ${LOG}
+  echo PATH=${PATH} >> ${LOG}
+  exec $EXEC ${extraarg} "$@" 2>&1 | tee -a ${LOG}
+fi
