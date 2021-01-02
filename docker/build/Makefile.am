@@ -349,24 +349,37 @@ context.appimage_%: result.appdir_% ${srcdir}/context/appimage.sh gits.tag
 	${srcdir}/prepare_context.sh $@.dir $<.dir/appdir $<.dir/image $<.dir/version.sh ${srcdir}/context/appimage.sh $(GITS)/pkg2appimage
 	echo > $@
 
-result.appimage_%: context.appimage_%
-	+$(srcdir)/context_to_result.sh $@.dir "./appimage.sh AppImage"
-	echo > $@
-
 APPIMAGE_BASENAME:=$(shell echo $(PACKAGE_TITLE) | sed -e "s, ,,g")
 APPIMAGE_CLIENT_64:=$(APPIMAGE_BASENAME)-$(PACKAGE_VERSION).AppImage
 APPIMAGE_SERVER_64:=$(APPIMAGE_BASENAME)Dedicated-$(PACKAGE_VERSION).AppImage
 APPIMAGE_CLIENT_32:=$(APPIMAGE_BASENAME)-32bit-$(PACKAGE_VERSION).AppImage
 APPIMAGE_SERVER_32:=$(APPIMAGE_BASENAME)Dedicated-32bit-$(PACKAGE_VERSION).AppImage
 
+result.appimage_client_64: context.appimage_client_64
+	+$(srcdir)/context_to_result.sh $@.dir "./appimage.sh ${APPIMAGE_CLIENT_64}"
+	echo > $@
+result.appimage_server_64: context.appimage_server_64
+	+$(srcdir)/context_to_result.sh $@.dir "./appimage.sh ${APPIMAGE_SERVER_64}"
+	echo > $@
+result.appimage_client_32: context.appimage_client_32
+	+$(srcdir)/context_to_result.sh $@.dir "./appimage.sh ${APPIMAGE_CLIENT_32}"
+	echo > $@
+result.appimage_server_32: context.appimage_server_32
+	+$(srcdir)/context_to_result.sh $@.dir "./appimage.sh ${APPIMAGE_SERVER_32}"
+	echo > $@
+
 upload/$(APPIMAGE_CLIENT_64): result.appimage_client_64 upload/.tag
-	cp $<.dir/AppImage $@
+	cp $<.dir/`basename $@` $@
+	cp $<.dir/`basename $@`.zsync $@.zsync
 upload/$(APPIMAGE_SERVER_64): result.appimage_server_64 upload/.tag
-	cp $<.dir/AppImage $@
+	cp $<.dir/`basename $@` $@
+	cp $<.dir/`basename $@`.zsync $@.zsync
 upload/$(APPIMAGE_CLIENT_32): result.appimage_client_32 upload/.tag
-	cp $<.dir/AppImage $@
+	cp $<.dir/`basename $@` $@
+	cp $<.dir/`basename $@`.zsync $@.zsync
 upload/$(APPIMAGE_SERVER_32): result.appimage_server_32 upload/.tag
-	cp $<.dir/AppImage $@
+	cp $<.dir/`basename $@` $@
+	cp $<.dir/`basename $@`.zsync $@.zsync
 
 appimage_client_64.tag: upload/$(APPIMAGE_CLIENT_64)
 	echo > $@
