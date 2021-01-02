@@ -23,7 +23,7 @@ desktop-file-validate appdir/*.desktop || exit $?
 #   https://github.com/AppImage/AppImageKit/releases
 
 rm -f $1
-#ARCH=${ARCH} appimagetool-${ARCH}.AppImage --appimage-extract-and-run appdir $1 || exit $?
+#docs on updatable AppImages: https://github.com/AppImage/docs.appimage.org/blob/master/source/packaging-guide/optional/updates.rst
 ZSYNC=`echo $1 | sed -e s,-${PACKAGE_VERSION},,`.zsync
 ARCH=${ARCH} appimagetool-${ARCH}.AppImage --appimage-extract-and-run -u "zsync|https://download.armagetronad.org/appimage/${ZSYNC}" appdir $1 || exit $?
 
