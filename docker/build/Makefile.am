@@ -226,6 +226,12 @@ context.steam: context.64 gits_artifacts.tag
 #   done
 	echo > $@
 
+# switch container to use to steam soldier SDK, rebrand
+context.steamsoldier: context.steam
+	${srcdir}/prepare_context.sh $@.dir $<.dir/'*'
+	rm $@.dir/image
+	echo "armasteam_soldier" > $@.dir/image
+
 # add debian/ubuntu build info for release %. Requires GPG key from ~/.gnupg
 context.debsrc_%: rootcontext.64 ${srcdir}/rebrand_debian_core.sh ${srcdir}/debian_source.sh gits_artifacts.tag $(TARBALL)
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' $(TARBALL) ${srcdir}/rebrand_debian_core.sh ${srcdir}/debian_source.sh ${srcdir}/context/debian
@@ -567,6 +573,12 @@ steamdirs/steam_linux: result.appdir_server_steam result.appdir_client_steam ste
 	rm -rf $@.dir
 	cp -al $<.dir/appdir $@.dir
 	cp -al result.appdir_client_steam.dir/appdir/* $@.dir/
+	echo > $@
+
+steamdirs/steam_linux_soldier: result.appdir_server_steamsoldier result.appdir_client_steamsoldier steamdirs/.tag
+	rm -rf $@.dir
+	cp -al $<.dir/appdir $@.dir
+	cp -al result.appdir_client_steamsoldier.dir/appdir/* $@.dir/
 	echo > $@
 
 steamdirs/steam_windows: result.winbuild_steam steamdirs/.tag ${srcdir}/context/steam/windows/*
