@@ -83,3 +83,6 @@ MAINTAINER Manuel Moos <z-man@users.sf.net>
 WORKDIR /
 COPY --chown=root --from=build /root/destdir /
 RUN sh /usr/local/share/games/*-dedicated/scripts/sysinstall install /usr/local
+
+ENTRYPOINT /usr/local/bin/armagetronad-dedicated
+EXPOSE 4534/udp
