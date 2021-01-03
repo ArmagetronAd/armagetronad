@@ -64,9 +64,7 @@ ARG BRANCH
 COPY . ${SOURCE_DIR}
 WORKDIR ${SOURCE_DIR}
 
-RUN (test -r configure && test -f missing) || ./bootstrap.sh
-RUN cat version.m4
-RUN ls install-sh -l
+RUN (test -r configure && test -f missing) || (./bootstrap.sh && cat version.m4)
 
 RUN mkdir -p ${BUILD_DIR} && chmod 755 ${BUILD_DIR}
 WORKDIR ${BUILD_DIR}
