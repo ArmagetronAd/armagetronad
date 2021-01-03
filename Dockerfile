@@ -84,5 +84,8 @@ WORKDIR /
 COPY --chown=root --from=build /root/destdir /
 RUN sh /usr/local/share/games/*-dedicated/scripts/sysinstall install /usr/local
 
+RUN adduser -D armagetronad
+USER armagetronad
+
 ENTRYPOINT /usr/local/bin/armagetronad-dedicated
 EXPOSE 4534/udp
