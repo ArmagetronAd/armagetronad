@@ -1,94 +1,85 @@
-ARG BASE_BUILD_SMALL=registry.gitlab.com/armagetronad/armagetronad/armalpine_32:028_0
-ARG BASE_BUILD_FULL=registry.gitlab.com/armagetronad/armagetronad/armabuild_64:028_0
-ARG BASE_LINUX=i386/alpine:3.7
-ARG PROGRAM_NAME=armagetronad-unk
-ARG PROGRAM_TITLE="Armagetron UNK"
+ARG BASE_ALPINE=amd64/alpine:3.7
+ARG CONFIGURE_ARGS=""
 ARG FAKERELEASE=false
-ARG BRANCH=trunk-fix-unknown-bug
 
 ########################################
 
-# bootstrap source
-FROM ${BASE_BUILD_FULL} AS bootstrap
-MAINTAINER Manuel Moos <z-man@users.sf.net>
+# development prerequisites
+FROM ${BASE_ALPINE} AS builder
+LABEL maintainer="Manuel Moos <z-man@users.sf.net>"
 
-ENV SOURCE_DIR /home/docker/armagetronad
-ENV BUILD_DIR /home/docker/build
+RUN mkdir src && wget https://forums3.armagetronad.net/download/file.php?id=9628 -O src/zthread.patch.bz2
+RUN wget https://sourceforge.net/projects/zthread/files/ZThread/2.3.2/ZThread-2.3.2.tar.gz/download -O src/zthread.tgz
 
-COPY --chown=docker . ${SOURCE_DIR}
-RUN chmod 755 ${SOURCE_DIR}
-WORKDIR ${SOURCE_DIR}
-# these files are in .dockerignore, but if they're in git, restore them.
-RUN test -d .git && git checkout .dockerignore .gitlab-ci.yml Dockerfile
-RUN git status
-#RUN ./batch/make/version .
-#RUN false
-RUN test -r configure || ./bootstrap.sh
-RUN cat version.m4
-#RUN false
-
-########################################
-
-# build tarball
-FROM bootstrap AS configured
-
-#ARG PROGRAM_NAME
-#ARG PROGRAM_TITLE
-ARG FAKERELEASE
-ARG BRANCH
-
-RUN mkdir -p ${BUILD_DIR} && chmod 755 ${BUILD_DIR}
-WORKDIR ${BUILD_DIR}
-RUN . ../armagetronad/docker/scripts/brand.sh . && ARMAGETRONAD_FAKERELEASE=${FAKERELEASE} ../armagetronad/configure --prefix=/usr/local --disable-glout --disable-sysinstall --disable-desktop progname="${PROGRAM_NAME}" progtitle="${PROGRAM_TITLE}"
-RUN make -j$(nproc) dist && make -C docker/build tag.gits
-RUN if [ ${FAKERELEASE} = true ]; then cp ../armagetronad/docker/build/fakerelease_proto.sh docker/build/fakerelease.sh; fi
-
-########################################
-
-# build server
-FROM bootstrap AS build_server
-
-ARG PROGRAM_NAME
-ARG PROGRAM_TITLE
-
-RUN bash ./configure --prefix=/usr/local --disable-glout --disable-sysinstall --disable-desktop progname="${PROGRAM_NAME}" progtitle="${PROGRAM_TITLE}"
-RUN make -j$(nproc)
-RUN DESTDIR=/home/docker/destdir make install
-
-########################################
-
-# build client
-FROM bootstrap AS build_client
-
-ARG PROGRAM_NAME
-ARG PROGRAM_TITLE
-
-RUN bash ./configure --prefix=/usr/local --disable-sysinstall --disable-desktop progname="${PROGRAM_NAME}" progtitle="${PROGRAM_TITLE}"
-RUN make -j$(nproc)
-RUN DESTDIR=/home/docker/destdir make install
-
-########################################
-
-FROM ${BASE_LINUX} AS run_server_base
-MAINTAINER Manuel Moos <z-man@users.sf.net>
-
-# runtime dependencies
+# build dependencies
 RUN apk add \
-boost-thread \
-libxml2 \
-protobuf \
-python \
+autoconf \
+automake \
+bash \
+bison \
+g++ \
+make \
+libxml2-dev \
+python3 \
+--no-cache
+
+# for 0.4
+#protobuf-dev \
+#boost-dev \
+#boost-thread \
+
+RUN cd src && tar -xzf zthread.tgz && cd ZThread* && bzcat ../zthread.patch.bz2 | patch -p 1
+RUN cd src/ZThread* && CXXFLAGS="-fpermissive -DPTHREAD_MUTEX_RECURSIVE_NP=PTHREAD_MUTEX_RECURSIVE" ./configure --prefix=/usr --enable-shared=false && make install
+
+########################################
+
+# runtime prerequisites
+FROM ${BASE_ALPINE} AS runtime
+LABEL maintainer="Manuel Moos <z-man@users.sf.net>"
+
+RUN apk add \
+bash \
+libxml2-dev \
+libgcc \
+libstdc++ \
 shadow \
 --no-cache
 
+# for 0.4
+# boost-thread \
+# protobuf \
+
 ########################################
 
-FROM run_server_base AS run_server
+# build
+FROM builder as build
+
+ENV SOURCE_DIR /root/armagetronad
+ENV BUILD_DIR /root/build
+
+ARG CONFIGURE_ARGS
+ARG FAKERELEASE
+ARG BRANCH
+
+COPY . ${SOURCE_DIR}
+WORKDIR ${SOURCE_DIR}
+
+RUN (test -r configure && test -f missing) || ./bootstrap.sh
+RUN cat version.m4
+RUN ls install-sh -l
+
+RUN mkdir -p ${BUILD_DIR} && chmod 755 ${BUILD_DIR}
+WORKDIR ${BUILD_DIR}
+RUN ARMAGETRONAD_FAKERELEASE=${FAKERELEASE} ../armagetronad/configure --prefix=/usr/local --disable-glout --disable-sysinstall --disable-useradd --disable-master --disable-uninstall --disable-desktop ${CONFIGURE_ARGS}
+RUN make -j `nproc`
+RUN DESTDIR=/root/destdir make install
+
+########################################
+
+# pack
+FROM runtime AS run_server
 MAINTAINER Manuel Moos <z-man@users.sf.net>
 
-ARG PROGRAM_NAME
-
 WORKDIR /
-COPY --chown=root --from=build_server /home/docker/destdir/ /
-RUN sh /usr/local/share/games/${PROGRAM_NAME}-dedicated/scripts/sysinstall install /usr/local
-
+COPY --chown=root --from=build /root/destdir /
+RUN sh /usr/local/share/games/*-dedicated/scripts/sysinstall install /usr/local

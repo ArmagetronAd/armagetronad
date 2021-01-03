@@ -2,4 +2,11 @@ Dockerfile
 dockerbuild
 .dockerignore
 .gitlab-ci.yml
+.git
 builds
+docker
+#!docker/scripts/*.sh
+!docker/build/*.in
+!docker/build/*.am
+!docker/build/context/*.in
+!docker/deploy/*.in
