@@ -1,4 +1,4 @@
-This is from the 0.2.9 branch of development. Our current releases are derived from here.
+This is from the 0.4 branch of development. Our experimental releases are derived from here.
 
 Changes in AppImage Land: Our AppImage files now are signed and support bandwidth-saving updates via [AppImageUpdate](https://github.com/AppImage/AppImageUpdate). They no longer carry their version in the filename because after an update, that would be a lie.
 
