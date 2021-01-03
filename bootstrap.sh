@@ -7,6 +7,17 @@ MYDIR=`dirname $0`
 if test -r batch/make/version; then
     echo "Generating version..."
     echo "m4_define(AUTOMATIC_VERSION,["`sh batch/make/version $MYDIR`"])" > version.m4 || exit 1
+
+    # try to fix source epoch
+    if test -e .git; then
+        if SOURCE_DATE_EPOCH=`git log --date=unix | grep Date: | head -n 1 | sed -e "s,Date: *,,"`; then
+            git update-index --refresh > /dev/null
+            if git diff-index --quiet HEAD --; then
+                echo "m4_define(SOURCE_DATE_EPOCH,${SOURCE_DATE_EPOCH})" >> version.m4 || exit 1
+            fi
+        fi
+    fi
+
     rm -f version
 fi
 echo "Copying license..."
