@@ -345,8 +345,10 @@ apptar: apptar.tag
 #***************************************************************
 
 # AppImages with optional signing
-context.appimage_%: result.appdir_% ${srcdir}/context/appimage.sh gits.tag
-	${srcdir}/prepare_context.sh $@.dir $<.dir/appdir $<.dir/image $<.dir/version.sh ${srcdir}/context/appimage.sh $(GITS)/pkg2appimage
+context.appimage_%: upload/$(PACKAGE_NAME)-%-$(PACKAGE_VERSION).tbz context/version.sh ${srcdir}/context/appimage.sh gits.tag
+	${srcdir}/prepare_context.sh $@.dir ${srcdir}/context/appimage.sh $(GITS)/pkg2appimage
+	mkdir -p $@.dir/appdir/ && tar -jxf $< -C $@.dir/appdir/
+	echo $* | sed -e 's,.*_,armabuild_,' > $@.dir/image
 	if test -r  ../deploy/secrets/sec.gpg; then cp -lrf ../deploy/secrets/*.gpg $@.dir/; fi
 	echo > $@
 
