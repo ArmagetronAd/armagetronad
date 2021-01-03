@@ -350,10 +350,10 @@ context.appimage_%: result.appdir_% ${srcdir}/context/appimage.sh gits.tag
 	echo > $@
 
 APPIMAGE_BASENAME:=$(shell echo $(PACKAGE_TITLE) | sed -e "s, ,,g")
-APPIMAGE_CLIENT_64:=$(APPIMAGE_BASENAME)-$(PACKAGE_VERSION).AppImage
-APPIMAGE_SERVER_64:=$(APPIMAGE_BASENAME)Dedicated-$(PACKAGE_VERSION).AppImage
-APPIMAGE_CLIENT_32:=$(APPIMAGE_BASENAME)-32bit-$(PACKAGE_VERSION).AppImage
-APPIMAGE_SERVER_32:=$(APPIMAGE_BASENAME)Dedicated-32bit-$(PACKAGE_VERSION).AppImage
+APPIMAGE_CLIENT_64:=$(APPIMAGE_BASENAME).AppImage
+APPIMAGE_SERVER_64:=$(APPIMAGE_BASENAME)Dedicated.AppImage
+APPIMAGE_CLIENT_32:=$(APPIMAGE_BASENAME)-32bit.AppImage
+APPIMAGE_SERVER_32:=$(APPIMAGE_BASENAME)Dedicated-32bit.AppImage
 
 result.appimage_client_64: context.appimage_client_64
 	+$(srcdir)/context_to_result.sh $@.dir "./appimage.sh ${APPIMAGE_CLIENT_64}"
