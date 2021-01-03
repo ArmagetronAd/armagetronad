@@ -3,6 +3,12 @@
 # pack portable application dir into AppImage
 set -x
 
+# import gpg keys
+SIGN_POSSIBLE=0
+gpg --import pub.gpg || SIGN_POSSIBLE=$?
+gpg --allow-secret-key-import --import sec.gpg || SIGN_POSSIBLE=$?
+rm -rf *.gpg
+
 . ./version.sh
 
 # determine arch suffix
@@ -25,7 +31,9 @@ desktop-file-validate appdir/*.desktop || exit $?
 rm -f $1
 #docs on updatable AppImages: https://github.com/AppImage/docs.appimage.org/blob/master/source/packaging-guide/optional/updates.rst
 ZSYNC=`echo $1 | sed -e s,-${PACKAGE_VERSION},,`.zsync
-ARCH=${ARCH} appimagetool-${ARCH}.AppImage --appimage-extract-and-run -u "zsync|https://download.armagetronad.org/appimage/${ZSYNC}" appdir $1 || exit $?
+SIGN=""
+test ${SIGN_POSSIBLE} = 0 && SIGN=--sign
+ARCH=${ARCH} appimagetool-${ARCH}.AppImage --appimage-extract-and-run -u "zsync|https://download.armagetronad.org/appimage/${ZSYNC}" appdir $1 ${SIGN} || exit $?
 
 # test that the package runs with and without system libraries
 ./$1 --appimage-extract-and-run --version || exit $?

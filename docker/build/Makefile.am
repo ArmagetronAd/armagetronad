@@ -344,9 +344,10 @@ apptar: apptar.tag
 
 #***************************************************************
 
-# AppImages
+# AppImages with optional signing
 context.appimage_%: result.appdir_% ${srcdir}/context/appimage.sh gits.tag
 	${srcdir}/prepare_context.sh $@.dir $<.dir/appdir $<.dir/image $<.dir/version.sh ${srcdir}/context/appimage.sh $(GITS)/pkg2appimage
+	if test -r  ../deploy/secrets/sec.gpg; then cp -lrf ../deploy/secrets/*.gpg $@.dir/; fi
 	echo > $@
 
 APPIMAGE_BASENAME:=$(shell echo $(PACKAGE_TITLE) | sed -e "s, ,,g")
