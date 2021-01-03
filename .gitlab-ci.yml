@@ -311,7 +311,7 @@ deploy-release:
 
     # build
     - cd gitlab_build/docker/build
-    - rm -rf result.appimage_* # remake appimages, now we can sign them
+    - rm -rf result.appimage_* context.appimage_* # remake appimages, now we can sign them
     - make unstaged_deploy -O -j$(nproc) -k
 
 
