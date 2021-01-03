@@ -1,4 +1,4 @@
-ARG BASE_ALPINE=amd64/alpine:3.7
+ARG BASE_ALPINE=amd64/alpine:3.12
 ARG CONFIGURE_ARGS=""
 ARG FAKERELEASE=false
 
@@ -15,6 +15,7 @@ RUN wget https://sourceforge.net/projects/zthread/files/ZThread/2.3.2/ZThread-2.
 RUN apk add \
 autoconf \
 automake \
+patch \
 bash \
 bison \
 g++ \
