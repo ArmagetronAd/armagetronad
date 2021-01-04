@@ -330,7 +330,7 @@ deploy-docker:
      when: on_success
    - when: never
   script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY || exit $?
+    - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY 2>&1 | grep -v WARNING\|credential || exit $?
     - make -C gitlab_build/docker/build deploy_docker.tag || exit $?
 
 # post-build tests
