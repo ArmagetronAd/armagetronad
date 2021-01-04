@@ -30,7 +30,11 @@ python3 \
 #boost-thread \
 
 RUN cd src && tar -xzf zthread.tgz && cd ZThread* && bzcat ../zthread.patch.bz2 | patch -p 1
-RUN cd src/ZThread* && CXXFLAGS="-fpermissive -DPTHREAD_MUTEX_RECURSIVE_NP=PTHREAD_MUTEX_RECURSIVE" ./configure --prefix=/usr --enable-shared=false && make install
+RUN cd src/ZThread* && CXXFLAGS="-fpermissive -DPTHREAD_MUTEX_RECURSIVE_NP=PTHREAD_MUTEX_RECURSIVE" ./configure --prefix=/usr --enable-shared=yes --enable-static=no && \
+make -j `nproc` && \
+make install
+
+#RUN find /usr/lib/ -name *ZThread*
 
 ########################################
 
@@ -49,6 +53,9 @@ shadow \
 # for 0.4
 # boost-thread \
 # protobuf \
+
+COPY --chown=root --from=builder /usr/lib/*ZThread*.so* /usr/lib/
+#RUN find /usr/lib/ -name *ZThread*
 
 ########################################
 
