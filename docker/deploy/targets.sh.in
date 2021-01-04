@@ -277,15 +277,14 @@ EOF
 
 # Deployment requires net access, wait a bit for it to come online
 
-for host in download.armagetronad.org builder.armagetronad.org 0install.armagetronad.org gitlab.com launchpad.net; do
-    timeout=5
-    while test ${timeout} -gt 0; do
-	if curl ${host}	--fail --silent --show-error > /dev/null; then
-	    timeout=0
-	else
-	    echo "Waiting for network: ${timeout}"
-	    sleep 5
-	    timeout=$(( ${timeout} - 1 ))
-	fi
-    done
-done
+if curl -h 2>&1 > /dev/null; then
+	for host in download.armagetronad.org builder.armagetronad.org 0install.armagetronad.org gitlab.com launchpad.net; do
+		timeout=5
+		if curl ${host}	--fail --silent --show-error > /dev/null; then
+			timeout=0
+		else
+			echo "Waiting for network: ${timeout}"
+		fi
+		done
+	done
+fi
