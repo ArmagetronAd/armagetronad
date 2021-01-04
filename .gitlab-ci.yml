@@ -314,6 +314,24 @@ deploy-release:
     - rm -rf result.appimage_* context.appimage_* # remake appimages, now we can sign them
     - make unstaged_deploy -O -j$(nproc) -k
 
+# deploy docker image
+deploy-docker:
+  stage: deploy
+  needs:
+   - build_prepare
+  dependencies:
+   - build_prepare
+  rules:
+   - if: $CI_MERGE_REQUEST_ID
+     when: never
+   - if: '$CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_TAG'
+     when: on_success
+   - if: '$CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_BRANCH'
+     when: on_success
+   - when: never
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY || exit $?
+    - make -C gitlab_build/docker/build deploy_docker.tag || exit $?
 
 # post-build tests
 post_test:
