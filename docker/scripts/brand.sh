@@ -43,11 +43,11 @@ if test "${CI_COMMIT_REF_PROTECTED}" = "true"; then
 			PROGRAM_NAME="armagetronad-wip"
 			PROGRAM_TITLE="Armagetron WIP"
 			;;
-		    legacy*)
+			legacy*)
 			PROGRAM_NAME="armagetronad-alpha"
 			PROGRAM_TITLE="Armagetron Alpha"
 			;;
-		    trunk)
+			trunk)
 			SERIES="EXPERIMENTAL"
 			PROGRAM_NAME="armagetronad-experimental"
 			PROGRAM_TITLE="Armagetron Experimental"

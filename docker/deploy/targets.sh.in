@@ -24,83 +24,83 @@ test -z ${SERIES} && exit 1
 test -z ${SUFFIX} && exit 1
 
 case ${SERIES}+${SUFFIX}+@version@ in
-    CURRENT+armagetronad+*_rc_*)
+	CURRENT+armagetronad+*_rc_*)
 	SF_DIR="rc/${YEAR}"
 	LP_SERIES="${VERSION_SERIES}"
 	ZI_SERIES="rc"
 	STEAM_BRANCH="staging"
 	;;
-    CURRENT+armagetronad+*)
+	CURRENT+armagetronad+*)
 	SF_DIR="stable"
 	LP_SERIES="${VERSION_SERIES}"
 	ZI_SERIES="stable"
 	STEAM_BRANCH="staging"
 	;;
-    CURRENT+beta+*)
+	CURRENT+beta+*)
 	SF_DIR="beta/${YEAR}"
 	LP_SERIES="${VERSION_SERIES}-snapshots"
 	ZI_SERIES="beta"
 	STEAM_BRANCH="beta"
 	;;
-    CURRENT+alpha+*)
+	CURRENT+alpha+*)
 	SF_DIR="alpha/${YEAR}"
 	LP_SERIES=""
 	ZI_SERIES="alpha"
 	STEAM_BRANCH="alpha"
 	;;
-    CURRENT+*)
+	CURRENT+*)
 	SF_DIR="alpha/${YEAR}"
 	LP_SERIES=""
 	ZI_SERIES="alpha"
 	STEAM_BRANCH="alpha"
 	;;
 
-    LTS_028*+armagetronad+*_rc_*)
+	LTS_028*+armagetronad+*_rc_*)
 	SF_DIR="rc/${YEAR}"
 	LP_SERIES="0.2.8"
 	ZI_SERIES="rc"
 	STEAM_BRANCH=""
 	;;
-    LTS_028*+armagetronad+*)
+	LTS_028*+armagetronad+*)
 	SF_DIR="stable"
 	LP_SERIES="0.2.8"
 	ZI_SERIES="stable"
 	STEAM_BRANCH=""
 	;;
-    LTS_028*+alpha+*)
+	LTS_028*+alpha+*)
 	SF_DIR="alpha/${YEAR}"
 	LP_SERIES=""
 	ZI_SERIES="alpha"
 	STEAM_BRANCH=""
 	;;
-    LTS_028*+*)
+	LTS_028*+*)
 	SF_DIR="beta/${YEAR}"
 	LP_SERIES="0.2.8-snapshots"
 	ZI_SERIES="beta"
 	STEAM_BRANCH=""
 	;;
 
-    *+experimental|EXPERIMENTAL+*)
+	*+experimental|EXPERIMENTAL+*)
 	SF_DIR="snapshots/${YEAR}"
 	LP_SERIES=""
 	ZI_SERIES="experimental"
 	STEAM_BRANCH="experimental"
 	;;
 
-    HACK*)
+	HACK*)
 	SF_DIR="wip/${YEAR}"
 	LP_SERIES="hacks"
 	ZI_SERIES="hacks"
 	STEAM_BRANCH=""
 	;;
-    WIP*)
+	WIP*)
 	SF_DIR="wip/${YEAR}"
 	LP_SERIES=""
 	ZI_SERIES=""
 	STEAM_BRANCH=""
 	;;
 
-    *)
+	*)
 	SF_DIR="unknown/${YEAR}"
 	LP_SERIES=""
 	ZI_SERIES=""
@@ -112,9 +112,9 @@ esac
 
 # git identity
 if which git > /dev/null && test -z "`git config --global user.name`"; then
-    git config --global user.email "z-man@users.sf.net"
-    git config --global user.name "Manuel Moos (From GitLab CI)"
-    git config --global push.default simple
+	git config --global user.email "z-man@users.sf.net"
+	git config --global user.name "Manuel Moos (From GitLab CI)"
+	git config --global push.default simple
 fi
 
 # **********************************************************************
@@ -178,9 +178,9 @@ fi
 
 # base directory for versioned uploads
 if test ${STAGING} == true; then
-    UPLOAD_SCP_BASE=arma0install@builder.armagetronad.org:/home/arma0install/staging/
+	UPLOAD_SCP_BASE=arma0install@builder.armagetronad.org:/home/arma0install/staging/
 else
-    UPLOAD_SCP_BASE=bazaaarmagetron,armagetronad@frs.sourceforge.net:/home/frs/project/a/ar/armagetronad/
+	UPLOAD_SCP_BASE=bazaaarmagetron,armagetronad@frs.sourceforge.net:/home/frs/project/a/ar/armagetronad/
 fi
 
 # destination for raw SCP/rsync uploads
@@ -218,8 +218,8 @@ UPLOAD_ZI_SCP=arma0install@builder.armagetronad.org:/home/arma0install/0install/
 #UPLOAD_ZI_SCP=arma0install@builder.armagetronad.org:/home/arma0install/0install-staging/
 
 if test ${STAGING} == true; then
-    # download URI base to use for zeroinstall
-    DOWNLOAD_URI_BASE=http://download.armagetronad.org/staging/${SF_DIR}/@version@/
+	# download URI base to use for zeroinstall
+	DOWNLOAD_URI_BASE=http://download.armagetronad.org/staging/${SF_DIR}/@version@/
 elif test "${SF_DIR}" == "stable"; then
 	# only stable builds go to launchpad permanently
 	DOWNLOAD_URI_BASE=https://launchpad.net/${LP_PROJECT}/${LP_SERIES}/${LP_VERSION}/+download/
@@ -280,10 +280,13 @@ EOF
 if curl -h 2>&1 > /dev/null; then
 	for host in download.armagetronad.org builder.armagetronad.org 0install.armagetronad.org gitlab.com launchpad.net; do
 		timeout=5
+		while test ${timeout} -gt 0; do
 		if curl ${host}	--fail --silent --show-error > /dev/null; then
 			timeout=0
 		else
 			echo "Waiting for network: ${timeout}"
+			sleep 5
+			timeout=$(( ${timeout} - 1 ))
 		fi
 		done
 	done
