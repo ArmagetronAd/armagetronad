@@ -345,6 +345,10 @@ apptar: apptar.tag
 #***************************************************************
 
 # Docker image building
+build_docker.tag: rootcontext.64 ${srcdir}/../deploy/deploy_docker.sh CI_INFO
+	docker build -t ${PACKAGE_NAME} $<.dir/source || exit $?
+	echo > $@
+
 deploy_docker.tag: rootcontext.64 ${srcdir}/../deploy/deploy_docker.sh CI_INFO
 	${srcdir}/../deploy/deploy_docker.sh $<.dir/source
 	echo > $@
