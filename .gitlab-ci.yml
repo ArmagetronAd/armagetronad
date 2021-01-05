@@ -315,10 +315,12 @@ deploy-release:
     - make unstaged_deploy -O -j$(nproc) -k
 
 # test build docker image (hopefully also initiating the cache for later deployment)
+# does not really need debtest, but we want to let the Windows builds go first
 build-docker:
   stage: build_collect
   needs:
    - build_prepare
+   - build_debtest
   dependencies:
    - build_prepare
   script:
