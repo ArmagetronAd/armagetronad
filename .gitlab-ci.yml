@@ -324,14 +324,12 @@ deploy-docker:
   rules:
    - if: $CI_MERGE_REQUEST_ID
      when: never
-   - if: '$CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_TAG'
-     when: on_success
-   - if: '$CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_BRANCH'
+   - if: '$CI_COMMIT_REF_PROTECTED == "true"'
      when: on_success
    - when: never
   script:
     - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY 2>&1 | grep -v WARNING\|credential || exit $?
-    - make -C gitlab_build/docker/build deploy_docker.tag || exit $?
+    - make -C gitlab_build/docker/build unstaged_deploy_docker.tag || exit $?
 
 # post-build tests
 post_test:
