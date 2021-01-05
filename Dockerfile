@@ -57,6 +57,9 @@ shadow \
 COPY --chown=root --from=builder /usr/lib/*ZThread*.so* /usr/lib/
 #RUN find /usr/lib/ -name *ZThread*
 
+WORKDIR /
+RUN adduser -D armagetronad
+
 ########################################
 
 # build
@@ -86,11 +89,9 @@ RUN DESTDIR=/root/destdir make install
 FROM runtime AS run_server
 MAINTAINER Manuel Moos <z-man@users.sf.net>
 
-WORKDIR /
 COPY --chown=root --from=build /root/destdir /
 RUN sh /usr/local/share/games/*-dedicated/scripts/sysinstall install /usr/local
 
-RUN adduser -D armagetronad
 USER armagetronad
 
 ENTRYPOINT /usr/local/bin/armagetronad-dedicated
