@@ -240,7 +240,7 @@ build_collect:
     expire_in: 1 week
 
 # deploy to staged environment
-deploy-staged:
+deploy_staged:
   dependencies:
    - build_prepare
    - build_collect
@@ -267,7 +267,7 @@ deploy-staged:
 
 
 # do the actual release; manually for final releases, delayed to avoid spam for everyone else
-delay-release:
+delay_release:
   dependencies: []
   stage: stage
   rules:
@@ -285,7 +285,7 @@ delay-release:
   script: [""]
 
 # do the actual release; manually for final releases, delayed to avoid spam for everyone else
-deploy-release:
+deploy_release:
   dependencies:
    - build_prepare
    - build_collect
@@ -316,7 +316,7 @@ deploy-release:
 
 # test build docker image (hopefully also initiating the cache for later deployment)
 # does not really need debtest, but we want to let the Windows builds go first
-build-docker:
+build_docker:
   stage: build_collect
   needs:
    - build_prepare
@@ -327,11 +327,11 @@ build-docker:
     - make -C gitlab_build/docker/build build_docker.tag || exit $?
 
 # deploy docker image to staging
-stage-docker:
+stage_docker:
   stage: stage
   needs:
    - build_prepare
-   - build-docker
+   - build_docker
   dependencies:
    - build_prepare
   rules:
@@ -345,12 +345,12 @@ stage-docker:
     - make -C gitlab_build/docker/build staged_deploy_docker.tag || exit $?
 
 # deploy docker image
-deploy-docker:
+deploy_docker:
   stage: deploy
   needs:
    - build_prepare
-   - stage-docker
-   - delay-release
+   - stage_docker
+   - delay_release
   dependencies:
    - build_prepare
   rules:
