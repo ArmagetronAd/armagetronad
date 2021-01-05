@@ -1,4 +1,4 @@
-ARG BASE_ALPINE=amd64/alpine:3.7
+ARG BASE_ALPINE=amd64/alpine:3.12
 ARG CONFIGURE_ARGS=""
 ARG FAKERELEASE=false
 
@@ -15,6 +15,7 @@ RUN wget https://sourceforge.net/projects/zthread/files/ZThread/2.3.2/ZThread-2.
 RUN apk add \
 autoconf \
 automake \
+patch \
 bash \
 bison \
 g++ \
@@ -29,7 +30,11 @@ python3 \
 #boost-thread \
 
 RUN cd src && tar -xzf zthread.tgz && cd ZThread* && bzcat ../zthread.patch.bz2 | patch -p 1
-RUN cd src/ZThread* && CXXFLAGS="-fpermissive -DPTHREAD_MUTEX_RECURSIVE_NP=PTHREAD_MUTEX_RECURSIVE" ./configure --prefix=/usr --enable-shared=false && make install
+RUN cd src/ZThread* && CXXFLAGS="-fpermissive -DPTHREAD_MUTEX_RECURSIVE_NP=PTHREAD_MUTEX_RECURSIVE" ./configure --prefix=/usr --enable-shared=yes --enable-static=no && \
+make -j `nproc` && \
+make install
+
+#RUN find /usr/lib/ -name *ZThread*
 
 ########################################
 
@@ -49,6 +54,12 @@ shadow \
 # boost-thread \
 # protobuf \
 
+COPY --chown=root --from=builder /usr/lib/*ZThread*.so* /usr/lib/
+#RUN find /usr/lib/ -name *ZThread*
+
+WORKDIR /
+RUN adduser -D armagetronad
+
 ########################################
 
 # build
@@ -64,9 +75,7 @@ ARG BRANCH
 COPY . ${SOURCE_DIR}
 WORKDIR ${SOURCE_DIR}
 
-RUN (test -r configure && test -f missing) || ./bootstrap.sh
-RUN cat version.m4
-RUN ls install-sh -l
+RUN (test -r configure && test -f missing) || (./bootstrap.sh && cat version.m4)
 
 RUN mkdir -p ${BUILD_DIR} && chmod 755 ${BUILD_DIR}
 WORKDIR ${BUILD_DIR}
@@ -80,9 +89,10 @@ RUN DESTDIR=/root/destdir make install
 FROM runtime AS run_server
 MAINTAINER Manuel Moos <z-man@users.sf.net>
 
-WORKDIR /
 COPY --chown=root --from=build /root/destdir /
 RUN sh /usr/local/share/games/*-dedicated/scripts/sysinstall install /usr/local
+
+USER armagetronad
 
 ENTRYPOINT /usr/local/bin/armagetronad-dedicated
 EXPOSE 4534/udp

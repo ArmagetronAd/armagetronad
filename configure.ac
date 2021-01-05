@@ -46,16 +46,14 @@ dnl export version
 version=$VERSION
 AC_SUBST(version)
 
-# determine date, if possible from prerecorded git log
-date_raw_rfc=`grep "Date:" ${srcdir}/ChangeLog | head -n 1 | sed -e 's/Date: *//'`
-dnl echo date_raw_rfc=${date_raw_rfc}
-date_iso=`date -I` || exit $?
+source_date_epoch=SOURCE_DATE_EPOCH
+test ${source_date_epoch} = SOURCE_DATE_EPOCH && source_date_epoch=`date +%s`
+AC_SUBST(source_date_epoch)
+
+# determine date
+date_iso=`date -I -d "@${source_date_epoch}"` || exit $?
 dnl echo date_iso=${date_iso}
-date_rfc=`date -R` || exit $?
-dnl echo date_rfc=${date_rfc}
-test -z "${date_raw_rfc}" || date_iso=`date -I -d "${date_raw_rfc}"` || exit $?
-dnl echo date_iso=${date_iso}
-test -z "${date_raw_rfc}" || date_rfc=`date -R -d "${date_raw_rfc}"` || exit $?
+date_rfc=`date -R -d "@${source_date_epoch}"` || exit $?
 dnl echo date_rfc=${date_rfc}
 AC_SUBST(date_iso)
 AC_SUBST(date_rfc)
