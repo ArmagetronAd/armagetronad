@@ -23,9 +23,9 @@ function upload(){
     # upload versionless appimage into fixed directory for AppImageHub
     if ! test -z "${UPLOAD_SCP_APPIMAGE}"; then
         APPIMAGE_BASENAME=`echo ${PACKAGE_TITLE} | sed -e "s, ,,g"`
-        for f in upload/${APPIMAGE_BASENAME}*; do
-            target=`echo $f | sed -e s,upload/,, -e s,-${PACKAGE_VERSION}.*,,`
-            scp $f ${UPLOAD_SCP_APPIMAGE}${target}.AppImage || return $?
+        for f in upload/${APPIMAGE_BASENAME}*AppImage*; do
+            target=`echo $f | sed -e s,upload/,, -e s,-${PACKAGE_VERSION},,`
+            scp $f ${UPLOAD_SCP_APPIMAGE}${target} || return $?
         done
         # return 0
     fi

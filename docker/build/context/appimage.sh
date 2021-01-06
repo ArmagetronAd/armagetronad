@@ -3,6 +3,12 @@
 # pack portable application dir into AppImage
 set -x
 
+# import gpg keys
+SIGN_POSSIBLE=0
+gpg --import pub.gpg || SIGN_POSSIBLE=$?
+gpg --allow-secret-key-import --import sec.gpg || SIGN_POSSIBLE=$?
+rm -rf *.gpg
+
 . ./version.sh
 
 # determine arch suffix
@@ -23,11 +29,15 @@ desktop-file-validate appdir/*.desktop || exit $?
 #   https://github.com/AppImage/AppImageKit/releases
 
 rm -f $1
-ARCH=${ARCH} appimagetool-${ARCH}.AppImage --appimage-extract-and-run appdir $1 || exit $?
+#docs on updatable AppImages: https://github.com/AppImage/docs.appimage.org/blob/master/source/packaging-guide/optional/updates.rst
+ZSYNC=`echo $1 | sed -e s,-${PACKAGE_VERSION},,`.zsync
+SIGN=""
+test ${SIGN_POSSIBLE} = 0 && SIGN=--sign
+ARCH=${ARCH} appimagetool-${ARCH}.AppImage --appimage-extract-and-run -u "zsync|https://download.armagetronad.org/appimage/${ZSYNC}" appdir $1 ${SIGN} || exit $?
 
 # test that the package runs with and without system libraries
-./$1 --appimage-extract --version || exit $?
-LD_LIBRARY_PATH="" LD_DEBUG_APP=true ./$1 --appimage-extract --version || exit $?
+./$1 --appimage-extract-and-run --version || exit $?
+LD_LIBRARY_PATH="" LD_DEBUG_APP=true ./$1 --appimage-extract-and-run --version || exit $?
 
 # comment out to inspect result for debug purposes
 rm -rf appdir

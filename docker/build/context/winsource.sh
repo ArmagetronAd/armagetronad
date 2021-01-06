@@ -73,7 +73,7 @@ for suffix in bat nsi nsi.m4 cfg txt dsp dsw h cpp dtd xml; do
 done
 
 rm -rf $WINDIR/config.* $WINDIR/configure* $WINDIR/*.m4 $WINDIR/*.kde* 
-rm -rf $WINDIR/bootstrap.sh $WINDIR/batch $WINDIR/missing $WINDIR/install-sh $WINDIR/textures/KGN*
+rm -rf $WINDIR/bootstrap.sh $WINDIR/batch $WINDIR/missing $WINDIR/install-sh
 find $WINDIR -name "*.in" -exec rm \{\} \;
 find $WINDIR -name "*.am" -exec rm \{\} \;
 find $WINDIR -name "Makefile*" -exec rm \{\} \;

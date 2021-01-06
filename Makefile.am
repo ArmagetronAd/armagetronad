@@ -14,7 +14,7 @@ include $(top_srcdir)/Makefile.manual
 # what goes into the distribution
 EXTRA_DIST = README-DEVELOPER README-Subversion README-SDL \
 armagetron.kdevelop armagetron.kdevelop.pcs armagetron.kdevses tron.ico \
-models sound textures bootstrap.sh accustomdir.m4 fingerprint
+models sound textures bootstrap.sh accustomdir.m4 fingerprint Dockerfile
 # language/update.py
 
 # resource is included as a subdir for the purpose of keeping this makefile short and delegating
@@ -41,7 +41,7 @@ if NEEDDATA
 # install media data only when it is needed
 nobase_texture_DATA=textures/cycle_body.png textures/cycle_wheel.png textures/dir_wall.png\
 	textures/floor_a.png textures/floor_b.png textures/floor.png textures/font_extra.png\
-	textures/font.png textures/font_s.png textures/icon.png textures/KGN_logo.png textures/rim_wall.png\
+	textures/font.png textures/font_s.png textures/icon.png textures/rim_wall.png\
 	textures/shadow.png textures/sky.png textures/title.jpg
 
 nobase_sound_DATA=sound/cyclrun.wav sound/expl.wav

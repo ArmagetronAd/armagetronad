@@ -44,6 +44,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #undef 	INLINE_DEF
 #define INLINE_DEF
 
+// program name definition
+#ifndef PROGNAME
+#ifdef DEDICATED
+#define PROGNAME "armagetronad-dedicated"
+#else
+#define PROGNAME "armagetronad"
+#endif
+#endif
+
 static tCommandLineAnalyzer * s_commandLineAnalyzerAnchor;
 
 static void quitWithMessagePrepare( const char* message )
@@ -104,7 +113,7 @@ bool tCommandLineData::Analyse(int argc,char **argv)
 
         if ( name_.Len() <= 3 )
         {
-            name_ = "Armagetron";
+            name_ = PROGNAME;
         }
     }
 

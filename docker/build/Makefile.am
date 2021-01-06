@@ -113,6 +113,7 @@ CI_INFO: ${srcdir}/../scripts/brand.sh
 	echo PROGRAM_TITLE=$${PROGRAM_TITLE} >> $@ && \
 	echo CI_COMMIT_REF_PROTECTED=$${CI_COMMIT_REF_PROTECTED} >> $@ && \
 	echo CI_COMMIT_SHA=$${CI_COMMIT_SHA} >> $@ && \
+	echo CI_RELEASE_YEAR=$${CI_RELEASE_YEAR} >> $@ && \
 	echo CI_COMMIT_REF_NAME=$${CI_COMMIT_REF_NAME} >> $@
 
 .PRECIOUS: CI_INFO
@@ -343,29 +344,56 @@ apptar: apptar.tag
 
 #***************************************************************
 
-# AppImages
-context.appimage_%: result.appdir_% ${srcdir}/context/appimage.sh gits.tag
-	${srcdir}/prepare_context.sh $@.dir $<.dir/appdir $<.dir/image $<.dir/version.sh ${srcdir}/context/appimage.sh $(GITS)/pkg2appimage
+# Docker image building
+build_docker.tag: rootcontext.64 ${srcdir}/../deploy/deploy_docker.sh CI_INFO
+	DOCKER_NODEPLOY="nodeploy" ${srcdir}/../deploy/deploy_docker.sh $<.dir/source
 	echo > $@
 
-result.appimage_%: context.appimage_%
-	+$(srcdir)/context_to_result.sh $@.dir "./appimage.sh AppImage"
+deploy_docker.tag: rootcontext.64 ${srcdir}/../deploy/deploy_docker.sh CI_INFO
+	${srcdir}/../deploy/deploy_docker.sh $<.dir/source
+	echo > $@
+
+#***************************************************************
+
+# AppImages with optional signing
+context.appimage_%: upload/$(PACKAGE_NAME)-%-$(PACKAGE_VERSION).tbz context/version.sh ${srcdir}/context/appimage.sh gits.tag
+	${srcdir}/prepare_context.sh $@.dir ${srcdir}/context/appimage.sh $(GITS)/pkg2appimage
+	mkdir -p $@.dir/appdir/ && tar -jxf $< -C $@.dir/appdir/
+	echo $* | sed -e 's,.*_,armabuild_,' > $@.dir/image
+	if test -r  ../deploy/secrets/sec.gpg; then cp -lrf ../deploy/secrets/*.gpg $@.dir/; fi
 	echo > $@
 
 APPIMAGE_BASENAME:=$(shell echo $(PACKAGE_TITLE) | sed -e "s, ,,g")
-APPIMAGE_CLIENT_64:=$(APPIMAGE_BASENAME)-$(PACKAGE_VERSION).AppImage
-APPIMAGE_SERVER_64:=$(APPIMAGE_BASENAME)Dedicated-$(PACKAGE_VERSION).AppImage
-APPIMAGE_CLIENT_32:=$(APPIMAGE_BASENAME)-32bit-$(PACKAGE_VERSION).AppImage
-APPIMAGE_SERVER_32:=$(APPIMAGE_BASENAME)Dedicated-32bit-$(PACKAGE_VERSION).AppImage
+APPIMAGE_CLIENT_64:=$(APPIMAGE_BASENAME).AppImage
+APPIMAGE_SERVER_64:=$(APPIMAGE_BASENAME)Dedicated.AppImage
+APPIMAGE_CLIENT_32:=$(APPIMAGE_BASENAME)-32bit.AppImage
+APPIMAGE_SERVER_32:=$(APPIMAGE_BASENAME)Dedicated-32bit.AppImage
+
+result.appimage_client_64: context.appimage_client_64
+	+$(srcdir)/context_to_result.sh $@.dir "./appimage.sh ${APPIMAGE_CLIENT_64}"
+	echo > $@
+result.appimage_server_64: context.appimage_server_64
+	+$(srcdir)/context_to_result.sh $@.dir "./appimage.sh ${APPIMAGE_SERVER_64}"
+	echo > $@
+result.appimage_client_32: context.appimage_client_32
+	+$(srcdir)/context_to_result.sh $@.dir "./appimage.sh ${APPIMAGE_CLIENT_32}"
+	echo > $@
+result.appimage_server_32: context.appimage_server_32
+	+$(srcdir)/context_to_result.sh $@.dir "./appimage.sh ${APPIMAGE_SERVER_32}"
+	echo > $@
 
 upload/$(APPIMAGE_CLIENT_64): result.appimage_client_64 upload/.tag
-	cp $<.dir/AppImage $@
+	cp $<.dir/`basename $@` $@
+	cp $<.dir/`basename $@`.zsync $@.zsync
 upload/$(APPIMAGE_SERVER_64): result.appimage_server_64 upload/.tag
-	cp $<.dir/AppImage $@
+	cp $<.dir/`basename $@` $@
+	cp $<.dir/`basename $@`.zsync $@.zsync
 upload/$(APPIMAGE_CLIENT_32): result.appimage_client_32 upload/.tag
-	cp $<.dir/AppImage $@
+	cp $<.dir/`basename $@` $@
+	cp $<.dir/`basename $@`.zsync $@.zsync
 upload/$(APPIMAGE_SERVER_32): result.appimage_server_32 upload/.tag
-	cp $<.dir/AppImage $@
+	cp $<.dir/`basename $@` $@
+	cp $<.dir/`basename $@`.zsync $@.zsync
 
 appimage_client_64.tag: upload/$(APPIMAGE_CLIENT_64)
 	echo > $@
@@ -677,6 +705,16 @@ context.deploy_zi: context.deploy_base_zeroinstall result.update_zi ${srcdir}/..
 result.deploy_zi: context.deploy_zi deploy_external result.deploy_download
 	+$(srcdir)/context_to_result.sh $@.dir ./deploy_zeroinstall.sh
 	echo > $@
+
+context.deploy_fp: context.deploy_base_flatpak ${srcdir}/../deploy/*_flatpak.sh
+	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' ${srcdir}/../deploy/*_flatpak.sh
+	rm -f $@.dir/image
+	echo "armadeploy_64" > $@.dir/image
+	echo > $@
+result.deploy_fp: context.deploy_fp deploy_external result.deploy_download
+	+$(srcdir)/context_to_result.sh $@.dir ./deploy_flatpak.sh
+	echo > $@
+
 context.deploy_itch: context.deploy_base_itch ${srcdir}/../deploy/*_itch.sh upload/$(APPTAR_CLIENT_64) upload/$(APPTAR_CLIENT_32) $(WINZIP_CLIENT)
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' ${srcdir}/../deploy/*_itch.sh
 	mkdir -p $@.dir/appdir_linux_64; cd $@.dir/appdir_linux_64; tar -xjf ../../upload/$(APPTAR_CLIENT_64)
@@ -697,10 +735,12 @@ deploy_lp: result.deploy_lp
 deploy_scp: result.deploy_scp
 deploy_steam: result.deploy_steam
 deploy_zi: result.deploy_zi
+deploy_fp: result.deploy_fp
 deploy_download: result.deploy_download
 deploy_itch: result.deploy_itch
 
 deploy_ppa: \
+deploy_ppa_hirsute \
 deploy_ppa_groovy \
 deploy_ppa_focal \
 deploy_ppa_bionic \
@@ -710,7 +750,7 @@ deploy_ppa_trusty
 deploy_ppa_%: result.deploy_ppa_%
 	@echo Deployed $*
 
-deploy: deploy_lp deploy_scp deploy_ppa deploy_zi deploy_steam deploy_download deploy_itch
+deploy: deploy_lp deploy_scp deploy_ppa deploy_zi deploy_fp deploy_steam deploy_download deploy_itch
 #deploy: deploy_scp
 #deploy: deploy_zi
 #deploy: deploy_ppa
@@ -731,8 +771,9 @@ staged_%:
 context.debsrc_bionic result.debsrc_bionic context.deploy_ppa_bionic result.deploy_ppa_bionic \
 context.debsrc_trusty result.debsrc_trusty context.deploy_ppa_trusty result.deploy_ppa_trusty \
 context.debsrc_xenial result.debsrc_xenial context.deploy_ppa_xenial result.deploy_ppa_xenial \
-context.debsrc_eoan   result.debsrc_eoan   context.deploy_ppa_eoan   result.deploy_ppa_eoan \
 context.debsrc_focal  result.debsrc_focal  context.deploy_ppa_focal  result.deploy_ppa_focal \
+context.debsrc_groovy result.debsrc_groovy context.deploy_ppa_groovy result.deploy_ppa_groovy \
+context.debsrc_hirsute result.debsrc_hirsute context.deploy_ppa_hirsute result.deploy_ppa_hirsute \
 context.deploy_base_scp context.deploy_scp \
 context.deploy_base_download result.deploy_download context.deploy_download
 

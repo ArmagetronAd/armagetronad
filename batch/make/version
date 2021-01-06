@@ -81,7 +81,7 @@ then
         # If really no change was made, use the fool's number, with tag if any
         # So check if we have tags
         revno=$(bzr revno ${srcdir})
-        tag=$(bzr tags -r $revno | awk '{ print $1 }')
+        tag=$(bzr tags -r $revno | awk '{ print $1 }' | sed -e s/^v//)
         if test ${tag}
         then
             # If it is tagged, use the tag
@@ -109,12 +109,16 @@ GIT_BRANCH="alpha"
 if test -e "${srcdir}/.git"; then
     # check for a tag
     cd $srcdir
-    # todo: once we have make tags, consider just git describe --tags as version ID.
-    if tag=`git describe --tags --candidates=0` > /dev/null 2>&1; then
-        major_version=`echo ${tag} | sed -e s/version_// -e s/release_//`
-        minor_version=""
-        DATE=""
-    else
+
+    # todo: once we have make tags, consider just git describe --tags as version ID, like this:
+    # git describe --tags | sed -e s/^v//
+    # exit 0
+
+    #if tag=`git describe --tags --candidates=0` > /dev/null 2>&1; then
+    #    major_version=`echo ${tag} | sed -e s/version_// -e s/release_//` -e s/^v//
+    #    minor_version=""
+    #    DATE=""
+    #else
       git update-index --refresh > /dev/null
       if git diff-index --quiet HEAD --; then
             # local checkout clean, just use revno
@@ -123,7 +127,7 @@ if test -e "${srcdir}/.git"; then
             # local changes, add date
             DATE=_z`git rev-list HEAD --count`_$DATE
         fi
-    fi
+    #fi
 
     GIT_BRANCH=`git -C ${srcdir} rev-parse --abbrev-ref HEAD`
 fi

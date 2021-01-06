@@ -109,25 +109,55 @@ function mkdir_p()
     test -d $1 || mkdir $1
 }
 
+# usage: relative_path absolute_directory absolute_file
+# returns the relative path to absolute_file from absolute_directory
+# absolute_directory must end in a /
+function relative_path()
+{
+    absolute_dir=$1
+    absolute_file=$2
+
+    up=""
+    begin_file=""
+    begin_dir=""
+    while test "${begin_dir}" = "${begin_file}" && ! test -z "${absolute_file}" && ! test -z "${absolute_dir}"; do
+        absolute_dir="`echo ${absolute_dir} | sed -e "s,^${begin_dir},,"`"
+        absolute_file="`echo ${absolute_file} | sed -e "s,^${begin_file},,"`"
+        begin_file="`echo ${absolute_file} | sed -e 's,/.*,,'`/"
+        begin_dir="`echo ${absolute_dir} | sed -e 's,/.*,,'`/"
+    done
+
+    up="`echo ${absolute_dir} | sed -e 's,[^/]*/,../,g'`"
+    echo ${up}${absolute_file}
+}
+
 # install or uninstall a symbolic link depending on mode
 # usage: install_link <source> <destination>
 # source and destination must not come with the ${DEST/ROOTDIR} prefix.
 function install_link()
 {
     # right now, the source should be here:
-    source_now=${DESTDIR}$1
-    # but it will be moved here before it is used:
-    source_final=${ROOTDIR}$1
+    source=${DESTDIR}$1
     # the link should go here:
     target=${DESTDIR}$2
 
-    # if we don't link, but copy, the copy source needs to be the current source position
-    echo "@LN_S@" | grep "cp" > /dev/null && source_final=${source_now}
-
     if test "$MODE" = "install"; then
-        if test -r ${source_now}; then
-            mkdir_p `dirname ${target}`
-            test -f ${target} || @LN_S@ -f ${source_final} ${target} || exit 1
+        if echo "${target}" | grep -q '/$'; then
+            target_dir="${target}"
+            target_file=.
+            mkdir_p "${target_dir}"
+        elif test -d "${target}"; then
+            target_dir="${target}"/
+            target_file=.
+        else
+            target_dir="`dirname "${target}"`"/
+            target_file="`basename "${target}"`"
+            mkdir_p "${target_dir}"
+        fi
+        if ! test -f ${target}; then
+            relative=`relative_path "${target_dir}" "${source}"`
+            echo cd "${target_dir}", @LN_S@ "${relative}" "${target_file}"
+            (cd "${target_dir}" && @LN_S@ "${relative}" "${target_file}")
         fi
     else
         if test -L ${target} ; then
@@ -299,7 +329,9 @@ install_link ${BINDIR}/@prognamebase@-master-@version@ ${BINDIR}/@prognamebase@-
 # install desktop files
 if test @enable_desktop@ = yes; then
     DESKTOPSOURCE=@aa_datadir@/desktop
-    METADEST=${PREFIX}/share/metainfo
+    DESKTOPDESTDIR=${PREFIX}/share/applications
+    DESKTOPDEST=${DESKTOPDESTDIR}/@progid@.desktop
+    METADEST=${PREFIX}/share/appdata
 
     # rebrand icons and desktop file
     if test "$MODE" = "install"; then
@@ -308,23 +340,27 @@ if test @enable_desktop@ = yes; then
         else
             for f in 16x16 32x32 48x48; do mv ${DESTDIR}${DESKTOPSOURCE}/icons/$f/armagetronad.png ${DESTDIR}${DESKTOPSOURCE}/icons/$f/@prognamebase@.png || exit $?; done
         fi
-        mv ${DESTDIR}${DESKTOPSOURCE}/armagetronad.desktop ${DESTDIR}${DESKTOPSOURCE}/org.armagetronad.@progname@.desktop || exit $?
+
+        mkdir -p ${DESTDIR}${DESKTOPDESTDIR}
+        mv ${DESTDIR}${DESKTOPSOURCE}/armagetronad.desktop ${DESTDIR}${DESKTOPDEST} || exit $?
 
         # add appstream metadata
         mkdir_p ${DESTDIR}${METADEST}
-        mv ${DESTDIR}${DESKTOPSOURCE}/armagetronad.appdata.xml ${DESTDIR}${METADEST}/@progname@.appdata.xml || exit $?
+        mv ${DESTDIR}${DESKTOPSOURCE}/armagetronad.appdata.xml ${DESTDIR}${METADEST}/@progid@.appdata.xml || exit $?
     else
         for f in 16x16 32x32 48x48; do rm -f ${DESTDIR}${DESKTOPSOURCE}/icons/$f/@prognamebase@.png; done
-        rm -f ${DESTDIR}${DESKTOPSOURCE}/org.armagetronad.@progname@.desktop
-        rm -f ${DESTDIR}${METADEST}/@progname@.appdata.xml
+        rm -f ${DESTDIR}${DESKTOPDEST}
+        rm -f ${DESTDIR}${METADEST}/@progid@.appdata.xml
     fi
 
+    # set -x
     # install icons in canonical locations
     for f in 16x16 32x32 48x48; do
-        icontarget=${DESTDIR}${PREFIX}/share/icons/hicolor/$f/apps
-        mkdir -p ${icontarget} || exit $?
-        install_link ${DESTDIR}${DESKTOPSOURCE}/icons/$f/@prognamebase@.png ${icontarget}/ || exit $?
+        icontarget=${PREFIX}/share/icons/hicolor/$f/apps
+        mkdir -p ${DESTDIR}${icontarget} || exit $?
+        install_link ${DESKTOPSOURCE}/icons/$f/@prognamebase@.png ${icontarget}/@progid@.png || exit $?
     done
+    # set +x
 
     # add KDE icons and desktop link
     if kde-config --install icon > /dev/null 2>&1; then
@@ -333,7 +369,7 @@ if test @enable_desktop@ = yes; then
             echo "No permission to write to KDE icons directory."
         else
             echo "${INSTALLING} KDE icon in ${ICONSDEST}..."
-            install_link ${DESKTOPSOURCE}/icons/48x48/@prognamebase@.png ${ICONSDEST}/@progname@.png
+            install_link ${DESKTOPSOURCE}/icons/48x48/@prognamebase@.png ${ICONSDEST}/@progid@.png
         fi
 
         DESKTOPDEST=`kde_get_write_path apps ${DESTDIR}`
@@ -341,7 +377,7 @@ if test @enable_desktop@ = yes; then
             echo "No permission to write to KDE application menu directory."
         else
             echo "${INSTALLING} KDE start menu entry in ${DESKTOPDEST}..."
-            install_link ${DESKTOPSOURCE}/@prognamebase@.desktop ${DESKTOPDEST}/@progname@.desktop
+            install_link ${DESKTOPSOURCE}/@prognamebase@.desktop ${DESKTOPDEST}/@progid@.desktop
         fi
     fi
 

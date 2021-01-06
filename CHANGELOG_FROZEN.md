@@ -1,4 +1,49 @@
-##### Changes on the 0.2.9 branch
+
+#### Changes since 0.2.9.0:
+
+##### Fixed Bugs
+
+ * Can't open the .appimage file. Missing libwebp.so.5 ([#54](https://gitlab.com/armagetronad/armagetronad/-/issues/54))
+
+##### Contributors
+
+Manuel Moos
+
+
+#### Changes since 0.2.8.3.5:
+
+##### Fixed Bugs
+
+ * Debian builds: Documentation html files have empty last change ([#9](https://gitlab.com/armagetronad/armagetronad/-/issues/9))
+ * Socket and unclean exit trouble due to fork(), execve() and exit() interaction ([#13](https://gitlab.com/armagetronad/armagetronad/-/issues/13))
+ * Ubuntu PPA release candidate builds would overwrite previous stable releases ([#15](https://gitlab.com/armagetronad/armagetronad/-/issues/15))
+ * Language string identifier silence_player_text used twice ([#22](https://gitlab.com/armagetronad/armagetronad/-/issues/22))
+ * Bad video mode error recovery ([#23](https://gitlab.com/armagetronad/armagetronad/-/issues/23))
+ * AppRun script does not work if call path contains spaces ([#24](https://gitlab.com/armagetronad/armagetronad/-/issues/24))
+ * Included forum links outdated ([#25](https://gitlab.com/armagetronad/armagetronad/-/issues/25))
+ * Client segfaults on OpenBSD ([#26](https://gitlab.com/armagetronad/armagetronad/-/issues/26))
+ * Client compiled with clang 10.0 (optimized) sefgaults on logout ([#28](https://gitlab.com/armagetronad/armagetronad/-/issues/28))
+ * Valgrind reports uses of unitialized, freed or invalid memory ([#29](https://gitlab.com/armagetronad/armagetronad/-/issues/29))
+ * Windows: DPI scaling behavior wrong ([#33](https://gitlab.com/armagetronad/armagetronad/-/issues/33))
+
+##### New Features
+
+ * Update German translation ([#2](https://gitlab.com/armagetronad/armagetronad/-/issues/2))
+ * Adapt ChangeLog and fingerprint generation to git ([#11](https://gitlab.com/armagetronad/armagetronad/-/issues/11))
+ * Integrated build system ([#14](https://gitlab.com/armagetronad/armagetronad/-/issues/14))
+ * Make playback time display optional ([#16](https://gitlab.com/armagetronad/armagetronad/-/issues/16))
+ * Deploy to itch.io ([#19](https://gitlab.com/armagetronad/armagetronad/-/issues/19))
+ * Credit contributors in patch notes ([#21](https://gitlab.com/armagetronad/armagetronad/-/issues/21))
+
+##### Other Changes
+
+ * Make custom camera the default for new players ([#35](https://gitlab.com/armagetronad/armagetronad/-/issues/35))
+
+##### Contributors
+
+Daniel Harple, Hugh McMaster, Luke-Jr, Manuel Moos, Uzix, fman23, zolk3ri
+
+##### Other changes on the 0.2.9 branch
 
  * Added detection and reaction code for timing assist bots
  * /shuffle now works before you actually join a team
@@ -792,3 +837,4 @@ Bugfixes:
  * the moviepack title screen is displayed
  * Linux version: easier system-wide installation with RPM packages 
    or "make install"
+

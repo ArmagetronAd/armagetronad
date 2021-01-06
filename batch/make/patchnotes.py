@@ -253,6 +253,8 @@ for tag in reversed(tags):
 	#print(tag)
 	if not tag in fixed_after_tag:
 		continue
+	if tag == tag_lower_limit:
+		continue
 
 	fixed = fixed_after_tag[tag]
 	categories={}

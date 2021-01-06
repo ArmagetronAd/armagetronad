@@ -240,7 +240,7 @@ build_collect:
     expire_in: 1 week
 
 # deploy to staged environment
-deploy-staged:
+deploy_staged:
   dependencies:
    - build_prepare
    - build_collect
@@ -258,22 +258,22 @@ deploy-staged:
     - ./docker/deploy/prepare_deploy.sh || exit $?
 
   script:
-    # mark 
-    - echo ${CI_PIPELINE_IID} > /messageboard/current_pipeline_${CI_COMMIT_REF_NAME}
     # now enter the docker build directory and just invoke make there
     - cd gitlab_build/docker/build
     - make staged_deploy -O -j$(nproc) -k
 
 
 # do the actual release; manually for final releases, delayed to avoid spam for everyone else
-delay-release:
+delay_release:
   dependencies: []
   stage: stage
-  rules: 
+  rules:
   - if: $CI_MERGE_REQUEST_ID
     when: never
   - if: '$CI_COMMIT_REF_PROTECTED == "false"'
     when: never
+  - if: '$CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_TAG'
+    when: manual
   - if: '$CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_BRANCH'
     when: delayed
     start_in: '6 hours'
@@ -282,35 +282,87 @@ delay-release:
   script: [""]
 
 # do the actual release; manually for final releases, delayed to avoid spam for everyone else
-deploy-release:
+deploy_release:
   dependencies:
    - build_prepare
    - build_collect
   stage: deploy
   tags:
    - armagetronad_deploy
-  rules: 
+  rules:
    - if: $CI_MERGE_REQUEST_ID
      when: never
-   - if: '$CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_TAG'
-     when: manual
-   - if: '$CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_BRANCH'
+   - if: '$CI_COMMIT_REF_PROTECTED == "true"'
      when: on_success
    - when: never
   before_script:
     - ./docker/scripts/fix_gits.sh || exit $?
     - ./docker/deploy/prepare_deploy.sh || exit $?
   script:
-    - tagfile=/messageboard/current_pipeline_${CI_COMMIT_REF_NAME}
-    - if ! echo ${CI_COMMIT_REF_NAME} | grep -q ^release && test -r ${tagfile} && ! test ${CI_PIPELINE_IID} == `cat ${tagfile}`; then
-    -   echo "A newer build is already in the pipeline, abort."
-    -   exit 0
-    - fi
+    - docker/scripts/obsolete.sh || exit 0
 
-    # now enter the docker build directory and just invoke make there
+    # build
     - cd gitlab_build/docker/build
+    - rm -rf result.appimage_* context.appimage_* # remake appimages, now we can sign them
     - make unstaged_deploy -O -j$(nproc) -k
 
+# test build docker image (hopefully also initiating the cache for later deployment)
+# does not really need debtest, but we want to let the Windows builds go first
+build_docker:
+  stage: build_collect
+  needs:
+   - build_prepare
+   - build_debtest
+  dependencies:
+   - build_prepare
+  after_script:
+    - rm -f ~/.docker/config.json
+  script:
+    - make -C gitlab_build/docker/build build_docker.tag || exit $?
+
+# deploy docker image to staging
+stage_docker:
+  stage: stage
+  needs:
+   - build_prepare
+   - build_docker
+  dependencies:
+   - build_prepare
+  rules:
+   - if: $CI_MERGE_REQUEST_ID
+     when: never
+   - if: '$CI_COMMIT_REF_PROTECTED == "true"'
+     when: on_success
+   - when: never
+  after_script:
+    - rm -f ~/.docker/config.json
+  script:
+    - make -C gitlab_build/docker/build staged_deploy_docker.tag || exit $?
+
+# deploy docker image
+deploy_docker:
+  stage: deploy
+  needs:
+   - build_prepare
+   - stage_docker
+   - delay_release
+  dependencies:
+   - build_prepare
+  rules:
+   - if: $CI_MERGE_REQUEST_ID
+     when: never
+   - if: '$CI_COMMIT_REF_PROTECTED == "true"'
+     when: on_success
+   - when: never
+  after_script:
+    - rm -f ~/.docker/config.json
+  script:
+    # test whether we're current
+    - docker/scripts/obsolete.sh || exit 0
+
+    # build
+    - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY 2>&1 | grep -v WARNING\|credential || exit $?
+    - make -C gitlab_build/docker/build unstaged_deploy_docker.tag || exit $?
 
 # post-build tests
 post_test:

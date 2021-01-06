@@ -62,6 +62,7 @@ buildscript = sed -f ${top_builddir}/universal_variable_values_sed\
         -e 's,@progname\@,@progname@,g' \
 		-e 's,@prognamebase\@,@prognamebase@,g' \
 		-e 's,@progtitle\@,@progtitle@,g' \
+		-e 's,@progid\@,@progid@,g' \
 		-e 's,@enable_useradd\@,@enable_useradd@,g' \
 		-e 's,@enable_etc\@,@enable_etc@,g' \
 		-e 's,@enable_initscripts\@,@enable_initscripts@,g' \

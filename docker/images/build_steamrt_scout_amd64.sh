@@ -3,6 +3,8 @@
 # canonical 64 bit steam SDK environment
 # see https://github.com/ValveSoftware/steam-runtime#building-in-the-runtime
 
+# outdated, can go away on next update, see build_armasteam_64.sh
+
 set -x
 
 wd="`dirname $0`"

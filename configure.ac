@@ -46,6 +46,18 @@ dnl export version
 version=$VERSION
 AC_SUBST(version)
 
+source_date_epoch=SOURCE_DATE_EPOCH
+test ${source_date_epoch} = SOURCE_DATE_EPOCH && source_date_epoch=`date +%s`
+AC_SUBST(source_date_epoch)
+
+# determine date
+date_iso=`date -I -d "@${source_date_epoch}"` || exit $?
+dnl echo date_iso=${date_iso}
+date_rfc=`date -R -d "@${source_date_epoch}"` || exit $?
+dnl echo date_rfc=${date_rfc}
+AC_SUBST(date_iso)
+AC_SUBST(date_rfc)
+
 AC_ARG_VAR(CXXFLAGS,Flags passed to the C++ compiler)
 AC_ARG_VAR(DEBUGLEVEL,[Debug level for developers, normal users can safely ignore it. Accepted values go from 0 to 5. See README-DEVELOPER for details.])
 AC_ARG_VAR(CODELEVEL,[Code checking strictness level for developers, normal users can safely ignore it. Accepted values go from 0 to 4. See README-DEVELOPER for details.])
@@ -739,13 +751,9 @@ dnl AC_MSG_WARN([C++ standard library not found. You can ignore this warning on 
 dnl AC_CHECK_LIB(z, gzread,,
 dnl AC_MSG_ERROR([You need libz to compile ${progtitle}.]))
 
-AC_MSG_CHECKING(whether libpng is installed)
-if PNGLIBS=`libpng-config --libs`; then
-    AC_MSG_RESULT(yes)
-fi
-
-CPPFLAGS="$CPPFLAGS `libpng-config --cflags`"
-LIBS="$LIBS $PNGLIBS"
+PKG_CHECK_MODULES(LIBPNG, [libpng])
+CXXFLAGS="${CXXFLAGS} ${LIBPNG_CFLAGS}"
+LIBS="${LIBS} ${LIBPNG_LIBS}"
 
 AC_CHECK_FUNC(png_sig_cmp,
 ,
@@ -963,6 +971,12 @@ AC_SUBST_UNIVERSAL(relocatable)
 
 AC_USE_SUBST_UNIVERSAL
 AC_AA_REPLACEPATHS
+
+dnl turn progname into canonical progid with three components, keeping the parts already there
+progid=org.armagetronad.${progname}
+echo ${progname} | grep -q "\." && progid=org.${progname}
+echo ${progname} | grep -q "\..*\." && progid=${progname}
+AC_SUBST(progid)
 
 # all include directories added via -I so far should be system level inlcudes, divide them from those added by individual makefiles
 # CPPFLAGS="-I- $CPPFLAGS"
