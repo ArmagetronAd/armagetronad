@@ -358,11 +358,7 @@ deploy_docker:
     - rm -f ~/.docker/config.json
   script:
     # test whether we're current
-    - tagfile=/messageboard/current_pipeline_${CI_COMMIT_REF_NAME}
-    - if ! echo ${CI_COMMIT_REF_NAME} | grep -q ^release && test -r ${tagfile} && ! test ${CI_PIPELINE_IID} == `cat ${tagfile}`; then
-    -   echo "A newer build is already in the pipeline, abort."
-    -   exit 0
-    - fi
+    - docker/scripts/obsolete.sh || exit 0
 
     # build
     - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY 2>&1 | grep -v WARNING\|credential || exit $?
