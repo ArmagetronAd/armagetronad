@@ -7,6 +7,13 @@
 . ./context/version.sh || exit $?
 . ../deploy/targets.sh || exit $?
 
+# register at repository
+set +x
+if test x${CI_COMMIT_REF_PROTECTED} = xtrue && ! test -z "${CI_REGISTRY_PASSWORD}" && ! test -z "${CI_REGISTRY_USER}" && ! test -z "${CI_REGISTRY}"; then
+	echo ${CI_REGISTRY_PASSWORD} | docker login -u ${CI_REGISTRY_USER} --password-stdin ${CI_REGISTRY} 2>&1 | grep -v WARNING\|credential || exit $?
+else
+	CI_COMMIT_REF_PROTECTED=false
+fi
 
 if ${STAGING} == true; then
 	NAME=${PACKAGE_NAME}-staging

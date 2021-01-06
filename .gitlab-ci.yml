@@ -323,6 +323,8 @@ build_docker:
    - build_debtest
   dependencies:
    - build_prepare
+  after_script:
+    - rm -f ~/.docker/config.json
   script:
     - make -C gitlab_build/docker/build build_docker.tag || exit $?
 
@@ -340,8 +342,9 @@ stage_docker:
    - if: '$CI_COMMIT_REF_PROTECTED == "true"'
      when: on_success
    - when: never
+  after_script:
+    - rm -f ~/.docker/config.json
   script:
-    - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY 2>&1 | grep -v WARNING\|credential || exit $?
     - make -C gitlab_build/docker/build staged_deploy_docker.tag || exit $?
 
 # deploy docker image
@@ -359,6 +362,8 @@ deploy_docker:
    - if: '$CI_COMMIT_REF_PROTECTED == "true"'
      when: on_success
    - when: never
+  after_script:
+    - rm -f ~/.docker/config.json
   script:
     # test whether we're current
     - tagfile=/messageboard/current_pipeline_${CI_COMMIT_REF_NAME}
