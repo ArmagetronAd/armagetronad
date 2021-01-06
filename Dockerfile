@@ -38,6 +38,29 @@ make install
 
 ########################################
 
+# build
+FROM builder as build
+
+ENV SOURCE_DIR /root/armagetronad
+ENV BUILD_DIR /root/build
+
+ARG CONFIGURE_ARGS
+ARG FAKERELEASE
+ARG BRANCH
+
+COPY . ${SOURCE_DIR}
+WORKDIR ${SOURCE_DIR}
+
+RUN (test -r configure && test -f missing) || (./bootstrap.sh && cat version.m4)
+
+RUN mkdir -p ${BUILD_DIR} && chmod 755 ${BUILD_DIR}
+WORKDIR ${BUILD_DIR}
+RUN ARMAGETRONAD_FAKERELEASE=${FAKERELEASE} ../armagetronad/configure --prefix=/usr/local --disable-glout --disable-sysinstall --disable-useradd --disable-master --disable-uninstall --disable-desktop ${CONFIGURE_ARGS}
+RUN make -j `nproc`
+RUN DESTDIR=/root/destdir make install
+
+########################################
+
 # runtime prerequisites
 FROM ${BASE_ALPINE} AS runtime
 LABEL maintainer="Manuel Moos <z-man@users.sf.net>"
@@ -59,29 +82,6 @@ COPY --chown=root --from=builder /usr/lib/*ZThread*.so* /usr/lib/
 
 WORKDIR /
 RUN adduser -D armagetronad
-
-########################################
-
-# build
-FROM builder as build
-
-ENV SOURCE_DIR /root/armagetronad
-ENV BUILD_DIR /root/build
-
-ARG CONFIGURE_ARGS
-ARG FAKERELEASE
-ARG BRANCH
-
-COPY . ${SOURCE_DIR}
-WORKDIR ${SOURCE_DIR}
-
-RUN (test -r configure && test -f missing) || (./bootstrap.sh && cat version.m4)
-
-RUN mkdir -p ${BUILD_DIR} && chmod 755 ${BUILD_DIR}
-WORKDIR ${BUILD_DIR}
-RUN ARMAGETRONAD_FAKERELEASE=${FAKERELEASE} ../armagetronad/configure --prefix=/usr/local --disable-glout --disable-sysinstall --disable-useradd --disable-master --disable-uninstall --disable-desktop ${CONFIGURE_ARGS}
-RUN make -j `nproc`
-RUN DESTDIR=/root/destdir make install
 
 ########################################
 
