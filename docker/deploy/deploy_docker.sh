@@ -61,9 +61,9 @@ function build_cached()
 	CACHE_ARGS=""
 
 	docker build --target ${TARGET}\
-		-t ${DI_TAG} ${CACHE_ARGS} ${PAST_CACHE_ARGS} ${BUILDARGS} || exit $?
+		-t ${DI_TAG} ${PAST_CACHE_ARGS} ${CACHE_ARGS} ${BUILDARGS} || exit $?
 	tag_cache ${CACHE}-${TARGET}
-	PAST_CACHE_ARGS="${PAST_CACHE_ARGS} --cache-from ${CACHE}-${TARGET}"
+	PAST_CACHE_ARGS="--cache-from ${CACHE}-${TARGET} ${PAST_CACHE_ARGS}"
 }
 
 build_cached build
