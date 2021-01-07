@@ -55,8 +55,6 @@ function build()
 }
 
 build build
-build runtime
-#build run_server
 
 # final build
 docker build \
