@@ -5,7 +5,7 @@ ARG FAKERELEASE=false
 ########################################
 
 # runtime prerequisites
-FROM ${BASE_ALPINE} AS runtime
+FROM ${BASE_ALPINE} AS runtime_base
 LABEL maintainer="Manuel Moos <z-man@users.sf.net>"
 
 RUN apk add \
@@ -25,7 +25,7 @@ RUN adduser -D armagetronad
 ########################################
 
 # development prerequisites
-FROM runtime AS builder
+FROM runtime_base AS builder
 
 RUN mkdir src && wget https://forums3.armagetronad.net/download/file.php?id=9628 -O src/zthread.patch.bz2
 RUN wget https://sourceforge.net/projects/zthread/files/ZThread/2.3.2/ZThread-2.3.2.tar.gz/download -O src/zthread.tgz
@@ -82,10 +82,13 @@ DESTDIR=/root/destdir make install
 
 ########################################
 
-# pack
-FROM runtime AS run_server
+# finish runtime
+FROM runtime_base AS runtime
 
 COPY --chown=root --from=builder /usr/lib/*ZThread*.so* /usr/lib/
+
+# pack
+FROM runtime AS run_server
 
 COPY --chown=root --from=build /root/destdir /
 RUN sh /usr/local/share/games/*-dedicated/scripts/sysinstall install /usr/local

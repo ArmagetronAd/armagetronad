@@ -67,6 +67,7 @@ function build_cached()
 }
 
 build_cached build
+build_cached runtime
 
 # final build
 docker build \
