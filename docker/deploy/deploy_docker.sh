@@ -60,7 +60,7 @@ function build_cached()
 	docker pull ${BASE_CACHE}-${TARGET} || \
 	CACHE_ARGS=""
 
-	docker build --target ${TARGET}\
+	docker build --pull --target ${TARGET}\
 		-t ${DI_TAG} ${PAST_CACHE_ARGS} ${CACHE_ARGS} ${BUILDARGS} || exit $?
 	tag_cache ${CACHE}-${TARGET}
 	PAST_CACHE_ARGS="--cache-from ${CACHE}-${TARGET} ${PAST_CACHE_ARGS}"
@@ -70,7 +70,7 @@ build_cached build
 build_cached runtime
 
 # final build
-docker build \
+docker build --pull \
 	-t ${DI_TAG} ${PAST_CACHE_ARGS} ${BUILDARGS} || exit $?
 
 if test -z "${DOCKER_NODEPLOY}"; then
