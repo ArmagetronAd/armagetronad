@@ -14,14 +14,13 @@ ARG PROGNAME
 
 RUN apk add \
 bash \
+boost-thread \
 libxml2 \
 libgcc \
 libstdc++ \
+protobuf \
 --no-cache
 
-# for 0.4
-# boost-thread \
-# protobuf \
 
 WORKDIR /
 RUN adduser -D ${PROGNAME}
@@ -35,30 +34,16 @@ FROM runtime_base AS builder
 RUN apk add \
 autoconf \
 automake \
+boost-dev \
 patch \
 bash \
 bison \
 g++ \
 make \
 libxml2-dev \
+protobuf-dev \
 python3 \
 --no-cache
-
-# for 0.4
-#protobuf-dev \
-#boost-dev \
-#boost-thread \
-
-# download, patch, configure, build, install ZThread and remove all source traces in a single layer
-RUN mkdir src && wget https://forums3.armagetronad.net/download/file.php?id=9628 -O src/zthread.patch.bz2 && \
-wget https://sourceforge.net/projects/zthread/files/ZThread/2.3.2/ZThread-2.3.2.tar.gz/download -O src/zthread.tgz && \
-cd src && tar -xzf zthread.tgz && cd ZThread* && bzcat ../zthread.patch.bz2 | patch -p 1 && \
-CXXFLAGS="-fpermissive -DPTHREAD_MUTEX_RECURSIVE_NP=PTHREAD_MUTEX_RECURSIVE" ./configure --prefix=/usr --enable-shared=yes --enable-static=no && \
-make -j `nproc` && \
-make install && \
-cd ../../ && rm -r src
-
-#RUN find /usr/lib/ -name *ZThread*
 
 ########################################
 
@@ -90,13 +75,9 @@ rm -rf ${SOURCE_DIR} ${BUILD_DIR}
 
 ########################################
 
-# finish runtime
-FROM runtime_base AS runtime
-
-COPY --chown=root --from=builder /usr/lib/*ZThread*.so* /usr/lib/
-
 # pack
-FROM runtime AS run_server
+FROM runtime_base AS runtime
+FROM runtime_base AS run_server
 
 ARG PROGNAME
 
