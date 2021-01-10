@@ -50,13 +50,14 @@ source_date_epoch=SOURCE_DATE_EPOCH
 test ${source_date_epoch} = SOURCE_DATE_EPOCH && source_date_epoch=`date +%s`
 AC_SUBST(source_date_epoch)
 
-# determine date
-date_iso=`date -I -d "@${source_date_epoch}"` || exit $?
+# determine date, following the epoch time if we can
+date_iso=`date +%Y-%m-%d -d "@${source_date_epoch}" 2> /dev/null` || date_iso=`date +%Y-%m-%d` || exit $?
 dnl echo date_iso=${date_iso}
-date_rfc=`date -R -d "@${source_date_epoch}"` || exit $?
-dnl echo date_rfc=${date_rfc}
 AC_SUBST(date_iso)
-AC_SUBST(date_rfc)
+dnl date -R does not have an easy format string replacement and is unsupported in BSD. We don't need it right now, though.
+dnl date_rfc=`date -R -d "@${source_date_epoch}"` || exit $?
+dnl echo date_rfc=${date_rfc}
+dnl AC_SUBST(date_rfc)
 
 AC_ARG_VAR(CXXFLAGS,Flags passed to the C++ compiler)
 AC_ARG_VAR(DEBUGLEVEL,[Debug level for developers, normal users can safely ignore it. Accepted values go from 0 to 5. See README-DEVELOPER for details.])
