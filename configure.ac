@@ -57,19 +57,18 @@ AC_ARG_VAR(SDL_CONFIG,[Configuration script of SDL to use, defaults to sdl-confi
 AC_ARG_VAR(SDL2_CONFIG,[Configuration script of SDL to use, defaults to sdl2-config])
 AC_ARG_VAR(FREETYPE_CONFIG,[Configuration script of freetype to use, defaults to freetype-config])
 
-# determine date, if possible from prerecorded git log
-date_raw_rfc=`grep "Date:" ${srcdir}/ChangeLog | head -n 1 | sed -e 's/Date: *//'`
-dnl echo date_raw_rfc=${date_raw_rfc}
-date_iso=`date -I` || exit $?
+source_date_epoch=SOURCE_DATE_EPOCH
+test ${source_date_epoch} = SOURCE_DATE_EPOCH && source_date_epoch=`date +%s`
+AC_SUBST(source_date_epoch)
+
+# determine date, following the epoch time if we can
+date_iso=`date +%Y-%m-%d -d "@${source_date_epoch}" 2> /dev/null` || date_iso=`date +%Y-%m-%d` || exit $?
 dnl echo date_iso=${date_iso}
-date_rfc=`date -R` || exit $?
-dnl echo date_rfc=${date_rfc}
-test -z "${date_raw_rfc}" || date_iso=`date -I -d "${date_raw_rfc}"` || exit $?
-dnl echo date_iso=${date_iso}
-test -z "${date_raw_rfc}" || date_rfc=`date -R -d "${date_raw_rfc}"` || exit $?
-dnl echo date_rfc=${date_rfc}
 AC_SUBST(date_iso)
-AC_SUBST(date_rfc)
+dnl date -R does not have an easy format string replacement and is unsupported in BSD. We don't need it right now, though.
+dnl date_rfc=`date -R -d "@${source_date_epoch}"` || exit $?
+dnl echo date_rfc=${date_rfc}
+dnl AC_SUBST(date_rfc)
 
 AC_ARG_VAR(CXXFLAGS,Flags passed to the C++ compiler)
 AC_ARG_VAR(DEBUGLEVEL,[Debug level for developers, normal users can safely ignore it. Accepted values go from 0 to 5. See README-DEVELOPER for details.])
