@@ -78,6 +78,8 @@ if test -z "${DOCKER_NODEPLOY}"; then
 		tag ${REGISTRY}/${DI_TAG} || exit $?
 	fi
 	tag ${REGISTRY}/${NAME} || exit $?
+else
+	docker run --rm ${DI_TAG} --version || exit $?
 fi
 
 docker image rm ${DI_TAG} || exit $?
