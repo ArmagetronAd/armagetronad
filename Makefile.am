@@ -16,7 +16,7 @@ include $(top_srcdir)/Makefile.manual
 EXTRA_DIST = README-DEVELOPER README-Subversion README-SDL \
 armagetron.kdevelop armagetron.kdevelop.pcs armagetron.kdevses tron.ico \
 models sound textures bootstrap.sh music accustomdir.m4 fingerprint \
-win32 major_version
+win32 major_version Dockerfile
 # language/update.py
 
 # resource is included as a subdir for the purpose of keeping this makefile short and delegating
