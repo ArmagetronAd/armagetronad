@@ -304,6 +304,7 @@ deploy_release:
     - ./docker/scripts/fix_gits.sh || exit $?
     - ./docker/deploy/prepare_deploy.sh || exit $?
   script:
+    # test whether we're current
     - docker/scripts/obsolete.sh || exit 0
 
     # build
@@ -368,6 +369,25 @@ deploy_docker:
     # build
     - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY 2>&1 | grep -v WARNING\|credential || exit $?
     - make -C gitlab_build/docker/build unstaged_deploy_docker.tag || exit $?
+
+# deploy build to Gitlab
+deploy_gitlab:
+  stage: deploy
+  dependencies:
+   - build_prepare
+   - build_collect
+  rules:
+   - if: $CI_MERGE_REQUEST_ID
+     when: never
+   - if: $CI_COMMIT_REF_PROTECTED == "true"
+     when: on_success
+   - when: never
+  script:
+    # test whether we're current
+    - docker/scripts/obsolete.sh || exit 0
+
+    # deploy
+    - make -C gitlab_build/docker/build unstaged_deploy_gitlab || exit $?
 
 # post-build tests
 post_test:
