@@ -125,6 +125,7 @@ public:
     gZone &         SetTargetRadius     (REAL radius) {targetRadius_ = radius; return *this;}      //!< Sets the target radius
     gZone &         SetFallSpeed        (REAL speed) {fallSpeed_ = speed; return *this;}      //!< Sets the fall speed
 
+    bool InteractsWithCycle() { return interactWithCycle_; }
     bool isInside(gCycle *cycle)
     {
         for(int i=cycesInside_.Len()-1;i>=0;--i)
@@ -136,6 +137,20 @@ public:
         }
         return false;
     }
+    
+    bool InteractsWithZone() { return interactWithZone_; }
+    bool isInside(gZone *zone)
+    {
+        for(int i=zonesInside_.Len()-1;i>=0;--i)
+        {
+            if(zonesInside_[i] == zone)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+	
 	void            OnCycleDestroyed    (gCycle *cycle,REAL time);
 
     void BounceOffPoint(eCoord dest, eCoord collide);
@@ -177,6 +192,9 @@ protected:
     eCoord newImpactVelocity_;
 
     bool wallPenetrate_;
+
+    bool interactWithCycle_;
+    bool interactWithZone_;
 
     bool dynamicCreation_;  //??? remove
     bool delayCreation_;
@@ -236,6 +254,20 @@ private:
             if (p && (p == cycle))
             {
                 cycesInside_.RemoveAt(i);
+                break;
+            }
+        }
+    }
+    tArray<gZone *> zonesInside_;
+    void AddZoneInteraction(gZone *zone) { zonesInside_.Insert(zone); }
+    void RemoveZoneInteraction(gZone *zone)
+    {
+        for(int i=0; i < zonesInside_.Len(); i++)
+        {
+            gZone *z = zonesInside_[i];
+            if (z && (z == zone))
+            {
+                zonesInside_.RemoveAt(i);
                 break;
             }
         }
@@ -313,6 +345,8 @@ class gDeathZoneHack: public gZone
 
 								 //!< reacts on objects inside the zone
 		virtual void OnEnter( gDeathZoneHack *target, REAL time );
+		virtual void OnEnter( gZone *target, REAL time );
+		virtual void OnExit( gZone *target, REAL time );
 
 	protected:
 		virtual void OnVanish(); //!< called when the zone vanishes
@@ -484,6 +518,7 @@ class gBallZoneHack: public gZone
 		virtual bool Timestep(REAL currentTime);
 								 //!< reacts on objects inside the zone (kills them)
 		virtual void OnEnter( gCycle *target, REAL time );
+		virtual void OnEnter( gZone *target, REAL time );
 
 		tJUST_CONTROLLED_PTR<ePlayerNetID> lastPlayer_;
 };
@@ -704,6 +739,7 @@ class gObjectZoneHack: public gZone
         ~gObjectZoneHack();
 
         virtual void OnEnter(gZone *target, REAL time);
+        virtual void OnExit(gZone *target, REAL time);
         virtual void OnExit(gCycle *target, REAL time);
 
         REAL SeekUpdateTime()         { return this->seekUpdateTime_; }
@@ -743,6 +779,7 @@ class gSoccerZoneHack: public gZone
 		bool CheckTeamAssignment();         //  check if the soccer goal zonehas been assigned a team owner
 
 		virtual void OnEnter(gSoccerZoneHack *target, REAL time);
+		virtual void OnEnter( gZone *target, REAL time );
 
 		//  if it's a ball, go home after either dying or hitting a goal
 		void GoHome();
