@@ -675,6 +675,15 @@ context.deploy_steam: context.deploy_base_steam ${srcdir}/../deploy/steamcontent
 	echo "steamcmd" > $@.dir/image
 	echo > $@
 
+context.deploy_gitlab: context.deploy_base_gitlab Makefile
+	${srcdir}/prepare_context.sh $@.dir $<.dir/'*'
+	echo "#/bin/bash" > $@.dir/CI_INFO_DEPLOY_GITLAB
+	echo "CI_JOB_TOKEN=${CI_JOB_TOKEN}" >> $@.dir/CI_INFO_DEPLOY_GITLAB
+	echo "CI_API_V4_URL=${CI_API_V4_URL}" >> $@.dir/CI_INFO_DEPLOY_GITLAB
+	echo "CI_PROJECT_ID=${CI_PROJECT_ID}" >> $@.dir/CI_INFO_DEPLOY_GITLAB
+	chmod 755 $@.dir/CI_INFO_DEPLOY_GITLAB
+	echo > $@
+
 context.deploy_ppa_%: result.debsrc_% ${srcdir}/../deploy/deploy_ppa.sh ../deploy/targets.sh CI_INFO
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' ${srcdir}/../deploy/deploy_ppa.sh ../deploy/targets.sh ../deploy/secrets/*.gpg CI_INFO
 	echo > $@
@@ -733,6 +742,7 @@ result.deploy_download: deploy_external
 # individual deploy targets
 deploy_lp: result.deploy_lp
 deploy_scp: result.deploy_scp
+deploy_gitlab: result.deploy_gitlab
 deploy_steam: result.deploy_steam
 deploy_zi: result.deploy_zi
 deploy_fp: result.deploy_fp
@@ -765,7 +775,7 @@ staged_%:
 	sed -i ../deploy/targets.sh -e "s/STAGING=false/STAGING=true/"
 	MAKE=$(MAKE) ${srcdir}/make_deploy.sh $*
 
-.PHONY: deploy deploy_ppa deploy_scp deploy_steam deploy_base deploy_download
+.PHONY: deploy deploy_ppa deploy_scp deploy_gitlab deploy_steam deploy_base deploy_download
 
 .PRECIOUS: context.debsrc_dapper \
 context.debsrc_bionic result.debsrc_bionic context.deploy_ppa_bionic result.deploy_ppa_bionic \
@@ -775,6 +785,7 @@ context.debsrc_focal  result.debsrc_focal  context.deploy_ppa_focal  result.depl
 context.debsrc_groovy result.debsrc_groovy context.deploy_ppa_groovy result.deploy_ppa_groovy \
 context.debsrc_hirsute result.debsrc_hirsute context.deploy_ppa_hirsute result.deploy_ppa_hirsute \
 context.deploy_base_scp context.deploy_scp \
+context.deploy_base_gitlab context.deploy_gitlab \
 context.deploy_base_download result.deploy_download context.deploy_download
 
 #***************************************************************

@@ -26,6 +26,7 @@ DI_TAG=${NAME}:${PACKAGE_VERSION}
 CACHE=${REGISTRY}/cache:${PACKAGE_NAME}
 BASE_CACHE=${REGISTRY}/cache:armagetronad
 
+# tag a release; upload if we can
 function tag()
 {
 	docker tag ${DI_TAG} $1 || exit $?
@@ -34,9 +35,20 @@ function tag()
 	fi
 }
 
+# tag a cache; don't upload if we're deploying, there is nothing new to store then
+function tag_cache()
+{
+	docker tag ${DI_TAG} $1 || exit $?
+	if ! test -z "${DOCKER_NODEPLOY}" && test x${CI_COMMIT_REF_PROTECTED} = xtrue; then
+		docker push $1 || exit $?
+	fi
+}
+
 BUILDARGS="$1"
 PAST_CACHE_ARGS=""
-function build()
+
+# build to target $1 using the repository-stored cache
+function build_cached()
 {
 	TARGET=$1
 
@@ -48,18 +60,17 @@ function build()
 	docker pull ${BASE_CACHE}-${TARGET} || \
 	CACHE_ARGS=""
 
-	docker build --target ${TARGET}\
-		-t ${DI_TAG} ${CACHE_ARGS} ${PAST_CACHE_ARGS} ${BUILDARGS} || exit $?
-	tag ${CACHE}-${TARGET} || exit $?
-	PAST_CACHE_ARGS="${PAST_CACHE_ARGS} --cache-from ${CACHE}-${TARGET}"
+	docker build --pull --target ${TARGET}\
+		-t ${DI_TAG} ${PAST_CACHE_ARGS} ${CACHE_ARGS} ${BUILDARGS} || exit $?
+	tag_cache ${CACHE}-${TARGET}
+	PAST_CACHE_ARGS="--cache-from ${CACHE}-${TARGET} ${PAST_CACHE_ARGS}"
 }
 
-build build
-build runtime
-#build run_server
+build_cached build
+build_cached runtime
 
 # final build
-docker build \
+docker build --pull \
 	-t ${DI_TAG} ${PAST_CACHE_ARGS} ${BUILDARGS} || exit $?
 
 if test -z "${DOCKER_NODEPLOY}"; then
@@ -67,6 +78,8 @@ if test -z "${DOCKER_NODEPLOY}"; then
 		tag ${REGISTRY}/${DI_TAG} || exit $?
 	fi
 	tag ${REGISTRY}/${NAME} || exit $?
+else
+	docker run --rm ${DI_TAG} --version || exit $?
 fi
 
 docker image rm ${DI_TAG} || exit $?
