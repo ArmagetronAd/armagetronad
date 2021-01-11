@@ -2192,6 +2192,32 @@ ePlayerNetID * se_GetAlivePlayerFromUserID( int uid )
     return 0;
 }
 
+static bool se_MoveHere(int p)
+{
+    tString addr("");
+    if(nMachine::GetMachine(p).GetIP().StartsWith("127."))
+    {
+        addr << "127.0.0.1";
+    }
+    else if(sn_GetMyDNSName().Len() > 1)
+    {
+        addr = sn_GetMyDNSName();
+    }
+    else
+    {
+        addr = sn_GetMyAddress();
+        addr = addr.SubStr(0,addr.StrPos(":"));
+        if(addr.StartsWith("*"))
+        {
+            con << "Server doesn't know its own address!\n";
+            return false;
+        }
+    }
+    nServerInfoRedirect redirect(addr,sn_GetServerPort());
+    sn_KickUser(p,"",0,&redirect);
+    return true;
+}
+
 #ifndef KRAWALL_SERVER
 //The Base Remote Admin Password
 static tString sg_adminPass( "NONE" );
@@ -2753,31 +2779,6 @@ static eTeam * se_GetManagedTeam( ePlayerNetID * admin )
 }
 #endif // KRAWALL
 
-static bool se_MoveHere(int p)
-{
-    tString addr("");
-    if(nMachine::GetMachine(p).GetIP().StartsWith("127."))
-    {
-        addr << "127.0.0.1";
-    }
-    else if(sn_GetMyDNSName().Len() > 1)
-    {
-        addr = sn_GetMyDNSName();
-    }
-    else
-    {
-        addr = sn_GetMyAddress();
-        addr = addr.SubStr(0,addr.StrPos(":"));
-        if(addr.StartsWith("*"))
-        {
-            con << "Server doesn't know its own address!\n";
-            return false;
-        }
-    }
-    nServerInfoRedirect redirect(addr,sn_GetServerPort());
-    sn_KickUser(p,"",0,&redirect);
-    return true;
-}
 
 static eLadderLogWriter se_adminLoginWriter("ADMIN_LOGIN", false);
 static eLadderLogWriter se_adminLogoutWriter("ADMIN_LOGOUT", false);
