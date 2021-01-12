@@ -7762,6 +7762,7 @@ void gSoccerZoneHack::OnEnter( gCycle *target, REAL time )
             {
                 this->SetVelocity(eCoord(0,0));
                 RequestSync();
+                return;
             }
         }
         
@@ -7818,6 +7819,7 @@ void gSoccerZoneHack::OnEnter( gCycle *target, REAL time )
             {
                 this->SetVelocity(eCoord(0,0));
                 RequestSync();
+                return;
             }
         }
 
