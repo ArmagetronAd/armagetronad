@@ -7618,6 +7618,9 @@ gSoccerZoneHack::~gSoccerZoneHack( void )
 bool sg_soccerBallSlowdown = true;
 static tSettingItem<bool> sg_soccerBallSlowdownConf("SOCCER_BALL_SLOWDOWN", sg_soccerBallSlowdown);
 
+bool sg_soccerBallSlowdownHack = false;
+static tSettingItem<bool> sg_soccerBallSlowdownHackConf("SOCCER_BALL_SLOWDOWN_HACKYMETHOD", sg_soccerBallSlowdownHack);
+
 REAL sg_soccerBallSlowdownSpeed = 0.07;
 bool restrictBallSlowdownSpeed(const REAL &newValue)
 {
@@ -7660,6 +7663,8 @@ bool gSoccerZoneHack::Timestep( REAL time )
         //  store the current speed for setup
         eCoord currentVelocity = GetVelocity();
 
+        if(sg_soccerBallSlowdownHack)
+        {
         //  get the values working with decreasing the velocity speed
         if (currentVelocity.x < 0)
             currentVelocity.x += sg_soccerBallSlowdownSpeed;
@@ -7676,6 +7681,20 @@ bool gSoccerZoneHack::Timestep( REAL time )
 
         if (((currentVelocity.y > -1) && (currentVelocity.y < 0)) || ((currentVelocity.y > 0) && (currentVelocity.y < 1)))
             currentVelocity.y = 0;
+        }
+        else
+        {
+            REAL dt = time - referenceTime_;
+            REAL speed = currentVelocity.Norm();
+            if(speed > 0)
+            {
+                speed -= sg_soccerBallSlowdownSpeed*100*dt;
+                if(speed < 0) speed = 0;
+                currentVelocity.Normalize();
+                currentVelocity *= speed;
+            }
+            SetReferenceTime();
+        }
 
         //  set new velocity
         SetVelocity(currentVelocity);
