@@ -7746,6 +7746,25 @@ void gSoccerZoneHack::OnEnter( gCycle *target, REAL time )
 {
     if (!team && (zoneType == gSoccer_BALL || zoneType == gSoccer_BALL_SCORED))
     {
+        
+        REAL dt = time - referenceTime_;
+        if(sg_ballRimStop)
+        {
+            eCoord dest(posx_(dt), posy_(dt));
+            s_zoneWallInteractionFound = false;
+            s_zoneWallInteractionCoord = dest;
+            s_zoneWallInteractionRadius = GetRadius();
+            grid->ProcessWallsInRange(&S_ZoneWallIntersect,
+                s_zoneWallInteractionCoord,
+                s_zoneWallInteractionRadius,
+                CurrentFace());
+            if (s_zoneWallInteractionFound)
+            {
+                this->SetVelocity(eCoord(0,0));
+                RequestSync();
+            }
+        }
+        
         //  calculate the bounce off. Source: gBallZoneHack
         eCoord p2 = target->Position();
         eCoord v2 = target->Direction()*target->Speed();
@@ -7785,6 +7804,22 @@ void gSoccerZoneHack::OnEnter( gCycle *target, REAL time )
         eCoord new_v1 = base*-target->Speed();
         eCoord new_p1 = p1c + new_v1*(-t+0.01);
         new_v1 = new_v1*(1+sg_ballCycleBoost*target->GetAcceleration()/100);
+        
+        if(sg_ballRimStop)
+        {
+            s_zoneWallInteractionFound = false;
+            s_zoneWallInteractionCoord = new_p1 + new_v1 * dt;
+            s_zoneWallInteractionRadius = GetRadius();
+            grid->ProcessWallsInRange(&S_ZoneWallIntersect,
+                s_zoneWallInteractionCoord,
+                s_zoneWallInteractionRadius,
+                CurrentFace());
+            if (s_zoneWallInteractionFound)
+            {
+                this->SetVelocity(eCoord(0,0));
+                RequestSync();
+            }
+        }
 
         SetPosition(new_p1);
         SetVelocity(new_v1);
