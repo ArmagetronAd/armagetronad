@@ -3633,6 +3633,7 @@ ball_kills_help                     Flag indicating if a team owned ball can kil
 ball_speed_decay_help               Rate at which the ball slows down
 ball_speed_hit_decay_help           Amount the ball slows down when hitting an object
 ball_cycle_accel_boost_help         Boost Cycle gives the ball when colliding
+ball_stop_if_rim_and_cycle_help     Should the ball stop when interacting with both a cycle and the rim?
 ball_autorespawn_help               Flag indicating whether balls should automatically respawn when goal is scored
 
 ## Target Zone

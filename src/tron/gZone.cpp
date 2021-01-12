@@ -96,6 +96,9 @@ static tSettingItem<REAL> sg_ballSpeedDecayConf( "BALL_SPEED_DECAY", sg_ballSpee
 static REAL sg_ballSpeedHitDecay = 0;
 static tSettingItem<REAL> sg_ballSpeedHitDecayConf( "BALL_SPEED_HIT_DECAY", sg_ballSpeedHitDecay );
 
+static bool sg_ballRimStop = false;
+static tSettingItem<bool> sg_ballRimStopConf( "BALL_STOP_IF_RIM_AND_CYCLE", sg_ballRimStop );
+
 static REAL sg_ballCycleBoost = 0;
 static tSettingItem<REAL> sg_ballCycleBoostConf( "BALL_CYCLE_ACCEL_BOOST", sg_ballCycleBoost );
 
@@ -4762,7 +4765,14 @@ void gBallZoneHack::OnEnter( gCycle * target, REAL time )
 
     //Only process the cycle kick if there is no wall inside the zone
     if (s_zoneWallInteractionFound)
+    {
+        if(sg_ballRimStop)
+        {
+            this->SetVelocity(eCoord(0,0));
+            RequestSync();
+        }
         return;
+    }
 
     REAL r1 = this->GetRadius();
     REAL r2 = target->Player()->ping/.2;                             // the cycle "radius". accomidates for higher ping players
@@ -4809,7 +4819,14 @@ void gBallZoneHack::OnEnter( gCycle * target, REAL time )
         CurrentFace());
 
     if (s_zoneWallInteractionFound)
+    {
+        if(sg_ballRimStop)
+        {
+            this->SetVelocity(eCoord(0,0));
+            RequestSync();
+        }
         return;
+    }
 
     SetReferenceTime();
     this->SetPosition(new_p1);
