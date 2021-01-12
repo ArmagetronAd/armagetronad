@@ -829,10 +829,14 @@ void gZone::Collapse()
 static bool sg_zoneWallDeath = false;
 static tSettingItem<bool> sg_zoneWallDeathConf("ZONE_WALL_DEATH", sg_zoneWallDeath);
 
+static bool sg_zoneWallBoundaryRestrict = true;
+static tSettingItem<bool> sg_zoneWallBoundaryRestrictedConf("ZONE_WALL_BOUNDARY_VALUE_RESTRICTED", sg_zoneWallBoundaryRestrict);
+
 static REAL sg_zoneWallBoundary = -20.0;
 bool restrictZoneBoundry(const REAL &newValue)
 {
     //  we cannot have the boundry limit be greater than -1
+    if(sg_zoneWallBoundaryRestrict)
     if (newValue > 0) return false;
     return true;
 }
@@ -1007,7 +1011,7 @@ bool gZone::Timestep( REAL time )
 
                 REAL clip = eWallRim::Clip(start,stop,0);
 
-                if (clip < 1)
+                if (clip < 1 || !eWallRim::IsBound(GetPosition(), sg_zoneWallBoundary))
                 {
                     gBallZoneHack *thisBallZone = dynamic_cast<gBallZoneHack *>(this);
                     if (thisBallZone && sg_ballAutoRespawn)
