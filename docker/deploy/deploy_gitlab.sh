@@ -13,7 +13,7 @@ set -x
 # pad numbers to two digits
 # remove leading 0
 # only leave the first three dots
-GITLAB_VERSION=`echo ${PACKAGE_VERSION} | sed -e 's,[[:alpha:]_]\+,.,g' -e 's,\.\([0-9]\)\.,.0\1.,g' -e 's,\.\([0-9]\)\.,.0\1.,g' -e 's,\.\([0-9]\)\.,.0\1.,g' -e 's,^0.,0,' -e 's,\.,,3g'` || exit $?
+GITLAB_VERSION=`echo ${PACKAGE_VERSION} | sed -e 's,[[:alpha:]_+-]\+,.,g' -e 's,\.\([0-9]\)\.,.0\1.,g' -e 's,\.\([0-9]\)\.,.0\1.,g' -e 's,\.\([0-9]\)\.,.0\1.,g' -e 's,^0.,0,' -e 's,\.,,3g'` || exit $?
 
 if ${STAGING} == true; then
 	exit 0
