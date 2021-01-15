@@ -87,6 +87,13 @@ case ${SERIES}+${SUFFIX}+@version@ in
 	STEAM_BRANCH="experimental"
 	;;
 
+	AP*)
+	SF_DIR="ap/${YEAR}"
+	LP_SERIES=""
+	ZI_SERIES="ap"
+	STEAM_BRANCH="ap"
+	;;
+
 	HACK*)
 	SF_DIR="wip/${YEAR}"
 	LP_SERIES="hacks"
@@ -149,7 +156,7 @@ else
 		# A proper final build. Deploy to LTS ppa.
 		UBUNTU_PPA=ppa:armagetronad-dev/lts
 		;;
-		*+CURRENT|*+EXPERIMENTAL|experimental+*)
+		*+CURRENT|*+EXPERIMENTAL|experimental+*|*+AP)
 		# A proper final build. Deploy to regular PPA.
 		UBUNTU_PPA=ppa:armagetronad-dev/ppa
 		;;
