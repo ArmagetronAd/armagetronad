@@ -24,7 +24,6 @@ libstdc++ \
 # protobuf \
 
 WORKDIR /
-RUN adduser -D ${PROGNAME}
 
 ########################################
 
@@ -101,11 +100,25 @@ FROM runtime AS run_server
 ARG PROGNAME
 
 COPY --chown=root --from=build /root/destdir /
+
 RUN sh /usr/local/share/games/*-dedicated/scripts/sysinstall install /usr/local && \
-echo -e "#!/bin/bash\n/usr/local/bin/${PROGNAME}-dedicated \"\$@\"" > /usr/local/bin/run.sh && \
-chmod 755 /usr/local/bin/run.sh
+echo -e "#!/bin/bash\n \
+/usr/local/bin/${PROGNAME}-dedicated \
+--userdatadir /usr/share/${PROGNAME} \
+--vardir /var/${PROGNAME} \
+--autoresourcedir /var/${PROGNAME}/resource \
+\"\$@\"" > /usr/local/bin/run.sh && \
+chmod 755 /usr/local/bin/run.sh && \
+mkdir -p /var/${PROGNAME}-dedicated && chmod 777 /var/${PROGNAME}-dedicated
 
-USER ${PROGNAME}
+USER nobody:nobody
 
+VOLUME ["/var/${PROGNAME}-dedicated"]
 ENTRYPOINT ["/usr/local/bin/run.sh"]
 EXPOSE 4534/udp
+
+# Dump for launch script testing lines
+#ls -al /var\n \
+#ls -al /var/${PROGNAME}-dedicated\n \
+#bash\n \
+#echo -e "#!/bin/bash\nls -alR /home/${PROGNAME}/.${PROGNAME}-dedicated \"\$@\"\necho bla > /home/${PROGNAME}/.${PROGNAME}-dedicated/var/test.txt" > /usr/local/local/bin/run.sh && \
