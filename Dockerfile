@@ -1,4 +1,4 @@
-ARG BASE_ALPINE=amd64/alpine:3.12
+ARG BASE_ALPINE=docker.io/alpine:3.12
 ARG CONFIGURE_ARGS=""
 ARG FAKERELEASE=false
 ARG PROGNAME="armagetronad"
