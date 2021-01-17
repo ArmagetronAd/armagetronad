@@ -109,11 +109,11 @@ echo -e "#!/bin/bash\n \
 --autoresourcedir /var/${PROGNAME}/resource \
 \"\$@\"" > /usr/local/bin/run.sh && \
 chmod 755 /usr/local/bin/run.sh && \
-mkdir -p /var/${PROGNAME}-dedicated && chmod 777 /var/${PROGNAME}-dedicated
+mkdir -p /var/${PROGNAME} && chmod 777 /var/${PROGNAME}
 
 USER nobody:nobody
 
-VOLUME ["/var/${PROGNAME}-dedicated"]
+VOLUME ["/var/${PROGNAME}"]
 ENTRYPOINT ["/usr/local/bin/run.sh"]
 EXPOSE 4534/udp
 
@@ -121,4 +121,3 @@ EXPOSE 4534/udp
 #ls -al /var\n \
 #ls -al /var/${PROGNAME}-dedicated\n \
 #bash\n \
-#echo -e "#!/bin/bash\nls -alR /home/${PROGNAME}/.${PROGNAME}-dedicated \"\$@\"\necho bla > /home/${PROGNAME}/.${PROGNAME}-dedicated/var/test.txt" > /usr/local/local/bin/run.sh && \
