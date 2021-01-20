@@ -37,6 +37,7 @@ armascript_SCRIPTS=$(scriptsToBuild) $(rcScripts)
 # What goes in a distribution
 
 EXTRA_DIST=\
+	docker-entrypoint.sh.in\
 	install.in\
 	masterstarter.in\
 	rcd_config.in\

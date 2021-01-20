@@ -17,6 +17,7 @@ bash \
 libxml2 \
 libgcc \
 libstdc++ \
+runit \
 --no-cache
 
 # for 0.4
@@ -100,24 +101,15 @@ FROM runtime AS run_server
 ARG PROGNAME
 
 COPY --chown=root --from=build /root/destdir /
+COPY batch/docker-entrypoint.sh.in /usr/local/bin/docker-entrypoint.sh
 
 RUN sh /usr/local/share/games/*-dedicated/scripts/sysinstall install /usr/local && \
-echo -e "#!/bin/bash\n \
-/usr/local/bin/${PROGNAME}-dedicated \
---userdatadir /usr/share/${PROGNAME} \
---vardir /var/${PROGNAME} \
---autoresourcedir /var/${PROGNAME}/resource \
-\"\$@\"" > /usr/local/bin/run.sh && \
-chmod 755 /usr/local/bin/run.sh && \
-mkdir -p /var/${PROGNAME} && chmod 777 /var/${PROGNAME}
+sed -i /usr/local/bin/docker-entrypoint.sh -e "s/@progname@/${PROGNAME}/g" && \
+chmod 755 /usr/local/bin/docker-entrypoint.sh
 
 USER nobody:nobody
 
 VOLUME ["/var/${PROGNAME}"]
-ENTRYPOINT ["/usr/local/bin/run.sh"]
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+#ENTRYPOINT ["bash"]
 EXPOSE 4534/udp
-
-# Dump for launch script testing lines
-#ls -al /var\n \
-#ls -al /var/${PROGNAME}-dedicated\n \
-#bash\n \

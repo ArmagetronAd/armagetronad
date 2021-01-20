@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# set -x
+
+if test ${UID} = 0; then
+    # running as root inside the container; presumably the caller determined
+    # that this is needed to get write access to the var directory.
+
+    # make var directory usable
+    chown -R nobody:nobody /var/@progname@
+    # drop root rights in exec
+    EXEC_DECO="chpst -u nobody"
+else
+    EXEC_DECO=""
+fi
+
+exec ${EXEC_DECO} /usr/local/bin/@progname@-dedicated \
+    --userdatadir /usr/share/@progname@ \
+    --vardir /var/@progname@ \
+    --autoresourcedir /var/@progname@/resource \
+    "$@"
