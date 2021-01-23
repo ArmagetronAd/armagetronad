@@ -27,6 +27,11 @@ case $1 in
 	CI_COMMIT_REF_NAME=trunk
 	CI_COMMIT_BRANCH=trunk
 	;;
+    ap)
+	CI_COMMIT_REF_PROTECTED=true
+	CI_COMMIT_REF_NAME=hack-0.2.8-sty+ct+ap
+	CI_COMMIT_BRANCH=hack-0.2.8-sty+ct+ap
+	;;
 	hack)
 	CI_COMMIT_REF_PROTECTED=true
 	CI_COMMIT_BEFORE_SHA=
@@ -78,7 +83,7 @@ case $1 in
 	CI_MERGE_REQUEST_TARGET_BRANCH_NAME=trunk
 	;;
 	*)
-	echo "NO VALID CONFIGURATION SELECTED, available: raw (no CI), hack, wip, alpha, beta, rc, release, tag (unprotected), merge"
+	echo "NO VALID CONFIGURATION SELECTED, available: raw (no CI), hack, wip, ap (Alpha Project), alpha, beta, rc, release, tag (unprotected), merge"
 	exit 1
 	;;
 esac
