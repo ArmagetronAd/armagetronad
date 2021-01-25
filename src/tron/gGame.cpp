@@ -5396,7 +5396,7 @@ bool gGame::GameLoop(bool input){
             } else{
                 time = gtime;
             }
-            sg_gameTimeWriter << time;
+            sg_gameTimeWriter << time << gtime;
             sg_gameTimeWriter.write();
             lastTime = time;
         }
