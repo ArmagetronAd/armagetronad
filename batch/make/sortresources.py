@@ -187,7 +187,7 @@ def Redirect(oldFile, newFile, canonicalPath ):
                 splitLineLower = str.split(line.lower())
                 splitLine      = str.split(line)
                 if splitLineLower[0] == "rewriteengine":
-                    # rewriting is already mentioned; we don't have to enable it laster.
+                    # rewriting is already mentioned; we don't have to enable it later.
                     needEngine = False
 
                 # see if there already is a rewrite rule for our file

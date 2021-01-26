@@ -1,4 +1,4 @@
-ARG BASE_ALPINE=amd64/alpine:3.12
+ARG BASE_ALPINE=docker.io/alpine:3.12
 ARG CONFIGURE_ARGS=""
 ARG FAKERELEASE=false
 ARG PROGNAME="armagetronad"
@@ -17,6 +17,7 @@ bash \
 libxml2 \
 libgcc \
 libstdc++ \
+runit \
 --no-cache
 
 # for 0.4
@@ -24,7 +25,6 @@ libstdc++ \
 # protobuf \
 
 WORKDIR /
-RUN adduser -D ${PROGNAME}
 
 ########################################
 
@@ -101,11 +101,15 @@ FROM runtime AS run_server
 ARG PROGNAME
 
 COPY --chown=root --from=build /root/destdir /
+COPY batch/docker-entrypoint.sh.in /usr/local/bin/docker-entrypoint.sh
+
 RUN sh /usr/local/share/games/*-dedicated/scripts/sysinstall install /usr/local && \
-echo -e "#!/bin/bash\n/usr/local/bin/${PROGNAME}-dedicated \"\$@\"" > /usr/local/bin/run.sh && \
-chmod 755 /usr/local/bin/run.sh
+sed -i /usr/local/bin/docker-entrypoint.sh -e "s/@progname@/${PROGNAME}/g" && \
+chmod 755 /usr/local/bin/docker-entrypoint.sh
 
-USER ${PROGNAME}
+USER nobody:nobody
 
-ENTRYPOINT ["/usr/local/bin/run.sh"]
+VOLUME ["/var/${PROGNAME}"]
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+#ENTRYPOINT ["bash"]
 EXPOSE 4534/udp

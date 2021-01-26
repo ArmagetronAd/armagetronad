@@ -21,8 +21,10 @@ else
 	NAME=${PACKAGE_NAME}
 fi
 
+DOCKER_VERSION=`echo ${PACKAGE_VERSION} | sed -e 's,+,-,g'` || exit $?
+
 REGISTRY=${CI_REGISTRY_IMAGE:-registry.gitlab.com/armagetronad/armagetronad}
-DI_TAG=${NAME}:${PACKAGE_VERSION}
+DI_TAG=${NAME}:${DOCKER_VERSION}
 CACHE=${REGISTRY}/cache:${PACKAGE_NAME}
 BASE_CACHE=${REGISTRY}/cache:armagetronad
 
