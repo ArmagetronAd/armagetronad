@@ -7771,9 +7771,11 @@ void gSoccerZoneHack::OnEnter( gCycle *target, REAL time )
     {
         
         REAL dt = time - referenceTime_;
-        if(sg_ballRimStop)
+        
+        eCoord dest(posx_(dt), posy_(dt));
+        
+        //if(sg_ballRimStop)
         {
-            eCoord dest(posx_(dt), posy_(dt));
             s_zoneWallInteractionFound = false;
             s_zoneWallInteractionCoord = dest;
             s_zoneWallInteractionRadius = GetRadius();
@@ -7783,8 +7785,12 @@ void gSoccerZoneHack::OnEnter( gCycle *target, REAL time )
                 CurrentFace());
             if (s_zoneWallInteractionFound)
             {
-                this->SetVelocity(eCoord(0,0));
-                RequestSync();
+                if(GetVelocity().Norm() == 0)
+                {
+                    // Attempt to move the ball away from the wall when stuck
+                    SetVelocity( (-target->Direction()) * target->Speed() );
+                    RequestSync();
+                }
                 return;
             }
         }
@@ -7816,9 +7822,6 @@ void gSoccerZoneHack::OnEnter( gCycle *target, REAL time )
         else if (t1>t2) t = t1;
         else t = t2;
 
-        // if a wall impact happens too close, just skip cycle bouncing for now ...
-        if (t < lastImpactTime_ - time) return;
-
         // now that we have the time, get the positions ...
         eCoord p1c = p1+v1*t;
         eCoord p2c = p2+v2*t;
@@ -7829,7 +7832,7 @@ void gSoccerZoneHack::OnEnter( gCycle *target, REAL time )
         eCoord new_p1 = p1c + new_v1*(-t+0.01);
         new_v1 = new_v1*(1+sg_ballCycleBoost*target->GetAcceleration()/100);
         
-        if(sg_ballRimStop)
+        //if(sg_ballRimStop)
         {
             s_zoneWallInteractionFound = false;
             s_zoneWallInteractionCoord = new_p1 + new_v1 * dt;
@@ -7838,11 +7841,24 @@ void gSoccerZoneHack::OnEnter( gCycle *target, REAL time )
                 s_zoneWallInteractionCoord,
                 s_zoneWallInteractionRadius,
                 CurrentFace());
-            if (s_zoneWallInteractionFound)
+            if (s_zoneWallInteractionFound || (t < lastImpactTime_ - time))
             {
-                this->SetVelocity(eCoord(0,0));
-                RequestSync();
-                return;
+                // Try to determine which way the wall we hit was
+                if(s_zoneWallInteractionImpactCoord.x == s_zoneWallInteractionClosestCoord.x)
+                {
+                    new_p1.x = dest.x;
+                }
+                else if(s_zoneWallInteractionImpactCoord.y == s_zoneWallInteractionClosestCoord.y)
+                {
+                    new_p1.y = dest.y;
+                }
+                else
+                {
+                    // Just set our velocity and let the wall bounce handle it
+                    SetVelocity(new_v1);                    
+                    RequestSync();
+                    return;
+                }
             }
         }
 
