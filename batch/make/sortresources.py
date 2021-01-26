@@ -288,3 +288,7 @@ def main(argList):
 
     # do the work
     scanDir(sourceDirectory, destinationDirectory, function)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
