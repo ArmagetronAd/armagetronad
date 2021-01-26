@@ -7704,7 +7704,7 @@ bool gSoccerZoneHack::Timestep( REAL time )
         if(systime > lasttime || currentVelocity == eCoord(0,0))
         {
             lasttime = systime+sg_soccerBallSlowdownSync;
-            RequestSync();
+            RequestSync( currentVelocity == eCoord(0,0) );
         }
     }
     
