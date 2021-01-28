@@ -1788,6 +1788,11 @@ void eCamera::Timestep(REAL ts){
             // fetch the relevant turning speed
             REAL turnSpeed = ( mode == CAMERA_IN || mode == CAMERA_SMART_IN ) ? s_inTurnSpeed : customTurnSpeed;
 
+            if ( glancingForward )
+            {
+                turnSpeed += GLANCE_SPEED;
+            }
+            
             eCoord cycleDir = CenterCycleDir();
             newdir=dir+cycleDir*(turnSpeed*ts);
 
@@ -1810,6 +1815,11 @@ void eCamera::Timestep(REAL ts){
                 }
 
                 newdir = newdir + normedLastDir*(wrongDirection*ts*turnSpeed*customTurnSpeed180);
+                
+                if ( glancingForward )
+                {
+                    newdir = cycleDir;
+                }
             }
         }
         else
