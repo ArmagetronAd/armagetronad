@@ -1179,6 +1179,10 @@ input_glance_left_tooltip     Drücke \1, um nach links zu blicken.
 input_glance_left_text        Linksblick
 input_glance_left_help        Dreht die Kamera für kurze Zeit nach links.
 
+input_glance_forward_tooltip  Drücke \1 um nach vorne zu sehen (halte die Taste gedrückt und drehe dich um ihren Nutzen zu verstehen)
+input_glance_forward_text     Blicke vorwärts
+input_glance_forward_help     Dreht die Kamera vorübergehend nach vorne.
+
 input_bank_down_text          Blick senken
 input_bank_down_help          Dreht die Kamera nach unten (falls das erlaubt ist) oder bewegt sie nach oben
 

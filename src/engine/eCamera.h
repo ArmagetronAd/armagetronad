@@ -55,9 +55,10 @@ class eCamera{
 protected:
     static uActionCamera se_lookUp,se_lookDown,se_lookLeft,se_lookRight,
     se_moveLeft,se_moveRight,se_moveUp,se_moveDown,se_moveForward,se_moveBack,
-    se_zoomIn,se_zoomOut,se_glanceLeft,se_glanceRight,se_glanceBack,
+    se_zoomIn,se_zoomOut,
+    se_glanceLeft,se_glanceRight,se_glanceBack,se_glanceForward,
     se_switchView;
-    static uActionTooltip se_glanceLeftTooltip, se_glanceRightTooltip, se_glanceBackTooltip, se_switchViewTooltip;
+    static uActionTooltip se_glanceLeftTooltip, se_glanceRightTooltip, se_glanceBackTooltip, se_glanceForwardTooltip, se_switchViewTooltip;
 
     int id;
     //  tCHECKED_PTR(eGameObject) foot;
@@ -100,7 +101,7 @@ protected:
     REAL  userCameraControl;
     REAL  centerIncam;
 
-    bool glancingLeft,glancingRight,glancingBack;
+    bool glancingLeft,glancingRight,glancingBack,glancingForward;
     REAL glanceSmooth, glanceSmoothAbs;
     eCoord glanceDir_;
 

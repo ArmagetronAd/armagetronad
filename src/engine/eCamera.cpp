@@ -196,6 +196,8 @@ uActionCamera eCamera::se_zoomIn("ZOOM_IN",
                                  uAction::uINPUT_ANALOG);
 
 
+uActionCamera eCamera::se_glanceForward("GLANCE_FORWARD",-85);
+
 uActionCamera eCamera::se_glanceBack("GLANCE_BACK",-90);
 
 uActionCamera eCamera::se_glanceRight("GLANCE_RIGHT",-100);
@@ -222,6 +224,7 @@ uActionCamera eCamera::se_lookLeft("LOOK_LEFT",
 uActionCamera eCamera::se_switchView("SWITCH_VIEW", -160);
 
 uActionTooltip eCamera::se_glanceBackTooltip( eCamera::se_glanceBack, 1 );
+uActionTooltip eCamera::se_glanceForwardTooltip( eCamera::se_glanceForward, 1 );
 uActionTooltip eCamera::se_glanceRightTooltip( eCamera::se_glanceRight, 1 );
 uActionTooltip eCamera::se_glanceLeftTooltip( eCamera::se_glanceLeft, 1 );
 uActionTooltip eCamera::se_switchViewTooltip( eCamera::se_switchView, 1 );
@@ -533,11 +536,11 @@ bool eCamera::Act(uActionCamera *Act,REAL x){
     int turn=0;
     bool takeOverGlance = false;
     if (eGameObject::se_turnLeft==*reinterpret_cast<uActionPlayer *>(Act)){
-        takeOverGlance = glancingLeft || glancingBack;
+        //takeOverGlance = glancingLeft || glancingBack;
         turn=-1;
     }
     if (eGameObject::se_turnRight==*reinterpret_cast<uActionPlayer *>(Act)){
-        takeOverGlance = glancingRight || glancingBack;
+        //takeOverGlance = glancingRight || glancingBack;
         turn=1;
     }
 
@@ -545,7 +548,7 @@ bool eCamera::Act(uActionCamera *Act,REAL x){
     {
         // copy over position and direction, but reset glancing.
         // this will keep the camera as it was before the turn.
-        glancingRight=glancingBack=glancingLeft=false;
+        glancingForward=glancingRight=glancingBack=glancingLeft=false;
         dir = dir.Turn( glanceDir_ );
         pos = Glance( pos, glanceDir_ );
         glanceSmooth = 0;
@@ -592,6 +595,8 @@ bool eCamera::Act(uActionCamera *Act,REAL x){
         mu=-x;
     else if (se_switchView==*Act && x>0)
         SwitchView();
+    else if (se_glanceForward==*Act)
+        glancingForward=(x>0);
     else if (se_glanceBack==*Act)
         glancingBack=(x>0);
     else if (se_glanceLeft==*Act)
@@ -1563,7 +1568,7 @@ void eCamera::Timestep(REAL ts){
         glanceSmoothAbs = abs > glanceSmoothAbs ? abs : glanceSmoothAbs;
 
         // override: go all the way when glancing back
-        if ( glancingBack )
+        if ( glancingBack || glancingForward )
         {
             glanceSmoothAbs = 1;
         }
@@ -1997,7 +2002,7 @@ void eCamera::Timestep(REAL ts){
                 // usernewrise=newrise;
 
                 // use custom camera settings when glancing
-                if ( localPlayer && !se_forbidCustomGlance && localPlayer->smartCustomGlance && ( glancingBack || glancingRight || glancingLeft || glanceSmoothAbs > .01 ))
+                if ( localPlayer && !se_forbidCustomGlance && localPlayer->smartCustomGlance && ( glancingForward || glancingBack || glancingRight || glancingLeft || glanceSmoothAbs > .01 ))
                 {
                     // calculate blending factor c. c=0 will take the smart cam position, c=1 the custom cam.
                     REAL b = 1 - glanceSmoothAbs;
@@ -2007,7 +2012,7 @@ void eCamera::Timestep(REAL ts){
                     usernewrise = newrise = newrise * ( 1-glanceSmoothAbs) + customPitch * glanceSmoothAbs;
 
                     // the other values are updated every frame, blend them softer
-                    if ( glancingBack || glancingRight || glancingLeft )
+                    if ( glancingForward || glancingBack || glancingRight || glancingLeft )
                     {
                         usernewpos  =  newpos = pos * (1-c) + (CenterPos() - CenterCamDir() * customBack) * c;
                         usernewz    = newz    = z * (1-c) + (CenterCamZ() + customRise) * c;
