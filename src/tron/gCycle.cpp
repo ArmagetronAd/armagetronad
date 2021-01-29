@@ -7415,8 +7415,11 @@ static void sg_setCycleBraking(std::istream &s)
             bool braking = false;
             if(brakingStr.ToLower() == "true" || brakingStr == "1") braking = true;
 
-            pCycle->SetBraking(braking);
-            pCycle->RequestSync();
+            if(!pCycle->Act(&gCycle::s_brake, braking))
+            {
+                pCycle->SetBraking(braking);
+                pCycle->AddDestination();
+            }
         }
     }
 }
