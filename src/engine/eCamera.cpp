@@ -425,7 +425,7 @@ void eCamera::MyInit(){
         rise=(CenterZ()-z)/dist;
     }
 
-    glancingBack=glancingLeft=glancingRight=false;
+    glancingForward=glancingBack=glancingLeft=glancingRight=false;
     glanceSmooth=glanceSmoothAbs=0;
 
     lastSwitch=-100;
