@@ -258,8 +258,6 @@ deploy-staged:
     - ./docker/deploy/prepare_deploy.sh || exit $?
 
   script:
-    # mark 
-    - echo ${CI_PIPELINE_IID} > /messageboard/current_pipeline_${CI_COMMIT_REF_NAME}
     # now enter the docker build directory and just invoke make there
     - cd gitlab_build/docker/build
     - make staged_deploy -O -j$(nproc) -k
@@ -301,11 +299,7 @@ deploy-release:
     - ./docker/scripts/fix_gits.sh || exit $?
     - ./docker/deploy/prepare_deploy.sh || exit $?
   script:
-    - tagfile=/messageboard/current_pipeline_${CI_COMMIT_REF_NAME}
-    - if ! echo ${CI_COMMIT_REF_NAME} | grep -q ^release && test -r ${tagfile} && ! test ${CI_PIPELINE_IID} == `cat ${tagfile}`; then
-    -   echo "A newer build is already in the pipeline, abort."
-    -   exit 0
-    - fi
+    - docker/scripts/obsolete.sh || exit 0
 
     # now enter the docker build directory and just invoke make there
     - cd gitlab_build/docker/build
