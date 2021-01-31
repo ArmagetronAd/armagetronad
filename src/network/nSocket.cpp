@@ -1519,7 +1519,9 @@ int nSocket::Create( void )
 
     int socktype = socktype_;
 #ifndef WIN32
+#ifndef MACOSX
     socktype |= SOCK_CLOEXEC;
+#endif
 #endif
 
     // open new socket
@@ -1533,7 +1535,7 @@ int nSocket::Create( void )
     char tos = IPTOS_LOWDELAY;
 
     setsockopt( socket_, IPPROTO_IP, IP_TOS, &tos, sizeof(char) );
-#endif    
+#endif
 
     // unblock it
     unsigned long _true = true;
