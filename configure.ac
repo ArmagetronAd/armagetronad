@@ -487,7 +487,8 @@ case "$target" in
         MATHLIB=""
         SYS_GL_LIB=""
         SYS_GLU_LIB=""
-        #LIBS="$LIBS -framework GLU -framework Quicktime -lsmpeg"
+        test x$build_regular = xfalse || LIBS="$LIBS -framework OpenGL"
+        dnl -framework GLU -framework Quicktime -lsmpeg"
         ;;
     *-*-aix*)
 	AC_DEFINE(AIX, 1, [AIX])
