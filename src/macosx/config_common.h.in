@@ -5,6 +5,9 @@
 #define MACOSX_VERSION_10_2 1
 #endif
 
+/* Define for MacOS version via XCODE */
+#define MACOS_XCODE
+
 /* AIX */
 /* #undef AIX */
 
