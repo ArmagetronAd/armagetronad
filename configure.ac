@@ -806,8 +806,7 @@ case "$target" in
         MATHLIB=""
         SYS_GL_LIB=""
         SYS_GLU_LIB=""
-        test x$build_regular = xfalse || LIBS="$LIBS -framework OpenGL"
-        dnl -framework GLU -framework Quicktime -lsmpeg"
+        test x$build_regular = xfalse || LIBS="$LIBS -framework OpenGL -framework CoreFoundation -framework CoreServices"
         ;;
     *-*-aix*)
 	AC_DEFINE(AIX, 1, [AIX])
