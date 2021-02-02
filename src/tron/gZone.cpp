@@ -117,6 +117,9 @@ static tSettingItem<REAL> sg_zoneBottomConf( "ZONE_BOTTOM", sg_zoneBottom );
 static REAL sg_zoneHeight = 5.0f;
 static tSettingItem<REAL> sg_zoneHeightConf( "ZONE_HEIGHT", sg_zoneHeight );
 
+static bool sg_zoneNoFadeInSvr = false;
+static tSettingItem<bool> sg_zoneNoFadeInSvrConf( "ZONE_NO_FADE_IN_SERVER", sg_zoneNoFadeInSvr );
+
 static eLadderLogWriter sg_flagConquestRoundWinWriter("FLAG_CONQUEST_ROUND_WIN", true);
 static eLadderLogWriter sg_flagTimeoutWriter("FLAG_TIMEOUT", true);
 static eLadderLogWriter sg_flagReturnWriter("FLAG_RETURN", true);
@@ -379,7 +382,7 @@ gZone::gZone( eGrid * grid, const eCoord & pos, bool dynamicCreation, bool delay
 
     //??? Look at doing this in the shot or wherever it is created...
     //??? or changing dynamic creation to disableAlpha or something
-    if (dynamicCreation)
+    if (dynamicCreation || sg_zoneNoFadeInSvr)
     {
         referenceTime_ = createTime_ = lastTime = se_mainGameTimer->Time();
 
