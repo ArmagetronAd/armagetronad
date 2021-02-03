@@ -44,7 +44,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tMemManager.h"
 
 // include definition for top source directory
-#ifndef MACOSX
+#ifndef MACOSX_XCODE
 #ifdef TOP_SOURCE_DIR
 static const char * s_topSourceDir = TOP_SOURCE_DIR;
 #else
@@ -1392,8 +1392,6 @@ static tString AddPrefix( const char * suffix )
 }
 */
 
-#ifndef MACOSX
-#ifndef WIN32
 static tString st_RelocatePath( tString const & original )
 {
     // fetch prefix as it was compiled in
@@ -1413,13 +1411,11 @@ static tString st_RelocatePath( tString const & original )
         return original;
     }
 }
-#endif //!WIN32
-#endif //!MACOSX
 
 // tries to find the path to the data files, given the location of the executable
-#ifndef MACOSX
 static void FindDataPath()
 {
+#ifndef MACOSX_XCODE
 #ifdef WIN32
     // look for data in the same directory as the executable
     if ( TestDataPath(GetParent(st_pathToExecutable.Get(), 1) ) ) return;
@@ -1436,13 +1432,13 @@ static void FindDataPath()
 #ifdef DEBUG_PATH
     tERR_MESSAGE("Could not determine path to data files. Using defaults or command line arguments.\n");
 #endif
+#endif // !MACOSX_XCODE
 }
-#endif // !MACOSX
 
 // tries to find the path to the configuration files, given the location of the executable
-#ifndef MACOSX
 static void FindConfigurationPath()
 {
+#ifndef MACOSX
 #ifndef WIN32
     if ( TestConfigurationPath( st_RelocatePath( tString( AA_SYSCONFDIR ) ) ) ) return;
 #endif
@@ -1451,8 +1447,8 @@ static void FindConfigurationPath()
     if ( TestConfigurationPath(st_DataDir + "/config") ) return;
 
     tERR_WARN("Could not determine path to configuration files. Using defaults or command line arguments.\n");
+#endif // !MACOSX_XCODE
 }
-#endif // !MACOSX
 
 // tries to read a direcory type argument from the command line parser; result is written
 // into target, argument is the required switch ("--userdatadir")
@@ -1474,7 +1470,7 @@ private:
     void DoInitialize( tCommandLineParser & parser ) override
     {
         // Puts the data files in the executable's bundle
-#ifndef MACOSX
+#ifndef MACOSX_XCODE
         try
         {
             st_pathToExecutable.Set( parser.Executable() );

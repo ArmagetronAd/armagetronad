@@ -1521,7 +1521,9 @@ int nSocket::Create( void )
 
     int socktype = socktype_;
 #ifndef WIN32
+#ifndef MACOSX
     socktype |= SOCK_CLOEXEC;
+#endif
 #endif
 
     // open new socket
