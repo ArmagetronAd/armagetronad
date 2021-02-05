@@ -120,6 +120,7 @@ static tSettingItem<REAL> sg_zoneHeightConf( "ZONE_HEIGHT", sg_zoneHeight );
 static bool sg_zoneNoFadeInSvr = false;
 static tSettingItem<bool> sg_zoneNoFadeInSvrConf( "ZONE_NO_FADE_IN_SERVER", sg_zoneNoFadeInSvr );
 
+
 static eLadderLogWriter sg_flagConquestRoundWinWriter("FLAG_CONQUEST_ROUND_WIN", true);
 static eLadderLogWriter sg_flagTimeoutWriter("FLAG_TIMEOUT", true);
 static eLadderLogWriter sg_flagReturnWriter("FLAG_RETURN", true);
@@ -1847,8 +1848,6 @@ static tSettingItem<REAL> sg_deathZoneRotationSpeedConf("DEATHZONE_ROTATION_SPEE
 gDeathZoneHack::gDeathZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCreation, eTeam * teamowner, bool delayCreation )
 :gZone( grid, pos, dynamicCreation, delayCreation )
 {
-    interactWithZone_ = true;
-
     pLastShotCollision = NULL;
 
     if (!sg_deathZoneRandomColors)
@@ -1890,9 +1889,6 @@ gDeathZoneHack::gDeathZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCr
     {
         deathZoneType = TYPE_NORMAL;
     }
-
-    if (!delayCreation)
-        grid->AddGameObjectInteresting(this);
 }
 
 
@@ -1973,7 +1969,8 @@ static tSettingItem<int> s_dz_team("SCORE_DEATHZONE_TEAM",score_deathzone_team);
 
 void gDeathZoneHack::OnVanish( void )
 {
-    grid->RemoveGameObjectInteresting(this);
+    if(interactWithZone_)
+        grid->RemoveGameObjectInteresting(this);
 }
 
 
@@ -2045,6 +2042,24 @@ gZone & gDeathZoneHack::SetType(int type)
             {
                 wallBouncesLeft_ = 0;
             }
+        }
+        
+        switch(type)
+        {
+            case TYPE_ZOMBIE_ZONE: case TYPE_SHOT: case TYPE_DEATH_SHOT:
+                if(!interactWithZone_)
+                {
+                    interactWithZone_ = true;
+                    grid->AddGameObjectInteresting(this);
+                }
+                break;
+            default:
+                if(interactWithZone_)
+                {
+                    interactWithZone_ = false;
+                    grid->RemoveGameObjectInteresting(this);
+                }
+                break;
         }
     }
 
@@ -2544,9 +2559,6 @@ gRubberZoneHack::gRubberZoneHack( eGrid * grid, const eCoord & pos, bool dynamic
     color_.g = sg_colorRubberZoneG / 15.0;
     color_.b = sg_colorRubberZoneB / 15.0;
 
-    if (!delayCreation)
-        grid->AddGameObjectInteresting(this);
-
     rmRubber = 1.0;
 }
 
@@ -2574,7 +2586,6 @@ static tSettingItem<REAL> sg_rubberZoneRateConf("RUBBERZONE_RATE",sg_rubberZoneR
 
 void gRubberZoneHack::OnVanish( void )
 {
-    grid->RemoveGameObjectInteresting(this);
 }
 
 gZone & gRubberZoneHack::SetRubber(REAL rubber)
@@ -4603,8 +4614,8 @@ gBallZoneHack::gBallZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCrea
 
     if (teamowner!=NULL) team = teamowner;
 
-    if (!delayCreation)
-        grid->AddGameObjectInteresting(this);
+    //NOTE: Ball needs to be "interesting" not only for itself but so basezones can detect it
+    grid->AddGameObjectInteresting(this);
 }
 
 
@@ -6213,9 +6224,6 @@ gTargetZoneHack::gTargetZoneHack( eGrid * grid, const eCoord & pos, bool dynamic
     targetEmptyTime_ = -1.0;
     currentState_ = State_Safe;
 
-    if (!delayCreation)
-        grid->AddGameObjectInteresting(this);
-
     SetExpansionSpeed(0);
     SetRotationSpeed( .3f );
     RequestSync();
@@ -6472,8 +6480,6 @@ void gTargetZoneHack::OnVanish( void )
     }
     // decrement target zone counter
     TargetZoneCounter_--;
-
-    grid->RemoveGameObjectInteresting(this);
 }
 
 
@@ -6512,9 +6518,6 @@ gKOHZoneHack::gKOHZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCreati
     PlayersInside_=0;
     EnteredTime_ = -1;
     owner_=NULL;
-
-    if (!delayCreation)
-        grid->AddGameObjectInteresting(this);
 
     SetExpansionSpeed(0);
     SetRotationSpeed( .5f );
@@ -6706,7 +6709,6 @@ void gKOHZoneHack::OnVanish( void )
     owner_= NULL;
     EnteredTime_ = -1;
     PlayersInside_=0;
-    grid->RemoveGameObjectInteresting(this);
 }
 
 
@@ -6736,9 +6738,6 @@ gTeleportZoneHack::gTeleportZoneHack( eGrid * grid, const eCoord & pos, bool dyn
     color_.r = sg_ColorTeleZoneRed / 15.0f;//0.0f
     color_.g = sg_ColorTeleZoneGreen / 15.0f;//1.0f
     color_.b = sg_ColorTeleZoneBlue / 15.0f;//0.0f
-
-    if (!delayCreation)
-        grid->AddGameObjectInteresting(this);
 
     SetExpansionSpeed(0);
     SetRotationSpeed( .3f );
@@ -6842,7 +6841,6 @@ void gTeleportZoneHack::OnEnter( gCycle * target, REAL time )
 
 void gTeleportZoneHack::OnVanish( void )
 {
-    grid->RemoveGameObjectInteresting(this);
 }
 
 
@@ -6863,9 +6861,6 @@ gBlastZoneHack::gBlastZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCr
     color_.r = 0.0f;
     color_.g = 0.5f;
     color_.b = 1.0f;
-
-    if (!delayCreation)
-        grid->AddGameObjectInteresting(this);
 
     SetExpansionSpeed(0);
     SetRotationSpeed( .3f );
@@ -6962,7 +6957,6 @@ void gBlastZoneHack::OnEnter( gCycle * target, REAL time )
 
 void gBlastZoneHack::OnVanish( void )
 {
-    grid->RemoveGameObjectInteresting(this);
 }
 
 // *******************************************************************************
@@ -6982,9 +6976,6 @@ gSpeedZoneHack::gSpeedZoneHack( eGrid * grid, const eCoord & pos, bool dynamicCr
     color_.r = 0.0f;
     color_.g = 1.5f;
     color_.b = 1.0f;
-
-    if (!delayCreation)
-        grid->AddGameObjectInteresting(this);
 
     SetExpansionSpeed(0);
     SetRotationSpeed( .3f );
@@ -7073,7 +7064,6 @@ void gSpeedZoneHack::OnEnter( gCycle * target, REAL time )
 
 void gSpeedZoneHack::OnVanish( void )
 {
-    grid->RemoveGameObjectInteresting(this);
 }
 
 // *******************************************************************************
@@ -7093,9 +7083,6 @@ gObjectZoneHack::gObjectZoneHack( eGrid * grid, const eCoord & pos, bool dynamic
     color_.r = 1.0f;
     color_.g = 0.0f;
     color_.b = 0.5f;
-
-    if (!delayCreation)
-        grid->AddGameObjectInteresting(this);
 
     seekSpeed_ = 1.0;
 
@@ -7443,7 +7430,6 @@ void gObjectZoneHack::OnExit( gZone * target, REAL time )
 
 void gObjectZoneHack::OnVanish( void )
 {
-    grid->RemoveGameObjectInteresting(this);
 }
 
 // *******************************************************************************
@@ -7526,8 +7512,8 @@ gSoccerZoneHack::gSoccerZoneHack( eGrid * grid, const eCoord & pos, bool dynamic
 
     teamDistance_ = 0;
 
-    if (!delayCreation)
-        grid->AddGameObjectInteresting(this);
+    // NOTE: the soccer ball needs to be "interesting" so the soccer goal can detect it.
+    grid->AddGameObjectInteresting(this);
 
     zoneType = 1;
     team = NULL;
@@ -7557,9 +7543,6 @@ gSoccerZoneHack::gSoccerZoneHack( eGrid * grid, const eCoord & pos, bool dynamic
     teamDistance_ = 0;
     
     interactWithZone_ = true;
-
-    if (!delayCreation)
-        grid->AddGameObjectInteresting(this);
 
     if (teamowner)
     {
@@ -8037,8 +8020,6 @@ void gSoccerZoneHack::OnVanish( void )
     {
         GoHome();
     }
-    else
-        grid->RemoveGameObjectInteresting(this);
 }
 
 // *******************************************************************************
@@ -8260,9 +8241,6 @@ gRespawnZoneHack::gRespawnZoneHack( eGrid * grid, const eCoord & pos, ePlayerNet
     color_.g = 0.0f;
     color_.b = 0.5f;
 
-    if (!delayCreation)
-        grid->AddGameObjectInteresting(this);
-
     deadPlayer_ = player;
 
     SetExpansionSpeed(0);
@@ -8420,8 +8398,6 @@ void gRespawnZoneHack::OnVanish( void )
         newResZone->SetColor(GetColor());
         newResZone->SetSpawnDirection(SpawnDirection());
     }
-
-    grid->RemoveGameObjectInteresting(this);
 }
 
 // *******************************************************************************
@@ -8441,9 +8417,6 @@ gCheckpointZoneHack::gCheckpointZoneHack( eGrid * grid, const eCoord & pos, int 
     color_.r = 1.0f;
     color_.g = 0.0f;
     color_.b = 0.5f;
-
-    if (!delayCreation)
-        grid->AddGameObjectInteresting(this);
 
     checkpointId_ = checkpointId;
 
@@ -8723,7 +8696,6 @@ void gCheckpointZoneHack::OnExit( gCycle * target, REAL time )
 
 void gCheckpointZoneHack::OnVanish( void )
 {
-    grid->RemoveGameObjectInteresting(this);
 }
 
 // *******************************************************************************
@@ -9164,7 +9136,6 @@ void gZone::Timesteps(REAL currentTime)
                 if (Zone)
                 {
                     Zone->AddToList();
-                    grid->AddGameObjectInteresting(Zone);
                     Zone->RequestSync();
                 }
             }
