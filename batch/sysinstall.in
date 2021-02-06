@@ -347,7 +347,7 @@ if test @enable_desktop@ = yes; then
         done
     fi
 
-    if test -z "${DESTDIR}"; then
+    if test -z "${DESTDIR}" && xdg-icon-resource --help > /dev/null 2>&1; then
         # systemwide installation, use xdg-tools
         # add standard icons
         for icontype in "16" "32" "48"
