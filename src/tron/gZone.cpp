@@ -919,7 +919,6 @@ bool gZone::Timestep( REAL time )
                     InteractWith(dynamic_cast<eGameObject*>(*i),time,0);
                 }
                 lastPollTime_ = time;
-                //con << lastPollTime_ << "\n";
             }
         }
     }
