@@ -376,11 +376,6 @@ AC_ARG_ENABLE(automakedefaults,
 		[enforce the default installation directories as set by automake. localstatedir=prefix/var violates the FHS, so this is off by default.]),,
 enable_automakedefaults=$enable_automakedefaults_actual_default enable_automakedefaults_default=yes)
 
-AC_ARG_ENABLE(sysinstall,
-	AC_HELP_STRING([--enable-sysinstall],
-		[will install configuration files to /etc/armagetron and create a user if possible (default=enabled)]),,
-		enable_sysinstall=$default_enable_sysinstall)
-
 AC_ARG_ENABLE(useradd,
 	AC_HELP_STRING([--enable-useradd],
 		[will create a user during installation (default=enabled; requires --enable-sysinstall or a manual call of the sysinstall script)]),,
@@ -435,6 +430,7 @@ else
 fi,
 enable_uninstall=$default_enable_uninstall)
 AC_SUBST(external_uninstall_cmd)
+AM_CONDITIONAL(USE_UNINSTALL, test "$enable_uninstall" = "yes")
 
 AC_ARG_ENABLE(multiver,
 	AC_HELP_STRING([--enable-multiver@<:@=slot@:>@],
@@ -717,9 +713,6 @@ if test -n "$ARMAGETRONAD_OS_X_TOOLKIT"; then
 	fi
 fi
 
-AM_CONDITIONAL(USE_SYSINSTALL, test "$enable_sysinstall" = "yes")
-AM_CONDITIONAL(USE_UNINSTALL, test "$enable_uninstall" = "yes")
-
 AM_CONDITIONAL(ALLOW_MULTIPLE_VERSIONS, test "$enable_multiver" = "yes")
 AC_SUBST(enable_multiver)
 if test "$enable_multiver" = "yes"; then
@@ -807,6 +800,7 @@ case "$target" in
         SYS_GL_LIB=""
         SYS_GLU_LIB=""
         test x$build_regular = xfalse || LIBS="$LIBS -framework OpenGL -framework CoreFoundation -framework CoreServices"
+        default_enable_sysinstall=false
         ;;
     *-*-aix*)
 	AC_DEFINE(AIX, 1, [AIX])
@@ -856,6 +850,12 @@ case "$target" in
 		AC_DEFINE(DONTUSEMEMMANAGER)
         ;;
 esac
+
+AC_ARG_ENABLE(sysinstall,
+	AC_HELP_STRING([--enable-sysinstall],
+		[will install configuration files to /etc/armagetron and create a user if possible (default=enabled)]),,
+		enable_sysinstall=$default_enable_sysinstall)
+AM_CONDITIONAL(USE_SYSINSTALL, test "$enable_sysinstall" = "yes")
 
 AC_CACHE_SAVE
 
