@@ -720,4 +720,5 @@ AC_DEFUN([AX_CXXFLAGS_GCC_OPTION],[ifelse(m4_bregexp([$2],[-]),-1,
 
 dnl include boost boost_thread detection
 m4_include(acinclude.d/ax_boost_base.m4)
+m4_include(acinclude.d/ax_boost_system.m4)
 m4_include(acinclude.d/ax_boost_thread.m4)

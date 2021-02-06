@@ -874,6 +874,7 @@ dnl         Threading
 dnl *************************************************
 AC_LANG([C++])
 
+AX_BOOST_SYSTEM()
 AX_BOOST_THREAD()
 
 dnl if boost-thread is unavailable, make do with pthread
@@ -1475,7 +1476,7 @@ AC_SUBST(progid)
 
 # slap on boost defines
 CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
-LIBS="$LIBS $BOOST_LDFLAGS $BOOST_THREAD_LIB"
+LIBS="$LIBS $BOOST_LDFLAGS $BOOST_SYSTEM_LIB $BOOST_THREAD_LIB"
 
 export CFLAGS
 export CPPFLAGS
