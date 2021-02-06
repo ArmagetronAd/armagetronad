@@ -2093,7 +2093,22 @@ gZone & gDeathZoneHack::SetType(int type)
         
         switch(type)
         {
-            case TYPE_ZOMBIE_ZONE: case TYPE_SHOT: case TYPE_DEATH_SHOT:
+            case TYPE_SHOT: case TYPE_DEATH_SHOT:
+                if(!sg_shotCollision)
+                {
+                    // Make it so we aren't seen by other objects.
+                    // We'll send the signal to zombie zones ourselves later.
+                    interactWithZone_ = true;
+                    if(interestingID != -1)
+                    {
+                        grid->RemoveGameObjectInteresting(this);
+                        interestingID=-1;
+                    }
+                    break;
+                }
+                // Otherwise, we have to be visible to ourselves for shot collisions to "work".
+                // falls through
+            case TYPE_ZOMBIE_ZONE: 
                 if(!interactWithZone_)
                 {
                     interactWithZone_ = true;
@@ -2101,10 +2116,13 @@ gZone & gDeathZoneHack::SetType(int type)
                 }
                 break;
             default:
+                // No zone to zone interaction required for other deathzone types.
                 if(interactWithZone_)
-                {
                     interactWithZone_ = false;
+                if(interestingID != -1)
+                {
                     grid->RemoveGameObjectInteresting(this);
+                    interestingID=-1;
                 }
                 break;
         }
@@ -2553,6 +2571,14 @@ void gDeathZoneHack::OnEnter( gDeathZoneHack * target, REAL time )
                 //Record the last collision so we don't do it again
                 pLastShotCollision = target;
                 target->pLastShotCollision = this;
+            }
+        }
+        else if (target->deathZoneType == TYPE_ZOMBIE_ZONE)
+        {
+            if(interestingID == -1)
+            {
+                // We won't be seen by the zombie; send the signal ourselves
+                target->OnEnter(this,time);
             }
         }
     }
