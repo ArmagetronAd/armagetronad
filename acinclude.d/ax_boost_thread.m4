@@ -113,10 +113,6 @@ AC_DEFUN([AX_BOOST_THREAD],
                     ;;
             esac
 
-            AC_SUBST(BOOST_CPPFLAGS)
-
-            AC_DEFINE(HAVE_BOOST_THREAD,,
-                      [define if the Boost::Thread library is available])
             BOOSTLIBDIR=`echo $BOOST_LDFLAGS | sed -e 's/@<:@^\/@:>@*//'`
 
             LDFLAGS_SAVE=$LDFLAGS
@@ -151,9 +147,9 @@ AC_DEFUN([AX_BOOST_THREAD],
 
             fi
             if test "x$ax_lib" = "x"; then
-                AC_MSG_ERROR(Could not find a version of the Boost::Thread library!)
-            fi
-            if test "x$link_thread" = "xno"; then
+                AC_MSG_WARN(Could not find a version of the Boost::Thread library!)
+                BOOST_THREAD_LIB=""
+            elif test "x$link_thread" = "xno"; then
                 AC_MSG_ERROR(Could not link against $ax_lib !)
             else
                 BOOST_THREAD_LIB="-l$ax_lib"
@@ -178,6 +174,10 @@ AC_DEFUN([AX_BOOST_THREAD],
                         ;;
                 esac
                 AC_SUBST(BOOST_THREAD_LIB)
+                AC_SUBST(BOOST_CPPFLAGS)
+
+                AC_DEFINE(HAVE_BOOST_THREAD,,
+                          [define if the Boost::Thread library is available])
             fi
         fi
 
