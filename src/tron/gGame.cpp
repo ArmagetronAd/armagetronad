@@ -3397,11 +3397,21 @@ static void sg_ParseMap ( gParser * aParser )
 
 void gGame::Verify()
 {
+    std::map<int, gDelayCommand *>::iterator it = gDelayCommand::delayedCommands_.end(), itNext;
+    
     // test map and load map settings
     sg_ParseMap( aParser );
     init_game_grid(grid, aParser);
     Arena.LeastDangerousSpawnPoint();
     exit_game_grid(grid);
+    
+    // clear extra delayed commands
+    if(!gDelayCommand::delayedCommands_.empty()) itNext = (--it);
+    for (; it != gDelayCommand::delayedCommands_.end(); it=itNext)
+    {
+        itNext++;
+        gDelayCommand::delayedCommands_.erase(it);
+    }
 }
 
 gGame::gGame(){
