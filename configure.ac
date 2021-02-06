@@ -5,7 +5,7 @@ dnl but have to do this with version generated in bootstrap.sh instead for some 
 m4_include(version.m4)
 
 dnl Comment this out to disable autoconf custom directories:
-m4_include(accustomdir.m4)
+m4_include(acinclude.d/accustomdir.m4)
 
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(armagetronad,AUTOMATIC_VERSION)
@@ -873,6 +873,8 @@ dnl *************************************************
 dnl         Threading
 dnl *************************************************
 AC_LANG([C++])
+
+AX_BOOST_THREAD()
 
 dnl Boost.System is a mandatory dependency of Boost.Thread
 dnl http://www.boost.org/doc/libs/1_52_0/doc/html/thread/build.html
