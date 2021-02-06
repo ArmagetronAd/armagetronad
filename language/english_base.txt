@@ -3842,6 +3842,7 @@ ladderlog_write_objectzone_player_entered_help      Write to ladderlog: OBJECTZO
 ladderlog_write_objectzone_player_left_help         Write to ladderlog: OBJECTZONE_PLAYER_LEFT [zone_id] [zone_name] [zone_pos_x] [zone_pos_y] [player_name] [player_pos_x] [player_pos_y] [player_direction_x] [player_direction_y] [game_time]
 ladderlog_write_objectzone_spawned_help             Write to ladderlog: OBJECTZONE_SPAWNED [id] [name] [pos_x] [pos_y] [xdir] [ydir]
 ladderlog_write_objectzone_zone_entered_help        Write to ladderlog: OBJECTZONE_ZONE_ENTERED [zone_id] [zone_name] [zone_posx] [zone_posy] [target_id] [target_name] [target_pos_x] [target_pos_y] [target_dir_x] [target_dir_y] [game_time]
+ladderlog_objectzone_zone_entered_pollrate_help     Rate at which zones are checked for interactions with objectzones. Lower values increase accuracy at the cost of performance. -1 disables.
 ladderlog_write_player_ai_left_help                 Write to ladderlog: PLAYER_AI_LEFT [ai_name]
 ladderlog_write_player_colored_name_help            Write to ladderlog: PLAYER_COLORED_NAME [player_useranme] [player_colored_name]
 ladderlog_write_player_gridpos_help                 Write to ladderlog: PLAYER_GRIDPOS [player_username] [pos_x] [pos_y] [dir_x] [dir_y] [cycle_speed] [player_rubber] [cycle_rubber] [team] [player_braking] [player_brake_reservoir]

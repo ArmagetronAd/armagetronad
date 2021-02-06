@@ -63,6 +63,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <time.h>
 #include <algorithm>
 
+std::deque<gZone *> sg_Zones;
+
+
 static bool sg_SwapWinDeath = false;
 static tSettingItem<bool> sg_SwitchWinDeathColorCONF("SWAP_WINZONE_DEATHZONE_COLORS", sg_SwapWinDeath);
 
@@ -394,7 +397,10 @@ gZone::gZone( eGrid * grid, const eCoord & pos, bool dynamicCreation, bool delay
 
     // add to game grid
     if (!delayCreation)
+    {
         this->AddToList();
+        sg_Zones.push_back(this);
+    }
 
     // initialize position functions
     SetPosition( pos );
@@ -450,7 +456,10 @@ gZone::gZone( nMessage & m )
 
     // add to game grid
     if(!delayCreation_)
+    {
         this->AddToList();
+        sg_Zones.push_back(this);
+    }
 
     // initialize position functions
     SetPosition( pos );
@@ -468,6 +477,25 @@ gZone::gZone( nMessage & m )
 
 gZone::~gZone( void )
 {
+    RemoveFromZoneList();
+}
+
+void gZone::RemoveFromGame(void) {
+    RemoveFromZoneList();
+    eNetGameObject::RemoveFromGame();
+}
+
+void gZone::RemoveFromZoneList(void) {
+    std::deque<gZone *>::iterator pos_found =
+        std::find_if(
+            sg_Zones.begin(),
+            sg_Zones.end(),
+            std::bind2nd(
+                std::equal_to<gZone *>(),
+                this)
+        );
+    if(pos_found != sg_Zones.end())
+        sg_Zones.erase(pos_found);
 }
 
 
@@ -846,6 +874,9 @@ bool restrictZoneBoundry(const REAL &newValue)
 }
 static tSettingItem<REAL> sg_zoneWallBoundaryConf("ZONE_WALL_BOUNDARY", sg_zoneWallBoundary, &restrictZoneBoundry);
 
+static REAL sg_objectZoneZoneEnteredRate = 0.2;
+static tSettingItem<REAL> sg_objectZoneZoneEnteredRateConf("LADDERLOG_OBJECTZONE_ZONE_ENTERED_POLLRATE", sg_objectZoneZoneEnteredRate);
+
 static eLadderLogWriter sg_OnlineZoneWriter("ONLINE_ZONE", false);
 
 bool gZone::Timestep( REAL time )
@@ -874,6 +905,23 @@ bool gZone::Timestep( REAL time )
 
         */
         zoneInit_ = true;
+    }
+    
+    //HACK to have objectzones interact with other zones.
+    if(interactWithZone_ && dynamic_cast<gObjectZoneHack*>(this))
+    {
+        if(sg_objectZoneZoneEnteredRate >= 0)
+        {
+            if(time > lastPollTime_+sg_objectZoneZoneEnteredRate)
+            {
+                for(std::deque<gZone *>::const_iterator i = sg_Zones.begin(); i != sg_Zones.end(); ++i)
+                {
+                    InteractWith(dynamic_cast<eGameObject*>(*i),time,0);
+                }
+                lastPollTime_ = time;
+                //con << lastPollTime_ << "\n";
+            }
+        }
     }
 
     bool doRequestSync = false;
@@ -7085,6 +7133,9 @@ gObjectZoneHack::gObjectZoneHack( eGrid * grid, const eCoord & pos, bool dynamic
     color_.b = 0.5f;
 
     seekSpeed_ = 1.0;
+    
+    interactWithZone_ = true;
+    lastPollTime_ = 0;
 
     SetExpansionSpeed(0);
     SetRotationSpeed( .3f );
@@ -9136,6 +9187,7 @@ void gZone::Timesteps(REAL currentTime)
                 if (Zone)
                 {
                     Zone->AddToList();
+                    sg_Zones.push_back(Zone);
                     Zone->RequestSync();
                 }
             }
@@ -9174,32 +9226,91 @@ gZone &gZone::ClearWaypoints()
     return *this;
 }
 
-static eLadderLogWriter sg_zoneGridPosWriter("ZONE_GRIDPOS", false);
-void gZone::GridPosLadderLog()
-{
-    eGrid *grid = eGrid::CurrentGrid();
-    if (!grid) return;
 
-    if (!sg_zoneGridPosWriter.isEnabled())
+static eLadderLogWriter sg_zoneGridPosWriter("ZONE_GRIDPOS", false);
+
+void gZone::WriteLadderLog()
+{
+    sg_zoneGridPosWriter << GetEffect() << GetID() << GetName();
+    sg_zoneGridPosWriter << GetRadius() << GetExpansionSpeed();
+    sg_zoneGridPosWriter << MapPosition().x << MapPosition().y << GetVelocity().x << GetVelocity().y;
+    sg_zoneGridPosWriter << color_.r << color_.g << color_.b;
+
+    sg_zoneGridPosWriter.write();
+}
+
+static void sg_writeZoneGridposNow(std::istream &s,bool byId)
+{
+    if(!sg_zoneGridPosWriter.isEnabled())
     {
+        con << "This won't do anything until you turn on LADDERLOG_WRITE_ZONE_GRIDPOS.\nTIP: Set ZONE_GRIDPOS_INTERVAL to -1 to avoid automatic output.\n";
+    }
+    
+    eGrid *grid = eGrid::CurrentGrid();
+    if (!grid)
+    {
+        con << "Must be called while a grid exists!\n";
         return;
     }
-
-    const tList<eGameObject>& gameObjects = grid->GameObjects();
-    for (int i = 0; i < gameObjects.Len(); i++)
+    
+    tString object_id_str; s >> object_id_str;
+    int objIntId = atoi(object_id_str);
+    
+    // first check for the name
+    int zone_id = -1;
+    if(byId)
+        zone_id = gZone::FindIdFirst(objIntId);
+    else
+        zone_id = gZone::FindFirst(object_id_str);
+    if (zone_id <= -1)
     {
-        gZone *zone = dynamic_cast<gZone *>(gameObjects[i]);
+        zone_id = gZone::FindIdFirst(objIntId);
+        if(zone_id < 0)
+        {
+            con << "Couldn't find the zone specified.\n";
+            return;
+        }
+        byId = true;
+    }
+    
+    const tList<eGameObject>& gameObjects = grid->GameObjects();
+    if (zone_id >= gameObjects.Len()) return;
+
+    while (zone_id != -1)
+    {
+        // get the zone ...
+        gZone *zone=dynamic_cast<gZone *>(gameObjects(zone_id));
+        if (zone)
+        {
+            zone->WriteLadderLog();
+        }
+        if(byId)
+            zone_id=gZone::FindIdNext(objIntId,zone_id);
+        else
+            zone_id=gZone::FindNext(object_id_str,zone_id);
+    }
+}
+static void sg_writeZoneGridposNow(std::istream &s) { sg_writeZoneGridposNow(s,false); }
+static tConfItemFunc sg_writeZoneGridposNowConf("LOG_ZONE_GRIDPOS", &sg_writeZoneGridposNow);
+
+static void sg_writeZoneGridposNowId(std::istream &s) { sg_writeZoneGridposNow(s,true); }
+static tConfItemFunc sg_writeZoneGridposNowIdConf("LOG_ZONE_GRIDPOS_ID", &sg_writeZoneGridposNowId);
+
+void gZone::GridPosLadderLog()
+{
+    if (!sg_zoneGridPosWriter.isEnabled())
+        return;
+
+    for(std::deque<gZone *>::const_iterator i = sg_Zones.begin(); i != sg_Zones.end(); ++i)
+    {
+        gZone *zone = *i;
         if (zone && !zone->destroyed_)
         {
-            sg_zoneGridPosWriter << zone->GetEffect() << zone->GetID() << zone->GetName();
-            sg_zoneGridPosWriter << zone->GetRadius() << zone->GetExpansionSpeed();
-            sg_zoneGridPosWriter << zone->MapPosition().x << zone->MapPosition().y << zone->GetVelocity().x << zone->GetVelocity().y;
-            sg_zoneGridPosWriter << zone->color_.r << zone->color_.g << zone->color_.b;
-
-            sg_zoneGridPosWriter.write();
+            zone->WriteLadderLog();
         }
     }
 }
+
 
 static eLadderLogWriter sg_collapsezoneWriter("ZONE_COLLAPSED", false);
 

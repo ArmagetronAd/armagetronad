@@ -83,6 +83,7 @@ public:
     gZone(eGrid *grid, const eCoord &pos, bool dynamicCreation = false, bool delayCreation = false); //!< local constructor
     gZone(nMessage &m);                    //!< network constructor
     ~gZone();                              //!< destructor
+    void RemoveFromGame();		   //!< call this instead of the destructor
 
     int GetID() { return id_; }; //!< Gets the static zone ID
 	
@@ -178,6 +179,8 @@ public:
     static void ClearDelay();
 
     virtual void Collapse();    //  have the zone disappear instantly
+    
+    void WriteLadderLog();
     static void GridPosLadderLog(); //  gridpos ladderlog for the zones
 
 protected:
@@ -207,6 +210,7 @@ protected:
     REAL previousExpansionSpeed_;
     REAL fallSpeed_;
     REAL lastSeekTime_;
+    REAL lastPollTime_;
     bool zoneInit_;
 
     tString name_;
@@ -288,6 +292,8 @@ private:
 
     inline REAL EvaluateFunctionNow( tFunction const & f ) const;  //!< evaluates the given function with lastTime - referenceTime_ as argument
     inline void SetFunctionNow( tFunction & f, REAL value ) const; //!< makes sure EvaluateFunctionNow() returns the given value
+
+    void RemoveFromZoneList(void); //!< Removes the zone from the sg_Zones list if it's there
 
 };
 
