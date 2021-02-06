@@ -56,7 +56,7 @@ rm -rf $DEST
 exit -1
 fi
 
-find "$DEST" -type d | sed -e "s,^${DEST},rmdir --ignore-fail-on-non-empty \\\$\{DESTDIR\}," > ${UNINSTALL}.dir0
+find "$DEST" -type d | sed -e "s,^${DEST}\(.*\),rmdir \\\$\{DESTDIR\}\1 || true," > ${UNINSTALL}.dir0
 find "$DEST" -type f | sed -e "s,^${DEST},rm -f \\\$\{DESTDIR\}," > ${UNINSTALL}.files
 
 # less ${UNINSTALL}.dir0
@@ -64,7 +64,7 @@ find "$DEST" -type f | sed -e "s,^${DEST},rm -f \\\$\{DESTDIR\}," > ${UNINSTALL}
 # add all parent directories of those that are still game-specific
 grep ${PROGNAME} ${UNINSTALL}.dir0 > ${UNINSTALL}.dir
 while test -s ${UNINSTALL}.dir0; do
-  sed -e "s,/[^/]*\$,," < ${UNINSTALL}.dir0 | grep ${PROGNAME} > ${UNINSTALL}.dir1
+  sed -e "s,/[^/]*\$, || true," < ${UNINSTALL}.dir0 | grep ${PROGNAME} > ${UNINSTALL}.dir1
   cat ${UNINSTALL}.dir1 >> ${UNINSTALL}.dir
   mv ${UNINSTALL}.dir1 ${UNINSTALL}.dir0
 done
