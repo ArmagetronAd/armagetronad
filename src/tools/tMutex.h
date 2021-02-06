@@ -30,13 +30,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "defs.h"
 
-#ifdef HAVE_LIBBOOST_THREAD
+#ifdef HAVE_BOOST_THREAD
 
 #include <boost/thread/recursive_mutex.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/locks.hpp>
 
-#else // HAVE_LIBBOOST_THREAD
+#else // HAVE_BOOST_THREAD
 
 namespace boost
 {
@@ -145,6 +145,6 @@ public:
 
 }
 
-#endif // HAVE_LIBBOOST_THREAD
+#endif // HAVE_BOOST_THREAD
 
 #endif
