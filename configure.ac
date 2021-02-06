@@ -876,27 +876,15 @@ AC_LANG([C++])
 
 AX_BOOST_THREAD()
 
-dnl Boost.System is a mandatory dependency of Boost.Thread
-dnl http://www.boost.org/doc/libs/1_52_0/doc/html/thread/build.html
-AC_CHECK_LIB([boost_system], _ZN5boost6system15system_categoryEv)
-
-AC_CHECK_LIB([boost_thread],_ZN5boost11this_thread5yieldEv,[
-LIBS="-lboost_thread ${LIBS}"
-
-AC_DEFINE(HAVE_LIBBOOST_THREAD,1,[Define if you have boost_thread libraries and header files.])
-
-],[
-
+dnl if boost-thread is unavailable, make do with pthread
+if test "x$BOOST_THREAD_LIB" = x; then
 ACX_PTHREAD([
-
 LIBS="${PTHREAD_LIBS} ${LIBS}"
 CXXFLAGS="${CXXFLAGS} ${PTHREAD_CFLAGS}"
 CC="${PTHREAD_CC}"
 AC_DEFINE(HAVE_PTHREAD,1,[Define if you have POSIX threads libraries and header files.])
-
 ])
-
-])
+fi
 
 dnl *************************************************
 dnl         Misc
@@ -1484,6 +1472,10 @@ AC_SUBST(progid)
 
 # all include directories added via -I so far should be system level inlcudes, divide them from those added by individual makefiles
 # CPPFLAGS="-I- $CPPFLAGS"
+
+# slap on boost defines
+CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
+LIBS="$LIBS $BOOST_LDFLAGS $BOOST_THREAD_LIB"
 
 export CFLAGS
 export CPPFLAGS
