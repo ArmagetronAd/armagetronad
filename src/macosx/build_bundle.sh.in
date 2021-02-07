@@ -1,0 +1,18 @@
+#!/bin/bash
+
+set -x
+
+DIR=$1
+test -z "${DIR}" && DIR="`pwd`"
+
+BUNDLE="${DIR}/@progtitle@".app
+
+# create our files
+DESTDIR="${BUNDLE}" make install || exit $?
+
+# bundle libraries
+(cd "${BUNDLE}"; dylibbundler -od -b -x "./@prefix@/bin/@progname@" -d "./@prefix@/lib/") || exit $?
+
+# add launcher
+cp `dirname $0`/entrypoint.sh "${BUNDLE}/@progtitle@" || exit $?
+chmod 755 "${BUNDLE}/@progtitle@" || exit $?
