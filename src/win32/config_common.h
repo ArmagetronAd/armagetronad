@@ -9,7 +9,7 @@
 #define _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES 1
 
 // this one is included in winlibs as static library
-#define HAVE_LIBBOOST_THREAD
+#define HAVE_BOOST_THREAD
 #define BOOST_THREAD_USE_LIB
 
 // and disable warnings about those calls that can't be converted. We may want to look at

@@ -5,7 +5,7 @@ dnl but have to do this with version generated in bootstrap.sh instead for some 
 m4_include(version.m4)
 
 dnl Comment this out to disable autoconf custom directories:
-m4_include(accustomdir.m4)
+m4_include(acinclude.d/accustomdir.m4)
 
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(armagetronad,AUTOMATIC_VERSION)
@@ -874,27 +874,18 @@ dnl         Threading
 dnl *************************************************
 AC_LANG([C++])
 
-dnl Boost.System is a mandatory dependency of Boost.Thread
-dnl http://www.boost.org/doc/libs/1_52_0/doc/html/thread/build.html
-AC_CHECK_LIB([boost_system], _ZN5boost6system15system_categoryEv)
+AX_BOOST_SYSTEM()
+AX_BOOST_THREAD()
 
-AC_CHECK_LIB([boost_thread],_ZN5boost11this_thread5yieldEv,[
-LIBS="-lboost_thread ${LIBS}"
-
-AC_DEFINE(HAVE_LIBBOOST_THREAD,1,[Define if you have boost_thread libraries and header files.])
-
-],[
-
+dnl if boost-thread is unavailable, make do with pthread
+if test "x$BOOST_THREAD_LIB" = x; then
 ACX_PTHREAD([
-
 LIBS="${PTHREAD_LIBS} ${LIBS}"
 CXXFLAGS="${CXXFLAGS} ${PTHREAD_CFLAGS}"
 CC="${PTHREAD_CC}"
 AC_DEFINE(HAVE_PTHREAD,1,[Define if you have POSIX threads libraries and header files.])
-
 ])
-
-])
+fi
 
 dnl *************************************************
 dnl         Misc
@@ -916,7 +907,7 @@ fi
 AC_LANG([C++])
 
 dnl check for library
-AC_CHECK_LIB([protobuf],_ZN6google8protobuf7MessageD2Ev,,
+AC_CHECK_LIB([protobuf],_ZN6google8protobuf14FatalExceptionD2Ev,,
 [
 	AC_CHECK_LIB([protobuf],_ZN6google8protobuf7ClosureD2Ev,
 		AC_MSG_WARN([[The library protobuf (Google Protobuf Buffers) has a broken dependency on library pthread on your system.]])
@@ -1482,6 +1473,10 @@ AC_SUBST(progid)
 
 # all include directories added via -I so far should be system level inlcudes, divide them from those added by individual makefiles
 # CPPFLAGS="-I- $CPPFLAGS"
+
+# slap on boost defines
+CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
+LIBS="$LIBS $BOOST_LDFLAGS $BOOST_SYSTEM_LIB $BOOST_THREAD_LIB"
 
 export CFLAGS
 export CPPFLAGS

@@ -30,13 +30,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "defs.h"
 
-#ifdef HAVE_LIBBOOST_THREAD
+#ifdef HAVE_BOOST_THREAD
 
 #include <boost/thread/thread.hpp>
 
 #define HAVE_THREADS
 
-#else // HAVE_LIBBOOST_THREAD
+#else // HAVE_BOOST_THREAD
 
 #ifdef HAVE_PTHREAD
 
@@ -103,6 +103,6 @@ public:
 
 #endif // HAVE_PTHREAD
 
-#endif // HAVE_LIBBOOST_THREAD
+#endif // HAVE_BOOST_THREAD
 
 #endif

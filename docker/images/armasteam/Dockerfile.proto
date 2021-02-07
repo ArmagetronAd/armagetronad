@@ -35,7 +35,7 @@ RUN apt-get -y update && apt-get install \
 #git \
 #make \
 libboost-dev \
-libboost-thread-dev \
+#libboost-thread-dev \
 #libfreetype6-dev \
 #libftgl-dev \
 #libglew-dev \
