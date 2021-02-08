@@ -7,11 +7,7 @@ test -z "${DIR}" && DIR="`pwd`"
 
 BUNDLE="${DIR}/@progtitle@".app
 
-# create our files
-DESTDIR="${BUNDLE}" make install || exit $?
-
-# bundle libraries
-(cd "${BUNDLE}"; dylibbundler -od -b -x "./@prefix@/bin/@progname@" -d "./@prefix@/lib/") || exit $?
+mkdir -p "${BUNDLE}" || exit $?
 
 # add launcher
 cp `dirname $0`/entrypoint.sh "${BUNDLE}/@progtitle@" || exit $?
@@ -20,7 +16,7 @@ chmod 755 "${BUNDLE}/@progtitle@" || exit $?
 # add plist with @v@ -> value and progtitle replacements
 REL_SRCDIR=`echo @srcdir@ | sed -e s,^@top_builddir@/,,` || exit $?
 sed < "${REL_SRCDIR}/Info.plist" > "${BUNDLE}/Info.plist" -e "s,Armagetron Advanced,@progtitle@,g" || exit $?
-mkdir -p "${BUNDLE}/English.lproj"
+mkdir -p "${BUNDLE}/English.lproj" || exit $?
 sed < "${REL_SRCDIR}/English.lproj/InfoPlist.strings.in" > "${BUNDLE}/English.lproj/InfoPlist.strings" \
 -e "s,Armagetron Advanced,@progtitle@,g" \
 -e "s,@vers[i]on@,@version@,g" \
@@ -30,3 +26,9 @@ sed < "${REL_SRCDIR}/English.lproj/InfoPlist.strings.in" > "${BUNDLE}/English.lp
 # add icons
 REL_TOP_SRCDIR=`echo @top_srcdir@ | sed -e s,^@top_builddir@/,,` || exit $?
 cp "${REL_TOP_SRCDIR}/MacOS/Armagetron Advanced.icns" "${BUNDLE}/@progtitle@.icns"
+
+# install game into bundle
+DESTDIR="${BUNDLE}" make install || exit $?
+
+# bundle libraries
+(cd "${BUNDLE}"; dylibbundler -od -b -x "./@prefix@/bin/@progname@" -d "./@prefix@/lib/") || exit $?
