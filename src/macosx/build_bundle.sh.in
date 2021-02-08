@@ -16,3 +16,17 @@ DESTDIR="${BUNDLE}" make install || exit $?
 # add launcher
 cp `dirname $0`/entrypoint.sh "${BUNDLE}/@progtitle@" || exit $?
 chmod 755 "${BUNDLE}/@progtitle@" || exit $?
+
+# add plist with @v@ -> value and progtitle replacements
+REL_SRCDIR=`echo @srcdir@ | sed -e s,^@top_builddir@/,,` || exit $?
+sed < "${REL_SRCDIR}/Info.plist" > "${BUNDLE}/Info.plist" -e "s,Armagetron Advanced,@progtitle@,g" || exit $?
+mkdir -p "${BUNDLE}/English.lproj"
+sed < "${REL_SRCDIR}/English.lproj/InfoPlist.strings.in" > "${BUNDLE}/English.lproj/InfoPlist.strings" \
+-e "s,Armagetron Advanced,@progtitle@,g" \
+-e "s,@vers[i]on@,@version@,g" \
+-e "s,@year@,`date +%Y`,g" \
+|| exit $?
+
+# add icons
+REL_TOP_SRCDIR=`echo @top_srcdir@ | sed -e s,^@top_builddir@/,,` || exit $?
+cp "${REL_TOP_SRCDIR}/MacOS/Armagetron Advanced.icns" "${BUNDLE}/@progtitle@.icns"
