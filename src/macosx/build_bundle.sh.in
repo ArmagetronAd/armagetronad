@@ -32,3 +32,23 @@ DESTDIR="${BUNDLE}" make install || exit $?
 
 # bundle libraries
 (cd "${BUNDLE}"; dylibbundler -od -b -x "./@prefix@/bin/@progname@" -d "./@prefix@/lib/") || exit $?
+
+# pack dmg
+
+# mkdir pack
+# cp -a "${BUNDLE}" pack || exit $?
+# --sandbox-safe
+# --icon "$ICON" 200 190 \
+# DMG_SRC=pack
+DMG_SRC=${BUNDLE}
+rm -f "@progtitle@.dmg"
+ICON="../armagetronad/MacOS/Armagetron Advanced.icns"
+create-dmg \
+	--volicon "$ICON" \
+	--app-drop-link 600 185 --window-pos 200 112 --window-size 800 400 \
+	"@progtitle@.dmg" "${DMG_SRC}" || exit $?
+
+# alternative, native way, less powerful
+# hdiutil create -volname "@progtitle@" -srcfolder "${BUNDLE}" -ov -format UDIF "@progtitle@.dmg"
+
+rm -rf "${DMG_SRC}"
