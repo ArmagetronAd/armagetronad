@@ -42,10 +42,15 @@ DESTDIR="${BUNDLE}" make install || exit $?
 # DMG_SRC=pack
 DMG_SRC=${BUNDLE}
 rm -f "@progtitle@.dmg"
-ICON="../armagetronad/MacOS/Armagetron Advanced.icns"
+ICON="${REL_TOP_SRCDIR}/MacOS/Armagetron Advanced.icns"
+BG="${REL_TOP_SRCDIR}/MacOS/background.png"
 create-dmg \
 	--volicon "$ICON" \
-	--app-drop-link 600 185 --window-pos 200 112 --window-size 800 400 \
+	--app-drop-link 470 180 --window-pos 200 112 --window-size 650 330 \
+	--icon "@progtitle@.app" 220 80 \
+	--icon-size 100 \
+	--hide-extension "@progtitle@.app" \
+	--background ${BG} \
 	"@progtitle@.dmg" "${DMG_SRC}" || exit $?
 
 # alternative, native way, less powerful
