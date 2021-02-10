@@ -32,7 +32,7 @@ cp "${REL_TOP_SRCDIR}/MacOS/Armagetron Advanced.icns" "${BUNDLE}/${TITLE}.icns"
 DESTDIR="${BUNDLE}" make install || exit $?
 
 # bundle libraries
-(cd "${BUNDLE}"; dylibbundler -od -b -x "./@prefix@/bin/@progname@" -d "./@prefix@/lib/") || exit $?
+(cd "${BUNDLE}"; dylibbundler -od -b -x "./@prefix@/bin/@progname@" -d "./@prefix@/libs/") || exit $?
 
 # zip
 (cd "${BUNDLE}" && zip -r ../@progname@-@version@.zip .) || exit $?
