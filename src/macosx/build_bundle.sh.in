@@ -1,0 +1,64 @@
+#!/bin/bash
+
+set -x
+
+DIR=$1
+test -z "${DIR}" && DIR="`pwd`"
+
+TITLE="@progtitle@@progtitle_server@"
+BUNDLE="${DIR}/${TITLE}.app"
+
+mkdir -p "${BUNDLE}" || exit $?
+
+# add launcher
+cp `dirname $0`/entrypoint.sh "${BUNDLE}/${TITLE}" || exit $?
+chmod 755 "${BUNDLE}/${TITLE}" || exit $?
+
+# add plist with @v@ -> value and progtitle replacements
+REL_SRCDIR=`echo @srcdir@ | sed -e s,^@top_builddir@/,,` || exit $?
+sed < "${REL_SRCDIR}/Info.plist" > "${BUNDLE}/Info.plist" -e "s,Armagetron Advanced,${TITLE},g" || exit $?
+mkdir -p "${BUNDLE}/English.lproj" || exit $?
+sed < "${REL_SRCDIR}/English.lproj/InfoPlist.strings.in" > "${BUNDLE}/English.lproj/InfoPlist.strings" \
+-e "s,Armagetron Advanced,${TITLE},g" \
+-e "s,@vers[i]on@,@version@,g" \
+-e "s,@year@,`date +%Y`,g" \
+|| exit $?
+
+# add icons
+REL_TOP_SRCDIR=`echo @top_srcdir@ | sed -e s,^@top_builddir@/,,` || exit $?
+cp "${REL_TOP_SRCDIR}/MacOS/Armagetron Advanced.icns" "${BUNDLE}/${TITLE}.icns"
+
+# install game into bundle
+DESTDIR="${BUNDLE}" make install || exit $?
+
+# bundle libraries
+(cd "${BUNDLE}"; dylibbundler -od -b -x "./@prefix@/bin/@progname@" -d "./@prefix@/libs/") || exit $?
+
+# zip
+(cd "${BUNDLE}" && zip -r ../@progname@-@version@.zip .) || exit $?
+
+# pack dmg
+
+# mkdir pack
+# cp -a "${BUNDLE}" pack || exit $?
+# --sandbox-safe
+# --icon "$ICON" 200 190 \
+# DMG_SRC=pack
+DMG_SRC=${BUNDLE}
+DMG="${DIR}/@progname@-@version@.dmg"
+rm -f "${DMG}"
+ICON="${REL_TOP_SRCDIR}/MacOS/Armagetron Advanced.icns"
+BG="${REL_TOP_SRCDIR}/MacOS/background.png"
+create-dmg \
+	--volicon "$ICON" \
+	--app-drop-link 470 180 --window-pos 200 112 --window-size 650 330 \
+	--icon "${TITLE}.app" 220 80 \
+	--icon-size 100 \
+	--hide-extension "${TITLE}.app" \
+	--background ${BG} \
+	"${DMG}" "${DMG_SRC}" || exit $?
+
+# alternative, native way, less powerful
+# hdiutil create -volname "@progtitle@" -srcfolder "${BUNDLE}" -ov -format UDIF "${DMG}"
+
+rm -rf "${DMG_SRC}"
