@@ -15,7 +15,10 @@ set -x
 
 dd=`dirname $0`
 
-set
+# get tarball URI, make sure it exists
+TAR_FILENAME=${PACKAGE_NAME}-${PACKAGE_VERSION}.tbz
+TAR_URI=${DOWNLOAD_URI_BASE_STAGING}${TAR_FILENAME}
+./wait_for_upload.sh ${TAR_URI} || exit $?
 
 trust_github || exit $?
 
@@ -31,8 +34,6 @@ git checkout -b ${DEPLOY_BRANCH} || exit $?
 
 git remote add upstream ${MACOS_GIT} || exit $?
 
-FILENAME=${PACKAGE_NAME}-${PACKAGE_VERSION}.tbz
-
 STEAM_PACKAGE_NAME=retrocycles
 STEAM_PACKAGE_TITLE=Retrocycles
 
@@ -43,7 +44,7 @@ STEAM_PACKAGE_TITLE=Retrocycles
 
 # write new definiton file
 cat > INFO <<EOF
-TARBALL=${DOWNLOAD_URI_BASE_STAGING}${FILENAME}
+TARBALL=${TAR_URI}
 VERSION=${PACKAGE_VERSION}
 BRANCH=${ZI_SERIES}
 PROGTITLE_RC="${STEAM_PACKAGE_TITLE}"
