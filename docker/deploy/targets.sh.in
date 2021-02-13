@@ -204,6 +204,11 @@ fi
 
 # **********************************************************************
 
+# macOS build: Git reporitory on GitHub with appropriate Action to build
+MACOS_GIT=git@github.com:ArmagetronAd/macOS.git
+
+# **********************************************************************
+
 # download site: git repository
 DOWNLOAD_SITE_GIT=git@gitlab.com:armagetronad/downloads.git
 
