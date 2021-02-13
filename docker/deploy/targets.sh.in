@@ -144,8 +144,9 @@ fi
 
 # **********************************************************************
 
+UPLOAD_SCP_BASE_STAGING=arma0install@builder.armagetronad.org:/home/arma0install/staging/
 if test ${STAGING} == true; then
-    UPLOAD_SCP_BASE=arma0install@builder.armagetronad.org:/home/arma0install/staging/
+    UPLOAD_SCP_BASE=${UPLOAD_SCP_BASE_STAGING}
 else
     UPLOAD_SCP_BASE=bazaaarmagetron,armagetronad@frs.sourceforge.net:/home/frs/project/a/ar/armagetronad/
 fi
