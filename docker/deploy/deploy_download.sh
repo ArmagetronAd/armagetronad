@@ -53,6 +53,12 @@ for f in *; do
 	*win32.zip)
 		WAIT=false
 		;;
+	*-dedicated-*.dmg)
+		MACOS_SERVER=$f
+		;;
+	*.dmg)
+		MACOS_CLIENT=$f
+		;;
 	*-${PACKAGE_VERSION}.zip)
 		SOURCE_ZIP=$f
 		;;
@@ -109,10 +115,12 @@ uri_base: ${DOWNLOAD_URI_BASE}
 uri_winclient: ${WIN_CLIENT}
 uri_lin64client: ${LIN64_CLIENT}
 uri_lin32client: ${LIN32_CLIENT}
+uri_macosclient: ${MACOS_CLIENT}
 
 uri_winserver: ${WIN_SERVER}
 uri_lin64server: ${LIN64_SERVER}
 uri_lin32server: ${LIN32_SERVER}
+uri_macosserver: ${MACOS_SERVER}
 
 uri_tarsrc: ${SOURCE_TARBALL}
 uri_zipsrc: ${SOURCE_ZIP}
