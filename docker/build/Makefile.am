@@ -627,6 +627,16 @@ result.deploy_%: context.deploy_%
 	+$(srcdir)/context_to_result.sh $@.dir ./deploy_$*.sh
 	echo > $@
 
+# build on the mac via GitHub Actions
+context.macbuild: rootcontext.64 ${srcdir}/../deploy/*_macbuild.sh ${srcdir}/../deploy/wait_for_upload.sh ../deploy/* CI_INFO
+	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' ../deploy/'*' ${srcdir}/../deploy/*_macbuild.sh ${srcdir}/../deploy/wait_for_upload.sh CI_INFO ${srcdir}/../scripts/.cache/gits/macOS
+	rm -f $@.dir/image
+	echo "armadeploy_64" > $@.dir/image
+	echo > $@
+result.macbuild: context.macbuild
+	+$(srcdir)/context_to_result.sh $@.dir ./deploy_macbuild.sh
+	echo > $@
+
 # special case steam: run in steamcmd image
 context.deploy_steam: context.deploy_base_steam ${srcdir}/../deploy/steamcontentbuilder/*/* steamdirs/* deploy_essential
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' ${srcdir}/../deploy/steamcontentbuilder
