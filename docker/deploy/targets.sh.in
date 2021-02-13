@@ -184,9 +184,10 @@ ZI_GIT=git@gitlab.com:armagetronad/zeroinstall.git
 UPLOAD_ZI_SCP=arma0install@builder.armagetronad.org:/home/arma0install/0install/
 #UPLOAD_ZI_SCP=arma0install@builder.armagetronad.org:/home/arma0install/0install-staging/
 
+DOWNLOAD_URI_BASE_STAGING=http://download.armagetronad.org/staging/${SF_DIR}/@version@/
 if test ${STAGING} == true; then
-    # download URI base to use for zeroinstall
-    DOWNLOAD_URI_BASE=http://download.armagetronad.org/staging/${SF_DIR}/@version@/
+    # download URI base to use for zeroinstall staging and macOS builds
+    DOWNLOAD_URI_BASE=${DOWNLOAD_URI_BASE_STAGING}
 elif test "${SF_DIR}" == "stable"; then
 	# only stable builds go to launchpad permanently
 	DOWNLOAD_URI_BASE=https://launchpad.net/${LP_PROJECT}/${LP_SERIES}/${LP_VERSION}/+download/
