@@ -259,7 +259,6 @@ deploy_staged:
   before_script:
     - ./docker/scripts/fix_gits.sh || exit $?
     - ./docker/deploy/prepare_deploy.sh || exit $?
-
   script:
     # now enter the docker build directory and just invoke make there
     - cd gitlab_build/docker/build
