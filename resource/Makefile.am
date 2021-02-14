@@ -34,7 +34,7 @@ install-data-local: linked_included.install
 
 uninstall-local:
 #   remove resources
-	rm -rf ${DESTDIR}${resourcedir}/included
+	rm -rf "${DESTDIR}${resourcedir}/included"
 
 dist-hook: linked_included.dist
 #   copy processed included resources into distribution

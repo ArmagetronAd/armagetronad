@@ -27,8 +27,8 @@ SUBDIRS = src resource batch config desktop www-root docker/build
 
 # special tasks to do if we're building the master server
 if BUILDMASTER
-masterInstallTasks=	cd  $(DESTDIR)$(bindir); mv armagetronad_main_master$(EXEEXT) @prognamebase@-master$(executable_suffix)
-masterUninstallTasks=rm -f $(DESTDIR)$(bindir)/@prognamebase@-master$(executable_suffix)
+masterInstallTasks=	cd "$(DESTDIR)$(bindir)"; mv armagetronad_main_master$(EXEEXT) @prognamebase@-master$(executable_suffix)
+masterUninstallTasks=rm -f "$(DESTDIR)$(bindir)"/@prognamebase@-master$(executable_suffix)
 else
 masterInstallTasks=echo 'No tasks for the master server'
 masterUninstallTasks=echo 'No tasks for the master server'
@@ -175,9 +175,9 @@ uninstall_location=$(DESTDIR)${bindir}/${uninstaller}
 
 # generate and install uninstallation script
 install-uninstall: @srcdir@/batch/make/uninstall Makefile
-	$(install_sh_PROGRAM) $< $(uninstall_location)
-	rm $(uninstall_location)
-	ROOTDIR=$(ROOTDIR) DESTDIR=$(DESTDIR) MAKE="$(MAKE)" PREFIX="${prefix}" PROGTITLE="${progtitle}" PROGNAME="${progname}" SCRIPTDIR="${scriptdir}" sh $< $(uninstall_location) "$(external_uninstall_cmd)"
+	$(install_sh_PROGRAM) $< "$(uninstall_location)"
+	rm "$(uninstall_location)"
+	ROOTDIR=$(ROOTDIR) DESTDIR="$(DESTDIR)" MAKE="$(MAKE)" PREFIX="${prefix}" PROGTITLE="${progtitle}" PROGNAME="${progname}" SCRIPTDIR="${scriptdir}" sh $< "$(uninstall_location)" "$(external_uninstall_cmd)"
 else
 install-uninstall:
 endif
@@ -215,9 +215,9 @@ endif
 
 uninstall-hook:
 #	delete executable and uninstaller
-	rm -f $(DESTDIR)${bindir}/@progname@$(executable_suffix)
+	rm -f "$(DESTDIR)${bindir}/@progname@$(executable_suffix)"
 if BUILDDEDICATED
-	rm -f $(DESTDIR)${bindir}/@prognamebase@-serverquery$(executable_suffix)
+	rm -f "$(DESTDIR)${bindir}/@prognamebase@-serverquery$(executable_suffix)"
 endif
 
 #	delegate to special tasks
@@ -234,7 +234,7 @@ endif
 uninstall-first:
 #	uninstall systemwide files
 if USE_SYSINSTALL
-	if test -z "$(AA_FAKE_UNINSTALL)"; then DESTDIR=$(DESTDIR) ROOTDIR=$(ROOTDIR) bash $(DESTDIR)${scriptdir}/sysinstall uninstall $(prefix); fi
+	if test -z "$(AA_FAKE_UNINSTALL)"; then DESTDIR="$(DESTDIR)" ROOTDIR=$(ROOTDIR) bash "$(DESTDIR)${scriptdir}"/sysinstall uninstall $(prefix); fi
 endif
 
 install-first:

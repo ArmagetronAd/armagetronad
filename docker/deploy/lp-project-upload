@@ -163,6 +163,8 @@ def main():
             if extension == ".zip":
                 if "source" in filename:
                     description="Windows Source Zip"
+                elif ".macOS." in filename:
+                    description="Client macOS Zip"
                 else:
                     description="Client Windows Binary Zip for Zero Install"
                 mime_type="application/zip"
