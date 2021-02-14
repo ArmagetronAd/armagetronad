@@ -367,7 +367,7 @@ if test @enable_desktop@ = yes; then
         if test "$MODE" = "install"; then
             # add appstream metadata
             mkdir_p "${DESTDIR}${METADEST}"
-            mv "${DESTDIR}${DESKTOPSOURCE}/armagetronad.appdata.xml ${DESTDIR}${METADEST}/@progid@.appdata.xml" || exit $?
+            mv "${DESTDIR}${DESKTOPSOURCE}/armagetronad.appdata.xml" "${DESTDIR}${METADEST}/@progid@.appdata.xml" || exit $?
         else
             for f in 16x16 32x32 48x48; do rm -f "${DESTDIR}${DESKTOPSOURCE}/icons/$f/@prognamebase@.png"; done
             for suffix in .desktop -handler.desktop; do
