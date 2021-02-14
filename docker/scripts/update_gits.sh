@@ -48,6 +48,7 @@ function fix_gits(){
 
 EOF
 
+fix_git macOS
 fix_git winlibs
 fix_git steam-art
 fix_git pkg2appimage

@@ -1,0 +1,58 @@
+#!/bin/bash
+
+set -x
+
+DIR=$1
+test -z "${DIR}" && DIR="`pwd`"
+
+TITLE="@progtitle@@progtitle_server@"
+BUNDLE="${DIR}/${TITLE}.app"
+
+mkdir -p "${BUNDLE}" || exit $?
+
+# add launcher
+cp `dirname $0`/entrypoint.sh "${BUNDLE}/${TITLE}" || exit $?
+chmod 755 "${BUNDLE}/${TITLE}" || exit $?
+
+# add plist with @v@ -> value and progtitle replacements
+REL_SRCDIR=`echo @srcdir@ | sed -e s,^@top_builddir@/,,` || exit $?
+cp "`dirname $0`/Info.plist" "${BUNDLE}/" || exit $?
+
+# add icons
+REL_TOP_SRCDIR=`echo @top_srcdir@ | sed -e s,^@top_builddir@/,,` || exit $?
+cp "${REL_TOP_SRCDIR}/desktop/os-x/Armagetron Advanced.icns" "${BUNDLE}/${TITLE}.icns"
+
+# install game into bundle
+DESTDIR="${BUNDLE}" make install || exit $?
+
+# bundle libraries
+(cd "${BUNDLE}"; dylibbundler -od -b -x "./@prefix@/bin/@progname@" -d "./@prefix@/libs/") || exit $?
+
+# zip
+(cd "${BUNDLE}" && zip -r ../@progname@-@version@.macOS.zip .) || exit $?
+
+# pack dmg
+
+# mkdir pack
+# cp -a "${BUNDLE}" pack || exit $?
+# --sandbox-safe
+# --icon "$ICON" 200 190 \
+# DMG_SRC=pack
+DMG_SRC=${BUNDLE}
+DMG="${DIR}/@progname@-@version@.dmg"
+rm -f "${DMG}"
+ICON="${REL_TOP_SRCDIR}/desktop/os-x/Armagetron Advanced.icns"
+BG="${REL_TOP_SRCDIR}/desktop/os-x/background.png"
+create-dmg \
+	--volicon "$ICON" \
+	--app-drop-link 470 180 --window-pos 200 112 --window-size 650 330 \
+	--icon "${TITLE}.app" 220 80 \
+	--icon-size 100 \
+	--hide-extension "${TITLE}.app" \
+	--background ${BG} \
+	"${DMG}" "${DMG_SRC}" || exit $?
+
+# alternative, native way, less powerful
+# hdiutil create -volname "@progtitle@" -srcfolder "${BUNDLE}" -ov -format UDIF "${DMG}"
+
+rm -rf "${DMG_SRC}"
