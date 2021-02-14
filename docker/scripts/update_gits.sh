@@ -48,6 +48,7 @@ function fix_gits(){
 
 EOF
 
+fix_git macOS
 fix_git winlibs
 fix_git codeblocks
 fix_git steam-art
