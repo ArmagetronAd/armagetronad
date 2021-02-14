@@ -259,7 +259,6 @@ deploy_staged:
   before_script:
     - ./docker/scripts/fix_gits.sh || exit $?
     - ./docker/deploy/prepare_deploy.sh || exit $?
-
   script:
     # now enter the docker build directory and just invoke make there
     - cd gitlab_build/docker/build
@@ -279,7 +278,7 @@ delay_release:
     when: manual
   - if: '$CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_BRANCH'
     when: delayed
-    start_in: '6 hours'
+    start_in: '16 hours'
   - when: on_success
   before_script: [""]
   script: [""]

@@ -19,6 +19,7 @@ function fix_gits(){
     set -x
     # On merge conflicts here: run update_gits.sh, that sorts things out
 
+    fix_git macOS c77e2d9a24e48f36f1ddab7c76f140e7f145ccf1 || return $?
     fix_git winlibs d03e20bf8973a6cbd1e0ecb47dd8333c5614b139 || return $?
     fix_git codeblocks 2f363cec627bc40bdc358c2cc467d3384910691c || return $?
     fix_git steam-art 7b3930ab85a3dfbb1caffaa17442b670c823f314 || return $?

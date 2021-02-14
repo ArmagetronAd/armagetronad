@@ -585,6 +585,33 @@ zeroinstall: zeroinstall.tag
 
 #***************************************************************
 
+# build on the mac via GitHub Actions. Requires staging.
+context.macbuild: rootcontext.64 ${srcdir}/../deploy/*_macbuild.sh ${srcdir}/../deploy/wait_for_upload.sh ../deploy/* CI_INFO
+	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' ../deploy/'*' ${srcdir}/../deploy/*_macbuild.sh ${srcdir}/../deploy/wait_for_upload.sh CI_INFO ${srcdir}/../scripts/.cache/gits/macOS
+	rm -f $@.dir/image
+	echo "armadeploy_64" > $@.dir/image
+	echo > $@
+result.macbuild: context.macbuild
+	+$(srcdir)/context_to_result.sh $@.dir ./deploy_macbuild.sh
+	echo > $@
+
+# only build macOS if we're not staging
+macbuild: macbuild.tag
+macbuild.tag: maybe_macbuild_${STAGING}.tag
+	touch $@
+maybe_macbuild_.tag:
+	touch $@
+maybe_macbuild_true.tag:
+	touch $@
+maybe_macbuild_false.tag: result.macbuild upload/.tag
+	cp $<.dir/upload/${PROGRAM_TITLE}* upload/
+#	rm -rf steamdirs/steam_macOS.dir
+#	mkdir -p steamdirs/steam_macOS.dir
+#	cd steamdirs/steam_macOS.dir; unzip ../../$<.dir/upload/${STEAM_PACKAGE_NAME}-${PACKAGE_VERSION}.macOS.zip 
+	touch $@
+
+#***************************************************************
+
 steamdirs/.tag:
 	mkdir -p steamdirs
 	echo > $@
@@ -656,7 +683,7 @@ deploy_ours: result.deploy_zi result.deploy_download deploy_external
 context.deploy_base_%: rootcontext.64 deploy_base.tag ${srcdir}/../deploy/deploy_%.sh ${srcdir}/../deploy/wait_for_upload.sh ../deploy/* CI_INFO
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' upload ../deploy/'*' ${srcdir}/../deploy/deploy_$*.sh ${srcdir}/../deploy/wait_for_upload.sh CI_INFO
 	echo > $@
-context.deploy_%: context.deploy_base_%
+context.deploy_%: context.deploy_base_% macbuild
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*'
 	echo > $@
 result.deploy_%: context.deploy_%
@@ -713,17 +740,6 @@ context.deploy_zi: context.deploy_base_zeroinstall result.update_zi ${srcdir}/..
 	echo > $@
 result.deploy_zi: context.deploy_zi deploy_external result.deploy_download
 	+$(srcdir)/context_to_result.sh $@.dir ./deploy_zeroinstall.sh
-	echo > $@
-context.deploy_itch: context.deploy_base_itch ${srcdir}/../deploy/*_itch.sh upload/$(APPTAR_CLIENT_64) upload/$(APPTAR_CLIENT_32) $(WINZIP_CLIENT)
-	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' ${srcdir}/../deploy/*_itch.sh
-	mkdir -p $@.dir/appdir_linux_64; cd $@.dir/appdir_linux_64; tar -xjf ../../upload/$(APPTAR_CLIENT_64)
-	mkdir -p $@.dir/appdir_linux_32; cd $@.dir/appdir_linux_32; tar -xjf ../../upload/$(APPTAR_CLIENT_32)
-	mkdir -p $@.dir/appdir_windows; cd $@.dir/appdir_windows; unzip ../../$(WINZIP_CLIENT)
-	rm -f $@.dir/image
-	echo "armadeploy_64" > $@.dir/image
-	echo > $@
-result.deploy_itch: context.deploy_itch
-	+$(srcdir)/context_to_result.sh $@.dir ./deploy_itch.sh
 	echo > $@
 
 context.deploy_fp: context.deploy_base_flatpak ${srcdir}/../deploy/*_flatpak.sh
