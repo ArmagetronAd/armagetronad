@@ -669,7 +669,7 @@ reformat.tag: result.reformat
 # for testing, we want minimal builds before any deployment
 # in production, the CI solution is responsible for having built
 # everything not explicitly required here
-deploy_base.tag: CI_pack.tag debtest.tag reformat.tag ../deploy/targets.sh macbuild
+deploy_base.tag: CI_pack.tag debtest.tag reformat.tag ../deploy/targets.sh
 	echo > $@
 deploy_base: deploy_base.tag
 
@@ -683,7 +683,7 @@ deploy_ours: result.deploy_zi result.deploy_download deploy_external
 context.deploy_base_%: rootcontext.64 deploy_base.tag ${srcdir}/../deploy/deploy_%.sh ${srcdir}/../deploy/wait_for_upload.sh ../deploy/* CI_INFO
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' upload ../deploy/'*' ${srcdir}/../deploy/deploy_$*.sh ${srcdir}/../deploy/wait_for_upload.sh CI_INFO
 	echo > $@
-context.deploy_%: context.deploy_base_%
+context.deploy_%: context.deploy_base_% macbuild
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*'
 	echo > $@
 result.deploy_%: context.deploy_%
