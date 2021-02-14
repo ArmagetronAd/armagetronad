@@ -702,8 +702,8 @@ context.deploy_steam: context.deploy_base_steam ${srcdir}/../deploy/steamcontent
 	echo "steamcmd" > $@.dir/image
 	echo > $@
 
-context.deploy_gitlab: context.deploy_base_gitlab Makefile
-	${srcdir}/prepare_context.sh $@.dir $<.dir/'*'
+context.deploy_gitlab: rootcontext.64 deploy_base.tag ../deploy/* ${srcdir}/../deploy/deploy_gitlab.sh CI_INFO
+	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' upload ../deploy/'*' ${srcdir}/../deploy/deploy_gitlab.sh CI_INFO
 	echo "#/bin/bash" > $@.dir/CI_INFO_DEPLOY_GITLAB
 	echo "CI_JOB_TOKEN=${CI_JOB_TOKEN}" >> $@.dir/CI_INFO_DEPLOY_GITLAB
 	echo "CI_API_V4_URL=${CI_API_V4_URL}" >> $@.dir/CI_INFO_DEPLOY_GITLAB
