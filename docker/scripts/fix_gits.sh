@@ -14,7 +14,7 @@ function fix_git(){
 }
 
 function fix_gits(){
-    ${wd}/ensure_gits.sh legacy_0.2.8 || return $?
+    ${wd}/ensure_gits.sh legacy_0.2.9 || return $?
 
     set -x
     # On merge conflicts here: run update_gits.sh, that sorts things out
