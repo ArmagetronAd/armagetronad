@@ -76,8 +76,9 @@ if test ${STAGING} == true; then
 fi
 
 # wait for result
+sleep 300
 MACOS_DOWNLOAD=${DOWNLOAD_URI_BASE_STAGING}/macOS/
-timeout=10
+timeout=5
 ERROR=1
 while test ${timeout} -gt -1; do
     if ./wait_for_upload.sh ${MACOS_DOWNLOAD}mac_is_done.txt; then
