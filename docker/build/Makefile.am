@@ -644,10 +644,10 @@ deploy_external: deploy_essential deploy_steam
 # targets in our control
 deploy_ours: result.deploy_zi result.deploy_download deploy_external
 
-context.deploy_base_%: rootcontext.64 deploy_base.tag ${srcdir}/../deploy/deploy_%.sh ${srcdir}/../deploy/wait_for_upload.sh ../deploy/* CI_INFO
+context.deploy_base_%: rootcontext.64 deploy_base.tag ${srcdir}/../deploy/deploy_%.sh ${srcdir}/../deploy/wait_for_upload.sh ../deploy/* CI_INFO macbuild
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' upload ../deploy/'*' ${srcdir}/../deploy/deploy_$*.sh ${srcdir}/../deploy/wait_for_upload.sh CI_INFO
 	echo > $@
-context.deploy_%: context.deploy_base_% macbuild
+context.deploy_%: context.deploy_base_%
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*'
 	echo > $@
 result.deploy_%: context.deploy_%
