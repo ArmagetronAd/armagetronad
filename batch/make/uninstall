@@ -6,31 +6,31 @@
 #set -x
 
 UNINSTALL=$1
-test x$UNINSTALL = x && UNINSTALL=uninstall
+test "x${UNINSTALL}" = x && UNINSTALL=uninstall
 
 EXTERNAL_CMD=$2
 
-test -z "`echo $UNINSTALL | grep '^/'`" && UNINSTALL=`pwd`/$UNINSTALL
-echo "Generating uninstallation script" $UNINSTALL...
+test -z "`echo ${UNINSTALL} | grep '^/'`" && UNINSTALL="`pwd`/${UNINSTALL}"
+echo "Generating uninstallation script" ${UNINSTALL}...
 
 if test "$EXTERNAL_CMD" != "" && test "$EXTERNAL_CMD" != "yes"; then
 	{
 		echo '#! /bin/sh'
 		echo "$EXTERNAL_CMD"
-	} > $UNINSTALL
+	} > "${UNINSTALL}"
 else
 
-# start $UNINSTALL
-cat > ${UNINSTALL} <<EOF
+# start ${UNINSTALL}
+cat > "${UNINSTALL}" <<EOF
 #! /bin/sh
 # uninstalls ${PROGTITLE}
 
 # set default destdir to where the game was installed to
-test -z "\${DESTDIR}" && DESTDIR=${ROOTDIR}
+test -z "\${DESTDIR}" && DESTDIR="${ROOTDIR}"
 export DESTDIR
 
 # uninstall system files
-\${DESTDIR}${SCRIPTDIR}/sysinstall uninstall ${PREFIX} || exit 1
+"\${DESTDIR}${SCRIPTDIR}/sysinstall" uninstall "${PREFIX}" || exit 1
 
 # automaticall generated from "make install"
 EOF
@@ -54,32 +54,32 @@ rm -rf $DEST
 exit -1
 fi
 
-find "$DEST" -type d | sed -e "s,^${DEST},rmdir --ignore-fail-on-non-empty \\\$\{DESTDIR\}," > ${UNINSTALL}.dir0
-find "$DEST" -type f | sed -e "s,^${DEST},rm -f \\\$\{DESTDIR\}," > ${UNINSTALL}.files
+find "$DEST" -type d | sed -e "s,^${DEST},rmdir --ignore-fail-on-non-empty \\\$\{DESTDIR\}," > "${UNINSTALL}.dir0"
+find "$DEST" -type f | sed -e "s,^${DEST},rm -f \\\$\{DESTDIR\}," > "${UNINSTALL}.files"
 
 # less ${UNINSTALL}.dir0
 
 # add all parent directories of those that are still game-specific
-grep ${PROGNAME} ${UNINSTALL}.dir0 > ${UNINSTALL}.dir
-while test -s ${UNINSTALL}.dir0; do
-  sed -e "s,/[^/]*\$,," < ${UNINSTALL}.dir0 | grep ${PROGNAME} > ${UNINSTALL}.dir1
-  cat ${UNINSTALL}.dir1 >> ${UNINSTALL}.dir
-  mv ${UNINSTALL}.dir1 ${UNINSTALL}.dir0
+grep "${PROGNAME}" "${UNINSTALL}.dir0" > "${UNINSTALL}.dir"
+while test -s "${UNINSTALL}.dir0"; do
+  sed -e "s,/[^/]*\$,," < "${UNINSTALL}.dir0" | grep "${PROGNAME}" > "${UNINSTALL}.dir1"
+  cat "${UNINSTALL}.dir1" >> "${UNINSTALL}.dir"
+  mv "${UNINSTALL}.dir1" "${UNINSTALL}.dir0"
 done
 
 # compose uninstall script from file and directory list
-cat ${UNINSTALL}.files >> ${UNINSTALL}
-sort ${UNINSTALL}.dir -ru >> ${UNINSTALL}
+cat "${UNINSTALL}.files" >> "${UNINSTALL}"
+sort "${UNINSTALL}.dir" -ru >> "${UNINSTALL}"
 
-rm -rf ${DEST}
+rm -rf "${DEST}"
 
 fi
 
 # clean up
-rm -f ${UNINSTALL}.dir ${UNINSTALL}.dir0 ${UNINSTALL}.files
+rm -f "${UNINSTALL}.dir" "${UNINSTALL}.dir0" "${UNINSTALL}.files"
 
-chmod 755 ${UNINSTALL}
+chmod 755 "${UNINSTALL}"
 
-# less ${UNINSTALL}
+# less "${UNINSTALL}"
 
 echo "done."

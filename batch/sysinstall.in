@@ -155,7 +155,7 @@ function install_link()
             mkdir_p "${target_dir}"
         fi
         if ! test -f "${target}"; then
-            relative=`relative_path "${target_dir}" "${source}"`
+            relative="`relative_path "${target_dir}" "${source}"`"
             echo cd "${target_dir}", @LN_S@ "${relative}" "${target_file}"
             (cd "${target_dir}" && @LN_S@ "${relative}" "${target_file}")
         fi
@@ -317,8 +317,8 @@ fi
 if test @enable_etc@ = yes && echo @aa_sysconfdir@ | grep -v "^/etc/" > /dev/null; then
     if mkdir_p "$DESTDIR/etc" > /dev/null 2>&1 && test -w "$DESTDIR/etc"; then
         echo ${INSTALLING} configuration directories in $DESTDIR/etc...
-        install_link "$CONFIGDIR" /etc/@progname@
-        test -z "@progdir_suffix@" || install_link "$CONFIGDIR" /etc/@progname@-@progdir_suffix@
+        install_link "$CONFIGDIR" "/etc/@progname@"
+        test -z "@progdir_suffix@" || install_link "$CONFIGDIR" "/etc/@progname@-@progdir_suffix@"
     fi
 fi
 
@@ -329,9 +329,9 @@ install_link "${BINDIR}/@prognamebase@-master-@version@" "${BINDIR}/@prognamebas
 # install desktop files
 if test @enable_desktop@ = yes; then
     DESKTOPSOURCE=@aa_datadir@/desktop
-    DESKTOPDESTDIR=${PREFIX}/share/applications
-    DESKTOPDEST=${DESKTOPDESTDIR}/@progid@.desktop
-    METADEST=${PREFIX}/share/appdata
+    DESKTOPDESTDIR="${PREFIX}/share/applications"
+    DESKTOPDEST="${DESKTOPDESTDIR}/@progid@.desktop"
+    METADEST="${PREFIX}/share/appdata"
 
     # rebrand icons and desktop file
     if test "$MODE" = "install"; then
@@ -341,24 +341,24 @@ if test @enable_desktop@ = yes; then
             for f in 16x16 32x32 48x48; do mv "${DESTDIR}${DESKTOPSOURCE}/icons/$f/armagetronad.png" "${DESTDIR}${DESKTOPSOURCE}/icons/$f/@prognamebase@.png" || exit $?; done
         fi
 
-        mkdir -p ${DESTDIR}${DESKTOPDESTDIR}
-        mv ${DESTDIR}${DESKTOPSOURCE}/armagetronad.desktop ${DESTDIR}${DESKTOPDEST} || exit $?
+        mkdir -p "${DESTDIR}${DESKTOPDESTDIR}"
+        mv "${DESTDIR}${DESKTOPSOURCE}/armagetronad.desktop" "${DESTDIR}${DESKTOPDEST}" || exit $?
 
         # add appstream metadata
-        mkdir_p ${DESTDIR}${METADEST}
-        mv ${DESTDIR}${DESKTOPSOURCE}/armagetronad.appdata.xml ${DESTDIR}${METADEST}/@progid@.appdata.xml || exit $?
+        mkdir_p "${DESTDIR}${METADEST}"
+        mv "${DESTDIR}${DESKTOPSOURCE}/armagetronad.appdata.xml" "${DESTDIR}${METADEST}/@progid@.appdata.xml" || exit $?
     else
-        for f in 16x16 32x32 48x48; do rm -f ${DESTDIR}${DESKTOPSOURCE}/icons/$f/@prognamebase@.png; done
-        rm -f ${DESTDIR}${DESKTOPDEST}
-        rm -f ${DESTDIR}${METADEST}/@progid@.appdata.xml
+        for f in 16x16 32x32 48x48; do rm -f "${DESTDIR}${DESKTOPSOURCE}/icons/$f/@prognamebase@.png"; done
+        rm -f "${DESTDIR}${DESKTOPDEST}"
+        rm -f "${DESTDIR}${METADEST}/@progid@.appdata.xml"
     fi
 
     # set -x
     # install icons in canonical locations
     for f in 16x16 32x32 48x48; do
-        icontarget=${PREFIX}/share/icons/hicolor/$f/apps
-        mkdir -p ${DESTDIR}${icontarget} || exit $?
-        install_link ${DESKTOPSOURCE}/icons/$f/@prognamebase@.png ${icontarget}/@progid@.png || exit $?
+        icontarget="${PREFIX}/share/icons/hicolor/$f/apps"
+        mkdir -p "${DESTDIR}${icontarget}" || exit $?
+        install_link "${DESKTOPSOURCE}/icons/$f/@prognamebase@.png" "${icontarget}/@progid@.png" || exit $?
     done
     # set +x
 
@@ -380,7 +380,6 @@ if test @enable_desktop@ = yes; then
             install_link "${DESKTOPSOURCE}/@prognamebase@.desktop" "${DESKTOPDEST}/@progid@.desktop"
         fi
     fi
-
 fi
 
 # on uninstallation, look for other installed versions in the same prefix
