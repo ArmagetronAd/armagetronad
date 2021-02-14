@@ -92,7 +92,7 @@ test ${ERROR} == 0 || exit ${ERROR}
 
 mkdir upload
 for ext in dmg macOS.zip; do
-    for base in ${PACKAGE_NAME} ${PACKAGE_NAME}-dedicated ${STEAM_PACKAGE_NAME}; do
+    for base in ${PACKAGE_NAME} ${PACKAGE_NAME}-dedicated; do #${STEAM_PACKAGE_NAME}; do
         FILE=${base}-${PACKAGE_VERSION}.${ext}
         curl ${MACOS_DOWNLOAD}${FILE} --fail --silent --show-error -L -o upload/${FILE} || exit $?
     done

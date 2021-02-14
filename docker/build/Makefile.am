@@ -570,9 +570,9 @@ maybe_macbuild_true.tag:
 	touch $@
 maybe_macbuild_false.tag: result.macbuild upload/.tag
 	cp $<.dir/upload/${PROGRAM_TITLE}* upload/
-	rm -rf steamdirs/steam_macOS.dir
-	mkdir -p steamdirs/steam_macOS.dir
-	cd steamdirs/steam_macOS.dir; unzip ../../$<.dir/upload/${STEAM_PACKAGE_NAME}-${PACKAGE_VERSION}.macOS.zip 
+#	rm -rf steamdirs/steam_macOS.dir
+#	mkdir -p steamdirs/steam_macOS.dir
+#	cd steamdirs/steam_macOS.dir; unzip ../../$<.dir/upload/${STEAM_PACKAGE_NAME}-${PACKAGE_VERSION}.macOS.zip 
 	touch $@
 
 #***************************************************************
