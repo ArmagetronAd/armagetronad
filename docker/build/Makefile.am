@@ -550,6 +550,33 @@ zeroinstall: zeroinstall.tag
 
 #***************************************************************
 
+# build on the mac via GitHub Actions. Requires staging.
+context.macbuild: rootcontext.64 ${srcdir}/../deploy/*_macbuild.sh ${srcdir}/../deploy/wait_for_upload.sh ../deploy/* CI_INFO
+	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' ../deploy/'*' ${srcdir}/../deploy/*_macbuild.sh ${srcdir}/../deploy/wait_for_upload.sh CI_INFO ${srcdir}/../scripts/.cache/gits/macOS
+	rm -f $@.dir/image
+	echo "armadeploy_64" > $@.dir/image
+	echo > $@
+result.macbuild: context.macbuild
+	+$(srcdir)/context_to_result.sh $@.dir ./deploy_macbuild.sh
+	echo > $@
+
+# only build macOS if we're not staging
+macbuild: macbuild.tag
+macbuild.tag: maybe_macbuild_${STAGING}.tag
+	touch $@
+maybe_macbuild_.tag:
+	touch $@
+maybe_macbuild_true.tag:
+	touch $@
+maybe_macbuild_false.tag: result.macbuild upload/.tag
+	cp $<.dir/upload/${PROGRAM_TITLE}* upload/
+#	rm -rf steamdirs/steam_macOS.dir
+#	mkdir -p steamdirs/steam_macOS.dir
+#	cd steamdirs/steam_macOS.dir; unzip ../../$<.dir/upload/${STEAM_PACKAGE_NAME}-${PACKAGE_VERSION}.macOS.zip 
+	touch $@
+
+#***************************************************************
+
 steamdirs/.tag:
 	mkdir -p steamdirs
 	echo > $@
@@ -606,7 +633,7 @@ reformat.tag: result.reformat
 # for testing, we want minimal builds before any deployment
 # in production, the CI solution is responsible for having built
 # everything not explicitly required here
-deploy_base.tag: CI_pack.tag debtest.tag reformat.tag ../deploy/targets.sh
+deploy_base.tag: CI_pack.tag debtest.tag reformat.tag ../deploy/targets.sh macbuild
 	echo > $@
 deploy_base: deploy_base.tag
 
