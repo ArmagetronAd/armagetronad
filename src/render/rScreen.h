@@ -103,6 +103,7 @@ struct SDL_Surface;
 extern SDL_Surface  *sr_screen;
 #endif
 
+// screen/window dimensions in pixels
 extern int sr_screenWidth,sr_screenHeight;
 
 extern bool sr_alphaBlend;

@@ -83,7 +83,13 @@ static int width[ArmageTron_Custom+2]  = {0, 320, 320, 400, 512, 640, 800, 1024	
 static int height[ArmageTron_Custom+2] = {0, 200, 240, 300, 384, 480, 600,  768	,  800,  854, 1024, 1200, 1050, 1572,600,200};
 static REAL aspect[ArmageTron_Custom+2]= {1, 1	, 1  , 1  , 1  , 1  , 1	 , 1	,    1,    1, 1   ,    1,    1,    1,1,  1};
 
-int sr_screenWidth,sr_screenHeight;
+
+// screen/window dimensions in pixels
+int sr_screenWidth{960},sr_screenHeight{540};
+
+// screen/window dimensions in whatever the system uses for screen coordinates (points/pixels)
+int sr_screenWidthInPoints{960},sr_screenHeightInPoints{540};
+
 
 static tSettingItem<int>  at_ch("CUSTOM_SCREEN_HEIGHT"	, height[ArmageTron_Custom]);
 static tSettingItem<int>  at_cw("CUSTOM_SCREEN_WIDTH" 	, width	[ArmageTron_Custom]);
@@ -585,6 +591,16 @@ static int CountBits(int toCount)
     return ret;
 }
 
+namespace
+{
+#ifdef DEBUG
+// sort of simulate Retina display: set to 2
+static const int s_windowSizeFactor = 1;
+#else
+static const int s_windowSizeFactor = 1;
+#endif
+}
+
 static bool lowlevel_sr_InitDisplay(){
     rCallbackBeforeScreenModeChange::Exec();
 
@@ -595,8 +611,8 @@ static bool lowlevel_sr_InitDisplay(){
         currentScreensetting.aspect = aspect[res.res];
 
     res.UpdateSize();
-    sr_screenWidth = res.width;
-    sr_screenHeight= res.height;
+    sr_screenWidthInPoints = res.width;
+    sr_screenHeightInPoints= res.height;
 
     // desktop color depth
     static int desktopCD_R = 8;
@@ -672,8 +688,8 @@ static bool lowlevel_sr_InitDisplay(){
     int defaultHeight = sr_desktopHeight;
     if(!currentScreensetting.fullscreen)
     {
-        defaultWidth = sr_screenWidth;
-        defaultHeight = sr_screenHeight;
+        defaultWidth = sr_screenWidthInPoints;
+        defaultHeight = sr_screenHeightInPoints;
     }
 
     int defaultX = screenBounds.x + (screenBounds.w-defaultWidth)/2;
@@ -737,16 +753,16 @@ static bool lowlevel_sr_InitDisplay(){
 
         sr_SetGLAttributes( singleCD_R, singleCD_G, singleCD_B, zDepth );
 
-        int attrib=SDL_WINDOW_OPENGL;
+        int attrib=SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI;
         SDL_SetRelativeMouseMode(SDL_FALSE);
 
     #ifdef FORCE_WINDOW
     #ifdef WIN32
-        //		sr_screenWidth  = 400;
-        //		sr_screenHeight = 300;
+        //		sr_screenWidthInPoints  = 400;
+        //		sr_screenHeightInPoints = 300;
     #else
-        //		sr_screenWidth  = minWidth;
-        //		sr_screenHeight = minHeight;
+        //		sr_screenWidthInPoints  = minWidth;
+        //		sr_screenHeightInPoints = minHeight;
     #endif
     #endif
         // int CD = fullCD;
@@ -767,7 +783,7 @@ static bool lowlevel_sr_InitDisplay(){
         // only reinit the screen if the desktop res detection hasn't left us
         // with a perfectly good one.
         if (!sr_screen &&
-            !(sr_screen = SDL_CreateWindow("", defaultX, defaultY, defaultWidth, defaultHeight, attrib))
+            !(sr_screen = SDL_CreateWindow("", defaultX*s_windowSizeFactor, defaultY*s_windowSizeFactor, defaultWidth, defaultHeight, attrib))
             )
         {
             lastError.Clear();
@@ -794,7 +810,7 @@ static bool lowlevel_sr_InitDisplay(){
     {
         // go to window mode, position window on center of selected display
         SDL_SetWindowFullscreen(sr_screen, 0);
-        SDL_SetWindowSize(sr_screen, defaultWidth, defaultHeight);
+        SDL_SetWindowSize(sr_screen, defaultWidth*s_windowSizeFactor, defaultHeight*s_windowSizeFactor);
         SDL_SetWindowPosition(sr_screen, defaultX, defaultY);
 
         SDL_Delay(10);
@@ -809,22 +825,22 @@ static bool lowlevel_sr_InitDisplay(){
         // do we need a custom display mode? if a display mode
         // is set, yes, but also if a non-default custom refresh rate
         // is set.
-        if ( sr_screenWidth + sr_screenHeight > 0 || (currentScreensetting.refreshRate != desktopMode.refresh_rate && currentScreensetting.refreshRate > 0))
+        if ( sr_screenWidthInPoints + sr_screenHeightInPoints > 0 || (currentScreensetting.refreshRate != desktopMode.refresh_rate && currentScreensetting.refreshRate > 0))
         {
             // find best display mode
             SDL_DisplayMode desiredMode, mode, lastMode;
             desiredMode.format = 0;
-            desiredMode.w = sr_screenWidth;
-            desiredMode.h = sr_screenHeight;
-            if ( sr_screenWidth + sr_screenHeight <= 0)
+            desiredMode.w = sr_screenWidthInPoints;
+            desiredMode.h = sr_screenHeightInPoints;
+            if ( sr_screenWidthInPoints + sr_screenHeightInPoints <= 0)
             {
                 desiredMode.w = desktopMode.w;
                 desiredMode.h = desktopMode.h;
             }
             else
             {
-                desiredMode.w = sr_screenWidth;
-                desiredMode.h = sr_screenHeight;
+                desiredMode.w = sr_screenWidthInPoints;
+                desiredMode.h = sr_screenHeightInPoints;
             }
             desiredMode.refresh_rate = currentScreensetting.refreshRate;
             desiredMode.driverdata = NULL;
@@ -843,14 +859,14 @@ static bool lowlevel_sr_InitDisplay(){
                 }
 
                 // set the display mode
-                sr_screenWidth = closest->w;
-                sr_screenHeight = closest->h;
+                sr_screenWidthInPoints = closest->w;
+                sr_screenHeightInPoints = closest->h;
 
                 if(0 == SDL_SetWindowDisplayMode(sr_screen, closest))
                 {
                     SDL_Delay(100);
                     SDL_PumpEvents();
-                    SDL_SetWindowSize(sr_screen, sr_screenWidth, sr_screenHeight);
+                    SDL_SetWindowSize(sr_screen, sr_screenWidthInPoints, sr_screenHeightInPoints);
                     SDL_Delay(100);
                     SDL_PumpEvents();
                     fullscreenSuccess = (0 == SDL_SetWindowFullscreen(sr_screen, SDL_WINDOW_FULLSCREEN));
@@ -869,13 +885,13 @@ static bool lowlevel_sr_InitDisplay(){
         // if desktop resolution was selected or custom mode setting failed, pick desktop mode
         if(!fullscreenSuccess)
         {
-            sr_screenWidth = sr_desktopWidth;
-            sr_screenHeight = sr_desktopHeight;
+            sr_screenWidthInPoints = sr_desktopWidth;
+            sr_screenHeightInPoints = sr_desktopHeight;
             SDL_SetWindowFullscreen(sr_screen, SDL_WINDOW_FULLSCREEN_DESKTOP);
             SDL_SetWindowFullscreen(sr_screen, 0);
             SDL_Delay(100);
             SDL_PumpEvents();
-            SDL_SetWindowSize(sr_screen, sr_screenWidth, sr_screenHeight);
+            SDL_SetWindowSize(sr_screen, sr_screenWidthInPoints*s_windowSizeFactor, sr_screenHeightInPoints*s_windowSizeFactor);
             SDL_Delay(100);
             SDL_PumpEvents();
             fullscreenSuccess = (0 == SDL_SetWindowFullscreen(sr_screen, SDL_WINDOW_FULLSCREEN_DESKTOP));
@@ -894,8 +910,8 @@ static bool lowlevel_sr_InitDisplay(){
 
             currentScreensetting.fullscreen = false;
 
-            sr_screenWidth  = currentScreensetting.windowSize.width;
-            sr_screenHeight = currentScreensetting.windowSize.height;
+            sr_screenWidthInPoints  = currentScreensetting.windowSize.width;
+            sr_screenHeightInPoints = currentScreensetting.windowSize.height;
         }
     }
     if (!currentScreensetting.fullscreen)
@@ -903,7 +919,7 @@ static bool lowlevel_sr_InitDisplay(){
         // Set windowed mode and size accordingly
         if (!SDL_SetWindowFullscreen(sr_screen, 0))
         {
-            SDL_SetWindowSize(sr_screen, sr_screenWidth, sr_screenHeight);
+            SDL_SetWindowSize(sr_screen, sr_screenWidthInPoints*s_windowSizeFactor, sr_screenHeightInPoints*s_windowSizeFactor);
             SDL_SetWindowPosition(sr_screen, defaultX, defaultY);
             SDL_SetRelativeMouseMode(SDL_FALSE);
         }
@@ -1102,8 +1118,8 @@ static bool lowlevel_sr_InitDisplay(){
         currentScreensetting.aspect = aspect[res.res];
 
     res.UpdateSize();
-    sr_screenWidth = res.width;
-    sr_screenHeight= res.height;
+    sr_screenWidthInPoints = res.width;
+    sr_screenHeightInPoints= res.height;
 
     // desktop color depth
     static int desktopCD_R = 5;
@@ -1192,7 +1208,7 @@ static bool lowlevel_sr_InitDisplay(){
 
         /*
           #ifdef POWERPAK_DEB
-          PD_SetGFXMode(sr_screenWidth, sr_screenHeight, 32, PD_DEFAULT);
+          PD_SetGFXMode(sr_screenWidthInPoints, sr_screenHeightInPoints, 32, PD_DEFAULT);
           sr_screen=DoubleBuffer;
           #else
         */
@@ -1212,29 +1228,29 @@ static bool lowlevel_sr_InitDisplay(){
 
     #ifdef FORCE_WINDOW
     #ifdef WIN32
-        //		sr_screenWidth  = 400;
-        //		sr_screenHeight = 300;
+        //		sr_screenWidthInPoints  = 400;
+        //		sr_screenHeightInPoints = 300;
     #else
-        //		sr_screenWidth  = minWidth;
-        //		sr_screenHeight = 480;
+        //		sr_screenWidthInPoints  = minWidth;
+        //		sr_screenHeightInPoints = 480;
     #endif
     #endif
         int CD = fullCD;
 
         // only check for errors if requested and if we're not about to set the
         // desktop resolution, where SDL_VideoModeOK apparently doesn't work.
-        if (currentScreensetting.checkErrors && sr_screenWidth + sr_screenHeight > 0)
+        if (currentScreensetting.checkErrors && sr_screenWidthInPoints + sr_screenHeightInPoints > 0)
         {
             // check if the video mode should be OK:
             CD = SDL_VideoModeOK
-                 (sr_screenWidth, sr_screenHeight,   fullCD,
+                 (sr_screenWidthInPoints, sr_screenHeightInPoints,   fullCD,
                   attrib);
 
             // if not quite right
             if (CD < 15){
                 // check if the other fs/windowed mode is better
                 int CD_fsinv = SDL_VideoModeOK
-                               (sr_screenWidth, sr_screenHeight,   fullCD,
+                               (sr_screenWidthInPoints, sr_screenHeightInPoints,   fullCD,
                                 attrib^SDL_FULLSCREEN);
 
                 if (CD_fsinv >= 15){
@@ -1254,10 +1270,10 @@ static bool lowlevel_sr_InitDisplay(){
         }
 
         // if desktop resolution was selected, pick it
-        if ( sr_screenWidth + sr_screenHeight == 0 )
+        if ( sr_screenWidthInPoints + sr_screenHeightInPoints == 0 )
         {
-            sr_screenWidth = sr_desktopWidth;
-            sr_screenHeight = sr_desktopHeight;
+            sr_screenWidthInPoints = sr_desktopWidth;
+            sr_screenHeightInPoints = sr_desktopHeight;
         }
         else
         {
@@ -1267,8 +1283,8 @@ static bool lowlevel_sr_InitDisplay(){
 
         // only reinit the screen if the desktop res detection hasn't left us
         // with a perfectly good one.
-        if ( !sr_screen && (sr_screen=SDL_SetVideoMode (sr_screenWidth, sr_screenHeight, CD, attrib)) == NULL) {
-            if((sr_screen=SDL_SetVideoMode (sr_screenWidth, sr_screenHeight, CD, attrib^SDL_FULLSCREEN))==NULL ) {
+        if ( !sr_screen && (sr_screen=SDL_SetVideoMode (sr_screenWidthInPoints, sr_screenHeightInPoints, CD, attrib)) == NULL) {
+            if((sr_screen=SDL_SetVideoMode (sr_screenWidthInPoints, sr_screenHeightInPoints, CD, attrib^SDL_FULLSCREEN))==NULL ) {
                 lastError.Clear();
                 lastError << "Couldn't set video mode: ";
                 lastError << SDL_GetError();
@@ -1501,23 +1517,37 @@ bool sr_InitDisplay(){
     #endif
     #endif
 
-        sr_LockSDL();
-        if (lowlevel_sr_InitDisplay())
+        auto Success = [&]()
         {
+#ifndef DEDICATED
+#if SDL_VERSION_ATLEAST(2,0,1)
+            SDL_GL_GetDrawableSize(sr_screen, &sr_screenWidth, &sr_screenHeight);
+#else
+            sr_screenWidth = sr_screenWidthInPoints;
+            sr_screenHeight = sr_screenHeightInPoints;
+#endif
+#endif
+
             sr_UnlockSDL();
             failed_attempts = 0;
             st_SaveConfig();
             return true;
+        };
+
+        sr_screenWidth = sr_screenWidthInPoints;
+        sr_screenHeight = sr_screenHeightInPoints;
+
+        sr_LockSDL();
+        if (lowlevel_sr_InitDisplay())
+        {
+            return Success();
         }
 
         st_SaveConfig();
 
         if (lowlevel_sr_InitDisplay())
         {
-            sr_UnlockSDL();
-            failed_attempts = 0;
-            st_SaveConfig();
-            return true;
+            return Success();
         }
         sr_UnlockSDL();
 
