@@ -68,7 +68,12 @@ SDL_GLContext sr_glcontext=NULL;
 SDL_Surface  *sr_screen=NULL; // our window
 #endif
 
-    #ifndef DEDICATED
+#if ! SDL_VERSION_ATLEAST(2,0,1)
+// this flag was introduced in 2.0.1, we can live without
+#define SDL_WINDOW_ALLOW_HIGHDPI 0
+#endif
+
+#ifndef DEDICATED
 #ifndef SDL_OPENGL
 #error "need SDL 1.1"
 #endif
