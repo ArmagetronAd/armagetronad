@@ -21,6 +21,7 @@ EXTRA_DIST=icons/16x16/armagetronad.png\
 		   armagetronad-armagetronad-handler.desktop.in\
 		   armagetronad-link.xml.in\
 		   armagetronad.protocol.in\
+		   os-x/background.png \
 		   os-x/armagetronad.icns os-x/Info.plist.in\
 		   os-x/armagetronad.icns os-x/background.png\
 		   os-x/armagetronad.icns os-x/armagetronad.icns\
