@@ -3868,6 +3868,7 @@ ladderlog_write_winzone_activated_help              Write to ladderlog: WINZONE_
 ladderlog_write_zone_created_help                   Write to ladderlog: ZONE_CREATED [effect] [id] [name] [xpos] [ypos] [xdir] [ydir]
 ladderlog_write_zone_gridpos_help                   Write to ladderlog: ZONE_GRIDPOS [effect] [id] [name] [radius] [growth] [posx] [posy] [velx] [vely] [r] [g] [b]
 ladderlog_write_zone_shot_released_help             Write to ladderlog: ZONE_SHOT_RELEASED [0-shot|1-deathshot] [id] [player_name] [zone_pos_x] [zone_pos_y] [zone_dir_x] [zone_dir_y]
+ladderlog_write_zone_route_stopped_help             Write to ladderlog: ZONE_ROUTE_STOPPED [effect] [id] [name] [posx] [posy] [velx] [vely]
 ladder_highscore_output_help              If set to >1, high scores will be announced to all players.
 legacy_ladderlog_command_help             If set to 1, COMMAND will output similar things to INVALID_COMMAND.
 limit_sets_help                           Set the match set limit. Teams winning more sets win the match.

@@ -879,6 +879,8 @@ static tSettingItem<REAL> sg_objectZoneZoneEnteredRateConf("LADDERLOG_OBJECTZONE
 
 static eLadderLogWriter sg_OnlineZoneWriter("ONLINE_ZONE", false);
 
+static eLadderLogWriter sg_zoneRouteStopWriter("ZONE_ROUTE_STOPPED", true);
+
 bool gZone::Timestep( REAL time )
 {
     if ((sn_GetNetState() != nCLIENT) && destroyed_)
@@ -1116,6 +1118,12 @@ bool gZone::Timestep( REAL time )
                 route_.clear();
                 lastCoord_ = 0;
                 nextUpdate_ = -1;
+                
+                sg_zoneRouteStopWriter << GetEffect() << GetID() << GetName();
+                sg_zoneRouteStopWriter << lastPos.x/gArena::SizeMultiplier() << lastPos.y/gArena::SizeMultiplier();
+                sg_zoneRouteStopWriter << GetVelocity().x << GetVelocity().y;
+
+                sg_zoneRouteStopWriter.write();
             }
             else
             {
