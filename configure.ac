@@ -950,7 +950,6 @@ src/doc/Makefile src/doc/net/Makefile src/doc/Doxyfile
 src/doc/html.m4
 src/thirdparty/Makefile
 src/thirdparty/particles/Makefile
-src/macosx/entrypoint.sh
 src/macosx/build_bundle.sh
 resource/Makefile
 config/Makefile

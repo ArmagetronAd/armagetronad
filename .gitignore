@@ -102,3 +102,4 @@ desktop/armagetronad-link.xml
 src/.cproject
 src/.project
 src/.settings
+.vscode
