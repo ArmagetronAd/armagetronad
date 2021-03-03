@@ -465,6 +465,7 @@ GENERICUNIX
 )
 
 SDL_CONFIG_DEFAULT=sdl-config
+macosx=false
 
 dnl *************************************************
 dnl GL AND  MATHLIB SELECTION ( SYSTEM DEPENDANT)
@@ -488,6 +489,8 @@ case "$target" in
         SYS_GL_LIB=""
         SYS_GLU_LIB=""
         test x$build_regular = xfalse || LIBS="$LIBS -framework OpenGL"
+        AC_PROG_OBJC
+        macosx=true
         dnl -framework GLU -framework Quicktime -lsmpeg"
         ;;
     *-*-aix*)
@@ -526,6 +529,8 @@ SAFEUNIX
 esac
 
 test -z "$SDL_CONFIG" && SDL_CONFIG=$SDL_CONFIG_DEFAULT
+
+AM_CONDITIONAL(MACOSX, test x$macosx = xtrue)
 
 AC_SUBST(docstyle)
 
