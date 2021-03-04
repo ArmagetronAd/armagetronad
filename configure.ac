@@ -466,6 +466,7 @@ GENERICUNIX
 
 SDL_CONFIG_DEFAULT=sdl-config
 macosx=false
+OBJC="not_needed_on_this_platform"
 
 dnl *************************************************
 dnl GL AND  MATHLIB SELECTION ( SYSTEM DEPENDANT)
@@ -489,7 +490,7 @@ case "$target" in
         SYS_GL_LIB=""
         SYS_GLU_LIB=""
         test x$build_regular = xfalse || LIBS="$LIBS -framework OpenGL"
-        AC_PROG_OBJC
+        unset OBJC
         macosx=true
         dnl -framework GLU -framework Quicktime -lsmpeg"
         ;;
@@ -527,6 +528,9 @@ SAFEUNIX
 SAFEUNIX
         ;;
 esac
+
+dnl Objective C:
+AC_PROG_OBJC
 
 test -z "$SDL_CONFIG" && SDL_CONFIG=$SDL_CONFIG_DEFAULT
 
