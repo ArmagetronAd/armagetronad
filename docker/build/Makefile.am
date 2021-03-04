@@ -111,6 +111,7 @@ CI_INFO: ${srcdir}/../scripts/brand.sh
 	echo PROGRAM_TITLE=$${PROGRAM_TITLE} >> $@ && \
 	echo CI_COMMIT_REF_PROTECTED=$${CI_COMMIT_REF_PROTECTED} >> $@ && \
 	echo CI_COMMIT_SHA=$${CI_COMMIT_SHA} >> $@ && \
+	echo CI_RELEASE_YEAR=$${CI_RELEASE_YEAR} >> $@ && \
 	echo CI_COMMIT_REF_NAME=$${CI_COMMIT_REF_NAME} >> $@
 
 .PRECIOUS: CI_INFO
@@ -549,6 +550,33 @@ zeroinstall: zeroinstall.tag
 
 #***************************************************************
 
+# build on the mac via GitHub Actions. Requires staging.
+context.macbuild: rootcontext.64 ${srcdir}/../deploy/*_macbuild.sh ${srcdir}/../deploy/wait_for_upload.sh ../deploy/* CI_INFO
+	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' ../deploy/'*' ${srcdir}/../deploy/*_macbuild.sh ${srcdir}/../deploy/wait_for_upload.sh CI_INFO ${srcdir}/../scripts/.cache/gits/macOS
+	rm -f $@.dir/image
+	echo "armadeploy_64" > $@.dir/image
+	echo > $@
+result.macbuild: context.macbuild
+	+$(srcdir)/context_to_result.sh $@.dir ./deploy_macbuild.sh
+	echo > $@
+
+# only build macOS if we're not staging
+macbuild: macbuild.tag
+macbuild.tag: maybe_macbuild_${STAGING}.tag
+	touch $@
+maybe_macbuild_.tag:
+	touch $@
+maybe_macbuild_true.tag:
+	touch $@
+maybe_macbuild_false.tag: result.macbuild upload/.tag
+	cp $<.dir/upload/${PROGRAM_TITLE}* upload/
+#	rm -rf steamdirs/steam_macOS.dir
+#	mkdir -p steamdirs/steam_macOS.dir
+#	cd steamdirs/steam_macOS.dir; unzip ../../$<.dir/upload/${STEAM_PACKAGE_NAME}-${PACKAGE_VERSION}.macOS.zip 
+	touch $@
+
+#***************************************************************
+
 steamdirs/.tag:
 	mkdir -p steamdirs
 	echo > $@
@@ -616,7 +644,7 @@ deploy_external: deploy_essential deploy_steam
 # targets in our control
 deploy_ours: result.deploy_zi result.deploy_download deploy_external
 
-context.deploy_base_%: rootcontext.64 deploy_base.tag ${srcdir}/../deploy/deploy_%.sh ${srcdir}/../deploy/wait_for_upload.sh ../deploy/* CI_INFO
+context.deploy_base_%: rootcontext.64 deploy_base.tag ${srcdir}/../deploy/deploy_%.sh ${srcdir}/../deploy/wait_for_upload.sh ../deploy/* CI_INFO macbuild
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' upload ../deploy/'*' ${srcdir}/../deploy/deploy_$*.sh ${srcdir}/../deploy/wait_for_upload.sh CI_INFO
 	echo > $@
 context.deploy_%: context.deploy_base_%

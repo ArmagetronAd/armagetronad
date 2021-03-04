@@ -23,8 +23,8 @@ SUBDIRS = src resource batch config desktop docker/build
 
 # special tasks to do if we're building the master server
 if BUILDMASTER
-masterInstallTasks=	cd  $(DESTDIR)$(bindir); mv armagetronad_main_master$(EXEEXT) @prognamebase@-master$(executable_suffix)
-masterUninstallTasks=rm -f $(DESTDIR)$(bindir)/@prognamebase@-master$(executable_suffix)
+masterInstallTasks=	cd "$(DESTDIR)$(bindir)"; mv armagetronad_main_master$(EXEEXT) @prognamebase@-master$(executable_suffix)
+masterUninstallTasks=rm -f "$(DESTDIR)$(bindir)"/@prognamebase@-master$(executable_suffix)
 else
 masterInstallTasks=echo 'No tasks for the master server'
 masterUninstallTasks=echo 'No tasks for the master server'
@@ -41,7 +41,7 @@ if NEEDDATA
 # install media data only when it is needed
 nobase_texture_DATA=textures/cycle_body.png textures/cycle_wheel.png textures/dir_wall.png\
 	textures/floor_a.png textures/floor_b.png textures/floor.png textures/font_extra.png\
-	textures/font.png textures/font_s.png textures/icon.png textures/KGN_logo.png textures/rim_wall.png\
+	textures/font.png textures/font_s.png textures/icon.png textures/rim_wall.png\
 	textures/shadow.png textures/sky.png textures/title.jpg
 
 nobase_sound_DATA=sound/cyclrun.wav sound/expl.wav
@@ -96,9 +96,9 @@ uninstall_location=$(DESTDIR)${bindir}/${uninstaller}
 
 # generate and install uninstallation script
 install-uninstall: @srcdir@/batch/make/uninstall Makefile
-	$(install_sh_PROGRAM) $< $(uninstall_location)
-	rm $(uninstall_location)
-	ROOTDIR=$(ROOTDIR) DESTDIR=$(DESTDIR) MAKE="$(MAKE)" PREFIX="${prefix}" PROGTITLE="${progtitle}" PROGNAME="${progname}" SCRIPTDIR="${scriptdir}" sh $< $(uninstall_location) "$(external_uninstall_cmd)"
+	$(install_sh_PROGRAM) $< "$(uninstall_location)"
+	rm "$(uninstall_location)"
+	ROOTDIR=$(ROOTDIR) DESTDIR="$(DESTDIR)" MAKE="$(MAKE)" PREFIX="${prefix}" PROGTITLE="${progtitle}" PROGNAME="${progname}" SCRIPTDIR="${scriptdir}" sh $< "$(uninstall_location)" "$(external_uninstall_cmd)"
 else
 install-uninstall:
 endif
@@ -107,7 +107,7 @@ endif
 install-exec-hook: install-uninstall
 #	rename executable to armagetronad-VERSION and link to armagetronad
 if BUILDMAIN
-	cd  $(DESTDIR)${bindir}; mv armagetronad_main$(EXEEXT) @progname@$(executable_suffix)
+	cd  "$(DESTDIR)${bindir}"; mv armagetronad_main$(EXEEXT) @progname@$(executable_suffix)
 endif
 
 #	delegate to special tasks
@@ -116,12 +116,12 @@ endif
 install-data-hook:
 #	install systemwide files
 if USE_SYSINSTALL
-	DESTDIR=$(DESTDIR) ROOTDIR=$(ROOTDIR) bash $(DESTDIR)${scriptdir}/sysinstall install $(prefix)
+	DESTDIR="$(DESTDIR)" ROOTDIR=$(ROOTDIR) bash "$(DESTDIR)${scriptdir}"/sysinstall install $(prefix)
 endif
 
 uninstall-hook:
 #	delete executable and uninstaller
-	rm -f $(DESTDIR)${bindir}/@progname@$(executable_suffix)
+	rm -f "$(DESTDIR)${bindir}"/@progname@$(executable_suffix)
 
 #	delegate to special tasks
 	$(masterUninstallTasks)
@@ -137,7 +137,7 @@ endif
 uninstall-first:
 #	uninstall systemwide files
 if USE_SYSINSTALL
-	if test -z "$(AA_FAKE_UNINSTALL)"; then DESTDIR=$(DESTDIR) ROOTDIR=$(ROOTDIR) bash $(DESTDIR)${scriptdir}/sysinstall uninstall $(prefix); fi
+	if test -z "$(AA_FAKE_UNINSTALL)"; then DESTDIR="$(DESTDIR)" ROOTDIR=$(ROOTDIR) bash "$(DESTDIR)${scriptdir}"/sysinstall uninstall $(prefix); fi
 endif
 
 install-first:

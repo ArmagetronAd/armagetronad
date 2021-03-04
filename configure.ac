@@ -465,6 +465,8 @@ GENERICUNIX
 )
 
 SDL_CONFIG_DEFAULT=sdl-config
+macosx=false
+OBJC="not_needed_on_this_platform"
 
 dnl *************************************************
 dnl GL AND  MATHLIB SELECTION ( SYSTEM DEPENDANT)
@@ -488,6 +490,8 @@ case "$target" in
         SYS_GL_LIB=""
         SYS_GLU_LIB=""
         test x$build_regular = xfalse || LIBS="$LIBS -framework OpenGL"
+        unset OBJC
+        macosx=true
         dnl -framework GLU -framework Quicktime -lsmpeg"
         ;;
     *-*-aix*)
@@ -525,7 +529,12 @@ SAFEUNIX
         ;;
 esac
 
+dnl Objective C:
+AC_PROG_OBJC
+
 test -z "$SDL_CONFIG" && SDL_CONFIG=$SDL_CONFIG_DEFAULT
+
+AM_CONDITIONAL(MACOSX, test x$macosx = xtrue)
 
 AC_SUBST(docstyle)
 
@@ -950,6 +959,7 @@ src/doc/Makefile src/doc/net/Makefile src/doc/Doxyfile
 src/doc/html.m4
 src/thirdparty/Makefile
 src/thirdparty/particles/Makefile
+src/macosx/build_bundle.sh
 resource/Makefile
 config/Makefile
 desktop/Makefile

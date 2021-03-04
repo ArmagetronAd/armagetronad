@@ -9,12 +9,6 @@ to upgrade to 0.2.9 just yet.
 If you are in that camp and need help integrating the changes into your build, 
 contact us.
 
-0.2.8.3.6 is the first release using the build system that powers the 0.2.9 series. 
-It should bring more consistency between this and future releases, 
-but as newer versions of autotools are now used, differences to 0.2.8.3.5 in the tarball
-are to be expected.
-
-Security related: One fix for a remotely exploitable use after free was backported from 0.2.9 (#34) and one
-client crash exploitable by making you play back a specially prepared recording (#54) was fixed.
-
-0.2.8.3.6.1 fixes silly build system mistakes and adds ppa support for Ubuntu 21.04.
+We started to integrate builds for [macOS](http://wiki.armagetronad.org/index.php?title=MacOS).
+Consider them alpha for now, testing and patches very welcome. The current macOS specific issues
+can be viewed [on our tracker](https://gitlab.com/armagetronad/armagetronad/-/issues?label_name%5B%5D=macOS).

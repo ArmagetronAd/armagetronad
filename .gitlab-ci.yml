@@ -229,7 +229,7 @@ delay-release:
     when: never
   - if: '$CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_BRANCH'
     when: delayed
-    start_in: '6 hours'
+    start_in: '16 hours'
   - when: on_success
   before_script: [""]
   script: [""]
