@@ -11,7 +11,8 @@
 set -x
 
 wd="`dirname $0`"
-bic="`readlink -f ${wd}/build_in_container.sh`"
+bic="`readlink -f ${wd}/build_in_container.sh 2> /dev/null`" || \
+bic="`greadlink -f ${wd}/build_in_container.sh`" || exit $?
 
 name="$1"
 shift
