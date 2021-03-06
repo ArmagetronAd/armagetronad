@@ -181,6 +181,26 @@ build_server_32:
     - gitlab_build/docker/build/
     expire_in: 1 day
 
+# macOS builds need a special runner, but can start early
+build_macos:
+  needs:
+   - build_prepare
+  dependencies:
+  - build_prepare
+  tags:
+  - macos
+  stage: build_main
+  rules:
+  - if: $CI_MERGE_REQUEST_ID
+    when: never
+  - when: on_success
+  script:
+    - gitlab_build/docker/build/make_ci.sh macOS
+  artifacts:
+    paths:
+    - gitlab_build/docker/build/
+    expire_in: 1 day
+    
 build_collect:
   stage: build_collect
   rules:
