@@ -101,3 +101,20 @@ Then, run the runner with
     gitlab-runner run
 
  Security and consistency implication: You then only have one docker instance. Jobs running on your runner can therefore modify the same docker images, for example apply tags. Therefore, all our CI scripts reference used images by their digest and use randomized names for containers so they don't get into one another's way.
+
+ ## macOS
+
+ macOS builds happen from this directory, too, without the need for docker. Of course, WITH docker, you can do all the other builds on a Mac.
+ Prerequisites:
+
+    brew install pkg-config autoconf automake sdl sdl_image sdl2 sdl2_image sdl2_mixer protobuf-c glew boost ftgl dylibbundler create-dmg wget python3
+
+For a GitLab runner, choose a VirtualBox based runner. Use [this](https://github.com/myspaghetti/macos-virtualbox) script to create a Mojave VM,
+then follow the [runner installation instructions](https://docs.gitlab.com/runner/install/osx.html). An important preparation step for building the
+.dmg files correctly is that the builder user needs the rights to remote control Finder; for that, just ssh into the machine as the build user (can be from
+within the VM itself) and do a test compilation run.
+
+The macOS builds are done with
+
+    cd docker/build
+    make macOS

@@ -10,13 +10,12 @@ BUNDLE="${DIR}/${TITLE}.app"
 
 mkdir -p "${BUNDLE}" || exit $?
 
-# add launcher
-cp `dirname $0`/entrypoint.sh "${BUNDLE}/${TITLE}" || exit $?
-chmod 755 "${BUNDLE}/${TITLE}" || exit $?
-
 # add plist with @v@ -> value and progtitle replacements
 REL_SRCDIR=`echo @srcdir@ | sed -e s,^@top_builddir@/,,` || exit $?
-sed < "${REL_SRCDIR}/Info.plist" > "${BUNDLE}/Info.plist" -e "s,Armagetron Advanced,${TITLE},g" || exit $?
+sed < "${REL_SRCDIR}/Info.plist" > "${BUNDLE}/Info.plist" \
+-e "s,Armagetron Advanced,${TITLE},g" \
+-e "s,usr/bin/armagetronad,./@prefix@/bin/@progname@,g" \
+|| exit $?
 mkdir -p "${BUNDLE}/English.lproj" || exit $?
 sed < "${REL_SRCDIR}/English.lproj/InfoPlist.strings.in" > "${BUNDLE}/English.lproj/InfoPlist.strings" \
 -e "s,Armagetron Advanced,${TITLE},g" \
@@ -32,7 +31,10 @@ cp "${REL_TOP_SRCDIR}/MacOS/Armagetron Advanced.icns" "${BUNDLE}/${TITLE}.icns"
 DESTDIR="${BUNDLE}" make install || exit $?
 
 # bundle libraries
-(cd "${BUNDLE}"; dylibbundler -od -b -x "./@prefix@/bin/@progname@" -d "./@prefix@/libs/") || exit $?
+(cd "${BUNDLE}"; dylibbundler -od -b -x "./@prefix@/bin/@progname@" -d "./@prefix@/libs/" -i /usr/lib/) || exit $?
+
+# for debugging pure app bundle builds
+# exit 0
 
 # zip
 (cd "${BUNDLE}" && zip -r ../@progname@-@version@.macOS.zip .) || exit $?
