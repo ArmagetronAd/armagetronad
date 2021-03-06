@@ -31,7 +31,6 @@ default:
     -  touch timestamp.tag
     -  test "x${ARMAGETRONAD_FAKERELEASE}" == "x" && export ARMAGETRONAD_FAKERELEASE=false
     -  test -r configure || ./bootstrap.sh
-    -  ls docker/build -al
     -  cat version.m4
     -  mkdir -p gitlab_build
     -  cd gitlab_build
