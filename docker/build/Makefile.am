@@ -216,12 +216,17 @@ context.steam: context.64 gits_artifacts.tag
 	rm $@.dir/image
 	echo "armasteam_64" > $@.dir/image
 #	rebrand
+	rm -f $@.dir/version.sh # required because the source and dest are hard links to the same file originally
 	sed < $<.dir/version.sh > $@.dir/version.sh -e s/PACKAGE_NAME=armagetronad/PACKAGE_NAME=$(STEAM_PACKAGE_TITLE)/ -e s/PACKAGE_TITLE=\"Armagetron\ Advanced/PACKAGE_TITLE=\"$(STEAM_PACKAGE_TITLE)/ -e s/PACKAGE_TITLE=\"Armagetron/PACKAGE_TITLE=\"$(STEAM_PACKAGE_TITLE)/
 # 	no remotely adult stuff
+	rm -f $@.dir/source/src/engine/ePlayer.cpp
 	sed < $<.dir/source/src/engine/ePlayer.cpp > $@.dir/source/src/engine/ePlayer.cpp -e "s/pr0n/cat videos/"
 #   install alternative title, adapt sources
 	cp gits/steam/title.png $@.dir/source/textures/
-	sed < $<.dir/source/src/tron/gLogo.cpp > $@.dir/source/src/tron/gLogo.cpp $@.dir/source/Makefile.* -e "s,textures/title.jpg,textures/title.png,"
+	for f in source/src/tron/gLogo.cpp source/src/Makefile.am; do \
+		rm -f $@.dir/$$f; \
+		sed < $<.dir/$$f > $@.dir/$$f -e "s,textures/title.jpg,textures/title.png,"; \
+	done
 	cd $@.dir/source; automake
 #   done
 	echo > $@
