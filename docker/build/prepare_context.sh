@@ -25,7 +25,11 @@ if ! cp -lrf context/version.sh $@ "${target}"/ > /dev/null 2>&1; then
         if test -f "$f"; then
             ln -f "$f" "${target}"/|| { rm -rf "${target}"; exit 1; }
         else
-            rsync -qav --link-dest="$f" "$f" "${target}/" || { rm -rf "${target}"; exit 1; }
+            if which rsync > /dev/null 2>&1; then
+                rsync -qav --link-dest="$f" "$f" "${target}/" || { rm -rf "${target}"; exit 1; }
+            else
+                cp -lrf "$f" "${target}/" || { rm -rf "${target}"; exit 1; }
+            fi
         fi
     done
 fi
