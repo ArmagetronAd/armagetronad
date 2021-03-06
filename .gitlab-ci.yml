@@ -195,6 +195,7 @@ build_macos:
     when: never
   - when: on_success
   script:
+    - docker/scripts/obsolete.sh || exit 0
     - gitlab_build/docker/build/make_ci.sh macOS
   artifacts:
     paths:
