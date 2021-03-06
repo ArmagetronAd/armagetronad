@@ -181,12 +181,11 @@ build_server_32:
     - gitlab_build/docker/build/
     expire_in: 1 day
 
-# macOS builds need a special runner, but can start early
+# macOS builds need a special runner, but can start early.
+# iIt should build directly from git content, the prepared linux source directories have soft links that won't work.
 build_macos:
-  needs:
-   - build_prepare
-  dependencies:
-  - build_prepare
+  needs: []
+  dependencies: []
   tags:
   - macos
   stage: build_main
@@ -199,7 +198,8 @@ build_macos:
     - gitlab_build/docker/build/make_ci.sh macOS
   artifacts:
     paths:
-    - gitlab_build/docker/build/
+    - gitlab_build/docker/build/upload
+    - gitlab_build/docker/build/macOS/*.tag
     expire_in: 1 day
     
 build_collect:
