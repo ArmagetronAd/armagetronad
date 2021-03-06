@@ -76,7 +76,7 @@ all:	default
 dockertest.tag:
 	cp ${srcdir}/fakerelease_proto.sh .
 	@echo "Testing whether 'docker' works..."
-	docker help > /dev/null
+	if which docker; then docker help > /dev/null; fi
 	echo > $@
 
 tarwrapper.sh: ${top_srcdir}/docker/scripts/tarwrapper.sh
