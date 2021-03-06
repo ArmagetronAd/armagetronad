@@ -38,7 +38,7 @@ default:
     -  ../configure  --prefix=/usr/local --disable-glout --disable-sysinstall --disable-desktop progname="${PROGRAM_NAME}" progtitle="${PROGRAM_TITLE}"
     -  test "x${ARMAGETRONAD_FAKERELEASE}" == "xtrue" && cp ../docker/build/fakerelease_proto.sh docker/build/fakerelease.sh 
     -  cd docker/build
-    -  make CI_prepare -j`nproc`
+    -  make CI_prepare -j`nproc || echo 3`
     -  cd ../../../
     - else
     -  find . -newer timestamp.tag ! -path "./gitlab_build" -exec touch -r timestamp.tag \{\} \;
@@ -194,7 +194,7 @@ build_macos:
   - when: on_success
   script:
     - docker/scripts/obsolete.sh || exit 0
-    - gitlab_build/docker/build/make_ci.sh macOS
+    - gitlab_build/docker/build/make_ci.sh macOS -j`nproc || echo 3`
   artifacts:
     paths:
     - gitlab_build/docker/build/upload
