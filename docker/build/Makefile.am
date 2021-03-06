@@ -782,10 +782,10 @@ intermediateclean:
 
 # keep the artifacts clean of junk not needed in the next phase
 artifactclean:
-	rm *.dir \
+	rm -rf \
+	*.dir \
 	proto/*.dir \
-	source \
-	-rf
+	source
 
 clean: intermediateclean
 	rm -rf \
