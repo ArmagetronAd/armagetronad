@@ -259,6 +259,35 @@ context.test: rootcontext.64
 
 #***************************************************************
 
+# macOS builds are done without docker
+MACOS_CONFIG_ARGS="--disable-sysinstall --disable-etc --prefix=/usr"
+MACOS_BUILD_BUNDLE="./src/macosx/build_bundle.sh"
+
+macOS/client.tag: context.64 upload/.tag #Makefile
+	mkdir -p macOS/client
+	cd macOS/client && ../../$<.dir/source/configure "${MACOS_CONFIG_ARGS}" && make -j `nproc`
+	cd macOS/client && bash ${MACOS_BUILD_BUNDLE}
+	cp macOS/client/*.dmg macOS/client/*.macOS.zip upload/
+	echo > $@
+
+macOS/server.tag: context.64 upload/.tag #Makefile
+	mkdir -p macOS/server
+	cd macOS/server && ../../$<.dir/source/configure --disable-glout "${MACOS_CONFIG_ARGS}" && make -j `nproc`
+	cd macOS/server && bash ${MACOS_BUILD_BUNDLE}
+	cp macOS/server/*.dmg macOS/server/*.macOS.zip upload/
+	echo > $@
+
+macOS/steam.tag: context.steam upload/.tag #Makefile
+	mkdir -p macOS/steam
+	cd macOS/steam && ../../$<.dir/source/configure "${MACOS_CONFIG_ARGS}" progname="${STEAM_PACKAGE_NAME}" progtitle="${STEAM_PACKAGE_TITLE}" && make -j `nproc`
+	cd macOS/steam && bash ${MACOS_BUILD_BUNDLE}
+	cp macOS/steam/*.dmg macOS/steam/*.macOS.zip upload/
+	echo > $@
+
+macOS: macOS/client.tag macOS/server.tag #macOS/steam.tag
+
+#***************************************************************
+
 context.build_server_%: context.%
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*'
 	echo "server" > $@.dir/serverclient
