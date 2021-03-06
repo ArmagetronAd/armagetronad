@@ -14,20 +14,22 @@ echo -e "vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv\n\
 
 set -x
 
-rm -rf ${target}
-mkdir -p ${target}
+rm -rf "${target}"
+mkdir -p "${target}"
 
-if ! cp -lrf context/version.sh $@ ${target}/; then
-    rm -rf ${target}/version.sh
-    cp -lrf context/version.sh ${target}/ || { rm -rf ${target}; exit 1; }
+if ! cp -lrf context/version.sh $@ "${target}"/ > /dev/null 2>&1; then
+    ln -f context/version.sh "${target}"/ || { rm -rf "${target}"; exit 1; }
     
     for f in $@; do
-	rm -rf ${target}/`basename $f`
-	cp -lrf $f ${target}/ || { rm -rf ${target}; exit 1; }
+        rm -rf "${target}/`basename $f`"
+        if test -f "$f"; then
+            ln -f "$f" "${target}"/|| { rm -rf "${target}"; exit 1; }
+        else
+            rsync -qav --link-dest="$f" "$f" "${target}/" || { rm -rf "${target}"; exit 1; }
+        fi
     done
 fi
 
 if test -f fakerelease.sh; then
-    rm -rf ${target}/fakerelease.sh
-    cp -lrf fakerelease.sh ${target}/
+    ln -f fakerelease.sh "${target}/"
 fi
