@@ -263,27 +263,40 @@ context.test: rootcontext.64
 MACOS_CONFIG_ARGS="--disable-sysinstall --disable-etc --prefix=/usr"
 MACOS_BUILD_BUNDLE="./src/macosx/build_bundle.sh"
 
-macOS/client.tag: context.64 upload/.tag #Makefile
+macOS/client_build.tag: context.64 #Makefile
 	mkdir -p macOS/client
-	cd macOS/client && ../../$<.dir/source/configure "${MACOS_CONFIG_ARGS}" && make -j `nproc`
+	cd macOS/client && ../../$<.dir/source/configure "${MACOS_CONFIG_ARGS}" && ${MAKE}
+	echo > $@
+
+macOS/client.tag: macOS/client_build.tag upload/.tag #Makefile
+	rm -rf macOS/client/*.app
 	cd macOS/client && bash ${MACOS_BUILD_BUNDLE}
 	cp macOS/client/*.dmg macOS/client/*.macOS.zip upload/
 	echo > $@
 
-macOS/server.tag: context.64 upload/.tag #Makefile
+macOS/server_build.tag: context.64 #Makefile
 	mkdir -p macOS/server
-	cd macOS/server && ../../$<.dir/source/configure --disable-glout "${MACOS_CONFIG_ARGS}" && make -j `nproc`
+	cd macOS/server && ../../$<.dir/source/configure --disable-glout "${MACOS_CONFIG_ARGS}" && ${MAKE}
+	echo > $@
+
+macOS/server.tag: macOS/server_build.tag upload/.tag #Makefile
+	rm -rf macOS/server/*.app
 	cd macOS/server && bash ${MACOS_BUILD_BUNDLE}
 	cp macOS/server/*.dmg macOS/server/*.macOS.zip upload/
 	echo > $@
 
-macOS/steam.tag: context.steam upload/.tag #Makefile
+macOS/steam_build.tag: context.steam #Makefile
 	mkdir -p macOS/steam
-	cd macOS/steam && ../../$<.dir/source/configure "${MACOS_CONFIG_ARGS}" progname="${STEAM_PACKAGE_NAME}" progtitle="${STEAM_PACKAGE_TITLE}" && make -j `nproc`
+	cd macOS/steam && ../../$<.dir/source/configure "${MACOS_CONFIG_ARGS}" progname="${STEAM_PACKAGE_NAME}" progtitle="${STEAM_PACKAGE_TITLE}" && ${MAKE}
+	echo > $@
+
+macOS/steam.tag: macOS/steam_build.tag upload/.tag #Makefile
+	rm -rf macOS/steam/*.app
 	cd macOS/steam && bash ${MACOS_BUILD_BUNDLE}
 	cp macOS/steam/*.dmg macOS/steam/*.macOS.zip upload/
 	echo > $@
 
+macOS_build: macOS/client_build.tag macOS/server_build.tag #macOS/steam_build.tag
 macOS: macOS/client.tag macOS/server.tag #macOS/steam.tag
 
 #***************************************************************
@@ -775,7 +788,7 @@ artifactclean:
 	-rf
 
 clean: intermediateclean
-	rm \
+	rm -rf \
 	*.tag \
 	gits \
 	proto \
@@ -784,9 +797,9 @@ clean: intermediateclean
 	source \
 	steamdirs \
 	test.* \
-	upload \
 	macOS \
-	-rf
+	upload
+
 	if git -C ${srcdir} rev-parse --abbrev-ref HEAD > /dev/null; then rm -f CI_INFO; fi
 distclean: clean
 	rm -rf $(TARBALL) CI_INFO
