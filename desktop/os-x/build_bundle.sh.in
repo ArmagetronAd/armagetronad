@@ -10,10 +10,6 @@ BUNDLE="${DIR}/${TITLE}.app"
 
 mkdir -p "${BUNDLE}" || exit $?
 
-# add launcher
-cp `dirname $0`/entrypoint.sh "${BUNDLE}/${TITLE}" || exit $?
-chmod 755 "${BUNDLE}/${TITLE}" || exit $?
-
 # add plist with @v@ -> value and progtitle replacements
 REL_SRCDIR=`echo @srcdir@ | sed -e s,^@top_builddir@/,,` || exit $?
 cp "`dirname $0`/Info.plist" "${BUNDLE}/" || exit $?
@@ -26,7 +22,10 @@ cp "${REL_TOP_SRCDIR}/desktop/os-x/Armagetron Advanced.icns" "${BUNDLE}/${TITLE}
 DESTDIR="${BUNDLE}" make install || exit $?
 
 # bundle libraries
-(cd "${BUNDLE}"; dylibbundler -od -b -x "./@prefix@/bin/@progname@" -d "./@prefix@/libs/") || exit $?
+(cd "${BUNDLE}"; dylibbundler -od -b -x "./@prefix@/bin/@progname@" -d "./@prefix@/libs/" -i /usr/lib/) || exit $?
+
+# for debugging pure app bundle builds
+# exit 0
 
 # zip
 (cd "${BUNDLE}" && zip -r ../@progname@-@version@.macOS.zip .) || exit $?

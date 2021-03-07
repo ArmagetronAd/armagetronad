@@ -6,7 +6,7 @@
   	  <string>English</string>
   	  
   	<key>CFBundleExecutable</key>
-  	  <string>@progtitle@</string>
+  	  <string>@prefix@/bin/@progname@</string>
   	  
   	<key>CFBundleIconFile</key>
   	  <string>desktop/os-x/armagetronad.icns</string>

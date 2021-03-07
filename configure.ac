@@ -775,6 +775,8 @@ GENERICUNIX
 
 SDL2_CONFIG_DEFAULT=sdl2-config
 SDL_CONFIG_DEFAULT=sdl-config
+macosx=false
+OBJC="not_needed_on_this_platform"
 
 dnl *************************************************
 dnl GL AND  MATHLIB SELECTION ( SYSTEM DEPENDANT)
@@ -800,6 +802,8 @@ case "$target" in
         SYS_GL_LIB=""
         SYS_GLU_LIB=""
         test x$build_regular = xfalse || LIBS="$LIBS -framework OpenGL -framework CoreFoundation -framework CoreServices"
+        unset OBJC
+        macosx=true
         default_enable_sysinstall=false
         ;;
     *-*-aix*)
@@ -832,8 +836,13 @@ SAFEUNIX
         ;;
 esac
 
+dnl Objective C:
+AC_PROG_OBJC
+
 test -z "$SDL_CONFIG" && SDL_CONFIG=$SDL_CONFIG_DEFAULT
 test -z "$SDL2_CONFIG" && SDL2_CONFIG=$SDL2_CONFIG_DEFAULT
+
+AM_CONDITIONAL(MACOSX, test x$macosx = xtrue)
 
 AC_SUBST(docstyle)
 
@@ -1510,7 +1519,6 @@ desktop/armagetronad-link.xml
 desktop/armagetronad.protocol
 desktop/armagetronad.appdata.xml
 desktop/os-x/Info.plist
-desktop/os-x/entrypoint.sh
 desktop/os-x/build_bundle.sh
 docker/build/Makefile
 docker/build/setup_ci_test.sh
