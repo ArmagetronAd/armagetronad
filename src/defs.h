@@ -34,10 +34,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //#pragma warning ( disable : 4800 4081 4244 4305 4244 4250 4541)
 #endif
 
+#ifndef __deprecated
 #ifdef __GNUC__
 #   define __deprecated __attribute__((deprecated))
 #else
 #   define __deprecated
+#endif
 #endif
 
 #include "aa_config.h"
