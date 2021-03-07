@@ -279,7 +279,7 @@ macOS/server_build.tag: context.64 #Makefile
 	cd macOS/server && ../../$<.dir/source/configure --disable-glout "${MACOS_CONFIG_ARGS}" && ${MAKE}
 	echo > $@
 
-macOS/server.tag: macOS/server_build.tag upload/.tag #Makefile
+macOS/server.tag: macOS/client.tag macOS/server_build.tag upload/.tag #Makefile
 	rm -rf macOS/server/*.app
 	cd macOS/server && bash ${MACOS_BUILD_BUNDLE}
 	cp macOS/server/*.dmg macOS/server/*.macOS.zip upload/
@@ -290,7 +290,7 @@ macOS/steam_build.tag: context.steam #Makefile
 	cd macOS/steam && ../../$<.dir/source/configure "${MACOS_CONFIG_ARGS}" progname="${STEAM_PACKAGE_NAME}" progtitle="${STEAM_PACKAGE_TITLE}" && ${MAKE}
 	echo > $@
 
-macOS/steam.tag: macOS/steam_build.tag upload/.tag #Makefile
+macOS/steam.tag: macOS/server.tag macOS/steam_build.tag upload/.tag #Makefile
 	rm -rf macOS/steam/*.app
 	cd macOS/steam && bash ${MACOS_BUILD_BUNDLE}
 	cp macOS/steam/*.dmg macOS/steam/*.macOS.zip upload/
