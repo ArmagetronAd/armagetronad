@@ -98,7 +98,6 @@ extern rScreenSettings lastSuccess;
 struct SDL_Window;
 struct SDL_Renderer;
 extern SDL_Window   *sr_screen;
-extern SDL_Renderer *sr_screenRenderer;
 #else
 struct SDL_Surface;
 extern SDL_Surface  *sr_screen;
