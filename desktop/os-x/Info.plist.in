@@ -6,10 +6,10 @@
   	  <string>English</string>
   	  
   	<key>CFBundleExecutable</key>
-  	  <string>@prefix@/bin/@progname@</string>
+  	  <string>./@prefix@/bin/@progname@</string>
   	  
   	<key>CFBundleIconFile</key>
-  	  <string>desktop/os-x/armagetronad.icns</string>
+  	  <string>@progtitle@.icns</string>
   	  
   	<key>CFBundleIdentifier</key>
   	  <string>org.armagetronad.@progname@</string>
