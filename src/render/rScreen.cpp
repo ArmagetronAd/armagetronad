@@ -935,6 +935,8 @@ static bool lowlevel_sr_InitDisplay(){
                 SDL_GL_DeleteContext(sr_glcontext);
             sr_glcontext = SDL_GL_CreateContext(sr_screen);
         }
+        if(!sr_glcontext)
+            return false;
     }
 
     #ifndef DEDICATED
