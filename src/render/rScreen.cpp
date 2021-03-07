@@ -936,7 +936,13 @@ static bool lowlevel_sr_InitDisplay(){
             sr_glcontext = SDL_GL_CreateContext(sr_screen);
         }
         if(!sr_glcontext)
+        {
+            lastError.Clear();
+            lastError << "Couldn't get OpenGL context: ";
+            lastError << SDL_GetError();
+            std::cerr << lastError << '\n';
             return false;
+        }
     }
 
     #ifndef DEDICATED
