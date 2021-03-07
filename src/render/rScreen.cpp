@@ -61,7 +61,6 @@ tCONFIG_ENUM( rVSync );
 
 #if SDL_VERSION_ATLEAST(2,0,0)
 SDL_Window   *sr_screen=NULL;
-SDL_Renderer *sr_screenRenderer=NULL;
 #ifndef DEDICATED
 SDL_GLContext sr_glcontext=NULL;
 #endif
@@ -691,11 +690,6 @@ static bool lowlevel_sr_InitDisplay(){
     if(currentScreensetting.zDepth != lastSuccess.zDepth ||
        currentScreensetting.colorDepth != lastSuccess.zDepth)
     {
-        if(sr_screenRenderer)
-        {
-            SDL_DestroyRenderer(sr_screenRenderer);
-            sr_screenRenderer=nullptr;
-        }
         if(sr_screen)
         {
             SDL_DestroyWindow(sr_screen);
@@ -765,19 +759,15 @@ static bool lowlevel_sr_InitDisplay(){
 #endif
 
         // try fullscreen first if requested and sensible (only display 0 is supported)
-        if (currentScreensetting.fullscreen && currentScreensetting.displayIndex == 0 && SDL_CreateWindowAndRenderer(sr_desktopWidth, sr_desktopHeight, attrib | SDL_WINDOW_FULLSCREEN_DESKTOP, &sr_screen, &sr_screenRenderer))
+        if (currentScreensetting.fullscreen && currentScreensetting.displayIndex == 0)
         {
-            sr_screen = NULL;
-            sr_screenRenderer = NULL;
+            sr_screen = SDL_CreateWindow("", defaultX, defaultY, sr_desktopWidth, sr_desktopHeight, attrib | SDL_WINDOW_FULLSCREEN_DESKTOP);
         }
 
         // only reinit the screen if the desktop res detection hasn't left us
         // with a perfectly good one.
         if (!sr_screen &&
-            (
-                !(sr_screen = SDL_CreateWindow("", defaultX, defaultY, defaultWidth, defaultHeight, attrib)) ||
-                !(sr_screenRenderer = SDL_CreateRenderer(sr_screen, -1, 0))
-                )
+            !(sr_screen = SDL_CreateWindow("", defaultX, defaultY, defaultWidth, defaultHeight, attrib))
             )
         {
             lastError.Clear();
@@ -1558,7 +1548,6 @@ void sr_ExitDisplay(){
 #if SDL_VERSION_ATLEAST(2,0,0)
         SDL_SetWindowFullscreen(sr_screen, 0);
         SDL_SetRelativeMouseMode(SDL_FALSE);
-        SDL_DestroyRenderer(sr_screenRenderer);
         SDL_DestroyWindow(sr_screen);
 #else
         // z-man: according to man SDL_SetVideoSurface, screen should not bee freed.
