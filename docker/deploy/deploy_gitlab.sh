@@ -24,7 +24,7 @@ function upload(){
 }
 
 EXIT=0
-for f in upload/*.AppImage upload/*.exe upload/${PACKAGE_NAME}-${PACKAGE_VERSION}*.tbz upload/*source*.zip; do
+for f in upload/*.AppImage upload/*.exe upload/${PACKAGE_NAME}-${PACKAGE_VERSION}*.tbz upload/*source*.zip upload/*.dmg; do
 	if test -r $f; then
 		upload $f || EXIT=$?
 	fi

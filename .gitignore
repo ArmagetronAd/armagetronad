@@ -102,3 +102,4 @@ src/.cproject
 src/.project
 src/.settings
 autogen.sh
+.vscode

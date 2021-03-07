@@ -1,3 +1,0 @@
-#!/bin/zsh
-cd "`dirname "$0"`"
-.@prefix@/bin/@progname@ "$@"
