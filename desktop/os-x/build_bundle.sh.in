@@ -8,6 +8,7 @@ test -z "${DIR}" && DIR="`pwd`"
 TITLE="@progtitle@@progtitle_server@"
 BUNDLE="${DIR}/${TITLE}.app"
 
+rm -rf "${BUNDLE}"
 mkdir -p "${BUNDLE}" || exit $?
 
 # add plist with @v@ -> value and progtitle replacements

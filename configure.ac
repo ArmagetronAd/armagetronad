@@ -802,6 +802,7 @@ case "$target" in
         SYS_GL_LIB=""
         SYS_GLU_LIB=""
         test x$build_regular = xfalse || LIBS="$LIBS -framework OpenGL -framework CoreFoundation -framework CoreServices"
+        CXXFLAGS="${CXXFLAGS} -DGL_SILENCE_DEPRECATION"
         unset OBJC
         macosx=true
         default_enable_sysinstall=false
