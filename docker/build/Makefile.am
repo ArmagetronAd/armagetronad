@@ -273,7 +273,7 @@ context.test: rootcontext.64
 #***************************************************************
 
 # macOS builds are done without docker
-MACOS_CONFIG_ARGS="--disable-sysinstall --disable-etc --prefix=/usr"
+MACOS_CONFIG_ARGS="--disable-restoreold --enable-automakedefaults --disable-useradd --disable-sysinstall --disable-initscripts --disable-uninstall --disable-etc --prefix=/usr"
 MACOS_BUILD_BUNDLE="./src/macosx/build_bundle.sh"
 
 macOS/client_build.tag: context.64 #Makefile
