@@ -39,20 +39,20 @@ EOF
 # do an installation
 echo -n "Performing test installation..."
 P=$(mktemp -t armagetronad-test-install.XXXXXX)
-rm -f ${P}
-DEST=${P}.${PROGNAME}.foruninstall
+rm -f "${P}"
+DEST="${P}.${PROGNAME}.foruninstall"
 
 # test for recursion
-if echo ${DESTDIR} | grep "\.foruninstall$"; then
+if echo "${DESTDIR}" | grep "\.foruninstall$"; then
    echo "Recursion detected, aborting."
    exit 0
 fi
 
-if ${MAKE} DESTDIR=${DEST} install > /dev/null; then
+if ${MAKE} DESTDIR="${DEST}" install > /dev/null; then
 echo "Success!"
 else
 echo "Failure :("
-rm -rf $DEST
+rm -rf "$DEST"
 exit -1
 fi
 
