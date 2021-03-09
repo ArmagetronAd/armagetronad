@@ -14,8 +14,7 @@ include $(top_srcdir)/Makefile.manual
 # what goes into the distribution
 EXTRA_DIST = README-DEVELOPER README-Subversion README-SDL \
 armagetron.kdevelop armagetron.kdevelop.pcs armagetron.kdevses tron.ico \
-models sound textures bootstrap.sh accustomdir.m4 fingerprint
-# language/update.py
+models sound textures bootstrap.sh accustomdir.m4 fingerprint language
 
 # resource is included as a subdir for the purpose of keeping this makefile short and delegating
 # resource management to a more appropriate place anyway
@@ -30,12 +29,10 @@ masterInstallTasks=echo 'No tasks for the master server'
 masterUninstallTasks=echo 'No tasks for the master server'
 endif
 
-languagedata=language/english_base.txt language/english_base_notranslate.txt language/american.txt language/british.txt\
-             language/deutsch.txt language/french.txt language/spanish.txt language/polish_transliterated.txt language/polish.txt
-
-nobase_dist_language_DATA=language/languages.txt.in $(languagedata) language/update.py
-
 # What gets installed
+
+nobase_language_DATA=language/languages.txt language/english_base.txt language/english_base_notranslate.txt language/american.txt language/british.txt\
+             language/deutsch.txt language/french.txt language/spanish.txt language/polish_transliterated.txt language/polish.txt
 
 if NEEDDATA
 # install media data only when it is needed
@@ -48,8 +45,6 @@ nobase_sound_DATA=sound/cyclrun.wav sound/expl.wav
 
 nobase_model_DATA=models/cycle_body.mod models/cycle_front.mod models/cycle_rear.mod
 endif
-
-nobase_language_DATA=language/languages.txt $(languagedata)
 
 # generate configure.ac with version hardcoded and ChangeLog
 dist-hook-scm:
