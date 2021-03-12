@@ -1521,14 +1521,7 @@ bool sr_InitDisplay(){
 
         auto Success = [&]()
         {
-#ifndef DEDICATED
-#if SDL_VERSION_ATLEAST(2,0,1)
-            SDL_GL_GetDrawableSize(sr_screen, &sr_screenWidth, &sr_screenHeight);
-#else
-            sr_screenWidth = sr_screenWidthInPoints;
-            sr_screenHeight = sr_screenHeightInPoints;
-#endif
-#endif
+            sr_GetDrawableSize();
 
             sr_UnlockSDL();
             failed_attempts = 0;
@@ -1597,6 +1590,22 @@ void sr_ExitDisplay(){
 
     #endif
 }
+
+void sr_GetDrawableSize()
+{
+#ifndef DEDICATED
+#if SDL_VERSION_ATLEAST(2,0,1)
+    if(sr_screen)
+    {
+        SDL_GL_GetDrawableSize(sr_screen, &sr_screenWidth, &sr_screenHeight);
+        return;
+    }
+#endif
+    sr_screenWidth = sr_screenWidthInPoints;
+    sr_screenHeight = sr_screenHeightInPoints;
+#endif
+}
+
 
 bool    sr_alphaBlend=true;
 bool    sr_glOut=true;

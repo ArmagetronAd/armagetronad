@@ -199,6 +199,7 @@ public:
 bool sr_InitDisplay();
 void sr_ExitDisplay();
 void sr_ReinitDisplay();
+void sr_GetDrawableSize();
 
 void sr_LoadDefaultConfig();
 
