@@ -102,7 +102,7 @@ static tSettingItem<REAL> at_ca("CUSTOM_SCREEN_ASPECT" , aspect[ArmageTron_Custo
 
     #define MAXEMERGENCY 7
 
-rScreenSettings lastSuccess(ArmageTron_640_480, false);
+rScreenSettings lastSuccess(ArmageTron_Desktop, true);
 rScreenSettings lastSuccessLowZBuffer(ArmageTron_640_480, false);
 rScreenSettings lastSuccessLowColor(ArmageTron_640_480, false);
 
@@ -596,16 +596,6 @@ static int CountBits(int toCount)
     return ret;
 }
 
-namespace
-{
-#ifdef DEBUG
-// sort of simulate Retina display: set to 2
-static const int s_windowSizeFactor = 1;
-#else
-static const int s_windowSizeFactor = 1;
-#endif
-}
-
 static bool lowlevel_sr_InitDisplay(){
     rCallbackBeforeScreenModeChange::Exec();
 
@@ -788,7 +778,7 @@ static bool lowlevel_sr_InitDisplay(){
         // only reinit the screen if the desktop res detection hasn't left us
         // with a perfectly good one.
         if (!sr_screen &&
-            !(sr_screen = SDL_CreateWindow("", defaultX*s_windowSizeFactor, defaultY*s_windowSizeFactor, defaultWidth, defaultHeight, attrib))
+            !(sr_screen = SDL_CreateWindow("", defaultX, defaultY, defaultWidth, defaultHeight, attrib))
             )
         {
             lastError.Clear();
@@ -815,7 +805,7 @@ static bool lowlevel_sr_InitDisplay(){
     {
         // go to window mode, position window on center of selected display
         SDL_SetWindowFullscreen(sr_screen, 0);
-        SDL_SetWindowSize(sr_screen, defaultWidth*s_windowSizeFactor, defaultHeight*s_windowSizeFactor);
+        SDL_SetWindowSize(sr_screen, defaultWidth, defaultHeight);
         SDL_SetWindowPosition(sr_screen, defaultX, defaultY);
 
         SDL_Delay(10);
@@ -825,13 +815,15 @@ static bool lowlevel_sr_InitDisplay(){
     // SDL2 can resize window or toggle fullscreen without recreating a new window and therefore keeping existing GL context.
     if (currentScreensetting.fullscreen)
     {
-        bool fullscreenSuccess = false;
+        bool fullscreenSuccess = true;
 
         // do we need a custom display mode? if a display mode
         // is set, yes, but also if a non-default custom refresh rate
         // is set.
         if ( sr_screenWidthInPoints + sr_screenHeightInPoints > 0 || (currentScreensetting.refreshRate != desktopMode.refresh_rate && currentScreensetting.refreshRate > 0))
         {
+            fullscreenSuccess = false;
+
             // find best display mode
             SDL_DisplayMode desiredMode, mode, lastMode;
             desiredMode.format = 0;
@@ -886,8 +878,13 @@ static bool lowlevel_sr_InitDisplay(){
                 std::cerr << lastError << '\n';
             }
         }
+        else
+        {
+            // simply set fullscreen mode
+            fullscreenSuccess = (0 == SDL_SetWindowFullscreen(sr_screen, SDL_WINDOW_FULLSCREEN_DESKTOP));
+        }
 
-        // if desktop resolution was selected or custom mode setting failed, pick desktop mode
+        // if desktop resolution was selected or custom mode setting failed, pick desktop mode with explicit resolution
         if(!fullscreenSuccess)
         {
             sr_screenWidthInPoints = sr_desktopWidth;
@@ -896,7 +893,7 @@ static bool lowlevel_sr_InitDisplay(){
             SDL_SetWindowFullscreen(sr_screen, 0);
             SDL_Delay(100);
             SDL_PumpEvents();
-            SDL_SetWindowSize(sr_screen, sr_screenWidthInPoints*s_windowSizeFactor, sr_screenHeightInPoints*s_windowSizeFactor);
+            SDL_SetWindowSize(sr_screen, sr_screenWidthInPoints, sr_screenHeightInPoints);
             SDL_Delay(100);
             SDL_PumpEvents();
             fullscreenSuccess = (0 == SDL_SetWindowFullscreen(sr_screen, SDL_WINDOW_FULLSCREEN_DESKTOP));
@@ -924,7 +921,7 @@ static bool lowlevel_sr_InitDisplay(){
         // Set windowed mode and size accordingly
         if (!SDL_SetWindowFullscreen(sr_screen, 0))
         {
-            SDL_SetWindowSize(sr_screen, sr_screenWidthInPoints*s_windowSizeFactor, sr_screenHeightInPoints*s_windowSizeFactor);
+            SDL_SetWindowSize(sr_screen, sr_screenWidthInPoints, sr_screenHeightInPoints);
             SDL_SetWindowPosition(sr_screen, defaultX, defaultY);
             SDL_SetRelativeMouseMode(SDL_FALSE);
         }
