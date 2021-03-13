@@ -924,6 +924,8 @@ armagetron_vsync_help       What to do with the monitor's vertical sync
 rmagetron_vsync_last_help  What to do with the monitor's vertical sync
 fullscreen_help			Fullscreen or windowed mode?
 last_fullscreen_help		Fullscreen or windowed mode, last successful init
+low_dpi_window_help			Use lower render reslolution? (Mac+Retina+windowed Mode only)
+last_low_dpi_window_help		Use lower render reslolution? (Mac+Retina+windowed Mode only, last successful init)
 check_errors_help		Listen to errors claiming a video mode does not exist
 last_check_errors_help		Listen to errors claiming a video mode does not exist, last successful init
 colordepth_help			Colour depth to use (0: 16 1: desktop 2: 24)
@@ -2395,6 +2397,9 @@ screen_custom_help		Set the variables CUSTOM_SCREEN_WIDTH and CUSTOM_SCREEN_HEIG
 
 screen_fullscreen_text		Fullscreen:
 screen_fullscreen_help		This toggles fullscreen and window mode. As with resolution changes. You have to exit and re-enter \g or select "Apply Changes" for this to have an effect. You can bind a key to toggle this at any time in System Setup/Misc Stuff/Global Keyboard Configuration.
+
+screen_lowdpi_text		Low DPI:
+screen_lowdpi_help		For windowed mode only on Retina displays, activating this uses a lower resolution for rendering. Saves resources, but results in a slightly blurrier image.
 
 screen_colordepth_text		Colour Depth:
 screen_colordepth_help		Choose the colour depth you want \g to run at. You have to exit and reenter \g or select "Apply Changes" for this to have an effect. 

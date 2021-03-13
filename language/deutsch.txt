@@ -915,6 +915,8 @@ armagetron_vsync_help         Was mit dem Vertical Sync des Monitors gemacht wer
 #rmagetron_vsync_last_help    UNTRANSLATED
 fullscreen_help               Vollbild oder Fenster?
 last_fullscreen_help          Vollbild oder Fenster, letzte erfolgreiche Einstellung
+low_dpi_window_help			  Verwende niedrigere Renderauflösung? (Nur Mac+Retina+Fenstermodus)
+last_low_dpi_window_help	  Verwende niedrigere Renderauflösung? (Nur Mac+Retina+Fenstermodus, letzte erfolgreiche Einstellung)
 check_errors_help             Soll \g auf Fehler bei der Grafikinitialisierung achten?
 last_check_errors_help        Soll \g auf Fehler bei der Grafikinitialisierung achten, letzte erfolgreiche Einstellung?
 colordepth_help               Farbtiefe: 0 für 16 Bit, 1 für Standard, 2 für 32 Bit
@@ -2376,6 +2378,9 @@ screen_custom_help            Setze die Variablen CUSTOM_SCREEN_WIDTH und CUSTOM
 
 screen_fullscreen_text        Vollbild:
 screen_fullscreen_help        Schaltet zwischen Vollbildmodus (Ein) und Fenstermodus (Aus) um. Auf einigen Systemen läuft \g leider nicht im Vollbild. Zum übernehmen muss \g neugestartet oder auf Aktivieren geklickt werden. Im Menu "System konfigurieren/Verschiedenes/Globale Tastatursteuerung" kann man eine Taste wählen, die jederzeit zwischen Vollbild und Fenstermodus wechselt.
+
+screen_lowdpi_text		      Low DPI:
+screen_lowdpi_help		      Nur für den Fenstermodus auf Retina-Bildschirmen: Verwende intern eine niedrigere Auflösung. Das schont Resourcen, kann eine höhere Bildrate liefern, sieht aber etwas verwaschen oder pixelig aus.
 
 screen_colordepth_text        Farbtiefe:
 screen_colordepth_help        Die Farbtiefe bestimmt die Bildqualität.

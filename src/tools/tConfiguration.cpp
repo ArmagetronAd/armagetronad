@@ -641,7 +641,7 @@ static bool s_VetoPlayback( tString const & line )
 {
     static char const * vetos_char[]=
         { "USE_DISPLAYLISTS", "CHECK_ERRORS", "ZDEPTH", "SWAP_OPTIMIZE",
-          "COLORDEPTH", "FULLSCREEN ", "ARMAGETRON_LAST_WINDOWSIZE",
+          "COLORDEPTH", "FULLSCREEN ", "LOW_DPI_WINDOW", "ARMAGETRON_LAST_WINDOWSIZE",
           "ARMAGETRON_WINDOWSIZE", "ARMAGETRON_LAST_SCREENMODE",
           "ARMAGETRON_SCREENMODE", "CUSTOM_SCREEN", "SOUND",
           "PASSWORD", "ADMIN_PASS",

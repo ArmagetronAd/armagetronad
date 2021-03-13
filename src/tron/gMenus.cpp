@@ -545,6 +545,14 @@ static void sg_ScreenModeMenu()
      "$screen_fullscreen_help",
      currentScreensetting.fullscreen);
 
+#ifdef MACOSX
+    uMenuItemToggle lowdpi_t
+    (&screen_menu_mode,
+     "$screen_lowdpi_text",
+     "$screen_lowdpi_help",
+     currentScreensetting.lowDPIWindow);
+#endif
+
 #if SDL_VERSION_ATLEAST(2,0,0)
     gRefreshRateMenuItem refreshRate
     (screen_menu_mode,

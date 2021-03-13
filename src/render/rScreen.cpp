@@ -189,6 +189,11 @@ static tConfItem<int> winsizeLast_h("ARMAGETRON_LAST_WINDOWSIZE_H",lastSuccess.w
 static tConfItem<bool> fs_ci("FULLSCREEN",currentScreensetting.fullscreen);
 static tConfItem<bool> fs_lci("LAST_FULLSCREEN",lastSuccess.fullscreen);
 
+#ifdef MACOSX
+static tConfItem<bool> lowdpi_ci("LOW_DPI_WINDOW",currentScreensetting.lowDPIWindow);
+static tConfItem<bool> lowdip_lci("LAST_LOW_DPI_WINDOW",lastSuccess.lowDPIWindow);
+#endif
+
 static tConfItem<rColorDepth> tc("COLORDEPTH",currentScreensetting.colorDepth);
 static tConfItem<rColorDepth> ltc("LAST_COLORDEPTH",lastSuccess.colorDepth);
 static tConfItem<rColorDepth> tzd("ZDEPTH",currentScreensetting.zDepth);
@@ -697,15 +702,27 @@ static bool lowlevel_sr_InitDisplay(){
         defaultY = lastWindowY;
     }
 
-    // reinit on color/z depth change
+    bool highDPI=true;
+#ifdef MACOSX
+    if(currentScreensetting.lowDPIWindow)
+    {
+        highDPI = false;
+    }
+#endif
+    static bool lastHighDPI = highDPI;
+
+    // reinit on color/z depth or resolution change
     if(currentScreensetting.zDepth != lastSuccess.zDepth ||
-       currentScreensetting.colorDepth != lastSuccess.zDepth)
+       currentScreensetting.colorDepth != lastSuccess.zDepth ||
+       lastHighDPI != highDPI
+       )
     {
         if(sr_screen)
         {
             SDL_DestroyWindow(sr_screen);
             sr_screen=nullptr;
         }
+        lastHighDPI = highDPI;
     }
 
     if (!sr_screen)
@@ -748,7 +765,13 @@ static bool lowlevel_sr_InitDisplay(){
 
         sr_SetGLAttributes( singleCD_R, singleCD_G, singleCD_B, zDepth );
 
-        int attrib=SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI;
+        int attrib=SDL_WINDOW_OPENGL;
+
+        if(highDPI)
+        {
+            attrib |= SDL_WINDOW_ALLOW_HIGHDPI;
+        }
+
         SDL_SetRelativeMouseMode(SDL_FALSE);
 
     #ifdef FORCE_WINDOW
