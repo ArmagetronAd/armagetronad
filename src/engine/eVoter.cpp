@@ -1898,7 +1898,7 @@ class eVoteItemReferee: public eVoteItemHarmServerControlled
 {
 public:
     eVoteItemReferee( ePlayerNetID* player = 0 )
-    : eVoteItemHarm( player )
+    : eVoteItemHarmServerControlled( player )
     {}
 
     ~eVoteItemReferee()
@@ -1915,7 +1915,7 @@ protected:
 
     virtual bool DoCheckValid( int senderID )
     {
-        if ( !eVoteItemHarm::DoCheckValid( senderID ) )
+        if ( !eVoteItemHarmServerControlled::DoCheckValid( senderID ) )
             return false;
 
         ePlayerNetID * victim = GetPlayer();
@@ -1948,7 +1948,7 @@ class eVoteItemCancelReferee: public eVoteItemHarmServerControlled
 {
 public:
     eVoteItemCancelReferee( ePlayerNetID* player = 0 )
-    : eVoteItemHarm( player )
+    : eVoteItemHarmServerControlled( player )
     {}
 
     ~eVoteItemCancelReferee()
@@ -1965,7 +1965,7 @@ protected:
 
     virtual bool DoCheckValid( int senderID )
     {
-        if ( !eVoteItemHarm::DoCheckValid( senderID ) )
+        if ( !eVoteItemHarmServerControlled::DoCheckValid( senderID ) )
             return false;
 
         ePlayerNetID * victim = GetPlayer();
