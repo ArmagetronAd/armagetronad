@@ -889,7 +889,7 @@ static void se_HandleNewServerVote( Engine::VoteItemServerControlled const & vot
 static nProtoBufDescriptor< Engine::VoteItemServerControlled > new_server_se_voteSubmissionDescriptor(232,se_HandleNewServerVote );
 
 // something to vote on: completely controlled by the server
-class eVoteItemServerControlled: public virtual eVoteItem
+class eVoteItemServerControlled: public eVoteItem
 {
 public:
     // constructors/destructor
@@ -1111,7 +1111,8 @@ static void se_VoteItemHarmHandler( Engine::VoteItemHarm const & kick, nSenderIn
 static nProtoBufDescriptor< Engine::VoteItemHarm > se_voteItemHarmDescriptor( 231, se_VoteItemHarmHandler );
 
 // something to vote on: harming a player
-class eVoteItemHarm: public virtual eVoteItem
+template<typename BASE = eVoteItem>
+class eVoteItemHarm: public BASE
 {
 public:
     // constructors/destructor
@@ -1247,7 +1248,7 @@ protected:
             }
         }
 
-        return eVoteItem::DoCheckValid( senderID );
+        return BASE::DoCheckValid( senderID );
     }
 
     void DoFillToMessage( Engine::VoteItemHarm & harm ) const
@@ -1262,7 +1263,7 @@ protected:
     virtual void DoExecute()
     {
         // Don't prevent name changes if the vote passes
-        eVoter *suggestor = GetSuggestor();
+        eVoter *suggestor = this->GetSuggestor();
         if ( suggestor )
         {
             suggestor->lastNameChangePreventor_ = -1E30;
@@ -1290,7 +1291,7 @@ protected:
         if ( player_ )
             name_ = player_->GetName();
 
-        return eVoteItem::DoGetDetails() + tString( tOutput( tString("$") + DoGetPrefix() + "_player_details_text", name_ ) );
+        return BASE::DoGetDetails() + tString( tOutput( tString("$") + DoGetPrefix() + "_player_details_text", name_ ) );
     }
 
     nMachine * GetMachine() const
@@ -1311,12 +1312,13 @@ private:
 };
 
 // something to vote on: kicking a player
-class eVoteItemKick: public virtual eVoteItemHarm
+template<typename BASE = eVoteItemHarm<eVoteItem>>
+class eVoteItemKick: public BASE
 {
 public:
     // constructors/destructor
     eVoteItemKick( ePlayerNetID* player )
-        : eVoteItemHarm( player )
+        : BASE( player )
     {}
 
     ~eVoteItemKick()
@@ -1342,7 +1344,7 @@ protected:
 
     virtual bool DoCheckValid( int senderID )
     {
-        ePlayerNetID * player = GetPlayer();
+        ePlayerNetID * player = this->GetPlayer();
 
         // check if player is protected from kicking
         if ( player && sn_GetNetState() != nCLIENT )
@@ -1365,13 +1367,13 @@ protected:
             }
         }
 
-        return eVoteItemHarm::DoCheckValid( senderID );
+        return BASE::DoCheckValid( senderID );
     }
 
     virtual void DoExecuteHarm()						// called when the voting was successful
     {
-        ePlayerNetID * player = GetPlayer();
-        nMachine * machine = GetMachine();
+        ePlayerNetID * player = this->GetPlayer();
+        nMachine * machine = this->GetMachine();
         if ( player )
         {
             // kick the player, he is online
@@ -1404,31 +1406,32 @@ private:
 };
 
 // harming vote items, server controlled
-class eVoteItemHarmServerControlled: public virtual eVoteItemServerControlled, public virtual eVoteItemHarm
+class eVoteItemHarmServerControlled: public eVoteItemHarm<eVoteItemServerControlled>
 {
+    typedef eVoteItemHarm<eVoteItemServerControlled> BASE;
 public:
     // constructors/destructor
     eVoteItemHarmServerControlled( ePlayerNetID* player = 0 )
-            : eVoteItemHarm( player )
+            : BASE( player )
     {}
 
     ~eVoteItemHarmServerControlled()
     {}
-protected:
-    virtual nMessageBase * CreateMessage() const
-    {
-        return eVoteItemServerControlled::CreateMessage();
-    }
 
     bool DoFillFromMessage( Engine::VoteItemHarm const & harm, nSenderInfo const & sender )
     {
         // delegate
-        bool ret = eVoteItemHarm::DoFillFromMessage( harm, sender );
+        bool ret = BASE::DoFillFromMessage( harm, sender );
 
         // fill in description
         Update();
 
         return ret;
+    }
+protected:
+    virtual nMessageBase * CreateMessage() const
+    {
+        return eVoteItemServerControlled::CreateMessage();
     }
 
     void DoFillToMessage( Engine::VoteItemHarm & harm ) const
@@ -1436,38 +1439,38 @@ protected:
         // should never be called on the client
         tASSERT( sn_GetNetState() != nCLIENT );
 
-        eVoteItemHarm::DoFillToMessage( harm );
+        BASE::DoFillToMessage( harm );
     }
     
     virtual void DoExecute()
     {
-        eVoteItemHarm::DoExecute();
+        BASE::DoExecute();
     }
 private:
     virtual void Update() //!< update description and details
     {
-        description_ = eVoteItemHarm::DoGetDescription();
-        details_ = eVoteItemHarm::DoGetDetails();
+        this->description_ = BASE::DoGetDescription();
+        this->details_ = BASE::DoGetDetails();
     }
 
     virtual tString DoGetDescription() const		// returns the description of the voting item
     {
-        return Pending() ?  eVoteItemHarm::DoGetDescription() : eVoteItemServerControlled::DoGetDescription();
+        return this->Pending() ?  BASE::DoGetDescription() : eVoteItemServerControlled::DoGetDescription();
     }
 
     virtual tString DoGetDetails() const		// returns the detailed description of the voting item
     {
-        return Pending() ? eVoteItemHarm::DoGetDetails() : eVoteItemServerControlled::DoGetDetails();
+        return this->Pending() ? BASE::DoGetDetails() : eVoteItemServerControlled::DoGetDetails();
     }
 };
 
 // remove vote items, server controlled
-class eVoteItemSuspend: public virtual eVoteItemHarmServerControlled
+class eVoteItemSuspend: public eVoteItemHarmServerControlled
 {
 public:
     // constructors/destructor
     eVoteItemSuspend( ePlayerNetID* player = 0 )
-        : eVoteItemHarm( player )
+        : eVoteItemHarmServerControlled( player )
         {}
 
     ~eVoteItemSuspend()
@@ -1501,12 +1504,12 @@ protected:
 };
 
 //  vote on silencing
-class eVoteItemSilence: public virtual eVoteItemHarmServerControlled
+class eVoteItemSilence: public eVoteItemHarmServerControlled
 {
 public:
     // constructors/destructor
     eVoteItemSilence( ePlayerNetID* player)
-        : eVoteItemHarm( player )
+        : eVoteItemHarmServerControlled( player )
         {}
 
     ~eVoteItemSilence()
@@ -1540,12 +1543,12 @@ protected:
 };
 
 //  vote on giving players their voice back (not really harmful, but it's a convenient base class)
-class eVoteItemVoice: public virtual eVoteItemHarmServerControlled
+class eVoteItemVoice: public eVoteItemHarmServerControlled
 {
 public:
     // constructors/destructor
     eVoteItemVoice( ePlayerNetID* player )
-        : eVoteItemHarm( player )
+        : eVoteItemHarmServerControlled( player )
         {}
 
     ~eVoteItemVoice()
@@ -1587,12 +1590,13 @@ protected:
 };
 
 // kick vote items, server controlled
-class eVoteItemKickServerControlled: public virtual eVoteItemHarmServerControlled, public virtual eVoteItemKick
+class eVoteItemKickServerControlled: public eVoteItemKick<eVoteItemHarmServerControlled>
 {
+    typedef eVoteItemKick<eVoteItemHarmServerControlled> BASE;
 public:
     // constructors/destructor
     eVoteItemKickServerControlled( bool fromMenu, ePlayerNetID* player )
-    : eVoteItemHarm( player ), eVoteItemKick( player ), fromMenu_( fromMenu )
+    : BASE( player ), fromMenu_( fromMenu )
     {}
 
     ~eVoteItemKickServerControlled()
@@ -1629,12 +1633,12 @@ protected:
         }
 
         // no transformation needed or transformation failed. Proceed as usual.
-        return eVoteItemHarm::DoCheckValid( senderID );
+        return BASE::DoCheckValid( senderID );
     }
 
     virtual void DoExecuteHarm()						// called when the voting was successful
     {
-        eVoteItemKick::DoExecuteHarm();
+        BASE::DoExecuteHarm();
     }
 private:
     bool fromMenu_; // flag set if the vote came from the menu
@@ -1649,7 +1653,7 @@ static void se_VoteItemHarmHandler( Engine::VoteItemHarm const & kick, nSenderIn
     // accept message
     if ( eVoteItem::AcceptNewVote( sender ) )
     {
-        eVoteItemHarm * item = tNEW( eVoteItemKickServerControlled )( true, 0 );
+        auto * item = tNEW( eVoteItemKickServerControlled )( true, 0 );
         if ( !eVoteItem::FillFromMessage( item, kick, sender ) )
         {
             delete item;
@@ -1660,7 +1664,7 @@ static void se_VoteItemHarmHandler( Engine::VoteItemHarm const & kick, nSenderIn
 
 static void se_SendKick( ePlayerNetID* p )
 {
-    eVoteItemKick kick( p );
+    eVoteItemKick<eVoteItemHarm<eVoteItem> > kick( p );
     kick.SendMessage();
 }
 
@@ -1894,7 +1898,7 @@ class eVoteItemReferee: public eVoteItemHarmServerControlled
 {
 public:
     eVoteItemReferee( ePlayerNetID* player = 0 )
-    : eVoteItemHarm( player )
+    : eVoteItemHarmServerControlled( player )
     {}
 
     ~eVoteItemReferee()
@@ -1911,7 +1915,7 @@ protected:
 
     virtual bool DoCheckValid( int senderID )
     {
-        if ( !eVoteItemHarm::DoCheckValid( senderID ) )
+        if ( !eVoteItemHarmServerControlled::DoCheckValid( senderID ) )
             return false;
 
         ePlayerNetID * victim = GetPlayer();
@@ -1944,7 +1948,7 @@ class eVoteItemCancelReferee: public eVoteItemHarmServerControlled
 {
 public:
     eVoteItemCancelReferee( ePlayerNetID* player = 0 )
-    : eVoteItemHarm( player )
+    : eVoteItemHarmServerControlled( player )
     {}
 
     ~eVoteItemCancelReferee()
@@ -1961,7 +1965,7 @@ protected:
 
     virtual bool DoCheckValid( int senderID )
     {
-        if ( !eVoteItemHarm::DoCheckValid( senderID ) )
+        if ( !eVoteItemHarmServerControlled::DoCheckValid( senderID ) )
             return false;
 
         ePlayerNetID * victim = GetPlayer();
