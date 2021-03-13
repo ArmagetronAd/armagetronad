@@ -765,7 +765,7 @@ static bool lowlevel_sr_InitDisplay(){
 
         sr_SetGLAttributes( singleCD_R, singleCD_G, singleCD_B, zDepth );
 
-        int attrib=SDL_WINDOW_OPENGL;
+        int attrib=SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
 
         if(highDPI)
         {
@@ -946,7 +946,12 @@ static bool lowlevel_sr_InitDisplay(){
         {
             SDL_SetWindowSize(sr_screen, sr_screenWidthInPoints, sr_screenHeightInPoints);
             SDL_SetWindowPosition(sr_screen, defaultX, defaultY);
+#if SDL_VERSION_ATLEAST(2, 0, 5)
+            // we're already setting the relevant flag on creation, but maybe it gets lost in fullscreen mode
+            SDL_SetWindowResizable(sr_screen, SDL_TRUE);
+#endif
             SDL_SetRelativeMouseMode(SDL_FALSE);
+
         }
         else
         {
