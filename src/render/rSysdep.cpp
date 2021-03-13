@@ -679,8 +679,7 @@ public:
             }
 #endif
 
-
-
+            sr_GetDrawableSize();
         }
     }
 

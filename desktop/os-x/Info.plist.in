@@ -20,6 +20,9 @@
 	<key>NSHumanReadableCopyright</key>
 	  <string>© The Armagetron Advanced Developer Team, 2003, 2013</string>
 	
+	<key>NSHighResolutionCapable</key>
+	  <string>True</string>
+
 	<key>CFBundleShortVersionString</key>
 	  <string>@version@</string>
 
