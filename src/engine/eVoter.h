@@ -52,12 +52,19 @@ private:
     bool	    silenced_; //! is he silenced?
 };
 
+template<typename BASE>
+class eVoteItemHarmT;
+template<typename BASE>
+class eVoteItemKickT;
+
 // class identifying a voter; all players coming from the same IP share the same voter.
 class eVoter: public tReferencable< eVoter >, public tListMember, public nMachineDecorator, public eVoterPlayerInfo
 {
     friend class eVoteItem;
-    friend class eVoteItemHarm;
-    friend class eVoteItemKick;
+    template<typename BASE>
+    friend class eVoteItemHarmT;
+    template<typename BASE>
+    friend class eVoteItemKickT;
 public:
     eVoter( nMachine & machine );
     ~eVoter();
