@@ -1112,17 +1112,17 @@ static nProtoBufDescriptor< Engine::VoteItemHarm > se_voteItemHarmDescriptor( 23
 
 // something to vote on: harming a player
 template<typename BASE = eVoteItem>
-class eVoteItemHarmT: public BASE
+class eVoteItemHarm: public BASE
 {
 public:
     // constructors/destructor
-    eVoteItemHarmT( ePlayerNetID* player = 0 )
+    eVoteItemHarm( ePlayerNetID* player = 0 )
             : player_( player )
             , machine_(NULL)
             , name_( "(Player who already left)" )
     {}
 
-    ~eVoteItemHarmT()
+    ~eVoteItemHarm()
     {
         delete machine_;
         machine_ = NULL;
@@ -1148,7 +1148,7 @@ protected:
     // lock legacy message creation to regular creation of this class
     virtual nMessageBase * CreateMessageLegacy() const
     {
-        return eVoteItemHarmT::CreateMessage();
+        return eVoteItemHarm::CreateMessage();
     }
 
     virtual nMessageBase * CreateMessage( void ) const
@@ -1312,16 +1312,16 @@ private:
 };
 
 // something to vote on: kicking a player
-template<typename BASE = eVoteItemHarmT<eVoteItem>>
-class eVoteItemKickT: public BASE
+template<typename BASE = eVoteItemHarm<eVoteItem>>
+class eVoteItemKick: public BASE
 {
 public:
     // constructors/destructor
-    eVoteItemKickT( ePlayerNetID* player )
+    eVoteItemKick( ePlayerNetID* player )
         : BASE( player )
     {}
 
-    ~eVoteItemKickT()
+    ~eVoteItemKick()
     {}
 
 protected:
@@ -1406,9 +1406,9 @@ private:
 };
 
 // harming vote items, server controlled
-class eVoteItemHarmServerControlled: public eVoteItemHarmT<eVoteItemServerControlled>
+class eVoteItemHarmServerControlled: public eVoteItemHarm<eVoteItemServerControlled>
 {
-    typedef eVoteItemHarmT<eVoteItemServerControlled> BASE;
+    typedef eVoteItemHarm<eVoteItemServerControlled> BASE;
 public:
     // constructors/destructor
     eVoteItemHarmServerControlled( ePlayerNetID* player = 0 )
@@ -1590,9 +1590,9 @@ protected:
 };
 
 // kick vote items, server controlled
-class eVoteItemKickServerControlled: public eVoteItemKickT<eVoteItemHarmServerControlled>
+class eVoteItemKickServerControlled: public eVoteItemKick<eVoteItemHarmServerControlled>
 {
-    typedef eVoteItemKickT<eVoteItemHarmServerControlled> BASE;
+    typedef eVoteItemKick<eVoteItemHarmServerControlled> BASE;
 public:
     // constructors/destructor
     eVoteItemKickServerControlled( bool fromMenu, ePlayerNetID* player )
@@ -1664,7 +1664,7 @@ static void se_VoteItemHarmHandler( Engine::VoteItemHarm const & kick, nSenderIn
 
 static void se_SendKick( ePlayerNetID* p )
 {
-    eVoteItemKickT<eVoteItemHarmT<eVoteItem> > kick( p );
+    eVoteItemKick<eVoteItemHarm<eVoteItem> > kick( p );
     kick.SendMessage();
 }
 

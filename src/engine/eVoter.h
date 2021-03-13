@@ -53,18 +53,18 @@ private:
 };
 
 template<typename BASE>
-class eVoteItemHarmT;
+class eVoteItemHarm;
 template<typename BASE>
-class eVoteItemKickT;
+class eVoteItemKick;
 
 // class identifying a voter; all players coming from the same IP share the same voter.
 class eVoter: public tReferencable< eVoter >, public tListMember, public nMachineDecorator, public eVoterPlayerInfo
 {
     friend class eVoteItem;
     template<typename BASE>
-    friend class eVoteItemHarmT;
+    friend class eVoteItemHarm;
     template<typename BASE>
-    friend class eVoteItemKickT;
+    friend class eVoteItemKick;
 public:
     eVoter( nMachine & machine );
     ~eVoter();
