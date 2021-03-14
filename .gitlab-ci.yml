@@ -87,7 +87,7 @@ build_server_steam_raw:
   stage: build_base
   rules:
   - if: $CI_MERGE_REQUEST_ID
-    when: on_success
+    when: never
   - when: on_success
   script:
     - gitlab_build/docker/build/make_ci.sh -k result.build_server_steam
@@ -124,7 +124,7 @@ build_windows_steam:
   stage: build_main
   rules:
   - if: $CI_MERGE_REQUEST_ID
-    when: on_success
+    when: never
   - when: on_success
   script:
     - gitlab_build/docker/build/make_ci.sh CI_windows_steam
@@ -156,7 +156,7 @@ build_linux_steam:
   stage: build_main
   rules:
   - if: $CI_MERGE_REQUEST_ID
-    when: on_success
+    when: never
   - when: on_success
   script:
     - gitlab_build/docker/build/make_ci.sh CI_linux_steam
