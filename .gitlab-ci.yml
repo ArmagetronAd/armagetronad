@@ -193,7 +193,9 @@ build_macos:
   rules:
   - if: $CI_MERGE_REQUEST_ID
     when: never
-  - when: on_success
+  - if: $CI_COMMIT_REF_PROTECTED == "true"
+    when: on_success
+  - when: never
   script:
     - docker/scripts/obsolete.sh || exit 0
     - ./bootstrap.sh || exit 0
