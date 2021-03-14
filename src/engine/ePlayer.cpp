@@ -5514,13 +5514,13 @@ void ePlayerNetID::RemoveFromGame()
     }
 
     se_PlayerNetIDs.Remove(this, listID);
-
-    if ( sn_GetNetState() == nCLIENT )
+    if( (sn_GetNetState() == nCLIENT) && (currentTeam || nextTeam) )
     {
         SetTeamWish( NULL );
+        SetTeam( NULL );
+        UpdateTeam();
+        currentTeam = NULL;
     }
-    SetTeam( NULL );
-    UpdateTeam();
     ControlObject( NULL );
 
     if( logLeave )

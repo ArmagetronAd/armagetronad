@@ -18,7 +18,7 @@ armagetron.kdevelop armagetron.kdevelop.pcs armagetron.kdevses tron.ico \
 models sound textures bootstrap.sh music \
 acinclude.d/accustomdir.m4 acinclude.d/ax_boost_base.m4 acinclude.d/ax_boost_system.m4 acinclude.d/ax_boost_thread.m4\
 fingerprint \
-win32 major_version Dockerfile
+win32 major_version Dockerfile language
 # language/update.py
 
 # resource is included as a subdir for the purpose of keeping this makefile short and delegating
@@ -40,6 +40,9 @@ languagedata=language/english_base.txt language/english_base_notranslate.txt lan
 nobase_dist_language_DATA=language/languages.txt.in $(languagedata) language/update.py
 
 # What gets installed
+
+nobase_language_DATA=language/languages.txt language/english_base.txt language/english_base_notranslate.txt language/american.txt language/british.txt\
+             language/deutsch.txt language/french.txt language/spanish.txt language/polish.txt language/russian.txt
 
 if NEEDDATA
 # install media data only when it is needed
@@ -116,8 +119,6 @@ nobase_music_DATA=music/titletrack.ogg  music/when.ogg music/doIknowyou.ogg\
 
 nobase_model_DATA=models/cycle_body.mod models/cycle_front.mod models/cycle_rear.mod
 endif
-
-nobase_language_DATA=language/languages.txt $(languagedata)
 
 doxy:
 	cd src/doc && doxygen Doxyfile
