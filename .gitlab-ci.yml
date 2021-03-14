@@ -256,7 +256,7 @@ build_collect:
   stage: build_collect
   rules:
   - if: $CI_MERGE_REQUEST_ID
-    when: on_success
+    when: never
   - when: on_success
   script:
     - gitlab_build/docker/build/make_ci.sh debtest.tag CI || exit $?
@@ -426,6 +426,10 @@ pack:
    - build_collect
   dependencies:
    - build_collect
+  rules:
+   - if: $CI_MERGE_REQUEST_ID
+     when: never
+   - when: on_success
   script: [""]
   before_script:
     # test that everything has been prepared correctly
