@@ -183,8 +183,10 @@ build_server_32:
 # macOS builds need a special runner, but can start early.
 # iIt should build directly from git content, the prepared linux source directories have soft links that won't work.
 build_macos:
-  needs: []
-  dependencies: []
+  needs:
+  - build_prepare
+  dependencies:
+  - build_prepare
   tags:
   - macos
   stage: build_main
