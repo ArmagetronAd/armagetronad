@@ -4236,9 +4236,9 @@ void ePlayerNetID::RemoveFromGame()
         SetTeamWish( NULL );
         SetTeam( NULL );
         UpdateTeam();
+        currentTeam = NULL;
     }
     ControlObject( NULL );
-    // currentTeam = NULL;
 }
 
 bool ePlayerNetID::ActionOnQuit()
