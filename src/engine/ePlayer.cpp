@@ -4231,9 +4231,12 @@ void ePlayerNetID::RemoveFromGame()
     }
 
     se_PlayerNetIDs.Remove(this, listID);
-    SetTeamWish( NULL );
-    SetTeam( NULL );
-    UpdateTeam();
+    if(currentTeam || nextTeam)
+    {
+        SetTeamWish( NULL );
+        SetTeam( NULL );
+        UpdateTeam();
+    }
     ControlObject( NULL );
     // currentTeam = NULL;
 }
