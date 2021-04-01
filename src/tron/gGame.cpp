@@ -152,6 +152,12 @@ static bool sg_defaultMapFileOnEmpty = false;
 static tSettingItem<bool> sg_defaultMapFileOnEmptyConf( "DEFAULT_MAP_FILE_ON_EMPTY", sg_defaultMapFileOnEmpty );
 #endif
 
+static tString sg_revertMapFile("");
+static tSettingItem<tString> sg_revertMapFileConf("REVERT_MAP_FILE", sg_revertMapFile);
+
+static tString sg_mapOnChangeInclude("");
+static tSettingItem<tString> sg_mapOnChangeIncludeConf("MAP_ONCHANGE_INCLUDE", sg_mapOnChangeInclude);
+
 void LoadMap(tString mapName)
 {
     conf_mapfile.Set( mapName );
@@ -3716,6 +3722,7 @@ void gGame::StateUpdate(){
             static tString lastMapfile( DEFAULT_MAP );
             if ( nCLIENT != sn_GetNetState() && mapfile != lastMapfile )
             {
+                if(sg_mapOnChangeInclude != "") st_Include(sg_mapOnChangeInclude);
                 try
                 {
                     Verify();
@@ -3733,6 +3740,7 @@ void gGame::StateUpdate(){
                     conf_mapfile.Set( lastMapfile );
                 }
                 lastMapfile = mapfile;
+                if(sg_revertMapFile != "") lastMapfile = sg_revertMapFile;
             }
 
             nConfItemBase::s_SendConfig(false);
