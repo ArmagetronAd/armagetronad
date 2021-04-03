@@ -1638,6 +1638,8 @@ void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
     }
     else if (argument == "add")
     {
+        addToQueue:
+
         if (p->GetAccessLevel() > ThisAccessLevel)
         {
             tOutput Output;
@@ -1725,7 +1727,7 @@ void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
             }
         }
     }
-    else if (argument == "remove")
+    else if (argument == "remove" || argument == "rm")
     {
         if (p->GetAccessLevel() > ThisAccessLevel)
         {
@@ -1797,6 +1799,12 @@ void sg_AddqueueingItems(ePlayerNetID *p, std::istream &s, tString command)
                 sn_ConsoleOut(Output, p->Owner());
             }
         }
+    }
+    else 
+    {
+        // HACK
+        pos = 0;
+        goto addToQueue;
     }
 
     searchFindings.Clear();
