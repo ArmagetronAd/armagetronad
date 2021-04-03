@@ -1921,6 +1921,9 @@ void QueRotate()
 static eLadderLogWriter sg_QueueStartedWriter("QUEUE_STARTED", false);
 static eLadderLogWriter sg_QueueFinishedWriter("QUEUE_FINISHED", false);
 
+static bool sg_rotationMessage = false;
+static tSettingItem<bool> sg_rotationMessageConf("ROTATION_MESSAGE",sg_rotationMessage);
+
 int roundNum = 0;
 void gRotation::HandleNewRound(int rounds)
 {
@@ -1929,6 +1932,8 @@ void gRotation::HandleNewRound(int rounds)
 
     if ((sg_MapQueueing->Size() == 0) && (sg_ConfigQueueing->Size() == 0))
     {
+        tOutput msg;
+
         //  resume normal rotation once queue is no longer active
         if (!queueActive_)
         {
@@ -2040,6 +2045,47 @@ void gRotation::HandleNewRound(int rounds)
 
             sg_QueueFinishedWriter << st_GetCurrentTime("%Y-%m-%d %H:%M:%S %Z");
             sg_QueueFinishedWriter.write();
+        }
+
+        if(sg_rotationMessage)
+        {
+            gRotation *ThisRotation = NULL;
+            gRotationRound *ThisRoundRotation = NULL;
+            if(mapRotation->Size() > 0)
+            {
+                msg.SetTemplateParameter(1,"map");
+                ThisRotation = mapRotation;
+                ThisRoundRotation = mapRoundRotation;
+            }
+            else if(configRotation->Size() > 0)
+            {
+                msg.SetTemplateParameter(1,"config");
+                ThisRotation = configRotation;
+                ThisRoundRotation = configRoundRotation;
+            }
+            
+            if(ThisRotation)
+            {
+                msg.SetTemplateParameter(2,ThisRotation->ID());
+                msg.SetTemplateParameter(3,ThisRotation->Size());
+
+                if(rotationtype == gROTATION_COUNTER)
+                {
+                    msg.SetTemplateParameter(4,gRotation::Counter());
+                    msg.SetTemplateParameter(5,sg_rotationMax);
+                }
+                else
+                {
+                    msg.SetTemplateParameter(4,"?");
+                    msg.SetTemplateParameter(5,"?");
+                }
+                msg << "$rotation_message";
+            }
+            else
+            {
+                msg << "$rotation_message_fail";
+            }
+            sn_ConsoleOut(msg);
         }
     }
     else

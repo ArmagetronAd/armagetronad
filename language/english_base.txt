@@ -347,6 +347,10 @@ rotation_search_failed                  0xffff7f/rotation failed: 0xff9999\1.\n
 rotation_search_found_toomanyfiles      0xff7777\2 more matches are found for search term "\1".\n
 rotation_search_found                   0xffff7f/rotation: 0xff55ff\1: 0x33ffff\2.\n
 
+rotation_message_help                   Display a message every round with stats about the rotation?
+rotation_message                        Currently on \1 \2 out of \3, in round \4 out of \5.\n
+rotation_message_fail                   Rotation type could not be detected.\n
+
 # non-rotation
 map_storage_help                        Is mainly use for non-rotation purposes, queue mainly. Usage is similar to MAP_ROTATION, except without round.
 map_storage_list                        List of maps currently in storge:\n
