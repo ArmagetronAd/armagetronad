@@ -173,7 +173,7 @@ void uMenu::OnEnter(){
 
 #ifndef DEDICATED
     lastkey=tSysTimeFloat();
-    static const REAL timeout=.5;
+    static const REAL timeout=0;
 #endif
 
     // inverted logic (0 = last item! prev(0) = top most item)
@@ -338,13 +338,6 @@ void uMenu::OnEnter(){
             disphelp = helpAlpha > 0;
             if ( items[selected]->DisplayHelp( disphelp, menuBot, helpAlpha ) )
             {
-                if (sr_alphaBlend)
-                    glColor4f(1,.8,.8, helpAlpha );
-                else
-                    Color(helpAlpha,
-                          .8*helpAlpha,
-                          .8*helpAlpha);
-
                 rTextField c(-.95f,menuBot-.04f,rCWIDTH_NORMAL*rTextField::AspectWidthMultiplier());
                 c.SetWidth(static_cast<int>((1.9f-items[selected]->SpaceRight())/c.GetCWidth()));
                 c << items[selected]->Help();
