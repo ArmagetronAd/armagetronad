@@ -150,6 +150,8 @@ public:
     int limitTime;   // match time limit. became set time limit if limitSet > 1
     int limitRounds; // match round limit
     int limitScore;  // match score limit
+    int limitScoreMinLead;  // minimum lead for limitScore to take effect
+    int maxBlowout;  // max score advance
     int limitSet;   // match set limit (as tennis "set", n means best of 2n-1)
 
     int numAIs;      // number of AI players
@@ -183,6 +185,7 @@ public:
 
     gGameSettings(int a_scoreWin, int a_scoreDiffWin,
                   int a_limitTime, int a_limitRounds, int a_limitScore, int a_limitSet,
+                  int a_limitScoreMinLead, int a_maxBlowout,
                   int a_numAIs,    int a_minPlayers,  int a_AI_IQ,
                   bool a_autoNum, bool a_autoIQ,
                   REAL a_speedFactor, REAL a_sizeFactor,

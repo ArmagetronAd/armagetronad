@@ -189,8 +189,10 @@ sp_ai_iq_help            IQ of the AI opponents in single player mode
 sp_min_players_help        Minimum number of players in single player mode
 sp_num_ais_help            Number of AI players in single player mode
 sp_limit_score_help        End the match when a player reaches this score in single player mode
+sp_limit_score_min_lead_help	Only consider LIMIT_SCORE when this lead is achieved by the winning team in single player mode
 sp_limit_rounds_help        End the match after this number of rounds in single player mode
 sp_limit_time_help        End the match after this number of minutes in single player mode
+sp_limit_advance_help   End the match in single player mode when the first team in score is this number of points ahead of the second team
 
 spawn_wingmen_back_help     Determines how much each wingman is placed backwards in a team.
 spawn_wingmen_side_help     Determines how much each wingman is placed sidewards in a team.
@@ -218,8 +220,10 @@ ai_iq_help            IQ of the AI opponents
 min_players_help        Minimum number of players
 num_ais_help            Number of AI players
 limit_score_help        End the match when a player reaches this score
+limit_score_min_lead_help	Only consider LIMIT_SCORE when this lead is achieved by the winning team
 limit_rounds_help        End the match after this number of rounds
 limit_time_help            End the match after this number of minutes
+limit_advance_help      End the match when the first team in score is this number of points ahead of the second team
 
 auto_team_help          Flag indicating whether players should be put into teams automatically.
 auto_team_spec_spam_help    If set to 0, spectators won't be announced when joining or leaving, provided AUTO_TEAM is set to 0.
@@ -2665,6 +2669,7 @@ gamestate_champ_center        Match Winner: \1
 gamestate_champ_console        Overall Winner: \1
 gamestate_champ_scorehit    with \1 points.\n
 gamestate_champ_timehit        after the time limit of \1 minutes was hit.\n
+gamestate_champ_blowout     after getting a \1-point advantage.\n
 gamestate_champ_default        after \1 rounds.\n
 gamestate_champ_finalscores    Final Scores:\n
 

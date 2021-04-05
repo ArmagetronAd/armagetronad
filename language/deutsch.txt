@@ -186,6 +186,7 @@ sp_num_ais_help               Anzahl der Computergegner
 sp_limit_score_help           Beende das Match wenn ein Spieler diesen Punktestand erreicht    
 sp_limit_rounds_help          Beende das Match nach dieser Rundenzahl
 sp_limit_time_help            Beende das Match nach Ablauf von soviel Minuten
+sp_limit_advance_help         Beendet das Match im Einzelspielermodus sobald das erste Team diese Anzahl an Punkten mehr als das andere hat
 
 spawn_wingmen_back_help       Bestimmt, wie weit die Flügelmänner in der Teamformation nach hinten versetzt sind.
 spawn_wingmen_side_help       Bestimmt, wie weit die Flügelmänner in der Teamformation zur Seite versetzt sind.
@@ -214,6 +215,7 @@ num_ais_help                  Anzahl der Computergegner
 limit_score_help              Beende das Match wenn ein Spieler diesen Punktestand erreicht
 limit_rounds_help             Beende das Match nach dieser Rundenzahl
 limit_time_help               Beende das Match nach Ablauf von soviel Minuten
+limit_advance_help            Beendet das Match sobald das erste Team diese Anzahl an Punkten mehr als das andere hat
 
 auto_team_help                Wenn dies auf 1 steht, werden Spieler automatisch einem Team zugeteilt. Steht es auf 0, bleiben sie Zuschauer.
 auto_team_spec_spam_help      Nur wenn der wert 1 ist, werden Zuschauer, die den Server betreten oder verlassen, angekündigt. Hat nur einen Effekt, wenn AUTO_TEAM auf 0 steht.
@@ -2380,6 +2382,7 @@ gamestate_champ_center        Meister: \1
 gamestate_champ_console       Gesamtsieger: \1 
 gamestate_champ_scorehit      hat das Punktelimit ( \1 / \2 ) erreicht.\n
 gamestate_champ_timehit       nachdem das Zeitlimit von \1 Minuten erreicht war.\n
+gamestate_champ_blowout       nach dem Erringen eines \1-Punkte-Vorteils.\n
 gamestate_champ_default       nach \1 Runden.\n
 gamestate_champ_finalscores   Endergebnis:\n
 

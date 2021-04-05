@@ -225,6 +225,7 @@ static eWavData extro("moviesounds/extro.wav");
 
 gGameSettings::gGameSettings(int a_scoreWin, int a_scoreDiffWin,
                              int a_limitTime, int a_limitRounds, int a_limitScore, int a_limitSet,
+                             int a_limitScoreMinLead, int a_maxBlowout,
                              int a_numAIs,    int a_minPlayers,  int a_AI_IQ,
                              bool a_autoNum, bool a_autoIQ,
                              REAL a_speedFactor, REAL a_sizeFactor,
@@ -234,6 +235,7 @@ gGameSettings::gGameSettings(int a_scoreWin, int a_scoreDiffWin,
                             )
         :scoreWin(a_scoreWin), scoreDiffWin(a_scoreDiffWin),
         limitTime(a_limitTime), limitRounds(a_limitRounds), limitScore(a_limitScore), limitSet(a_limitSet),
+        limitScoreMinLead(a_limitScoreMinLead), maxBlowout(a_maxBlowout),
         numAIs(a_numAIs),       minPlayers(a_minPlayers),   AI_IQ(a_AI_IQ),
         autoNum(a_autoNum),     autoIQ(a_autoIQ),
         speedFactor(a_speedFactor), sizeFactor(a_sizeFactor),
@@ -552,6 +554,7 @@ void gGameSettings::Menu()
 
 gGameSettings singlePlayer(10, 1,
                            30, 10, 100000, 1,
+                           0, 100000,
                            1,   0, 30,
                            true, true,
                            0  ,  -3,
@@ -560,6 +563,7 @@ gGameSettings singlePlayer(10, 1,
 
 gGameSettings multiPlayer(10, 1,
                           30, 10, 100, 1,
+                          0, 100000,
                           0,   4, 100,
                           false, false,
                           0  ,  -3,
@@ -573,6 +577,8 @@ static tSettingItem<int> mp_sd("SCORE_DIFF_WIN"   ,multiPlayer.scoreDiffWin);
 static tSettingItem<int> mp_lt("LIMIT_TIME"  ,multiPlayer.limitTime);
 static tSettingItem<int> mp_lr("LIMIT_ROUNDS",multiPlayer.limitRounds);
 static tSettingItem<int> mp_ls("LIMIT_SCORE" ,multiPlayer.limitScore);
+static tSettingItem<int> mp_ml("LIMIT_SCORE_MIN_LEAD" ,multiPlayer.limitScoreMinLead);
+static tSettingItem<int> mp_mb("LIMIT_ADVANCE" ,multiPlayer.maxBlowout);
 static tSettingItem<int> mp_lset("LIMIT_SETS" ,multiPlayer.limitSet);
 
 static tConfItem<int>    mp_na("NUM_AIS"     ,multiPlayer.numAIs);
@@ -608,6 +614,8 @@ static tSettingItem<int> sp_sd("SP_SCORE_DIFF_WIN"   ,singlePlayer.scoreDiffWin)
 static tSettingItem<int> sp_lt("SP_LIMIT_TIME"  ,singlePlayer.limitTime);
 static tSettingItem<int> sp_lr("SP_LIMIT_ROUNDS",singlePlayer.limitRounds);
 static tSettingItem<int> sp_ls("SP_LIMIT_SCORE" ,singlePlayer.limitScore);
+static tSettingItem<int> sp_ml("SP_LIMIT_SCORE_MIN_LEAD" ,singlePlayer.limitScoreMinLead);
+static tSettingItem<int> sp_mb("SP_LIMIT_ADVANCE" ,singlePlayer.maxBlowout);
 static tSettingItem<int> sp_lset("SP_LIMIT_SETS" ,singlePlayer.limitSet);
 
 static tConfItem<int>    sp_na("SP_NUM_AIS"     ,singlePlayer.numAIs);
@@ -4994,11 +5002,21 @@ void gGame::Analysis(REAL time){
 
                 // only then we can have a true winner:
                 if (
-                        ( eTeam::teams(0)->Score() >= sg_currentSettings->limitScore
-			&& eTeam::teams.Len()>1 && eTeam::teams(0)->Score() >= eTeam::teams(1)->Score() + sg_currentSettings->scoreDiffWin ) ||		// the score limit must be hit
+                        (
+                        // the score limit is hit
+                        eTeam::teams(0)->Score() >= sg_currentSettings->limitScore
+                            // and the minimum lead is achieved (unless only one team is present)
+                            && ( eTeam::teams.Len() < 2
+                                 || eTeam::teams(0)->Score()
+                                    >= sg_currentSettings->limitScoreMinLead + eTeam::teams(1)->Score()
+                            )
+                        )
+                        ||
                         rounds + winnerExtraRound >= sg_currentSettings->limitRounds ||     // or the round limit
                         tSysTimeFloat()>=startTime+sg_currentSettings->limitTime*60 ||      // or the time limit
                         (active <= 1 && eTeam::teams.Len() > 1)								// or all but one players must have disconnected.
+                        || // or the mercy limit is hit
+                        ( sg_currentSettings->maxBlowout && eTeam::teams.Len() > 1 && eTeam::teams(0)->Score() >= eTeam::teams(1)->Score() + sg_currentSettings->maxBlowout)
                    )
                 {
                     bool declareChampion = true;
@@ -5067,6 +5085,11 @@ void gGame::Analysis(REAL time){
                         {
                             message.SetTemplateParameter(1, sg_currentSettings->limitTime);
                             message << "$gamestate_champ_timehit";
+                        }
+                        else if ( sg_currentSettings->maxBlowout && eTeam::teams.Len() > 1 && eTeam::teams(0)->Score() >= eTeam::teams(1)->Score() + sg_currentSettings->maxBlowout )
+                        {
+                            message.SetTemplateParameter(1, eTeam::teams(0)->Score() - eTeam::teams(1)->Score());
+                            message << "$gamestate_champ_blowout";
                         }
                         else
                         {
