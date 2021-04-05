@@ -2300,6 +2300,10 @@ static bool sg_NetworkError( const tOutput& title, const tOutput& message, REAL 
         message2.Append( tOutput( "$network_redirect", redirect->GetConnectionName(), (int)redirect->GetPort() ) );
     }
 
+#ifndef DEDICATED
+    con << message2 << "\n\n";
+#endif
+
     return tConsole::Message( title, message2, timeout );
 }
 
