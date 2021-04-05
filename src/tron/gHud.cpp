@@ -332,7 +332,6 @@ static void display_hud_subby( ePlayer* player ){
             // static REAL imax=-1;
             char fasteststring[50];
             // REAL distance;
-            static float maxmeterspeed= 50;
             float myping;
             static REAL max=max_player_speed;
             static tString name;
@@ -405,14 +404,13 @@ static void display_hud_subby( ePlayer* player ){
                 if (me!=NULL){
                     gCycle *h = dynamic_cast<gCycle *>(me->Object());
                     if (h && ( !player->netPlayer || !player->netPlayer->IsChatting()) && se_GameTime()>-2){
-                        h->Speed()>maxmeterspeed?maxmeterspeed+=10:1;
                         // myscore=p->TotalScore();
                         myping = me->ping;
 
                         if(subby_ShowSpeedMeter)
                         {
                             static gGLMeter meter[MAX_PLAYERS];
-                            meter[player->ID()].Display(h->Speed(),maxmeterspeed,subby_SpeedGaugeLocX,subby_SpeedGaugeLocY,subby_SpeedGaugeSize,"Speed");  // easy to use configurable meters
+                            meter[player->ID()].Display(h->Speed(),h->MaximalSpeed(),subby_SpeedGaugeLocX,subby_SpeedGaugeLocY,subby_SpeedGaugeSize,"Speed");  // easy to use configurable meters
                         }
                         if(subby_ShowRubberMeter)
                         {
