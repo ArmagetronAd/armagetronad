@@ -531,6 +531,11 @@ static bool lowlevel_sr_InitDisplay(){
                 attrib=SDL_DOUBLEBUF | SDL_SWSURFACE;
         }
 
+        if(!currentScreensetting.fullscreen)
+        {
+            attrib |= SDL_RESIZABLE;
+        }
+
 #ifdef FORCE_WINDOW
 #ifdef WIN32
         //		sr_screenWidth  = 400;

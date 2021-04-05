@@ -520,6 +520,29 @@ int filter(const SDL_Event *tEvent){
                  (tEvent->motion.y>=sr_screenHeight-10 || tEvent->motion.y<=10)))
             SDL_WarpMouse(sr_screenWidth/2,sr_screenHeight/2);
 
+
+        if(tEvent->type==SDL_VIDEORESIZE && !currentScreensetting.fullscreen)
+        {
+            st_ToDo(rCallbackBeforeScreenModeChange::Exec);
+            sr_screenWidth = tEvent->resize.w;
+            sr_screenHeight = tEvent->resize.h;
+
+            // Alright, SDL1 requires setting the video mode after a resize
+            // color depth seems to be ignored, but we'll specify it anyway
+            sr_screen = SDL_SetVideoMode(
+                sr_screenWidth, sr_screenHeight, 
+                (currentScreensetting.colorDepth)?24:16, 
+                ((currentScreensetting.useSDL)?SDL_OPENGL:(SDL_DOUBLEBUF|SDL_SWSURFACE)) | SDL_RESIZABLE
+            );
+            if(sr_screen == NULL) 
+            {
+                // if it does fail we'll just disable resizing...
+                // TODO
+                sr_ReinitDisplay();
+            }
+            st_ToDo(rCallbackAfterScreenModeChange::Exec);
+        }
+
         // fetch alt-tab
 
         if (tEvent->type==SDL_ACTIVEEVENT)
