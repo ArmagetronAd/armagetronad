@@ -89,13 +89,19 @@ libengine_a_SOURCES=engine/eAdvWall.cpp engine/eAdvWall.h engine/eAuthentication
 	engine/eChat.cpp engine/eChat.h\
     engine/eBannedWords.cpp engine/eBannedWords.h
 
+if MACOSX
+# put extra Objective C files here, like so:
+#render_extra=render/rScreenHelper.h render/rScreenHelper.m
+render_extra=
+else
+render_extra=
+endif
 
-librender_a_SOURCES=render/rConsole.cpp render/rConsoleGraph.cpp render/rConsole.h render/rFont.cpp\
+librender_a_SOURCES=${render_extra} render/rConsole.cpp render/rConsoleGraph.cpp render/rConsole.h render/rFont.cpp\
 	render/rFont.h render/rGL.h render/rGL.cpp render/rGLRender.cpp render/rModel.cpp render/rModel.h render/rRender.cpp\
     render/rDisplayList.h render/rDisplayList.cpp \
 	render/rRender.h render/rScreen.cpp render/rScreen.h render/rSDL.h render/rSysdep.cpp render/rSysdep.h\
 	render/rTexture.cpp render/rTexture.h render/rViewport.cpp render/rViewport.h
-
 
 libtron_a_SOURCES=tron/gAIBase.cpp tron/gAIBase.h tron/gAICharacter.cpp tron/gAICharacter.h tron/gArena.cpp tron/gArena.h\
 	tron/gArmagetron.cpp tron/gCamera.cpp tron/gCamera.h tron/gCycle.cpp tron/gCycle.h tron/gCycleMovement.cpp\

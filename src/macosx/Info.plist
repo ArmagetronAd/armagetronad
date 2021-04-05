@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
-	<string>Armagetron Advanced</string>
+	<string>usr/bin/armagetronad</string>
 	<key>CFBundleIconFile</key>
 	<string>Armagetron Advanced.icns</string>
 	<key>CFBundleIdentifier</key>
@@ -22,5 +22,6 @@
 	<string>SDLMain</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>NSHighResolutionCapable</key><false/>
 </dict>
 </plist>

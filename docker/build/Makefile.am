@@ -78,7 +78,7 @@ all:	default
 dockertest.tag:
 	cp ${srcdir}/fakerelease_proto.sh .
 	@echo "Testing whether 'docker' works..."
-	docker help > /dev/null
+	if which docker; then docker help > /dev/null; fi
 	echo > $@
 
 tarwrapper.sh: ${top_srcdir}/docker/scripts/tarwrapper.sh
@@ -216,12 +216,17 @@ context.steam: context.64 gits_artifacts.tag
 	rm $@.dir/image
 	echo "armasteam_64" > $@.dir/image
 #	rebrand
-	sed -i $@.dir/version.sh -e s/PACKAGE_NAME=armagetronad/PACKAGE_NAME=$(STEAM_PACKAGE_TITLE)/ -e s/PACKAGE_TITLE=\"Armagetron\ Advanced/PACKAGE_TITLE=\"$(STEAM_PACKAGE_TITLE)/ -e s/PACKAGE_TITLE=\"Armagetron/PACKAGE_TITLE=\"$(STEAM_PACKAGE_TITLE)/
+	rm -f $@.dir/version.sh # required because the source and dest are hard links to the same file originally
+	sed < $<.dir/version.sh > $@.dir/version.sh -e s/PACKAGE_NAME=armagetronad/PACKAGE_NAME=$(STEAM_PACKAGE_TITLE)/ -e s/PACKAGE_TITLE=\"Armagetron\ Advanced/PACKAGE_TITLE=\"$(STEAM_PACKAGE_TITLE)/ -e s/PACKAGE_TITLE=\"Armagetron/PACKAGE_TITLE=\"$(STEAM_PACKAGE_TITLE)/
 # 	no remotely adult stuff
-	sed -i $@.dir/source/src/engine/ePlayer.cpp -e "s/pr0n/cat videos/"
+	rm -f $@.dir/source/src/engine/ePlayer.cpp
+	sed < $<.dir/source/src/engine/ePlayer.cpp > $@.dir/source/src/engine/ePlayer.cpp -e "s/pr0n/cat videos/"
 #   install alternative title, adapt sources
 	cp gits/steam/title.png $@.dir/source/textures/
-	sed -i $@.dir/source/src/tron/gLogo.cpp $@.dir/source/Makefile.* -e "s,textures/title.jpg,textures/title.png,"
+	for f in source/src/tron/gLogo.cpp source/src/Makefile.am; do \
+		rm -f $@.dir/$$f; \
+		sed < $<.dir/$$f > $@.dir/$$f -e "s,textures/title.jpg,textures/title.png,"; \
+	done
 	cd $@.dir/source; automake
 #   done
 	echo > $@
@@ -264,6 +269,48 @@ context.test: rootcontext.64
 	rm $@.dir/image
 	echo "armalpine_32" > $@.dir/image
 	echo > $@
+
+#***************************************************************
+
+# macOS builds are done without docker
+MACOS_CONFIG_ARGS="--disable-restoreold --enable-automakedefaults --disable-useradd --disable-sysinstall --disable-initscripts --disable-uninstall --disable-etc --prefix=/usr"
+MACOS_BUILD_BUNDLE="./src/macosx/build_bundle.sh"
+
+macOS/client_build.tag: context.64 #Makefile
+	mkdir -p macOS/client
+	cd macOS/client && ../../$<.dir/source/configure "${MACOS_CONFIG_ARGS}" && ${MAKE}
+	echo > $@
+
+macOS/client.tag: macOS/client_build.tag upload/.tag #Makefile
+	rm -rf macOS/client/*.app
+	cd macOS/client && bash ${MACOS_BUILD_BUNDLE}
+	cp macOS/client/*.dmg macOS/client/*.macOS.zip upload/
+	echo > $@
+
+macOS/server_build.tag: context.64 #Makefile
+	mkdir -p macOS/server
+	cd macOS/server && ../../$<.dir/source/configure --disable-glout "${MACOS_CONFIG_ARGS}" && ${MAKE}
+	echo > $@
+
+macOS/server.tag: macOS/client.tag macOS/server_build.tag upload/.tag #Makefile
+	rm -rf macOS/server/*.app
+	cd macOS/server && bash ${MACOS_BUILD_BUNDLE}
+	cp macOS/server/*.dmg macOS/server/*.macOS.zip upload/
+	echo > $@
+
+macOS/steam_build.tag: context.steam #Makefile
+	mkdir -p macOS/steam
+	cd macOS/steam && ../../$<.dir/source/configure "${MACOS_CONFIG_ARGS}" progname="${STEAM_PACKAGE_NAME}" progtitle="${STEAM_PACKAGE_TITLE}" && ${MAKE}
+	echo > $@
+
+macOS/steam.tag: macOS/server.tag macOS/steam_build.tag upload/.tag #Makefile
+	rm -rf macOS/steam/*.app
+	cd macOS/steam && bash ${MACOS_BUILD_BUNDLE}
+	cp macOS/steam/*.dmg macOS/steam/*.macOS.zip upload/
+	echo > $@
+
+macOS_build: macOS/client_build.tag macOS/server_build.tag #macOS/steam_build.tag
+macOS: macOS/client.tag macOS/server.tag #macOS/steam.tag
 
 #***************************************************************
 
@@ -585,33 +632,6 @@ zeroinstall: zeroinstall.tag
 
 #***************************************************************
 
-# build on the mac via GitHub Actions. Requires staging.
-context.macbuild: rootcontext.64 ${srcdir}/../deploy/*_macbuild.sh ${srcdir}/../deploy/wait_for_upload.sh ../deploy/* CI_INFO
-	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' ../deploy/'*' ${srcdir}/../deploy/*_macbuild.sh ${srcdir}/../deploy/wait_for_upload.sh CI_INFO ${srcdir}/../scripts/.cache/gits/macOS
-	rm -f $@.dir/image
-	echo "armadeploy_64" > $@.dir/image
-	echo > $@
-result.macbuild: context.macbuild
-	+$(srcdir)/context_to_result.sh $@.dir ./deploy_macbuild.sh
-	echo > $@
-
-# only build macOS if we're not staging
-macbuild: macbuild.tag
-macbuild.tag: maybe_macbuild_${STAGING}.tag
-	touch $@
-maybe_macbuild_.tag:
-	touch $@
-maybe_macbuild_true.tag:
-	touch $@
-maybe_macbuild_false.tag: result.macbuild upload/.tag
-	cp $<.dir/upload/${PROGRAM_TITLE}* upload/
-#	rm -rf steamdirs/steam_macOS.dir
-#	mkdir -p steamdirs/steam_macOS.dir
-#	cd steamdirs/steam_macOS.dir; unzip ../../$<.dir/upload/${STEAM_PACKAGE_NAME}-${PACKAGE_VERSION}.macOS.zip 
-	touch $@
-
-#***************************************************************
-
 steamdirs/.tag:
 	mkdir -p steamdirs
 	echo > $@
@@ -683,7 +703,7 @@ deploy_ours: result.deploy_zi result.deploy_download deploy_external
 context.deploy_base_%: rootcontext.64 deploy_base.tag ${srcdir}/../deploy/deploy_%.sh ${srcdir}/../deploy/wait_for_upload.sh ../deploy/* CI_INFO
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' upload ../deploy/'*' ${srcdir}/../deploy/deploy_$*.sh ${srcdir}/../deploy/wait_for_upload.sh CI_INFO
 	echo > $@
-context.deploy_%: context.deploy_base_% macbuild
+context.deploy_%: context.deploy_base_%
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*'
 	echo > $@
 result.deploy_%: context.deploy_%
@@ -702,8 +722,8 @@ context.deploy_steam: context.deploy_base_steam ${srcdir}/../deploy/steamcontent
 	echo "steamcmd" > $@.dir/image
 	echo > $@
 
-context.deploy_gitlab: context.deploy_base_gitlab Makefile
-	${srcdir}/prepare_context.sh $@.dir $<.dir/'*'
+context.deploy_gitlab: rootcontext.64 deploy_base.tag ../deploy/* ${srcdir}/../deploy/deploy_gitlab.sh CI_INFO
+	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' upload ../deploy/'*' ${srcdir}/../deploy/deploy_gitlab.sh CI_INFO
 	echo "#/bin/bash" > $@.dir/CI_INFO_DEPLOY_GITLAB
 	echo "CI_JOB_TOKEN=${CI_JOB_TOKEN}" >> $@.dir/CI_INFO_DEPLOY_GITLAB
 	echo "CI_API_V4_URL=${CI_API_V4_URL}" >> $@.dir/CI_INFO_DEPLOY_GITLAB
@@ -837,13 +857,13 @@ intermediateclean:
 
 # keep the artifacts clean of junk not needed in the next phase
 artifactclean:
-	rm *.dir \
+	rm -rf \
+	*.dir \
 	proto/*.dir \
-	source \
-	-rf
+	source
 
 clean: intermediateclean
-	rm \
+	rm -rf \
 	*.tag \
 	gits \
 	proto \
@@ -852,8 +872,9 @@ clean: intermediateclean
 	source \
 	steamdirs \
 	test.* \
-	upload \
-	-rf
+	macOS \
+	upload
+
 	if git -C ${srcdir} rev-parse --abbrev-ref HEAD > /dev/null; then rm -f CI_INFO; fi
 distclean: clean
 	rm -rf $(TARBALL) CI_INFO

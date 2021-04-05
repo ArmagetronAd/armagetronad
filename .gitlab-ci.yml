@@ -28,11 +28,10 @@ default:
   # common before script: bootstrap, configure, make dist, prepare docker builds
   before_script:
     - if ! test -d gitlab_build; then
-    -  docker help > /dev/null
+    -  which docker && docker help > /dev/null
     -  touch timestamp.tag
     -  test "x${ARMAGETRONAD_FAKERELEASE}" == "x" && export ARMAGETRONAD_FAKERELEASE=false
     -  test -r configure || ./bootstrap.sh
-    -  ls docker/build -al
     -  cat version.m4
     -  mkdir -p gitlab_build
     -  cd gitlab_build
@@ -40,7 +39,7 @@ default:
     -  ../configure  --prefix=/usr/local --disable-glout --disable-sysinstall --disable-desktop progname="${PROGRAM_NAME}" progtitle="${PROGRAM_TITLE}"
     -  test "x${ARMAGETRONAD_FAKERELEASE}" == "xtrue" && cp ../docker/build/fakerelease_proto.sh docker/build/fakerelease.sh 
     -  cd docker/build
-    -  make CI_prepare -j`nproc`
+    -  make CI_prepare -j`nproc || echo 3`
     -  cd ../../../
     - else
     -  find . -newer timestamp.tag ! -path "./gitlab_build" -exec touch -r timestamp.tag \{\} \;
@@ -88,7 +87,7 @@ build_server_steam_raw:
   stage: build_base
   rules:
   - if: $CI_MERGE_REQUEST_ID
-    when: on_success
+    when: never
   - when: on_success
   script:
     - gitlab_build/docker/build/make_ci.sh -k result.build_server_steam
@@ -125,7 +124,7 @@ build_windows_steam:
   stage: build_main
   rules:
   - if: $CI_MERGE_REQUEST_ID
-    when: on_success
+    when: never
   - when: on_success
   script:
     - gitlab_build/docker/build/make_ci.sh CI_windows_steam
@@ -157,7 +156,7 @@ build_linux_steam:
   stage: build_main
   rules:
   - if: $CI_MERGE_REQUEST_ID
-    when: on_success
+    when: never
   - when: on_success
   script:
     - gitlab_build/docker/build/make_ci.sh CI_linux_steam
@@ -227,11 +226,37 @@ build_server_32:
     - gitlab_build/docker/build/
     expire_in: 1 day
 
+# macOS builds need a special runner, but can start early.
+# iIt should build directly from git content, the prepared linux source directories have soft links that won't work.
+build_macos:
+  needs:
+  - build_prepare
+  dependencies:
+  - build_prepare
+  tags:
+  - macos
+  stage: build_main
+  rules:
+  - if: $CI_MERGE_REQUEST_ID
+    when: never
+  - if: $CI_COMMIT_REF_PROTECTED == "true"
+    when: on_success
+  - when: never
+  script:
+    - docker/scripts/obsolete.sh || exit 0
+    - ./bootstrap.sh || exit 0
+    - gitlab_build/docker/build/make_ci.sh macOS -j`nproc || echo 3`
+  artifacts:
+    paths:
+    - gitlab_build/docker/build/upload
+    - gitlab_build/docker/build/macOS/*.tag
+    expire_in: 1 day
+    
 build_collect:
   stage: build_collect
   rules:
   - if: $CI_MERGE_REQUEST_ID
-    when: on_success
+    when: never
   - when: on_success
   script:
     - gitlab_build/docker/build/make_ci.sh debtest.tag CI || exit $?
@@ -401,6 +426,10 @@ pack:
    - build_collect
   dependencies:
    - build_collect
+  rules:
+   - if: $CI_MERGE_REQUEST_ID
+     when: never
+   - when: on_success
   script: [""]
   before_script:
     # test that everything has been prepared correctly

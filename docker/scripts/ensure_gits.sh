@@ -32,7 +32,6 @@ function ensure_git(){
     return 0
 }
 
-ensure_git macOS https://github.com/ArmagetronAd/macOS.git || exit $?
 ensure_git winlibs https://gitlab.com/armagetronad/winlibs.git || exit $?
 ensure_git codeblocks https://gitlab.com/armagetronad/build_codeblocks.git || exit $?
 ensure_git steam-art https://gitlab.com/armagetronad/steam-art.git master || exit $?
