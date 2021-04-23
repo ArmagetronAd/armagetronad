@@ -1624,6 +1624,12 @@ static void sg_copySettings()
     gArena::SetSizeMultiplier 	( exponent( sg_currentSettings->sizeFactor ) );
 }
 
+static bool gamestateWaitEnabled=true;
+static tSettingItem<bool> gamestateWaitEnabledConf("GAME_WAIT_PLAYERS_ENABLED", gamestateWaitEnabled);
+
+static int gameSinglePlayerHumans=1;
+static tSettingItem<int> gameSinglePlayerHumansConf("GAME_SP_HUMANS", gameSinglePlayerHumans);
+
 static void sg_endChallenge();
 void update_settings( bool const * goon )
 {
@@ -1631,12 +1637,15 @@ void update_settings( bool const * goon )
     {
 #ifdef DEDICATED
         // wait for players to join
+        if(gamestateWaitEnabled)
         {
             bool restarted = false;
 
             REAL timeout = tSysTimeFloat() + 3.0f;
             while ( sg_NumHumans() <= 0 && sg_NumUsers() > 0 && ( !goon || *goon ) && uMenu::quickexit == uMenu::QuickExit_Off )
             {
+                if(!gamestateWaitEnabled) break;
+                
                 if ( !restarted && bool(sg_currentGame) )
                 {
                     sg_currentGame->StartNewMatch();
@@ -1685,7 +1694,7 @@ void update_settings( bool const * goon )
         // count the active players
         int humans = sg_NumHumans();
 
-        bool newsg_singlePlayer = (humans<=1);
+        bool newsg_singlePlayer = (humans<=gameSinglePlayerHumans);
 #else
         bool newsg_singlePlayer = (sn_GetNetState() == nSTANDALONE);
 #endif
@@ -5164,6 +5173,8 @@ void gGame::Analysis(REAL time){
                  )) && time-lastdeath >fintime-2
 #ifndef DEDICATED
                 && humans > 0
+#else
+                && (gamestateWaitEnabled || humans > 0) 
 #endif
                )){
 #ifdef DEBUG
