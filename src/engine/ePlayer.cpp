@@ -8370,7 +8370,11 @@ void ePlayerNetID::RankingLadderLog()
             else
             {
                 se_onlineAIWriter << p->GetLogName();
-                se_onlineAIWriter << p->CurrentTeam()->Name().Filter();
+                if(p->CurrentTeam())
+                {
+                    se_onlineAIWriter << p->CurrentTeam()->Name().Filter();
+                }
+                else se_onlineAIWriter << "";
                 se_onlineAIWriter << p->Score();
 
                 se_onlineAIWriter.write();
