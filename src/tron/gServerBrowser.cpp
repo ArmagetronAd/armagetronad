@@ -109,6 +109,7 @@ class gServerMenu: public uMenu
 
 public:
     virtual void OnRender();
+    tString filter_string;
 
     void Update(); // sort the server view by score
     gServerMenu(const char *title);
@@ -123,6 +124,8 @@ public:
     void Render(REAL y,
                 const tString &servername, const tString &score,
                 const tString &users     , const tString &ping);
+    
+    void Render(REAL x, REAL y, tString &c, int center, int cursor, int cursorPos);
 };
 
 
@@ -147,6 +150,26 @@ protected:
         displayHelp_ = display;
         return false;
     }
+};
+
+class gServerFilterMenuItem: public uMenuItemString
+{
+public:
+    gServerFilterMenuItem(gServerMenu *M)
+        :uMenuItemString(M,"$network_master_filter","",M->filter_string)
+    {}
+        
+    virtual ~gServerFilterMenuItem(){}
+    
+    virtual void Render(REAL x,REAL y,REAL alpha=1, bool selected=0);
+    virtual void RenderBackground(){
+        menu->Item(menu->NumItems()-2)->RenderBackground();
+    };
+    virtual bool Event( SDL_Event& event );
+    
+    
+private:
+    tString prev_filter_string;
 };
 
 class gServerMenuItem: public gBrowserMenuItem
@@ -293,6 +316,7 @@ void gServerBrowser::BrowseServers()
     gServerMenu browser("Server Browser");
 
     gServerStartMenuItem start(&browser);
+    gServerFilterMenuItem filter(&browser);
 
     /*
       while (nServerInfo::DoQueryAll(sg_simultaneous));
@@ -325,6 +349,12 @@ void gServerBrowser::BrowseServers()
 void gServerMenu::HandleEvent( SDL_Event event )
 {
 #ifndef DEDICATED
+    // Ignore event when we have the filter menu item
+    if(items.Len() - selected == 1 && filter_string.Len() > 1)
+    {
+        return uMenu::HandleEvent( event );
+    }
+
     switch (event.type)
     {
     case SDL_KEYDOWN:
@@ -341,6 +371,7 @@ void gServerMenu::HandleEvent( SDL_Event event )
             return;
             break;
 		case(SDLK_m):
+            if(items.Len() - selected == 1) break;
 			FriendsToggle();
             Update();
 			return;
@@ -398,14 +429,27 @@ void gServerMenu::Update()
     nServerInfo::CalcScoreAll();
     nServerInfo::Sort( nServerInfo::PrimaryKey( sortKey_ ) );
 
-    int mi = 1;
+    int mi = 2;
     gServerInfo *run = gServerInfo::GetFirstServer();
 	bool oneFound = false; //so we can display all if none were found
 
     while (run)
     {
+        if(filter_string.Len() > 1)
+        {
+            run->show = false;
+            oneFound = true;
+
+            tString name;
+            name << tColoredString::RemoveColors( run->GetName(), false );
+
+            if(name.ToLower().Contains(filter_string.ToLower()))
+            {
+                run->show = true;
+            }
+        }
 		//check friend filter
-		if (getFriendsEnabled())
+		else if (getFriendsEnabled())
 		{
 			run->show = false;
 			int i;
@@ -538,6 +582,14 @@ static int resW=1, resH=1;
 
 static REAL shrink = .6f;
 static REAL displace = .15;
+
+void gServerMenu::Render(REAL x,REAL y, tString &c, int center = 0, int cursor = 0, int cursorPos = 0)
+{
+    if (sr_glOut)
+    {
+        DisplayTextAutoWidth(x, y, c, text_height, -1, cursor, cursorPos);
+    }
+}
 
 void gServerMenu::Render(REAL y,
                          const tString &servername, const tString &score,
@@ -1031,6 +1083,65 @@ void gServerStartMenuItem::Enter()
 }
 
 
+
+void gServerFilterMenuItem::Render(REAL x,REAL y,REAL alpha, bool selected)
+{
+#ifndef DEDICATED
+    SetColor( selected, alpha );
+    
+    tString s;
+    s << description;
+    
+    x = -.9f;
+    REAL x2 = s.Len() * 0.018 + x;
+    
+    int cMode = selected ? 1 : 0;
+    
+    static_cast<gServerMenu*>(menu)->Render(x, y*shrink + displace, s);
+    static_cast<gServerMenu*>(menu)->Render(x2, y*shrink + displace, *content, 1, cMode, cursorPos);
+#endif
+}
+
+bool gServerFilterMenuItem::Event( SDL_Event& event )
+{
+#ifndef DEDICATED
+    if (event.type!=SDL_KEYDOWN)
+        return false;
+    
+    bool update = prev_filter_string != *content;
+    prev_filter_string = *content;
+    
+    switch (event.key.keysym.sym)
+    {
+    case(SDLK_ESCAPE):
+        if(content->Len() > 0)
+        {
+            *content = "";
+            
+            (static_cast<gServerMenu*>(menu))->Update();
+            return true;
+            
+            break;
+        }
+        else    
+        {
+            return uMenuItemString::Event( event );
+        }
+
+        break;
+    default:
+        break;
+    }
+        
+    if(update)
+    {
+        (static_cast<gServerMenu*>(menu))->Update();
+    }
+    
+#endif
+
+    return uMenuItemString::Event( event );
+}
 
 gServerStartMenuItem::gServerStartMenuItem(gServerMenu *men)
         :gBrowserMenuItem(men, *sg_StartHelpText)
