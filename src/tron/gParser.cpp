@@ -580,6 +580,13 @@ gParser::parseMovement(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, eCo
         {
             REAL xDir = myxmlGetPropFloat(cur, "xdir");
             REAL yDir = myxmlGetPropFloat(cur, "ydir");
+            REAL speed = myxmlGetPropFloat(cur, "speed");
+            if(speed > 0)
+            {
+                // TODO: do this properly...
+                xDir = yDir = speed*0.707;
+            }
+
             tString zoneInteractSet = myxmlGetPropString(cur, "interact");
 
             if (zoneInteractSet.ToLower() == "true")
@@ -600,6 +607,17 @@ gParser::parseMovement(eGrid *grid, xmlNodePtr cur, const xmlChar * keyword, eCo
                     route.push_back( eCoord(atof(x) * sizeMultiplier, atof(y) * sizeMultiplier) );
                     x = zoneRoute.ExtractNonBlankSubString(pos);
                 }
+            }
+
+            cur = cur->xmlChildrenNode;
+            while(cur)
+            {
+                if(isElement(cur->name, (const xmlChar *)"Route", keyword))
+                {
+                    REAL x = myxmlGetPropFloat(cur, "x"), y = myxmlGetPropFloat(cur, "y");
+                    route.push_back(eCoord(x * sizeMultiplier, y * sizeMultiplier));
+                }
+                cur = cur->next;
             }
 
             return;
