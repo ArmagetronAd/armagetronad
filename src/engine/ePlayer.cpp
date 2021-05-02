@@ -9952,6 +9952,30 @@ static tAccessLevelSetter sn_CenterPlayerConfLevel( CenterPlayerMessage_c, tAcce
 static tConfItemFunc PlayerCenterMessage_c("PLAYER_CENTER_MESSAGE",&CenterPlayerMessage_conf);
 static tAccessLevelSetter sn_PlayerCenterConfLevel( PlayerCenterMessage_c, tAccessLevel_Moderator );
 
+static void se_PlayerFullscreenMessageConf(std::istream &s)
+{
+    if(se_NeedsServer("PLAYER_FULLSCREEN_MESSAGE",s)) return;
+
+    int receiver = se_ReadUser( s );
+
+    int timeout; s >> timeout;
+    tColoredString title; s >> title;
+    tColoredString msg; s >> msg;
+
+    if ( receiver <= 0 || s.good() )
+    {
+        con << tOutput("Usage: PLAYER_FULLSCREEN_MESSAGE <user ID or name> <timeout> \"<Title>\" \"<Message>\"\n");
+        return;
+    }
+
+    sg_FullscreenMessage(title, msg, timeout, receiver);
+}
+
+static tConfItemFunc se_PlayerFullscreenMessage_c("PLAYER_FULLSCREEN_MESSAGE", &se_PlayerFullscreenMessageConf);
+static tAccessLevelSetter se_PlayerFullscreenConfLevel( se_PlayerFullscreenMessage_c, tAccessLevel_Admin );
+static tConfItemFunc se_FullscreenPlayerMessage_c("FULLSCREEN_PLAYER_MESSAGE", &se_PlayerFullscreenMessageConf);
+static tAccessLevelSetter se_FullscreenPlayerConfLevel( se_FullscreenPlayerMessage_c, tAccessLevel_Admin );
+
 static tString se_defaultKickReason("");
 static tConfItemLine se_defaultKickReasonConf( "DEFAULT_KICK_REASON", se_defaultKickReason );
 

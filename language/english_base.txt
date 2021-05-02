@@ -1209,6 +1209,8 @@ center_message_help            Prints a big message on the screen of all connect
 center_player_message_help  Sends a center message to a specified player.
 player_center_message_help  Sends a center message to a specified player.
 fullscreen_message_help     Prints a big message all over the screen, interrupting gameplay for a configurable timeout. Use with care.
+player_fullscreen_message_help Prints a big message all over the screen only to the specified player without pausing the game. Use with care.
+fullscreen_player_message_help Prints a big message all over the screen only to the specified player without pausing the game. Use with care.
 say_help                    Dedicated server only: let the server administrator say something.
 rename_help            Renames the given player.
 allow_rename_player_help    Gives the given player the ability to rename.
