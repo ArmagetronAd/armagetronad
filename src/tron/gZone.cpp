@@ -46,6 +46,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "eTess2.h"
 #include "eWall.h"
 #include "gWall.h"
+#include "gSensor.h"
+#include "eSensor.h"
 #include "gSvgOutput.h"
 #include "eSound.h"
 #include "uInput.h"
@@ -85,7 +87,7 @@ static int sg_ballsInteract = 0;
 static tSettingItem<int> sg_ballsInteractConf( "BALLS_INTERACT", sg_ballsInteract );
 
 static bool sg_cycleWallsInteract = 0;
-static tSettingItem<bool> sg_cycleWallsInteractConf( "BALLS_BOUNCE_ON_CYCLE_WALLS", sg_cycleWallsInteract );
+static tSettingItem<bool> sg_cycleWallsInteractConf( "ZONES_BOUNCE_ON_CYCLE_WALLS", sg_cycleWallsInteract );
 
 static bool sg_ballTeamMode = 0;  //0=ball score other team, 1=ball score only team owner ...
 static tSettingItem<bool> sg_ballTeamModeConfig( "BALL_TEAM_MODE", sg_ballTeamMode );
@@ -95,9 +97,11 @@ static tSettingItem<bool> sg_ballKillerConfig( "BALL_KILLS", sg_ballKiller );
 
 static REAL sg_ballSpeedDecay = 0;
 static tSettingItem<REAL> sg_ballSpeedDecayConf( "BALL_SPEED_DECAY", sg_ballSpeedDecay );
+static tSettingItem<REAL> sg_zoneSpeedDecayConf( "ZONE_SPEED_DECAY", sg_ballSpeedDecay );
 
 static REAL sg_ballSpeedHitDecay = 0;
 static tSettingItem<REAL> sg_ballSpeedHitDecayConf( "BALL_SPEED_HIT_DECAY", sg_ballSpeedHitDecay );
+static tSettingItem<REAL> sg_zoneSpeedHitDecayConf( "ZONE_SPEED_HIT_DECAY", sg_ballSpeedHitDecay );
 
 static bool sg_ballRimStop = false;
 static tSettingItem<bool> sg_ballRimStopConf( "BALL_STOP_IF_RIM_AND_CYCLE", sg_ballRimStop );
@@ -352,6 +356,7 @@ gZone::gZone( eGrid * grid, const eCoord & pos, bool dynamicCreation, bool delay
     wallInteract_ = false;
     wallBouncesLeft_ = 0;
     wallPenetrate_ = false;
+    newImpactWall_ = nullptr;
     interactWithCycle_ = true;
     interactWithZone_ = false;
     targetRadius_ = 0;
@@ -430,6 +435,7 @@ gZone::gZone( nMessage & m )
     wallInteract_ = false;
     wallBouncesLeft_ = 0;
     wallPenetrate_ = false;
+    newImpactWall_ = nullptr;
     interactWithCycle_ = false;
     interactWithZone_ = false;
     lastImpactTime_ = 0;
@@ -577,6 +583,7 @@ void gZone::ReadSync( nMessage & m )
     if (!m.End())
     {
         m >> referenceTime_;
+
         m >> posx_;
         m >> posy_;
         m >> radius_;
@@ -669,6 +676,8 @@ static tSettingItem<float> conf_shotSeekUpdateTime ("SHOT_SEEK_UPDATE_TIME", sg_
 static float sg_zombieZoneSpeed = 10;
 static tSettingItem<float> conf_zombieZoneSpeed ("ZOMBIE_ZONE_SPEED", sg_zombieZoneSpeed);
 
+
+// BEGIN: zone bouncing base
 static bool s_zoneWallInteractionFound;
 static eCoord s_zoneWallInteractionCoord;
 static eCoord s_zoneWallInteractionClosestCoord;
@@ -677,12 +686,65 @@ static REAL   s_zoneWallInteractionImpactTime;
 static eCoord s_zoneWallInteractionZoneVelocity;
 static eCoord s_zoneWallInteractionImpactCoord;
 static REAL   s_zoneWallInteractionZoneDeltaTime;
+static bool   s_zoneWallInteractionCycleIgnored = false;
+
+class ZoneBounceSensor: public eSensor
+{
+    public:
+        gSensorWallType type;
+        eWall * wall;
+
+        ZoneBounceSensor(eGameObject *o,const eCoord &start,const eCoord &d)
+                :eSensor(o,start,d), type(gSENSOR_NONE), wall(nullptr){}
+
+        virtual void PassEdge(const eWall * wall, REAL time, REAL a, int r=1)
+        {
+            if(!wall) return;
+
+            try
+            {
+                eSensor::PassEdge(wall, time, a, r);
+            }
+            catch( eSensorFinished & e )
+            {
+                if(dynamic_cast<const gWallRim *>(wall))
+                {
+                    this->type = gSENSOR_RIM;
+                    this->wall = const_cast<eWall *>(wall);
+                    throw;
+                }
+#if 0
+                // Yes, it works
+                // but I'm not entirely convinced that we really need
+                // to treat cycle walls to the same must-not-pass as
+                // rim walls for now
+                else if(sg_cycleWallsInteract)
+                {
+                    const gPlayerWall * playerWall = dynamic_cast<const gPlayerWall *>(wall);
+                    if(playerWall && playerWall->IsDangerous(a, se_GameTime()))
+                    {
+                        this->type = gSENSOR_ENEMY;
+                        this->wall = const_cast<eWall *>(wall);
+
+                        // Not entirely sure what this does
+                        if( playerWall->EndTime() < playerWall->BegTime() ) this->lr = -(this->lr);
+
+                        throw;
+                    }
+                }
+#endif
+                // Otherwise, we won't throw any exceptions
+                // ignore the wall and keep looking
+                this->ehit = NULL;
+            }
+        }
+};
 
 static void S_ZoneWallInteraction(eWall *pWall)
 {
     //Ignore player walls for now
     gPlayerWall *pPlayerWall = dynamic_cast<gPlayerWall*>(pWall);
-    if (pPlayerWall && !sg_cycleWallsInteract)
+    if (pPlayerWall && ( !sg_cycleWallsInteract || s_zoneWallInteractionCycleIgnored ) )
     {
         return;
     }
@@ -711,6 +773,14 @@ static void S_ZoneWallInteraction(eWall *pWall)
 
                                  // coordinate of the impact on the wall's line space
     REAL i = eCoord::F(XY,XP+V*t);
+    
+    // Hey, now we won't bounce on invisible walls!
+    // It took way too long to figure this out...
+    if(pPlayerWall && !pPlayerWall->IsDangerous(i/norm_XY, se_GameTime()))
+    {
+        return;
+    }
+    
     eCoord I;                    // position of the impact
     if (i>=0 && i<=norm_XY)      // there's an impact on the wall
     {
@@ -802,6 +872,7 @@ static void S_ZoneWallIntersect(eWall *pWall)
     }
 }
 
+// END: zone bouncing base
 
 gZone & gZone::SetOwner(ePlayerNetID *pOwner)
 {
@@ -901,11 +972,14 @@ bool gZone::Timestep( REAL time )
 
     if (!zoneInit_)
     {
+        this->newImpactTime_ = time+5;
+
         /*
         sg_OnlineZoneWriter << GetID() << name_ << effect_ << MapPosition().x << MapPosition().y << GetVelocity().x << GetVelocity().y
                             << GetRadius() << GetExpansionSpeed();
 
         */
+
         zoneInit_ = true;
     }
     
@@ -986,20 +1060,35 @@ bool gZone::Timestep( REAL time )
         // check if wall interactions are enabled
         if (wallInteract_)
         {
-            //??? We sometimes hiccup and go through a wall too far between updates,
-            //and end up bouncing on the other side of it...  We should really back-calculate
-            //and look for walls for time updates that went more than half the zone radius -
-            //Or, just drop the whole thing and find out if using sensors would work better...
+            if(((posx_.GetSlope() != 0) || (posy_.GetSlope() != 0)) && this->newImpactTime_ < time)
+            {
+                // Oops, we've overstepped the wall! Well, put the zone where it would have been...
+                SetPosition( GetPosition() - ( V * ( time - this->newImpactTime_ ) ) );
+            }
+
             s_zoneWallInteractionFound = false;
             s_zoneWallInteractionCoord = GetPosition();
             s_zoneWallInteractionRadius = GetRadius();
             s_zoneWallInteractionZoneVelocity = V;
             s_zoneWallInteractionZoneDeltaTime = time - lastImpactTime_;
             s_zoneWallInteractionZoneDeltaTime = (s_zoneWallInteractionZoneDeltaTime>1)?1:s_zoneWallInteractionZoneDeltaTime;
+
+            // First, check against the wall we're supposed to collide with
+            if(this->newImpactWall_)
+            {
+                S_ZoneWallInteraction(this->newImpactWall_);
+            }
+
+            // And, how sensors are currently integrated,
+            // it is very much possible to not see walls
+            // simply because they are not the ones right in front of us
+            if(!s_zoneWallInteractionFound)
+            {
             grid->ProcessWallsInRange(&S_ZoneWallInteraction,
                 s_zoneWallInteractionCoord,
                 s_zoneWallInteractionRadius*1.5,
                 CurrentFace());
+            }
 
             if (s_zoneWallInteractionFound)
             {
@@ -1051,9 +1140,29 @@ bool gZone::Timestep( REAL time )
                             RequestSync();
                         }
                     }
-                    return false;
                 }
             }
+
+            // Go ahead and run sensors...
+            ZoneBounceSensor test(this,GetPosition(),GetVelocity());
+            test.detect(5); // How many seconds into the future to check?
+
+            // Are we close enough to a wall?
+            if(test.ehit)
+            {
+                // Determine when we're hitting it, taking radius into consideration.
+                this->newImpactTime_ = time+(test.hit-(GetRadius()/V.Norm()));
+                this->newImpactWall_ = test.wall;
+            }
+            else
+            {
+                // We won't hit anything within the timeframe
+                this->newImpactTime_ = time+5;
+                this->newImpactWall_ = nullptr;
+            }
+
+            // Wait until next timestep to do anything else.
+            if(s_zoneWallInteractionFound) return false;
 
             // only clip if zone is moving
             if ((posx_.GetSlope() != 0) || (posy_.GetSlope() != 0))
@@ -7846,6 +7955,20 @@ void gSoccerZoneHack::OnEnter( gCycle *target, REAL time )
         
         //if(sg_ballRimStop)
         {
+            // HACK: don't process cycle walls this time...
+            s_zoneWallInteractionFound = false;
+            s_zoneWallInteractionCycleIgnored = true;
+            s_zoneWallInteractionCoord = GetPosition();
+            s_zoneWallInteractionRadius = GetRadius();
+            s_zoneWallInteractionZoneVelocity = GetVelocity();
+            s_zoneWallInteractionZoneDeltaTime = time - lastImpactTime_;
+            s_zoneWallInteractionZoneDeltaTime = (s_zoneWallInteractionZoneDeltaTime>1)?1:s_zoneWallInteractionZoneDeltaTime;
+            grid->ProcessWallsInRange(&S_ZoneWallInteraction,
+                s_zoneWallInteractionCoord,
+                s_zoneWallInteractionRadius*1.5,
+                CurrentFace());
+            s_zoneWallInteractionCycleIgnored = false;
+
             s_zoneWallInteractionFound = false;
             s_zoneWallInteractionCoord = dest;
             s_zoneWallInteractionRadius = GetRadius();

@@ -3647,10 +3647,13 @@ score_goal_help                     Number of points a player scores on kicking 
 goal_round_end_help                 Flag indicating whether the round ends when a goal is shot
 balls_interact_help                 Flag indicating whether balls can bounce off one another
 balls_bounce_on_cycle_walls_help    Flag indicating whether balls can bounce off cycle walls
+zones_bounce_on_cycle_walls_help    Flag indicating whether zones can bounce off cycle walls
 ball_team_mode_help                 Flag 0=ball score other team, 1=ball score only team owner
 ball_kills_help                     Flag indicating if a team owned ball can kill opposing team players
 ball_speed_decay_help               Rate at which the ball slows down
 ball_speed_hit_decay_help           Amount the ball slows down when hitting an object
+zone_speed_decay_help               Rate at which the zone slows down
+zone_speed_hit_decay_help           Amount the zone slows down when hitting an object
 ball_cycle_accel_boost_help         Boost Cycle gives the ball when colliding
 ball_stop_if_rim_and_cycle_help     Should the ball stop when interacting with both a cycle and the rim?
 ball_autorespawn_help               Flag indicating whether balls should automatically respawn when goal is scored

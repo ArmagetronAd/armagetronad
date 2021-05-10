@@ -193,6 +193,7 @@ protected:
     REAL newImpactTime_;
     eCoord newImpactPos_;
     eCoord newImpactVelocity_;
+    tJUST_CONTROLLED_PTR<eWall> newImpactWall_;
 
     bool wallPenetrate_;
 
