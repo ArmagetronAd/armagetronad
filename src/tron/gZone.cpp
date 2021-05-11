@@ -5039,6 +5039,11 @@ void gBallZoneHack::OnEnter( gCycle * target, REAL time )
     SetReferenceTime();
     this->SetPosition(new_p1);
     this->SetVelocity(new_v1);
+
+    this->newImpactTime_ = time+5;
+    this->newImpactWall_ = nullptr;
+    this->lastImpactTime_ = 0;
+
     RequestSync();
 }
 
@@ -8057,6 +8062,10 @@ void gSoccerZoneHack::OnEnter( gCycle *target, REAL time )
 
         SetPosition(new_p1);
         SetVelocity(new_v1);
+
+        this->newImpactTime_ = time+5;
+        this->newImpactWall_ = nullptr;
+        this->lastImpactTime_ = 0;
 
         RequestSync();
 
