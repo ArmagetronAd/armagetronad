@@ -2770,10 +2770,15 @@ void gAIPlayer::EmergencyCloseCombat( ThinkData & data )
 
 
 
+static bool sg_AIBypass = false;
+static tConfItem<bool> sg_AIBypassConf("AI_BYPASS", sg_AIBypass);
+
 void gAIPlayer::RightBeforeDeath(int triesLeft) // is called right before the vehicle gets destroyed.
 {
     if ( nCLIENT == sn_GetNetState() )
         return;
+
+    if (sg_AIBypass) return;
 
     if (!character)
     {
@@ -3140,6 +3145,8 @@ void gAIPlayer::ActOnData( ThinkDataBase & data )
 const REAL relax=25;
 
 void gAIPlayer::Timestep(REAL time){
+    if (sg_AIBypass) return;
+
     if (!character)
     {
         st_Breakpoint();
