@@ -393,7 +393,7 @@ gZone::gZone( eGrid * grid, const eCoord & pos, bool dynamicCreation, bool delay
     //??? or changing dynamic creation to disableAlpha or something
     if (dynamicCreation || sg_zoneNoFadeInSvr)
     {
-        referenceTime_ = createTime_ = lastTime = se_mainGameTimer->Time();
+        referenceTime_ = createTime_ = lastTime = se_GameTime();
 
         //Hack to get rid of the alpha to make zones non-transparent on creation
         //Negative creation times seem OK with current code
