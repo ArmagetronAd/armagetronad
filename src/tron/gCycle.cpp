@@ -3888,6 +3888,8 @@ private:
 
 bool sg_playerGridPosOnTurn = false;
 static tSettingItem<bool> sg_playerGridPosOnTurnConf("PLAYER_GRIDPOS_ON_TURN",sg_playerGridPosOnTurn);
+extern eLadderLogWriter se_playerGridPosWriter ;
+extern bool styctcompat_se_playerGridPos ;
 
 bool gCycle::DoTurn(int d)
 {
@@ -4008,8 +4010,33 @@ bool gCycle::DoTurn(int d)
             logTurnPos << pos.x << " " << pos.y << " " << dirDrive.x << " " << dirDrive.y;
             LogPlayersCycleTurns(this, logTurnPos);
             
-            if(sg_playerGridPosOnTurn)
-                Player()->GridPosLadderLog();
+            if( sg_playerGridPosOnTurn && Player() )
+            {
+                // FIXME: Too much copy'n'paste from ePlayer.cpp here
+                se_playerGridPosWriter << Player()->GetUserName();
+                se_playerGridPosWriter << ( pos.x / gArena::SizeMultiplier() ) << ( pos.y / gArena::SizeMultiplier() );
+                se_playerGridPosWriter << dirDrive.x << dirDrive.y;
+                if ( !styctcompat_se_playerGridPos )
+                {
+                    se_playerGridPosWriter << verletSpeed_;
+                    se_playerGridPosWriter << GetRubber() << sg_rubberCycle;
+                }
+
+                if ( Team() )
+                    se_playerGridPosWriter << ePlayerNetID::FilterName( Team()->Name() );
+                else
+                    se_playerGridPosWriter << "";
+                
+                if ( styctcompat_se_playerGridPos )
+                {
+                    se_playerGridPosWriter << verletSpeed_;
+                    se_playerGridPosWriter << GetRubber() << sg_rubberCycle;
+                }
+                se_playerGridPosWriter << GetBraking() << GetBrakingReservoir();
+                se_playerGridPosWriter << GetLastTurnTime() ;
+
+                se_playerGridPosWriter.write();
+            }
 
             turnedPositions.push_back(pos);
             turnedDirections.push_back(dirDrive);

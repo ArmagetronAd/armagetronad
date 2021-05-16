@@ -8413,7 +8413,7 @@ void ePlayerNetID::RankingLadderLog()
     }
 }
 
-static eLadderLogWriter se_playerGridPosWriter("PLAYER_GRIDPOS", false);
+/*static*/ eLadderLogWriter se_playerGridPosWriter( "PLAYER_GRIDPOS", false );
 
 bool styctcompat_se_playerGridPos = false;
 static tConfItem<bool> styctcompat_se_playerGridPosConf("STYCT_COMPATIBILITY_LADDERLOG_PLAYER_GRIDPOS",styctcompat_se_playerGridPos);
@@ -8452,6 +8452,7 @@ void ePlayerNetID::GridPosLadderLog()
                     se_playerGridPosWriter << pCycle->GetRubber() << sg_rubberCycle;
                 }
                 se_playerGridPosWriter << pCycle->GetBraking() << pCycle->GetBrakingReservoir();
+                se_playerGridPosWriter << se_GameTime() ;
 
                 se_playerGridPosWriter.write();
             }
