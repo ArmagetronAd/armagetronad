@@ -7649,7 +7649,7 @@ bool gSoccerZoneHack::CheckTeamAssignment()
         {
             gCycle *other = dynamic_cast<gCycle *>(gameObjects[i]);
 
-            if (other)
+            if( other && other->Player() && other->Player()->CurrentTeam() )
             {
                 eTeam *otherTeam = other->Player()->CurrentTeam();
                 eCoord otherpos = other->Position() - Position();
@@ -8073,7 +8073,11 @@ void gSoccerZoneHack::OnEnter( gCycle *target, REAL time )
         lastTeamIn_ = target->Team();
         lastPlayerIn_ = target->Player();
 
-        sg_soccerBallPlayerEntered << target->Player()->GetUserName() << target->Team()->Name().Filter();
+        sg_soccerBallPlayerEntered << target->Player()->GetUserName();
+        if( target->Team() ) 
+            sg_soccerBallPlayerEntered << target->Team()->Name().Filter();
+        else
+            sg_soccerBallPlayerEntered << "";
         sg_soccerBallPlayerEntered.write();
 
     }
@@ -8116,7 +8120,12 @@ void gSoccerZoneHack::OnEnter( gCycle *target, REAL time )
             }
         }
 
-        sg_soccerGoalPlayerEntered << target->Player()->GetUserName() << target->Team()->Name().Filter() << Team()->Name().Filter();
+        sg_soccerGoalPlayerEntered << target->Player()->GetUserName();
+        if( target->Team() )
+            sg_soccerGoalPlayerEntered << target->Team()->Name().Filter();
+        else
+            sg_soccerGoalPlayerEntered << "";
+        sg_soccerGoalPlayerEntered << Team()->Name().Filter();
         sg_soccerGoalPlayerEntered.write();
     }
 }
