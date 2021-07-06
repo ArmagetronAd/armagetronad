@@ -1866,7 +1866,24 @@ static void sg_AddScoreTeam(std::istream &s)
                 break;
             }
         }
-        if (!pTeam) return;
+        if (!pTeam)
+        {
+            con << "0xff0000No matches found for " << TeamStr << ".\n";
+            
+            // only way to check if this is from an admin?
+            if( tCasaclPreventer::InRInclude() )
+            {
+                con << "Possible matches: ";
+                for(int i=0;i<eTeam::teams.Len();++i)
+                {
+                    if(i != 0) con << ", ";
+                    con << ePlayerNetID::FilterName(eTeam::teams(i)->Name()) ;
+                }
+                con << "\n";
+            }
+            
+            return;
+        }
         tString ScoreStr = tString("");
         ScoreStr = params.ExtractNonBlankSubString(pos);
         int pScore = atoi(ScoreStr);
