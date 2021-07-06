@@ -4919,7 +4919,7 @@ void gBallZoneHack::OnEnter( gCycle * target, REAL time )
     ePlayerNetID * prey = target->Player();
     if ((sg_ballKiller) && (team) && !(prey->CurrentTeam() == team))
     {
-        target->deathReason_ << "BALL_ZONE" << ePlayerNetID::FilterName(team->Name());
+        target->deathReason_ << "BALL_ZONE " << ePlayerNetID::FilterName(team->Name());
         target->Kill();
         // scoring ...
         if ( lastPlayer_ )
@@ -8088,7 +8088,7 @@ void gSoccerZoneHack::OnEnter( gCycle *target, REAL time )
             if (target && (Team() != target->Team()))
             {
                 sn_ConsoleOut(tOutput("$soccer_goal_enemy_entered", target->Player()->GetColoredName(), Team()->GetColoredName()));
-                target->deathReason_ << "ENEMY_GOAL_ZONE" << ePlayerNetID::FilterName(team->Name());
+                target->deathReason_ << "ENEMY_GOAL_ZONE " << ePlayerNetID::FilterName(team->Name());
                 target->Kill();
             }
         }
@@ -8577,7 +8577,7 @@ void gRespawnZoneHack::OnEnter( gCycle * target, REAL time )
             msg << "$cycle_respawn_zone_kill_enemy";
             sn_ConsoleOut(msg);
 
-            target->deathReason_ << "RESPAWN_ZONE" << ePlayerNetID::FilterName(team->Name());
+            target->deathReason_ << "RESPAWN_ZONE " << ePlayerNetID::FilterName(team->Name());
             target->Kill();
             return;
         }
