@@ -7822,6 +7822,8 @@ static tSettingItem<REAL> sg_soccerBallSlowdownSyncConf("SOCCER_BALL_SLOWDOWN_SY
 
 bool gSoccerZoneHack::Timestep( REAL time )
 {
+    REAL dt = time - lastTime;
+
     // delegate
     bool returnStatus = gZone::Timestep( time );
 
@@ -7868,7 +7870,7 @@ bool gSoccerZoneHack::Timestep( REAL time )
         }
         else
         {
-            REAL dt = time - referenceTime_;
+            //REAL dt = time - referenceTime_;
             REAL speed = currentVelocity.Norm();
             if(speed > 0)
             {
@@ -7877,7 +7879,7 @@ bool gSoccerZoneHack::Timestep( REAL time )
                 currentVelocity.Normalize();
                 currentVelocity *= speed;
             }
-            SetReferenceTime();
+            //SetReferenceTime();
         }
 
         //  set new velocity
@@ -7953,6 +7955,7 @@ void gSoccerZoneHack::OnEnter( gCycle *target, REAL time )
 {
     if (!team && (zoneType == gSoccer_BALL || zoneType == gSoccer_BALL_SCORED))
     {
+        SetReferenceTime();
         
         REAL dt = time - referenceTime_;
         
@@ -8019,6 +8022,9 @@ void gSoccerZoneHack::OnEnter( gCycle *target, REAL time )
         else if (t2>0) t = t1;
         else if (t1>t2) t = t1;
         else t = t2;
+
+        // workaround for some ball teleports
+        if(t < -0.06f) t = -0.06f;
 
         // now that we have the time, get the positions ...
         eCoord p1c = p1+v1*t;
