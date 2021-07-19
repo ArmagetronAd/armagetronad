@@ -3664,6 +3664,7 @@ target_survive_time_help            Time in sec before the zone vanished once a 
 target_initial_score_help           Score for the first player entering the zone
 target_score_deplete_help           Score suppress to the zone score each time a player entered
 target_declare_winner_help          Last target zone is a winzone ?;
+target_player_multiuse_help         If enabled, a player can get points from the same target zone multiple times. If disabled, each player can only use a target zone only once.
 set_target_command_help             Add commands for a target zone to issue when someone enters it.
 
 ## King of the hill

@@ -6311,6 +6311,9 @@ static tSettingItem<int> sg_targetScoreDepleteConf( "TARGET_SCORE_DEPLETE", sg_t
 static int sg_targetIsWinzone = 1;
 static tSettingItem<int> sg_targetIsWinzoneConf( "TARGET_DECLARE_WINNER", sg_targetIsWinzone );
 
+static bool sg_targetMultiEnter = false;
+static tSettingItem<bool> sg_targetMultiEnterConf( "TARGET_PLAYER_MULTIUSE", sg_targetMultiEnter );
+
                                  //!< count check zone on grid
 int gTargetZoneHack::TargetZoneCounter_ = 0;
                                  //!< game time when a winner can be declared if nothing happens soon
@@ -6595,25 +6598,32 @@ void gTargetZoneHack::OnEnter( gCycle * target, REAL time )
         tConfItemBase::LoadAll(stream);
     }
 
-    // Check if player already entered this zone
-    // If not ...
     if(!isInside(target))
     {
-        if (zoneScore_>0)
+        // check if the player has already used the zone or if multiple uses are allowed
+        if( sg_targetMultiEnter || (!playerHasUsed( target->Player() )) )
         {
-            // grant the player
-            tOutput win;
-            tOutput lose;
-            win << "$player_target_score_win";
-            lose << "$player_target_score_lose";
-            target->Player()->AddScore(zoneScore_, win, lose);
-        }
-        // and decrease zone score value
-        zoneScore_-=zoneScoreDeplete_;
-        if (zoneScore_<=0)
-        {
-            zoneScore_=0;
-            targetEmptyTime_=time;
+            if (zoneScore_ > 0)
+            {
+                // give score to player
+                tOutput win, lose;
+                win << "$player_target_score_win";
+                lose << "$player_target_score_lose";
+                target->Player()->AddScore( zoneScore_, win, lose );
+            }
+            
+            // and decrease zone score value
+            zoneScore_ -= zoneScoreDeplete_;
+            if (zoneScore_ <= 0)
+            {
+                zoneScore_ = 0;
+                targetEmptyTime_ = time;
+            }
+            
+            if( (!sg_targetMultiEnter) || (!playerHasUsed( target->Player() )) )
+            {
+                this->playersUsed_.push_back( target->Player() );
+            }
         }
 
         sg_targetzonePlayerEnterWriter << this->GetID() << name_ << MapPosition().x << MapPosition().y << target->Player()->GetUserName() << target->Player()->Object()->MapPosition().x << target->Player()->Object()->MapPosition().y << target->Player()->Object()->Direction().x << target->Player()->Object()->Direction().y << time;

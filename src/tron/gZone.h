@@ -606,6 +606,8 @@ class gTargetZoneHack: public gZone
 								 //!< first player entering the zone
 		ePlayerNetID *firstPlayer_;
 
+		std::vector<ePlayerNetID *> playersUsed_;
+
 		int zoneInitialScore_;	 //!< score to give to the first player entering the zone
 		int zoneScore_;			 //!< score to give to the next player entering the zone
 		int zoneScoreDeplete_;	 //!< value to substract from score each time a player enter the zone
@@ -625,6 +627,11 @@ class gTargetZoneHack: public gZone
 		void SetOnEnterCmd(tString &cmd, tString &mode) {if (mode=="add") OnEnterCmd << "\n" << cmd; else OnEnterCmd = cmd;};
 		void SetOnExitCmd(tString &cmd, tString &mode) {if (mode=="add") OnExitCmd << "\n" << cmd; else OnExitCmd = cmd;};
 		void SetOnVanishCmd(tString &cmd, tString &mode) {if (mode=="add") OnVanishCmd << "\n" << cmd; else OnVanishCmd = cmd;};
+		
+		inline bool playerHasUsed( ePlayerNetID * player )
+		{
+			return ( std::find( playersUsed_.begin(), playersUsed_.end(), player ) != playersUsed_.end() );
+		};
 };
 class gKOHZoneHack: public gZone
 {
