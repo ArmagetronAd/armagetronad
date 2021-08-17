@@ -59,9 +59,15 @@ public:
     static void ScheduleBackground( T & object, void (T::*function)()  )
     {
         // schedule the task into a background thread
+#if BOOST_VERSION >= 105300
+        // attributes are not available on all supporting platforms. The version check is inprecise,
+        // that is simply the boost version that is in winlibs that has attributes available.
         boost::thread::attributes threadAttributes;
         threadAttributes.set_stack_size(8388608);
         boost::thread(threadAttributes, tMemberFunctionRunnerTemplate<T>( object, function ) ).detach();
+#else
+        boost::thread(tMemberFunctionRunnerTemplate<T>( object, function ) ).detach();
+#endif
     }
 
     //! schedule a task for execution in the next tToDo call
