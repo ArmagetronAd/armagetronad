@@ -723,8 +723,8 @@ deploy_zi: result.deploy_zi
 deploy_download: result.deploy_download
 
 deploy_ppa: \
+deploy_ppa_impish \
 deploy_ppa_hirsute \
-deploy_ppa_groovy \
 deploy_ppa_focal \
 deploy_ppa_bionic \
 deploy_ppa_xenial \
@@ -755,8 +755,8 @@ context.debsrc_bionic result.debsrc_bionic context.deploy_ppa_bionic result.depl
 context.debsrc_trusty result.debsrc_trusty context.deploy_ppa_trusty result.deploy_ppa_trusty \
 context.debsrc_xenial result.debsrc_xenial context.deploy_ppa_xenial result.deploy_ppa_xenial \
 context.debsrc_focal  result.debsrc_focal  context.deploy_ppa_focal  result.deploy_ppa_focal \
-context.debsrc_groovy result.debsrc_groovy context.deploy_ppa_groovy result.deploy_ppa_groovy \
 context.debsrc_hirsute result.debsrc_hirsute context.deploy_ppa_hirsute result.deploy_ppa_hirsute \
+context.debsrc_impish result.debsrc_impish context.deploy_ppa_impish result.deploy_ppa_impish \
 context.deploy_base_scp context.deploy_scp \
 context.deploy_base_download result.deploy_download context.deploy_download
 
