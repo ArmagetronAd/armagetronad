@@ -761,6 +761,17 @@ context.deploy_zi: context.deploy_base_zeroinstall result.update_zi ${srcdir}/..
 result.deploy_zi: context.deploy_zi deploy_external result.deploy_download
 	+$(srcdir)/context_to_result.sh $@.dir ./deploy_zeroinstall.sh
 	echo > $@
+context.deploy_itch: context.deploy_base_itch ${srcdir}/../deploy/*_itch.sh upload/$(APPTAR_CLIENT_64) upload/$(APPTAR_CLIENT_32) $(WINZIP_CLIENT)
+	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' ${srcdir}/../deploy/*_itch.sh
+	mkdir -p $@.dir/appdir_linux_64; cd $@.dir/appdir_linux_64; tar -xjf ../../upload/$(APPTAR_CLIENT_64)
+	mkdir -p $@.dir/appdir_linux_32; cd $@.dir/appdir_linux_32; tar -xjf ../../upload/$(APPTAR_CLIENT_32)
+	mkdir -p $@.dir/appdir_windows; cd $@.dir/appdir_windows; unzip ../../$(WINZIP_CLIENT)
+	rm -f $@.dir/image
+	echo "armadeploy_64" > $@.dir/image
+	echo > $@
+result.deploy_itch: context.deploy_itch
+	+$(srcdir)/context_to_result.sh $@.dir ./deploy_itch.sh
+	echo > $@
 
 context.deploy_fp: context.deploy_base_flatpak ${srcdir}/../deploy/*_flatpak.sh
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' ${srcdir}/../deploy/*_flatpak.sh
@@ -797,8 +808,8 @@ deploy_download: result.deploy_download
 deploy_itch: result.deploy_itch
 
 deploy_ppa: \
+deploy_ppa_impish \
 deploy_ppa_hirsute \
-deploy_ppa_groovy \
 deploy_ppa_focal \
 deploy_ppa_bionic \
 deploy_ppa_xenial \
@@ -829,8 +840,8 @@ context.debsrc_bionic result.debsrc_bionic context.deploy_ppa_bionic result.depl
 context.debsrc_trusty result.debsrc_trusty context.deploy_ppa_trusty result.deploy_ppa_trusty \
 context.debsrc_xenial result.debsrc_xenial context.deploy_ppa_xenial result.deploy_ppa_xenial \
 context.debsrc_focal  result.debsrc_focal  context.deploy_ppa_focal  result.deploy_ppa_focal \
-context.debsrc_groovy result.debsrc_groovy context.deploy_ppa_groovy result.deploy_ppa_groovy \
 context.debsrc_hirsute result.debsrc_hirsute context.deploy_ppa_hirsute result.deploy_ppa_hirsute \
+context.debsrc_impish result.debsrc_impish context.deploy_ppa_impish result.deploy_ppa_impish \
 context.deploy_base_scp context.deploy_scp \
 context.deploy_base_gitlab context.deploy_gitlab \
 context.deploy_base_download result.deploy_download context.deploy_download
