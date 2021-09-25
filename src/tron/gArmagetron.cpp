@@ -623,8 +623,7 @@ void sg_SetIcon()
         SetClassLong( info.window, GCL_HICON, (LONG) icon );
     }
 #else
-    rSurface tex( "desktop/icons/medium/armagetronad.png" );
-    //    SDL_Surface *tex=IMG_Load( tDirectories::Data().GetReadPath( "textures/icon.png" ) );
+    rSurface tex( "textures/icon.png" );
 
     if (tex.GetSurface())
 #if SDL_VERSION_ATLEAST(2,0,0)
@@ -897,12 +896,12 @@ int main(int argc,char **argv){
 #endif
             //std::cout << "set filter\n";
 
-            sg_SetIcon();
-
             tConsole::RegisterMessageCallback(&uMenu::Message);
             tConsole::RegisterIdleCallback(&uMenu::IdleInput);
 
             if (sr_InitDisplay()){
+
+                sg_SetIcon();
 
                 try
                 {
