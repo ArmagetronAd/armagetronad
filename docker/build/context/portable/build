@@ -20,7 +20,7 @@ cp ${APPDIR}/usr/share/games/${PACKAGE}/desktop/armagetronad.appdata.xml ${APPDI
 # hack Icon
 ICON_NAME=`grep 'Icon=' ${APPDIR}/org.armagetronad.${PACKAGE}.desktop | sed -e 's,Icon=,,'`
 for f in $(find ${APPDIR} -type d -name "desktop"); do
-  cp $f/icons/48x48/*.png ${APPDIR}/${ICON_NAME}.png
+  cp $f/icons/128x128/*.png ${APPDIR}/${ICON_NAME}.png
 done
 
 lastpath=/usr/lib/*linux-gnu
