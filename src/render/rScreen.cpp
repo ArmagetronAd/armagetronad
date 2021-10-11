@@ -449,6 +449,15 @@ static bool lowlevel_sr_InitDisplay(){
 
     if (!sr_screen)
     {
+        {
+            tOutput o("$game_name");
+            tString s;
+            s << o;
+            SDL_WM_SetCaption(s, s);
+        }
+
+        SDL_EnableUNICODE(1);
+
         int singleCD_R	= 5;
         int singleCD_G	= 5;
         int singleCD_B	= 5;
@@ -646,19 +655,6 @@ static bool lowlevel_sr_InitDisplay(){
                 */
             }
         }
-
-#ifdef MACOSX
-        // MacOSX SDL 1.2.4 crashes if we SetCaption after switch to fullscreen. (fixed in 1.2.5)
-        if(!currentScreensetting.fullscreen)
-#endif
-        {
-            tOutput o("$game_name");
-            tString s;
-            s << o;
-            SDL_WM_SetCaption(s, s);
-        }
-
-        SDL_EnableUNICODE(1);
     }
 
     // sanity check texture modes

@@ -83,6 +83,7 @@ WORKDIR ${BUILD_DIR}
 RUN ARMAGETRONAD_FAKERELEASE=${FAKERELEASE} progname="${PROGNAME}" progtitle="${PROGTITLE}" \
 ${SOURCE_DIR}/configure --prefix=/usr/local --disable-glout --disable-sysinstall --disable-useradd \
     --disable-master --disable-uninstall --disable-desktop \
+    LDFLAGS=-Wl,-z,stack-size=8388608 \
     ${CONFIGURE_ARGS} && \
 make -j `nproc` && \
 DESTDIR=/root/destdir make install && \
