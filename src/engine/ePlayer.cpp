@@ -4459,7 +4459,7 @@ void handle_chat( nMessage &m )
                     }
                     else if (command == "/chat")
                     {
-                        spam.lastSaidType_ = eChatMessageType_Public;
+                        spam.lastSaidType_ = eChatMessageType_Private;
                         se_ChatPlayer( p, s, spam );
                         return;
                     }
@@ -4476,7 +4476,7 @@ void handle_chat( nMessage &m )
                     }
                     else if (command == "/reports")
                     {
-                        spam.lastSaidType_ = eChatMessageType_Public;
+                        spam.lastSaidType_ = eChatMessageType_Command;
                         se_ChatReadReport( p, s );
                         return;
                     }
