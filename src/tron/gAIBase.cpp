@@ -3183,7 +3183,8 @@ void gAIPlayer::Timestep(REAL time){
     }
 
     // check if a route is defined and if current destination is touched
-    if(!route_.empty()) {
+    if( !route_.empty() && Object() && Object()->Alive() )
+    {
         eCoord tDir = route_[lastCoord_] - Object()->Position();
 	if (tDir.Norm()<2) NextRouteStep();
     }
@@ -3270,6 +3271,13 @@ void gAIPlayer::SetRoute(std::vector<eCoord> route)
 
 void gAIPlayer::UpdateRouteStep()
 {
+        static int depth = 0;
+        if(depth > 10)
+        {
+            tERR_WARN("preventing going too deep in recursion\n");
+            return;
+        }
+    
         eGrid *grid = eGrid::CurrentGrid();
         // update path
         eCoord targetPos = route_[lastCoord_];
@@ -3289,7 +3297,9 @@ void gAIPlayer::UpdateRouteStep()
             con << "invalid path.\n";
         } else {
             SwitchToState(AI_ROUTE, 5);
+            ++depth;
             Think();
+            --depth;
             con << "let's go to the next point.\n";
         }
 }
