@@ -5339,7 +5339,7 @@ static tSettingItem<REAL> sg_flagPassSpeedConf("FLAG_PASS_SPEED", sg_flagPassSpe
 bool gFlagZoneHack::Timestep( REAL time )
 {
     // initialize the zone info, this happens only once, but has to happen after construction
-    if (!init_)
+    if (!init_ && GetRadius())
     {
         init_ = true;
 
