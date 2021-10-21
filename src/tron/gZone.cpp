@@ -2514,6 +2514,7 @@ void gDeathZoneHack::OnEnter( gCycle * target, REAL time )
                 sg_deathZombieZoneWriter << target->Player()->GetUserName();
                 sg_deathZombieZoneWriter.write();
                 target->Player()->AddScore(score_zombie_zone, tOutput(), "$player_lose_suicide");
+                target->Kill("ZOMBIE_ZONE ");
             }
         }
 
