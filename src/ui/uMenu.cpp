@@ -194,7 +194,7 @@ void uMenu::OnEnter(){
         {
             SDL_Event tEvent;
             uInputProcessGuard inputProcessGuard;
-            while (su_GetSDLInput(tEvent))
+            while (!exitFlag && !quickexit && !exitToMain && su_GetSDLInput(tEvent))
             {
                 REAL entertime = tSysTimeFloat();
 
