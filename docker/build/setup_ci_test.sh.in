@@ -17,6 +17,8 @@ function test_targets(){
 	echo DOWNLOAD_URI_BASE=${DOWNLOAD_URI_BASE}
 }
 
+git_repo=@top_srcdir@
+export git_repo
 if @top_srcdir@/docker/scripts/setup_ci_variables_test.sh $*; then
 	. @top_srcdir@/docker/scripts/setup_ci_variables_test.sh $*
 	. @top_srcdir@/docker/scripts/brand.sh @top_srcdir@

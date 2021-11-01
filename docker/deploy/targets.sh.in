@@ -167,8 +167,8 @@ else
 	esac
 fi
 
-# required public data: gpgkey_pub.gpg
-# required secret: gpgkey_sec.gpg
+# required public data: pub.gpg
+# required secret: sec.gpg
 # both together must be a public/private key pair authorized to upload to that ppa
 # needs to match the signer in debian_source.sh
 # see https://www.debuntu.org/how-to-importexport-gpg-key-pair/
