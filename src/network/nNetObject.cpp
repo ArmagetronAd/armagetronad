@@ -1088,7 +1088,7 @@ nNetObject::~nNetObject(){
                 }
                 destroyers[user]->Write(id);
 
-                if (destroyers[user]->DataLen() > ( destroyersCount[user] ? 1000 : 100 ) )
+                if (destroyers[user]->DataLen() > ( destroyersCount[user] ? 500 : 100 ) )
                 {
                     sn_SendDestroyer( user );
                 }
