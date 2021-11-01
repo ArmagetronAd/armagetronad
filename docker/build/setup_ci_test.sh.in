@@ -17,6 +17,7 @@ function test_targets(){
 }
 
 git_repo=@top_srcdir@
+export git_repo
 if @top_srcdir@/docker/scripts/setup_ci_variables_test.sh $*; then
 	. @top_srcdir@/docker/scripts/setup_ci_variables_test.sh $*
 	. @top_srcdir@/docker/scripts/brand.sh @top_srcdir@

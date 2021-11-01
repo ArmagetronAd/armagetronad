@@ -54,7 +54,7 @@ case $1 in
     ppa)
 	# for post-release pushes of ppa builds to newer ubuntu versions
 	CI_COMMIT_REF_PROTECTED=true
-	CI_COMMIT_REF_NAME=`git -C ${git_repo} describe --tag`
+	CI_COMMIT_REF_NAME=`git -C ${git_repo} describe --tag` || return $? || exit $?
 	CI_COMMIT_TAG=${CI_COMMIT_REF_NAME}
 	;;
     merge)
