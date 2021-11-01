@@ -7,7 +7,6 @@ Uploaders:
 Build-Depends:
  autotools-dev,
  debhelper (>= 9),
- dh-systemd (>= 1.5),
  libgl1-mesa-dev,
  libglu1-mesa-dev,
  libpng-dev,
