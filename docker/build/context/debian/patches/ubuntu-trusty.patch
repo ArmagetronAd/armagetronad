@@ -1,0 +1,12 @@
+diff --git a/debian/control b/debian/control
+index 414cc8b56..fd3b8f29d 100644
+--- a/debian/control
++++ b/debian/control
+@@ -7,6 +7,7 @@ Uploaders:
+ Build-Depends:
+  autotools-dev,
+  debhelper (>= 9),
++ dh-systemd (>= 1.5),
+  libgl1-mesa-dev,
+  libglu1-mesa-dev,
+  libpng-dev,
