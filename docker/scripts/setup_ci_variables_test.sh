@@ -51,6 +51,12 @@ case $1 in
 	CI_COMMIT_REF_NAME=v0.2.7.3.4
 	CI_COMMIT_TAG=v0.2.7.3.4
 	;;
+    ppa)
+	# for post-release pushes of ppa builds to newer ubuntu versions
+	CI_COMMIT_REF_PROTECTED=true
+	CI_COMMIT_REF_NAME=`git -C ${git_repo} describe --tag`
+	CI_COMMIT_TAG=${CI_COMMIT_REF_NAME}
+	;;
     merge)
 	CI_COMMIT_REF_NAME=release_0.2.8.3 # CAN BE ANYTHING, merger chooses
 	CI_MERGE_REQUEST_CHANGED_PAGE_PATHS=
@@ -62,7 +68,7 @@ case $1 in
 	CI_MERGE_REQUEST_TARGET_BRANCH_NAME=trunk
 	;;
 	*)
-	echo "NO VALID CONFIGURATION SELECTED, available: raw (no CI), alpha, beta, rc, release, tag (unprotected), merge"
+	echo "NO VALID CONFIGURATION SELECTED, available: raw (no CI), alpha, beta, rc, release, tag (unprotected), ppa (for manually pushing ppa builds), merge"
 	exit 1
 	;;
 esac
