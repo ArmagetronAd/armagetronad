@@ -20,7 +20,7 @@ function fix_gits(){
 
     fix_git winlibs d03e20bf8973a6cbd1e0ecb47dd8333c5614b139 || return $?
     fix_git codeblocks 5ab4c626eb7cfa692a0bda7dbf26fed3721e4aa3 || return $?
-    fix_git ubuntu 61b9a6ba08a6b84792a879164a34b84aac564000 || return $?
+    fix_git ubuntu f6859ba047e2fa1d291ddd0f0f52b56950faf169 || return $?
 }
 
 if ! fix_gits; then
