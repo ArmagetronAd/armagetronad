@@ -1167,6 +1167,10 @@ void gAIPlayer::ConfigureAIs()  // ai configuration menu
 }
 
 
+static int sg_numAIsJoinTries = 4;
+bool restrictNumAIRetries(const int &newValue) { return (newValue > 0); }
+static tConfItem<int> sg_numAIsJoinTriesConf("NUM_AIS_PER_ROUND", sg_numAIsJoinTries, &restrictNumAIRetries);
+
 // make sure this many AI players are in the game
 void gAIPlayer::SetNumberOfAIs(int num, int minPlayers, int iq, int tries)
 {
@@ -1193,6 +1197,9 @@ void gAIPlayer::SetNumberOfAIs(int num, int minPlayers, int iq, int tries)
             sg_AIReferences.Remove( ai );
         }
     }
+
+    if(tries == -2)
+        tries = sg_numAIsJoinTries-1;
 
     int count = 0;
 

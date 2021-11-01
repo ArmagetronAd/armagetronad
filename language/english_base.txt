@@ -219,6 +219,7 @@ auto_ais_help            Automatically spawn AI players?
 ai_iq_help            IQ of the AI opponents
 min_players_help        Minimum number of players
 num_ais_help            Number of AI players
+num_ais_per_round_help  Controls how many AI players can enter at once each round.
 limit_score_help        End the match when a player reaches this score
 limit_score_min_lead_help	Only consider LIMIT_SCORE when this lead is achieved by the winning team
 limit_rounds_help        End the match after this number of rounds

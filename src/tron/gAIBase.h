@@ -181,7 +181,7 @@ public:
 
     static void ConfigureAIs();  // ai configuration menu
 
-    static void SetNumberOfAIs(int num, int minPlayers, int iq, int tries=3); // make sure this many AI players are in the game (with approximately the given IQ)
+    static void SetNumberOfAIs(int num, int minPlayers, int iq, int tries=-2); // make sure this many AI players are in the game (with approximately the given IQ)
 
     void ClearTarget(){target=NULL;}
 
