@@ -701,6 +701,7 @@ deploy_download: result.deploy_download
 deploy_itch: result.deploy_itch
 
 deploy_ppa: \
+deploy_ppa_jammy \
 deploy_ppa_impish \
 deploy_ppa_hirsute \
 deploy_ppa_focal \
