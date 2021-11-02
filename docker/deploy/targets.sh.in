@@ -199,7 +199,9 @@ elif test "${SF_DIR}" == "stable"; then
 	DOWNLOAD_URI_BASE=https://launchpad.net/${LP_PROJECT}/${LP_SERIES}/${LP_VERSION}/+download/
 else
 	# the rest reference to sourceforge
-	DOWNLOAD_URI_BASE=https://sourceforge.net/projects/armagetronad/files/${SF_DIR}/@version@/
+	# DOWNLOAD_URI_BASE=https://sourceforge.net/projects/armagetronad/files/${SF_DIR}/@version@/
+	# or not. SF certificates have been broken for quite a while.
+	DOWNLOAD_URI_BASE=http://download.armagetronad.org/staging/${SF_DIR}/@version@/
 fi
 
 # **********************************************************************
