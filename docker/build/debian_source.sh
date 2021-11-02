@@ -24,6 +24,11 @@ test -z ${SERIES} && SERIES=unstable
 
 DEBIAN_VERSION=${DEBIAN_VERSION_BASE}~${SERIES} || exit $?
 
+SERIES_PATCH=debian/patches/ubuntu-${SERIES}.patch
+if test -r ${SERIES_PATCH}; then
+  patch -p1 < ${SERIES_PATCH} || exit $?
+fi
+
 mv debian/changelog changelog_orig || exit $?
 cat > debian/changelog <<EOF
 armagetronad (${DEBIAN_VERSION}) ${SERIES}; urgency=medium
