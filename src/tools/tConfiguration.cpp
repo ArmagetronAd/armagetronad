@@ -1035,13 +1035,23 @@ void tConfItemLine::ReadVal(std::istream &s){
 
 
 void tConfItemLine::WriteVal(std::ostream &s){
-    tConfItem<tString>::WriteVal(s);
-
-    // double trailing backslash so it is read back as a single backslash, not
-    // a continued line (HACK: this would actually be the job of the calling function)
-    if ( target->Len() >= 2 &&
-            target->operator()(target->Len() - 2) == '\\' )
-        s << "\\";
+    // slow, but correct: escape special characters on the fly
+    int len = target->Len();
+    for(int i = 0; i < len; ++i)
+    {
+        char c = (*target)[i];
+        switch(c)
+        {
+            case 0:
+                continue;
+            case '\\':
+            case '\'':
+            case '"':
+            case ' ':
+                s << '\\';
+        }
+        s << c;
+    }
 }
 
 tConfItemFunc::tConfItemFunc
