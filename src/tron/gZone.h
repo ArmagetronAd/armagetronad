@@ -167,6 +167,8 @@ public:
     static int          FindNext(tString name, int prev_pos);
     static int          FindIdFirst(int id);
     static int          FindIdNext(int id, int prev_pos);
+    
+    static void         FindAll(tString object_id_str, bool byId, std::function<bool(gZone *)> callback);
 
     tString             GetEffect() {return effect_;}
     void                SetEffect(tString newEffect) {effect_ = newEffect;}
