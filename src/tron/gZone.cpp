@@ -2103,7 +2103,8 @@ bool gDeathZoneHack::Timestep(REAL time)
     // delegate
     bool returnStatus = gZone::Timestep( time );
 
-    if (seeking_)
+    // Make sure we're actually seeking, don't run before collapsing
+    if ( seeking_ && pSeekingCycle_ )
     {
         //Only run this every poll time to save on network traffic
         if (lastTime >= (lastSeekTime_ + sg_shotSeekUpdateTime))
