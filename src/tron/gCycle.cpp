@@ -7010,7 +7010,7 @@ void gCycle::SetWallBuilding(bool build) {
 	// Cycle must be alive !
 	if (!Alive()) return;
 	// Get current wall if exists ...
-	gNetPlayerWall *nwall = ((CurrentWall())?CurrentWall()->NetWall():0);
+    tJUST_CONTROLLED_PTR<gNetPlayerWall> nwall = ((CurrentWall())?CurrentWall()->NetWall():0);
 	if (build&&!nwall) DropWall(true);
 	else if (nwall&&!build) DropWall(false);
 	if (nwall) nwall->RequestSync();
