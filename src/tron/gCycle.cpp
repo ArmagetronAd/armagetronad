@@ -5516,7 +5516,8 @@ void gCycle::DrawSvg(std::ofstream &f) {
             else if ( u=='>' ) f << "&gt;";
             else if( u < ' ' );
             else if( u > '~' && u < 0xa0 );
-            else f << *c;
+            else if( u < 0x80 ) f << *c;
+            else f << "&#x" << ( ( 0x80 | ( u & 0x3f ) ) + 64 ) << ";";
         }
         f << "</text>\n";
     }
