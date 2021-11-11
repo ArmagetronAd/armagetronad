@@ -42,6 +42,10 @@ static nSettingItem<float> conf_mult ("REAL_ARENA_SIZE_FACTOR", sizeMultiplier);
 
 static int axes = 4;
 static nSettingItemWatched<int> conf_axes ("ARENA_AXES", axes,  nConfItemVersionWatcher::Group_Breaking, 6 );
+// HACK: Disallow axes to be too high, eats memory
+static const tConfItem<int> conf_axes_ = conf_axes.GetSetting().SetShouldChangeFunc(
+    [](const int &newValue){ return newValue <= 0xFFFF; }
+);
 
 gArena::gArena():spawnPoints()
 {

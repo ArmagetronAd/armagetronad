@@ -374,8 +374,10 @@ void tAdvanceFrame( int usecdelay )
 #endif
 }
 
+static bool restrictTF( const REAL & ) { return (tSysTimeFloat() < 8.f); }
+
 static float st_timeFactor = 1.0;
-static tSettingItem< float > st_timeFactorConf( "TIME_FACTOR", st_timeFactor );
+static tSettingItem< float > st_timeFactorConf( "TIME_FACTOR", st_timeFactor, &restrictTF );
 
 double tSysTimeFloat ()
 {

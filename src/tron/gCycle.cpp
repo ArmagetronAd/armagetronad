@@ -151,6 +151,10 @@ void gCycle::PrivateSettings()
 static REAL sg_speedCycleSound=15;
 static nSettingItem<REAL> c_ss("CYCLE_SOUND_SPEED",
                                sg_speedCycleSound);
+// HACK: sound speed must not be 0 or very near 0, breaks clients
+static const tConfItem<REAL> c_ss_ = c_ss.SetShouldChangeFunc(
+    [](const REAL &newValue){ return roundf(newValue*1e6)/1e6 != 0.f; }
+);
 
 // time after spawning it takes the cycle to start building a wall
 static REAL sg_cycleWallTime = 0.0;

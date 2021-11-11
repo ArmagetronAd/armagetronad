@@ -423,6 +423,9 @@ static REAL se_lagOffsetServer = 0.0f;
 static tSettingItem< REAL > se_lagOffsetClientConf( "LAG_OFFSET_CLIENT", se_lagOffsetClient );
 static nSettingItem< REAL > se_lagOffsetServerConf( "LAG_OFFSET_SERVER", se_lagOffsetServer );
 
+static tAccessLevelSetter se_loccLevel( se_lagOffsetClientConf, tAccessLevel_Owner );
+static tAccessLevelSetter se_locsLevel( se_lagOffsetServerConf, tAccessLevel_Owner );
+
 // *******************************************************************************
 // *
 // *	Report
