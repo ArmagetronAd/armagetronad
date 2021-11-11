@@ -141,7 +141,7 @@ static nSettingItem<tString> fcs("FORBID_COCKPIT_DATA", stc_forbiddenCallbacksSt
 
 cCockpit::~cCockpit() {
     ClearWidgets();
-    std::remove_if(m_Cockpits.begin(), m_Cockpits.end(), std::bind2nd(std::equal_to<cCockpit *>(), this));
+    m_Cockpits.remove(this);
 }
 cCockpit::cCockpit(cockpit_type type) :
         m_Type(type),
