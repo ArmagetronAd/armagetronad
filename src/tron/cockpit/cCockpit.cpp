@@ -484,7 +484,7 @@ void cCockpit::ProcessWidgets(node cur) {
             break;
         }
         cWidget::Base_ptr widget_ptr = ProcessWidgetType(cur);
-        if(&*widget_ptr == 0) {
+        if(!widget_ptr) {
             tERR_WARN("Unknown Widget type '" + cur.GetName() + "'");
             continue;
         }
