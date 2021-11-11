@@ -112,6 +112,10 @@ static tSettingItem<REAL> sg_ballCycleBoostConf( "BALL_CYCLE_ACCEL_BOOST", sg_ba
 static bool sg_ballAutoRespawn = 1;
 static tSettingItem<bool> sg_ballAutoRespawnConf( "BALL_AUTORESPAWN", sg_ballAutoRespawn );
 
+REAL sg_cycleZonesApproach = 1000.0;
+static tSettingItem<REAL>sg_cycleZoneApprochConf("CYCLE_ZONES_APPROCH", sg_cycleZonesApproach);
+static tSettingItem<REAL>sg_cycleZoneApproachConf("CYCLE_ZONES_APPROACH", sg_cycleZonesApproach);
+
 static int sg_zoneSegments = 11;
 static tSettingItem<int> sg_zoneSegmentsConf( "ZONE_SEGMENTS", sg_zoneSegments );
 
@@ -1366,26 +1370,36 @@ void gZone::OnVanish( void )
 bool sg_cyclesZonesAvoid = true;
 static tSettingItem<bool> sg_cyclesZonesAvoidConf("CYCLE_ZONES_AVOID", sg_cyclesZonesAvoid);
 
+REAL sg_cyclesZonesAvoidRange = 5;
+static tSettingItem<REAL> sg_cyclesZonesAvoidRangeConf("CYCLE_ZONES_AVOID_RANGE", sg_cyclesZonesAvoidRange);
+
 bool sg_chatbotAvoidZones = false;
 static tSettingItem<bool> sg_chatbotAvoidZonesConf("CYCLE_ZONES_AVOID_CHATBOT", sg_chatbotAvoidZones);
 
-REAL sg_cycleZonesApproch = 100.0;
-static tSettingItem<REAL>sg_cycleZoneApprochConf("CYCLE_ZONES_APPROCH", sg_cycleZonesApproch);
+bool sg_cyclesZonesAvoidOld = false;
+static tSettingItem<bool> sg_cyclesZonesAvoidOldConf("CYCLE_ZONES_AVOID_OLD", sg_cyclesZonesAvoidOld);
 
-static void TriggerAvoidZone(gCycle *target, gZone *Zone, REAL currentTime)
+//#define AVOID_ZONE_TYPES
+#ifdef AVOID_ZONE_TYPES
+tString sg_cyclesZonesAvoidTypes("death");
+static tSettingItem<tString> sg_cyclesZonesAvoidTypesConf("CYCLE_ZONES_AVOID_TYPES", sg_cyclesZonesAvoidTypes);
+#endif
+
+static bool TriggerAvoidZone(gCycle * target, gZone * Zone, REAL currentTime)
 {
-    //  don't execute if players won't want to avoid zones
-    if (!sg_cyclesZonesAvoid)
-        return;
+    ePlayerNetID * player = target->Player();
+    if(!player) return;
 
-    eGrid *grid = eGrid::CurrentGrid();
-    if (!grid) return;
-
-    if(!target->Alive() || target->GetLastTurnTime()+target->GetTurnDelay() > currentTime) return;
-    
-    ePlayerNetID *player = target->Player();
     if ((!player->IsHuman()) || (sg_chatbotAvoidZones && player->IsChatting() && player->IsActive()))
     {
+#ifdef AVOID_ZONE_TYPES
+        if(Zone->GetEffect() != sg_cyclesZonesAvoidTypes && sg_cyclesZonesAvoidTypes != "all")
+        {
+            int pos = sg_cyclesZonesAvoidTypes.StrPos(Zone->GetEffect());
+            if(pos == -1) return false;
+        }
+#endif
+        
         REAL tarX = target->Position().x;
         REAL tarY = target->Position().y;
         REAL zonX = Zone->Position().x;
@@ -1397,7 +1411,8 @@ static void TriggerAvoidZone(gCycle *target, gZone *Zone, REAL currentTime)
         bool shouldTurn = false;
         //A bad way to do this: loop through the zone's perimeter and determine if they intersect with the cycle direction
         REAL radi = Zone->GetRadius();
-        REAL adjPosX = tarX+(tarDirX*sg_cycleZonesApproch), adjPosY = tarY+(tarDirY*sg_cycleZonesApproch);
+        REAL dist = sg_cyclesZonesAvoidRange;
+        REAL adjPosX = tarX+(tarDirX*dist), adjPosY = tarY+(tarDirY*dist);
         REAL pX, pY, s1_x, s1_y, s2_x, s2_y, s, t, lpX = radi, lpY = 0;
         for(int i=41;i>0;--i)
         {
@@ -1413,16 +1428,44 @@ static void TriggerAvoidZone(gCycle *target, gZone *Zone, REAL currentTime)
         }
         
         if(!shouldTurn)
-            return;
+        {
+            //con << "line\n";
+            return false;
+        }
+
+/*
+        if(sqrt(pow((pX-tarX),2)+pow((pY-tarY),2)) > dist)
+        {
+            //con << "dist\n";
+            return false;
+        }
+*/
         
 #ifdef DEBUG
         con << player->GetName() << " turning away from zone...\n";
 #endif
-
+        
         if ((tarX == zonX) || (tarY == zonY))
         {
             target->Act(&gCycle::se_turnRight, 1);
         }
+
+if(!sg_cyclesZonesAvoidOld)
+{
+        // the lack of indenting here is because the older logic will likely be deleted anyway
+        REAL absdir = atan2f(tarY-zonY,tarX-zonX);
+        
+        REAL pi2 = M_PI*2;
+        REAL reldir = fmod(atan2f(tarDirX,tarDirY)-absdir,pi2);
+        while(reldir < 0) reldir += pi2;
+        
+        if(reldir > M_PI)
+            target->Act(&gCycle::se_turnLeft, 1);
+        else
+            target->Act(&gCycle::se_turnRight, 1);
+        
+        return true;
+}
 
         if (tarDirX >= 0)
         {
@@ -1464,11 +1507,152 @@ static void TriggerAvoidZone(gCycle *target, gZone *Zone, REAL currentTime)
                     target->Act(&gCycle::se_turnLeft, 1);
             }
         }
+        
+        return true;
     }
 
     //  if all fails, cycle will enter the zone
+    return false;
 }
 
+
+extern REAL sg_conquestRate, sg_defendRate;
+// *******************************************************************************
+// *
+// *    TriggerAimZone
+// *
+// *******************************************************************************
+//!
+//!     @param  target        the other game object
+//!     @param  zone          the zone player is getting near
+//!     @param  time          the current time
+//!
+// *******************************************************************************
+
+bool sg_cyclesZonesAim = true;
+static tSettingItem<bool> sg_cyclesZonesAimConf("CYCLE_ZONES_AIM", sg_cyclesZonesAim);
+
+bool sg_chatbotAimZones = false;
+static tSettingItem<bool> sg_chatbotAimZonesConf("CYCLE_ZONES_AIM_CHATBOT", sg_chatbotAimZones);
+
+tString sg_cyclesZonesAimTypes("win;fortress;flag");
+static tSettingItem<tString> sg_cyclesZonesAimTypesConf("CYCLE_ZONES_AIM_TYPES", sg_cyclesZonesAimTypes);
+
+static bool TriggerAimZone(gCycle * cycle, gZone * zone, REAL currentTime)
+{
+    ePlayerNetID * player = cycle->Player();
+    if((!player->IsHuman()) || (sg_chatbotAimZones && player->IsChatting() && player->IsActive()))
+    {
+        if(zone->GetEffect() != sg_cyclesZonesAimTypes && sg_cyclesZonesAimTypes != "all")
+        {
+            int pos = sg_cyclesZonesAimTypes.StrPos(zone->GetEffect());
+            if( pos == -1 )
+            {
+                return false;
+            }
+        }
+        
+        {
+            gBaseZoneHack * fortZone = dynamic_cast<gBaseZoneHack *>(zone);
+            if( fortZone && !cycle->flag_ && ( ( sg_conquestRate == 0 && sg_defendRate == 0 ) || fortZone->Team() == cycle->Team() ) )
+            {
+                return true;
+            }
+            
+            gFlagZoneHack * flagZone = dynamic_cast<gFlagZoneHack *>(zone);
+            if( flagZone && ( flagZone->Team() == cycle->Team() || !flagZone->IsHome() ) ) 
+            {
+                return true;
+            }
+        }
+        
+        con << zone->GetEffect() << "\n";
+        
+        REAL absdir = atan2f(cycle->Position().y-zone->Position().y,cycle->Position().x-zone->Position().x);
+        
+        REAL pi2 = M_PI*2;
+        REAL reldir = fmod(atan2f(cycle->Direction().y,cycle->Direction().x)-absdir,pi2);
+        while(reldir < 0) reldir += pi2;
+        
+#if 0
+        // are we already facing the zone?
+        if(roundf(absdir/8) == round(atan2f(cycle->Direction().y,cycle->Direction().x)/8))
+            return;
+#else
+        REAL tarX = cycle->Position().x, tarY = cycle->Position().y;
+        REAL zonX = zone->Position().x, zonY = zone->Position().y;
+        REAL tarDirX = cycle->Direction().x, tarDirY = cycle->Direction().y;
+        
+        //A bad way to do this: loop through the zone's perimeter and determine if they intersect with the cycle direction
+        REAL radi = zone->GetRadius();
+        REAL dist = sg_cycleZonesApproach;
+        REAL adjPosX = tarX+(tarDirX*dist), adjPosY = tarY+(tarDirY*dist);
+        REAL pX, pY, s1_x, s1_y, s2_x, s2_y, s, t, lpX = radi, lpY = 0;
+        for(int i=41;i>0;--i)
+        {
+            pX = (radi*cos(M_PI*2*(i/42.f)))+zonX; pY = (radi*sin(M_PI*2*(i/42.f)))+zonY;
+            
+            s1_x = adjPosX - tarX; s1_y = adjPosY - tarY; s2_x = pX - lpX; s2_y = pY - lpY;
+            s = (-s1_y * (tarX - lpX) + s1_x * (tarY - lpY)) / (-s2_x * s1_y + s1_x * s2_y);
+            t = ( s2_x * (tarY - lpY) - s2_y * (tarX - lpX)) / (-s2_x * s1_y + s1_x * s2_y);
+            
+            if(s >= 0 && s <= 1 && t >= 0 && t <= 1) { return true; };
+            
+            lpX = pX; lpY = pY;
+        }
+#endif
+        
+        if(reldir < M_PI)
+            cycle->Act(&gCycle::se_turnLeft, 1);
+        else if(reldir != M_PI)
+            cycle->Act(&gCycle::se_turnRight, 1);
+        
+        return true;
+    }
+    return false;
+}
+
+
+// *******************************************************************************
+// *
+// *    TriggerZoneApproach
+// *
+// *******************************************************************************
+//!
+//!     @param  target        the other game object
+//!     @param  zone          the zone player is getting near
+//!     @param  time          the current time
+//!
+// *******************************************************************************
+
+bool sg_cyclesZonesAAOrder = false;
+static tSettingItem<bool> sg_cyclesZonesAAOrderConf("CYCLE_ZONES_AVOID_AIM_ORDER", sg_cyclesZonesAAOrder);
+
+static void TriggerZoneApproach(gCycle * target, gZone * Zone, REAL currentTime)
+{
+    // don't bother if nothing that depends on this is enabled
+    if(!sg_cyclesZonesAvoid && !sg_cyclesZonesAim)
+        return;
+
+    eGrid * grid = eGrid::CurrentGrid();
+    if (!grid) return;
+
+    if(target->Alive() && target->GetLastTurnTime()+target->GetTurnDelay() < currentTime)
+    {
+        if(sg_cyclesZonesAvoid && sg_cyclesZonesAAOrder)
+        {
+            if(TriggerAvoidZone(target,Zone,currentTime)) return;
+        }
+        if(sg_cyclesZonesAim && TriggerAimZone(target,Zone,currentTime))
+        {
+            return;
+        }
+        if(sg_cyclesZonesAvoid && !sg_cyclesZonesAAOrder)
+        {
+            if(TriggerAvoidZone(target,Zone,currentTime)) return;
+        }
+    }
+}
 
 // *******************************************************************************
 // *
@@ -1503,9 +1687,9 @@ void gZone::InteractWith( eGameObject * target, REAL time, int recursion )
                 }
                 return;
             }
-            else if ( dist < (r + (sg_cycleZonesApproch * 2)) )
+            else if ( dist < (r + (sg_cycleZonesApproach * 2)) )
             {
-                TriggerAvoidZone(prey, this, time);
+                TriggerZoneApproach(prey, this, time);
                 OnNear(prey, time);
             }
         }
