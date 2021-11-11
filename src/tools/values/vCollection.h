@@ -44,7 +44,7 @@ typedef std::set<BasePtr, FooPtrOps> myCol;
 
 struct FooPtrOps
 {
-    bool operator()( const BasePtr & a, const BasePtr & b )
+    bool operator()( const BasePtr & a, const BasePtr & b ) const
     {
         return (*a < *b);
     }
