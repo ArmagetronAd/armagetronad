@@ -99,18 +99,18 @@ public:
 
     // virtual gDestination* GetCurrentDestination() const;			// returns the current destination
 
-    virtual bool EdgeIsDangerous(const eWall *w, REAL time, REAL a) const;
+    bool EdgeIsDangerous(const eWall *w, REAL time, REAL a) const override;
 
-    virtual ePassEdgeResult PassEdge(const eWall *w,REAL time,REAL a,int recursion=1) override;
+    ePassEdgeResult PassEdge(const eWall *w,REAL time,REAL a,int recursion=1) override;
 
-    virtual bool TimestepCore(REAL currentTime, bool calculateAcceleration = true );
+    bool TimestepCore(REAL currentTime, bool calculateAcceleration = true ) override;
 
     // virtual bool DoTurn(int dir);
 
     REAL			  trueDistance_;										// distance predicted as best as we can
 private:
     //! returns the descriptor responsible for this class
-    virtual nNetObjectDescriptorBase const & DoGetDescriptor() const;
+    nNetObjectDescriptorBase const & DoGetDescriptor() const override;
 
     // virtual REAL            DoGetDistanceSinceLastTurn  (                               ) const     ;   //!< returns the distance since the last turn
 
@@ -229,8 +229,8 @@ private:
     bool	Extrapolate( REAL dt );							// simulate the extrapolator at higher speed
     void	SyncFromExtrapolator();							// take over the extrapolator's data
 
-    virtual void OnNotifyNewDestination(gDestination *dest);   //!< called when a destination is successfully inserted into the destination list
-    virtual void OnDropTempWall        ( gPlayerWall * wall, eCoord const & position, eCoord const & direction );   //!< called when another cycle grinds a wall; this cycle should then drop its current wall if the grinding is too close.
+    void OnNotifyNewDestination(gDestination *dest) override;   //!< called when a destination is successfully inserted into the destination list
+    void OnDropTempWall( gPlayerWall * wall, eCoord const & position, eCoord const & direction ) override;   //!< called when another cycle grinds a wall; this cycle should then drop its current wall if the grinding is too close.
 
     //	unsigned short currentWallID;
 
@@ -246,22 +246,22 @@ private:
 protected:
     virtual ~gCycle();
 
-    virtual void OnRemoveFromGame(); // called when the cycle is physically removed from the game
+    void OnRemoveFromGame() override; // called when the cycle is physically removed from the game
 
-    virtual void OnRoundEnd();    //!< called when the round ends
+    void OnRoundEnd() override; //!< called when the round ends
 
     // virtual REAL            DoGetDistanceSinceLastTurn  (                               ) const     ;   //!< returns the distance since the last turn
 public:
-    virtual void Die ( REAL time )  ;  //!< dies at the specified time
+    void Die ( REAL time ) override; //!< dies at the specified time
     void KillAt( const eCoord& pos );  //!< kill this cycle at the given position and take care of scoring
 
     int WindingNumber() const {return windingNumber_;}
 
-    virtual bool            Vulnerable              ()                                    const     ;   //!< returns whether the cycle can be killed
+    bool Vulnerable() const override; //!< returns whether the cycle can be killed
 
     // bool CanMakeTurn() const { return pendingTurns <= 0 && lastTime >= nextTurn; }
 
-    virtual void InitAfterCreation();
+    void InitAfterCreation() override;
     gCycle(eGrid *grid, const eCoord &pos,const eCoord &dir,ePlayerNetID *p=NULL);
 
     static	void 	SetWallsStayUpDelay		( REAL delay );				//!< the time the cycle walls stay up ( negative values: they stay up forever )
@@ -292,59 +292,59 @@ public:
     //! returns true if sync message is new (and updates 
 
 
-    virtual void ReceiveControl(REAL time,uActionPlayer *Act,REAL x);
-    virtual void PrintName(tString &s) const;
-    virtual bool ActionOnQuit();
+    void ReceiveControl(REAL time,uActionPlayer *Act,REAL x) override; 
+    void PrintName(tString &s) const override;
+    bool ActionOnQuit() override;
 
     //! returns the descriptor responsible for this class
-    virtual nNetObjectDescriptorBase const & DoGetDescriptor() const;
+    nNetObjectDescriptorBase const & DoGetDescriptor() const override;
 
     //! returns true if sync message is new (and updates 
     bool SyncIsNew( Game::CycleSync const & sync, nSenderInfo const & sender );
 
-    virtual bool Timestep(REAL currentTime);
-    virtual bool TimestepCore(REAL currentTime,bool calculateAcceleration = true);
+    bool Timestep(REAL currentTime) override;
+    bool TimestepCore(REAL currentTime,bool calculateAcceleration = true) override;
 
-    virtual void InteractWith(eGameObject *target,REAL time,int recursion=1);
+    void InteractWith(eGameObject *target,REAL time,int recursion=1) override;
 
-    virtual bool EdgeIsDangerous(const eWall *w, REAL time, REAL a) const;
+    bool EdgeIsDangerous(const eWall *w, REAL time, REAL a) const override;
 
-    virtual ePassEdgeResult PassEdge(const eWall *w,REAL time,REAL a,int recursion=1) override;
+    ePassEdgeResult PassEdge(const eWall *w,REAL time,REAL a,int recursion=1) override;
 
-    virtual REAL PathfindingModifier( const eWall *w ) const;
+    REAL PathfindingModifier( const eWall *w ) const override;
 
-    virtual bool Act(uActionPlayer *Act,REAL x);
+    bool Act(uActionPlayer *Act,REAL x) override;
 
-    virtual bool DoTurn(int dir);
+    bool DoTurn(int dir) override;
     void DropWall( bool buildNew=true );                                    //!< Drops the current wall and builds a new one
 
     // void Turbo(bool turbo);
 
-    virtual void Kill();
+    void Kill() override;
 
     const eTempEdge* Edge();
     const gPlayerWall* CurrentWall();
     // const gPlayerWall* LastWall();
 
 #ifndef DEDICATED
-    virtual void Render(const eCamera *cam);
-    virtual void Render2D(tCoord scale) const;
+    void Render(const eCamera *cam) override;
+    void Render2D(tCoord scale) const override;
 
     virtual void RenderName( const eCamera *cam );
 
-    virtual bool RenderCockpitFixedBefore(bool primary=true);
+    bool RenderCockpitFixedBefore(bool primary=true) override;
 
-    virtual void SoundMix(unsigned char *dest,unsigned int len,
-                          int viewer,REAL rvol,REAL lvol);
+    void SoundMix(unsigned char *dest,unsigned int len,
+                  int viewer,REAL rvol,REAL lvol) override;
 #endif
 
-    virtual eCoord CamPos() const;
-    virtual eCoord PredictPosition() const;
-    virtual eCoord  CamTop() const;
-    virtual eCoord CamDir()  const;
-    virtual eCoord Direction()  const;
+    eCoord CamPos() const override;
+    eCoord PredictPosition() const override;
+    eCoord  CamTop() const override;
+    eCoord CamDir() const override;
+    eCoord Direction() const override;
 
-    virtual void RightBeforeDeath( int numTries );
+    void RightBeforeDeath( int numTries ) override;
 
 #ifdef POWERPAK_DEB
     virtual void PPDisplay();
@@ -361,7 +361,7 @@ private:
     static	REAL	explosionRadius;			//!< the radius of the holes blewn in by an explosion
     gJoystick *     joystick_;                  //!< joystick control
 protected:
-    virtual 	bool 			DoIsDestinationUsed		( const gDestination *	dest		) const		;	//!< returns whether the given destination is in active use
+    bool DoIsDestinationUsed(const gDestination *dest) const override; //!< returns whether the given destination is in active use
 };
 
 #endif

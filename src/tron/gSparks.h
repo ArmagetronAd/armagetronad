@@ -64,16 +64,16 @@ public:
     gSpark(eGrid *grid, const eCoord &pos,const eCoord &dir,REAL time,REAL ocolor_r,REAL ocolor_g,REAL ocolor_b,REAL ecolor_r,REAL ecolor_g,REAL ecolor_b);
     virtual ~gSpark();
 
-    virtual bool Timestep(REAL currentTime);
+    bool Timestep(REAL currentTime) override;
 
-    virtual void InteractWith(eGameObject *target,REAL time,int recursion=1);
+    void InteractWith(eGameObject *target,REAL time,int recursion=1) override;
 
-    virtual ePassEdgeResult PassEdge(const eWall *e,REAL time,REAL a,int recursion=1) override;
+    ePassEdgeResult PassEdge(const eWall *e,REAL time,REAL a,int recursion=1) override;
 
-    virtual void Kill();
+    void Kill() override;
 
 #ifndef DEDICATED
-    virtual void Render(const eCamera *cam);
+    void Render(const eCamera *cam) override;
 
     //virtual void SoundMix(Uint8 *dest,unsigned int len,
     //                      int viewer,REAL rvol,REAL lvol);

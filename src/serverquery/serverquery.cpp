@@ -254,7 +254,7 @@ namespace sq
               << "=============\n";
         }
         
-        virtual bool DoExecute()
+        bool DoExecute() override
         {
             Json::Value root(Json::arrayValue);
             Json::StyledWriter styledWriter;
