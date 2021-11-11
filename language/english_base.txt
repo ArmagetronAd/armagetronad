@@ -3703,6 +3703,7 @@ base_enemy_kill_help                Flag indicating whether a base will kill ene
 ## General zone commands
 spawn_zone_help                                spawn a zone onto the grid
 styct_compatibility_spawn_zone_help            If eanbled, SPAWN_ZONE will take colors out of 1 rather than 15.
+styct_compatibility_set_zone_color_help        If eanbled, SET_ZONE_COLOR will take colors out of 1 rather than 15.
 collapse_zone_help                             collapse a zone by name (or, if no arguments, collapses all zones without assigned names)
 set_zone_radius_help                           change zones radius. Usage: SET_ZONE_RADIUS <name> <radius> <rate>
 set_zone_id_radius_help                        change zones radius. Usage: SET_ZONE_ID_RADIUS <id> <radius> <rate>
@@ -3718,8 +3719,8 @@ set_zone_dir_help                              change a zones direction. Usage: 
 set_zone_id_dir_help                           change a zones direction. Usage: SET_ZONE_ID_DIR <id> <xdir> <ydir>
 set_zone_speed_help                            change a zones speed. Usage: SET_ZONE_SPEED <name> <speed>
 set_zone_id_speed_help                         change a zones speed. Usage: SET_ZONE_ID_SPEED <id> <speed>
-set_zone_color_help                            Change the color of a zone (floats always out of 1). Usage: SET_ZONE_COLOR <name> <r> <g> <b>
-set_zone_id_color_help                         Change the color of a zone (floats always out of 1). Usage: SET_ZONE_ID_COLOR <id> <r> <g> <b>
+set_zone_color_help                            Change the color of a zone (out of 15 by default). Usage: SET_ZONE_COLOR <name> <r> <g> <b>
+set_zone_id_color_help                         Change the color of a zone (out of 15 by default). Usage: SET_ZONE_ID_COLOR <id> <r> <g> <b>
 set_zone_expansion_help                        Change the Expansion rate of a zone. Usage: SET_ZONE_EXPANSION <name> <growth>
 set_zone_id_expansion_help                     Change the Expansion rate of a zone. Usage: SET_ZONE_ID_EXPANSION <id> <growth>
 set_zone_rotation_help                         Change the rotation speed of a zone. Usage: SET_ZONE_ROTATION <name> <rotation>

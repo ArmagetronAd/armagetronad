@@ -9861,6 +9861,9 @@ static void sg_SetZoneIdDir(std::istream &s) { sg_SetZoneDir(s,true); }
 static tConfItemFunc sg_SetZoneIdDir_conf("SET_ZONE_ID_DIR",&sg_SetZoneIdDir);
 
 
+static bool styctcompat_se_SetZoneColor = false;
+static tConfItem<bool> styctcompat_se_SetZoneColorConf("STYCT_COMPATIBILITY_SET_ZONE_COLOR", styctcompat_se_SetZoneColor);
+
 static void sg_SetZoneColor(std::istream &s,bool byId)
 {
     // parse the line to get the param : object_id, r, g, b ...
@@ -9871,13 +9874,10 @@ static void sg_SetZoneColor(std::istream &s,bool byId)
     
     gRealColor zoneColor;
     if ((zoneRedStr=="")||(zoneGreenStr=="")||(zoneBlueStr=="")) return;
-    zoneColor.r = atof(zoneRedStr);
-    zoneColor.g = atof(zoneGreenStr);
-    zoneColor.b = atof(zoneBlueStr);
-    
-    zoneColor.r = (zoneColor.r>1.0)?1.0:zoneColor.r;
-    zoneColor.g = (zoneColor.g>1.0)?1.0:zoneColor.g;
-    zoneColor.b = (zoneColor.b>1.0)?1.0:zoneColor.b;
+
+    zoneColor.r = fmin(1, (atof(zoneRedStr  ) / (styctcompat_se_SetZoneColor?1.f:15.f)));
+    zoneColor.g = fmin(1, (atof(zoneGreenStr) / (styctcompat_se_SetZoneColor?1.f:15.f)));
+    zoneColor.b = fmin(1, (atof(zoneBlueStr ) / (styctcompat_se_SetZoneColor?1.f:15.f)));
 
     gZone::FindAll(object_id_str, byId, [zoneColor](gZone * zone)
     {
