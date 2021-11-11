@@ -7190,8 +7190,7 @@ void gBlastZoneHack::OnEnter( gCycle * target, REAL time )
 {
     target->SetWallBuilding(false);
 
-    gCycle *c = dynamic_cast<gCycle *>(target->Player()->Object());
-    if(c) c->Kill("BLASTZONE");;
+    target->Kill("BLASTZONE");
 
     tOutput lose;
     lose << "$player_blastzone_score";
