@@ -1566,7 +1566,7 @@ static bool TriggerAimZone(gCycle * cycle, gZone * zone, REAL currentTime)
             }
         }
         
-        con << zone->GetEffect() << "\n";
+        //con << zone->GetEffect() << "\n";
         
         REAL absdir = atan2f(cycle->Position().y-zone->Position().y,cycle->Position().x-zone->Position().x);
         
