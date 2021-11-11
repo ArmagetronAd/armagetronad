@@ -49,7 +49,7 @@ public:
     static zEffector* create() { return new zEffector(); };
     zEffector():count(-1),message() { }; //<! Constructor
     zEffector(zEffector const &other) { };
-    void operator=(zEffector const &other) { this->zEffector::operator=(other); }; //!< overloaded assignment operator
+    zEffector const &operator=(zEffector const &other) = delete;
     virtual zEffector *copy(void) const { return new zEffector(*this); };
     virtual ~zEffector() {};
 
@@ -149,7 +149,7 @@ public:
     static zEffector* create() { return new zEffectorWin(); };
     zEffectorWin():zEffector(){ }; //<! Constructor
     zEffectorWin(zEffectorWin const &other):zEffector(other) { };
-    void operator=(zEffectorWin const &other) { this->zEffector::operator=(other); }; //!< overloaded assignment operator
+    zEffectorWin& operator=(zEffectorWin const &other) = delete;
     virtual zEffectorWin *copy(void) const { return new zEffectorWin(*this); };
     virtual ~zEffectorWin() {};
 
@@ -164,7 +164,7 @@ public:
     static zEffector* create() { return new zEffectorDeath(); };
     zEffectorDeath():zEffector(){ }; //<! Constructor
     zEffectorDeath(zEffectorDeath const &other):zEffector(other) { };
-    void operator=(zEffectorDeath const &other) { this->zEffector::operator=(other); }; //!< overloaded assignment operator
+    zEffectorDeath &operator=(zEffectorDeath const &other) = delete;
     virtual zEffectorDeath *copy(void) const { return new zEffectorDeath(*this); };
     virtual ~zEffectorDeath() {};
 
@@ -179,7 +179,7 @@ public:
     static zEffector* create() { return new zEffectorPoint(); };
     zEffectorPoint():zEffector(){ }; //<! Constructor
     zEffectorPoint(zEffectorPoint const &other):zEffector(other),d_score(other.getPoint()) { };
-    void operator=(zEffectorPoint const &other) { this->zEffector::operator=(other); }; //!< overloaded assignment operator
+    zEffectorPoint &operator=(zEffectorPoint const &other) = delete;
     virtual zEffectorPoint *copy(void) const { return new zEffectorPoint(*this); };
     virtual ~zEffectorPoint() {};
 
@@ -199,7 +199,7 @@ public:
     static zEffector* create() { return new zEffectorCycleRubber(); };
     zEffectorCycleRubber():zEffector(){ }; //<! Constructor
     zEffectorCycleRubber(zEffectorCycleRubber const &other):zEffector(other) { };
-    void operator=(zEffectorCycleRubber const &other) { this->zEffector::operator=(other); }; //!< overloaded assignment operator
+    zEffectorCycleRubber &operator=(zEffectorCycleRubber const &other) = delete;
     virtual zEffectorCycleRubber *copy(void) const { return new zEffectorCycleRubber(*this); };
     virtual ~zEffectorCycleRubber() {};
 
@@ -212,7 +212,7 @@ public:
     static zEffector* create() { return new zEffectorCycleBrake(); };
     zEffectorCycleBrake():zEffector(){ }; //<! Constructor
     zEffectorCycleBrake(zEffectorCycleBrake const &other):zEffector(other) { };
-    void operator=(zEffectorCycleBrake const &other) { this->zEffector::operator=(other); }; //!< overloaded assignment operator
+    zEffectorCycleBrake &operator=(zEffectorCycleBrake const &other) = delete;
     virtual zEffectorCycleBrake *copy(void) const { return new zEffectorCycleBrake(*this); };
     virtual ~zEffectorCycleBrake() {};
 
@@ -246,7 +246,7 @@ public:
     static zEffector* create() { return new zEffectorSpawnPlayer(); };
     zEffectorSpawnPlayer():zEffector(){ }; //<! Constructor
     zEffectorSpawnPlayer(zEffectorSpawnPlayer const &other):zEffector(other) { };
-    void operator=(zEffectorSpawnPlayer const &other) { this->zEffector::operator=(other); }; //!< overloaded assignment operator
+    zEffectorSpawnPlayer &operator=(zEffectorSpawnPlayer const &other) = delete;
     virtual zEffectorSpawnPlayer *copy(void) const { return new zEffectorSpawnPlayer(*this); };
     virtual ~zEffectorSpawnPlayer() {};
 
@@ -270,7 +270,7 @@ public:
             zEffector(other),
             settingName(other.getSettingName()),
     settingValue(other.getSettingValue())  { };
-    void operator=(zEffectorSetting const &other) { this->zEffector::operator=(other); }; //!< overloaded assignment operator
+    zEffectorSetting &operator=(zEffectorSetting const &other) = delete;
     virtual zEffectorSetting *copy(void) const { return new zEffectorSetting(*this); };
     virtual ~zEffectorSetting() {};
 
