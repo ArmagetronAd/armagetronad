@@ -127,8 +127,8 @@ REAL uMenu::YPos(int num){
 }
 
 
-static inline void arrow(REAL x,REAL y,REAL dy,REAL size){
 #ifndef DEDICATED
+static inline void arrow(REAL x,REAL y,REAL dy,REAL size){
     if (sr_glOut){
         BeginLineLoop();
         Vertex(x,y+2*dy*size);
@@ -140,8 +140,8 @@ static inline void arrow(REAL x,REAL y,REAL dy,REAL size){
         Vertex(x-size,y);
         RenderEnd();
     }
-#endif
 }
+#endif
 
 static bool s_globalRepeat = false;
 
