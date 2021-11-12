@@ -1388,7 +1388,7 @@ static tSettingItem<tString> sg_cyclesZonesAvoidTypesConf("CYCLE_ZONES_AVOID_TYP
 static bool TriggerAvoidZone(gCycle * target, gZone * Zone, REAL currentTime)
 {
     ePlayerNetID * player = target->Player();
-    if(!player) return;
+    if(!player) return false;
 
     if ((!player->IsHuman()) || (sg_chatbotAvoidZones && player->IsChatting() && player->IsActive()))
     {
@@ -1516,7 +1516,6 @@ if(!sg_cyclesZonesAvoidOld)
 }
 
 
-extern REAL sg_conquestRate, sg_defendRate;
 // *******************************************************************************
 // *
 // *    TriggerAimZone
@@ -1554,7 +1553,7 @@ static bool TriggerAimZone(gCycle * cycle, gZone * zone, REAL currentTime)
         
         {
             gBaseZoneHack * fortZone = dynamic_cast<gBaseZoneHack *>(zone);
-            if( fortZone && !cycle->flag_ && ( ( sg_conquestRate == 0 && sg_defendRate == 0 ) || fortZone->Team() == cycle->Team() ) )
+            if( fortZone && !cycle->flag_ && ( BaseZoneIsAttackable() || fortZone->Team() == cycle->Team() ) )
             {
                 return true;
             }
@@ -3215,6 +3214,8 @@ static tSettingItem< REAL > sg_conquestDecayRateConf( "FORTRESS_CONQUEST_DECAY_R
 // time with no enemy inside a zone before it collapses harmlessly
 static REAL sg_conquestTimeout = 0;
 static tSettingItem< REAL > sg_conquestTimeoutConf( "FORTRESS_CONQUEST_TIMEOUT", sg_conquestTimeout );
+
+inline bool BaseZoneIsAttackable() { return ( sg_conquestRate == 0 && sg_defendRate == 0 ); };
 
 // kill at least than many players from the team that just got its zone conquered
 static int sg_onConquestKillMin = 0;

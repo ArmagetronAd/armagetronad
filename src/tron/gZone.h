@@ -408,6 +408,7 @@ class gRubberZoneHack: public gZone
 		gCycle * getPlayerCycle(ePlayerNetID *pPlayer);
 };
 
+extern inline bool BaseZoneIsAttackable();
 //! base zone: belongs to a team, enemy players who manage to stay inside win the round (will be replaced
 class gBaseZoneHack: public gZone
 {
