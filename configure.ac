@@ -565,6 +565,12 @@ if test $CODELEVEL -ge 1; then
 
     dnl Well, they don't, GCC 5.7 warns about them; silence it.
     AX_CXXFLAGS_GCC_OPTION(-Wno-attributes)
+
+    dnl some data structures have members only used in client code, it would be too ugly to remove them
+    dnl on the dedicated server. Silence "unused private field" warnings.
+    if test x$build_dedicated = xtrue; then
+        AX_CXXFLAGS_GCC_OPTION(-Wno-unused-private-field)
+    fi
 fi
 
 dnl test $CODELEVEL -ge 2 && CXXFLAGS="$CXXFLAGS -Wshadow -Wpointer-arith -Wfloat-equal -W -Wcast-qual -Wcast-align -Wconversion -Wunreachable-code --pedantic -Winline"
