@@ -7,6 +7,8 @@ m4_include(version.m4)
 dnl Comment this out to disable autoconf custom directories:
 m4_include(acinclude.d/accustomdir.m4)
 
+m4_include(acinclude.d/ax_cxx_have_align.m4)
+
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(armagetronad,AUTOMATIC_VERSION)
 
@@ -565,6 +567,12 @@ if test $CODELEVEL -ge 1; then
 
     dnl Well, they don't, GCC 5.7 warns about them; silence it.
     AX_CXXFLAGS_GCC_OPTION(-Wno-attributes)
+
+    dnl some data structures have members only used in client code, it would be too ugly to remove them
+    dnl on the dedicated server. Silence "unused private field" warnings.
+    if test x$build_dedicated = xtrue; then
+        AX_CXXFLAGS_GCC_OPTION(-Wno-unused-private-field)
+    fi
 fi
 
 dnl test $CODELEVEL -ge 2 && CXXFLAGS="$CXXFLAGS -Wshadow -Wpointer-arith -Wfloat-equal -W -Wcast-qual -Wcast-align -Wconversion -Wunreachable-code --pedantic -Winline"
@@ -1331,6 +1339,8 @@ AC_CHECK_FUNCS(select)
 AC_CHECK_FUNCS(atan2f sinf cosf tanf sqrtf logf expf fabsf floorf pow10 pow10f exp10 exp10f)
 AC_CHECK_FUNCS(wmemset)
 AC_CHECK_FUNCS(clearenv)
+
+AX_CXX_HAVE_ALIGN()
 
 # if the compiler is GCC -Os produces faulty code (exceptions cause crashes), at least on AMD64. Replace it with -O2.
 test -z "`$CXX --version | grep '(GCC)'`" || CXXFLAGS="`echo $CXXFLAGS | sed -e 's,-Os,-O2,g' `" CFLAGS="`echo $CFLAGS | sed -e 's,-Os,-O2,g' `"

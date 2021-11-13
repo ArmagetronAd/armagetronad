@@ -39,18 +39,18 @@ public:
     gExplosion(eGrid *grid, const eCoord &pos,REAL time, rColor & color, gCycle * owner );
     virtual ~gExplosion();
 
-    virtual bool Timestep(REAL currentTime);
+    bool Timestep(REAL currentTime) override;
 
-    virtual void InteractWith(eGameObject *target,REAL time,int recursion=1);
+    void InteractWith(eGameObject *target,REAL time,int recursion=1) override;
 
-    virtual ePassEdgeResult PassEdge(const eWall *w,REAL time,REAL a,int recursion=1) override;
+    ePassEdgeResult PassEdge(const eWall *w,REAL time,REAL a,int recursion=1) override;
 
-    virtual void Kill();
+    void Kill() override;
 #ifndef DEDICATED
-    virtual void Render(const eCamera *cam);
-    virtual void Render2D(tCoord scale) const;
+    void Render(const eCamera *cam) override;
+    void Render2D(tCoord scale) const override;
 
-    //virtual void SoundMix(Uint8 *dest,unsigned int len,
+    //virtual void SoundMix(Uint16 *dest,unsigned int len,
     //                      int viewer,REAL rvol,REAL lvol);
 #endif
 
@@ -75,7 +75,7 @@ public:
     }
 
 protected:
-    virtual void OnRemoveFromGame(); // called last when the object is removed from the game
+    void OnRemoveFromGame() override; // called last when the object is removed from the game
 
 private:
     REAL        createTime;

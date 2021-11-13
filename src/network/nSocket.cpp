@@ -268,6 +268,7 @@ static inline void Con_Printf(const char *x){
     con << x;
 }
 
+/*
 static inline void Con_SafePrintf(const char *x){
     con << x;
 }
@@ -275,6 +276,7 @@ static inline void Con_SafePrintf(const char *x){
 static inline void Con_DPrintf(const char *x){
     con << x;
 }
+*/
 
 #ifdef HAVE_SOCKLEN_T
 typedef socklen_t NET_SIZE;

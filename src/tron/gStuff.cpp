@@ -102,7 +102,7 @@ bool sg_OpenURI( char const * uri )
 {
 #ifdef MACOSX
 #ifndef DEDICATED
-    CFURLRef URL = CFURLCreateWithBytes( NULL, (UInt8 *)uri, strlen(uri), kCFStringEncodingUTF8, NULL );
+    CFURLRef URL = CFURLCreateWithBytes( NULL, reinterpret_cast<UInt8 const *>(uri), strlen(uri), kCFStringEncodingUTF8, NULL );
     LSOpenCFURLRef( URL, NULL );
     CFRelease( URL );
 #endif
@@ -117,7 +117,7 @@ bool sg_OpenDirectory( char const * path )
 #ifdef MACOSX
 #ifndef DEDICATED
     FSRef ref;
-    CFURLRef url = CFURLCreateFromFileSystemRepresentation( NULL, (UInt8 *)path, strlen( path ), true );
+    CFURLRef url = CFURLCreateFromFileSystemRepresentation( NULL, reinterpret_cast<UInt8 const *>(path), strlen( path ), true );
     // LSOpenCFURLRef() doesn't seem to traverse past "..", so we open a FSRef instead.
     CFURLGetFSRef( url, &ref );
     CFRelease( url );

@@ -36,7 +36,7 @@
  *******************************************************************************/
 
 eWavData::eWavData() :
-        m_Volume(64), m_Playable(false)
+        m_Volume(64)
 {
 #ifdef HAVE_LIBSDL_MIXER
     // Do nothing constructor

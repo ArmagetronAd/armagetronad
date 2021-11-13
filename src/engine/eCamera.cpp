@@ -1500,9 +1500,6 @@ bool eCamera::AutoSwitchIncam(){
         return false;
 }
 
-static inline void makefinite(REAL &x,REAL y=2){if (!isfinite(x)) x=y;}
-static inline void makefinite(eCoord &x){makefinite(x.x);makefinite(x.y);}
-
 // Smart camera settings
 
 // distance scale for tests measured relative to cycle speed
@@ -1597,6 +1594,9 @@ static tSettingItem<float> secimfd("CAMERA_IN_MAX_FOCUS_DISTANCE", se_cameraInMa
 
 #ifndef DEDICATED
 bool displaying=false;
+
+static inline void makefinite(REAL &x,REAL y=2){if (!isfinite(x)) x=y;}
+static inline void makefinite(eCoord &x){makefinite(x.x);makefinite(x.y);}
 
 void eCamera::Render(){
     if (!sr_glOut)
@@ -2505,7 +2505,7 @@ void eCamera::s_Timestep(eGrid *grid, REAL time){
 
 #ifndef DEDICATED
 
-void eCamera::SoundMix(Uint8 *dest,unsigned int len){
+void eCamera::SoundMix(Uint16 *dest,unsigned int len){
     tASSERT_THIS();
 
     if (id>=0){
@@ -2520,7 +2520,7 @@ void eCamera::SoundMix(Uint8 *dest,unsigned int len){
 }
 
 
-void eCamera::SoundMixGameObject(Uint8 *dest,unsigned int len,eGameObject *go){
+void eCamera::SoundMixGameObject(Uint16 *dest,unsigned int len,eGameObject *go){
     if(!go)
         return;
     

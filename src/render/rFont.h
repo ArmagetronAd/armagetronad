@@ -104,8 +104,6 @@ class rTextField{
     float nextx;          // x-coordinate the next char should go to for rendering
     float currentWidth;   //The current position where the next char will go to for caching
     bool multiline;        // linewrapping enabled?
-    FTFont *font;
-    sr_fontClass type;    //what is the type of this font?
 
     tColor color_;               //!< current color
     static tColor defaultColor_; //!< default color

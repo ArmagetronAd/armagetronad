@@ -1029,7 +1029,7 @@ private:
     rRollingMinimum waitTimes_;
 
     // time sync is started
-    double startTime_;
+    // double startTime_;
 
     // last time swap was complete
     double lastTime_;

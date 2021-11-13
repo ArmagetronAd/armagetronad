@@ -82,7 +82,6 @@ private:
     rTextureRenderTarget * previous;
 
     int width_, height_;
-    GLenum colorMode, depthMode;
 public:
 };
 

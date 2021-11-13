@@ -165,7 +165,7 @@ public:
 //    
 //    virtual bool RenderCockpitFixedBefore(bool primary=true);
 //    
-//    //virtual void SoundMix(unsigned char *dest,unsigned int len,
+//    //virtual void SoundMix(Uint16 *dest,unsigned int len,
 //    //                      int viewer,REAL rvol,REAL lvol);
 //#endif
     
