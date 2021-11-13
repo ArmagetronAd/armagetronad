@@ -116,7 +116,7 @@ namespace{
 bool is_aligned_16(void *ptr, size_t space)
 {
     const size_t alignment = alignof(Uint16);
-#ifdef HAVE_STD_ALIGN
+#ifdef HAVE_CXX_ALIGN
     void *ptr_back{ptr};
     return 0 == (space % alignment) && std::align(alignment, space, ptr, space) == ptr_back;
 #else

@@ -7,6 +7,8 @@ m4_include(version.m4)
 dnl Comment this out to disable autoconf custom directories:
 m4_include(acinclude.d/accustomdir.m4)
 
+m4_include(acinclude.d/ax_cxx_have_align.m4)
+
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(armagetronad,AUTOMATIC_VERSION)
 
@@ -1337,6 +1339,8 @@ AC_CHECK_FUNCS(select)
 AC_CHECK_FUNCS(atan2f sinf cosf tanf sqrtf logf expf fabsf floorf pow10 pow10f exp10 exp10f)
 AC_CHECK_FUNCS(wmemset)
 AC_CHECK_FUNCS(clearenv)
+
+AX_CXX_HAVE_ALIGN()
 
 # if the compiler is GCC -Os produces faulty code (exceptions cause crashes), at least on AMD64. Replace it with -O2.
 test -z "`$CXX --version | grep '(GCC)'`" || CXXFLAGS="`echo $CXXFLAGS | sed -e 's,-Os,-O2,g' `" CFLAGS="`echo $CFLAGS | sed -e 's,-Os,-O2,g' `"

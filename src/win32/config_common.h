@@ -41,7 +41,7 @@
 #endif
 
 // not currently in our toolchain
-#undef HAVE_STD_ALIGN
+#undef HAVE_CXX_ALIGN
 
 // uncomment this line to compile a version that TRIES to be compatible
 // with Windows 9X. No guarantees.
