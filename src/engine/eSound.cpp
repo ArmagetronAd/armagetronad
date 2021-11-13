@@ -37,6 +37,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "eCamera.h"
 //#include "tList.h"
 #include <iostream>
+#include <memory>
 #include <stdlib.h>
 #include "eGrid.h"
 #include "tException.h"
