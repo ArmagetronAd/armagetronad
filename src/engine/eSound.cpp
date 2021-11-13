@@ -375,6 +375,7 @@ eLegacyWavData::~eLegacyWavData(){
 
 Uint16 *eLegacyWavData::GetData16()
 {
+#ifndef DEDICATED
     if(is_aligned_16(data, len))
         return reinterpret_cast<Uint16 *>(data);
 
@@ -384,6 +385,9 @@ Uint16 *eLegacyWavData::GetData16()
         memcpy(&alignedData[0], data, len);
     }
     return &alignedData[0];
+#else
+    return nullptr;
+#endif
 }
 
 bool eLegacyWavData::Mix(Uint16 *dest,Uint32 playlen,eAudioPos &pos,
