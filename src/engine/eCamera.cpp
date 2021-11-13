@@ -2505,7 +2505,7 @@ void eCamera::s_Timestep(eGrid *grid, REAL time){
 
 #ifndef DEDICATED
 
-void eCamera::SoundMix(Uint8 *dest,unsigned int len){
+void eCamera::SoundMix(Uint16 *dest,unsigned int len){
     tASSERT_THIS();
 
     if (id>=0){
@@ -2520,7 +2520,7 @@ void eCamera::SoundMix(Uint8 *dest,unsigned int len){
 }
 
 
-void eCamera::SoundMixGameObject(Uint8 *dest,unsigned int len,eGameObject *go){
+void eCamera::SoundMixGameObject(Uint16 *dest,unsigned int len,eGameObject *go){
     if(!go)
         return;
     

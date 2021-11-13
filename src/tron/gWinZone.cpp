@@ -218,15 +218,8 @@ gZone::gZone( Game::ZoneV1Sync const & sync, nSenderInfo const & sender )
 
 gZone::~gZone( void )
 {
-    sg_Zones.erase(
-        std::find_if(
-            sg_Zones.begin(),
-            sg_Zones.end(),
-            std::bind2nd(
-                std::equal_to<gZone *>(),
-                this)
-        )
-    );
+    auto it = std::remove(sg_Zones.begin(), sg_Zones.end(), this);
+    sg_Zones.erase(it, sg_Zones.end());
 }
 
 

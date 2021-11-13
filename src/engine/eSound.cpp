@@ -49,9 +49,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 // static Mix_Music* music = NULL;
 #endif
 
-// static SDL_AudioSpec audio;
-// static bool sound_is_there=false;
-// static bool uses_sdl_mixer=false;
 #endif
 
 // sound quality
@@ -82,7 +79,7 @@ static int real_sound_sources=0;
 static tList<eSoundPlayer> se_globalPlayers;
 
 
-void fill_audio(void *udata, Uint8 *stream, int len)
+void fill_audio_core(void *udata, Uint16 *stream, int len)
 {
 #ifndef DEDICATED
     real_sound_sources=0;
@@ -111,6 +108,23 @@ void fill_audio(void *udata, Uint8 *stream, int len)
 #endif
 }
 
+// checks whether a given buffer is 16 bit aligned
+bool is_aligned_16(void *ptr, size_t space)
+{
+    const size_t alignment = alignof(Uint16);
+    void *ptr_back{ptr};
+    return 0 == (space % alignment) && std::align(alignment, space, ptr, space) == ptr_back;
+}
+
+void fill_audio(void *udata, Uint8 *stream, int len)
+{
+    if(is_aligned_16(stream, len))
+    {
+        // aligment is good
+        fill_audio_core(udata, reinterpret_cast<Uint16*>(stream), len);
+    }
+}
+
 #ifndef DEDICATED
 #ifdef DEFAULT_SDL_AUDIODRIVER
 
@@ -136,171 +150,6 @@ static bool se_SoundInitPrepare()
     return ( SDL_InitSubSystem(SDL_INIT_AUDIO) >= 0 );
 }
 #endif
-#endif
-
-#if 0
-void se_SoundInit()
-{
-#ifndef DEDICATED
-    // save configuration file with sound disabled on first use so we don't try again
-    bool needSave = false;
-    static bool firstRun = true;
-    if ( st_FirstUse )
-    {
-        needSave = true;
-        int sound_quality_back = sound_quality;
-        sound_quality = SOUND_OFF;
-        st_SaveConfig();
-        if ( firstRun )
-            con << tOutput("$sound_firstinit");
-        sound_quality=sound_quality_back;
-    }
-
-    if ( sound_quality != SOUND_OFF )
-    {
-#ifdef DEFAULT_SDL_AUDIODRIVER
-        static bool init = se_SoundInitPrepare();
-        if ( !init )
-            return;
-#endif
-        if ( firstRun && !SDL_WasInit( SDL_INIT_AUDIO ) )
-            return;
-        firstRun = false;
-    }
-
-    if (!sound_is_there && sound_quality!=SOUND_OFF)
-    {
-        SDL_AudioSpec desired;
-        memset( &desired, 0, sizeof( SDL_AudioSpec ) );
-
-        switch (sound_quality)
-        {
-        case SOUND_LOW:
-            desired.freq=11025; break;
-        case SOUND_MED:
-            desired.freq=22050; break;
-        case SOUND_HIGH:
-            desired.freq=44100; break;
-        default:
-            desired.freq=22050;
-        }
-
-        desired.format=AUDIO_S16SYS;
-        desired.samples=128;
-        while (desired.samples <= desired.freq >> (6-buffer_shift))
-            desired.samples <<= 1;
-        desired.channels = 2;
-        desired.callback = fill_audio;
-        desired.userdata = NULL;
-
-#ifdef HAVE_LIBSDL_MIXER
-        uses_sdl_mixer=true;
-
-        // init using SDL_Mixer
-        sound_is_there=(Mix_OpenAudio(desired.freq, desired.format, desired.channels, desired.samples)>=0);
-
-        if ( sound_is_there )
-        {
-            // query actual sound info
-            audio = desired;
-            int channels;
-            Mix_QuerySpec( &audio.freq, &audio.format, &channels );
-            audio.channels = channels;
-
-            // register callback
-            Mix_SetPostMix( &fill_audio, NULL );
-
-            const tPath& vpath = tDirectories::Data();
-            tString musFile = vpath.GetReadPath( "music/fire.xm" );
-
-            music = Mix_LoadMUS( musFile );
-
-            if ( music )
-                Mix_FadeInMusic( music, -1, 2000 );
-
-        }
-#else
-        // just use SDL to init sound
-        uses_sdl_mixer=false;
-        sound_is_there=(SDL_OpenAudio(&desired,&audio)>=0);
-#endif
-        if (sound_is_there && (audio.format!=AUDIO_S16SYS || audio.channels!=2))
-        {
-            uses_sdl_mixer=false;
-            se_SoundExit();
-            // force emulation of 16 bit stereo; sadly, this cannot use SDL_Mixer :-(
-            audio.format=AUDIO_S16SYS;
-            audio.channels=2;
-            sound_is_there=(SDL_OpenAudio(&audio,NULL)>=0);
-            con << tOutput("$sound_error_no16bit");
-        }
-        if (!sound_is_there)
-            con << tOutput("$sound_error_initfailed");
-        else
-        {
-            //for(int i=wavs.Len()-1;i>=0;i--)
-            //wavs(i)->Init();
-#ifdef DEBUG
-            tOutput o;
-            o.SetTemplateParameter(1,audio.freq);
-            o.SetTemplateParameter(2,audio.samples);
-            o << "$sound_inited";
-            con << o;
-#endif
-            se_SoundPause(false);
-        }
-    }
-
-    // save sound settings, they appear to work
-    if ( needSave )
-    {
-        st_SaveConfig();
-    }
-#endif
-}
-
-void se_SoundExit(){
-#ifndef DEDICATED
-    eSoundLocker locker;
-
-    eLegacyWavData::UnloadAll();
-    se_SoundPause(true);
-
-    if (sound_is_there){
-#ifdef DEBUG
-        con << tOutput("$sound_disabling");
-#endif
-        //		se_SoundPause(false);
-        //    for(int i=wavs.Len()-1;i>=0;i--)
-        //wavs(i)->Exit();
-
-#ifdef HAVE_LIBSDL_MIXER
-        if ( music )
-        {
-            if( Mix_PlayingMusic() )
-            {
-                Mix_FadeOutMusic(100);
-                SDL_Delay(100);
-            }
-            Mix_FreeMusic( music );
-            music = NULL;
-        }
-
-        se_SoundPause(true);
-
-        if ( uses_sdl_mixer )
-            Mix_CloseAudio();
-        else
-#endif
-            SDL_CloseAudio();
-
-#ifdef DEBUG
-        con << tOutput("$sound_disabling_done");
-#endif
-    }
-    sound_is_there=false;
-#endif
-}
 #endif
 
 #ifndef DEDICATED
@@ -459,6 +308,8 @@ void eLegacyWavData::Unload(){
 #ifndef DEDICATED
     loadError = false;
 
+    alignedData.clear();
+
     //wavs.Add(this,id);
     if (data){
         eSoundLocker locker;
@@ -505,7 +356,20 @@ eLegacyWavData::~eLegacyWavData(){
 // from eSoundMixer.cpp
 // extern int se_mixerFrequency;
 
-bool eLegacyWavData::Mix(Uint8 *dest,Uint32 playlen,eAudioPos &pos,
+Uint16 *eLegacyWavData::GetData16()
+{
+    if(is_aligned_16(data, len))
+        return reinterpret_cast<Uint16 *>(data);
+
+    if(alignedData.size()*2 < len)
+    {
+        alignedData.resize(len/2);
+        memcpy(&alignedData[0], data, len);
+    }
+    return &alignedData[0];
+}
+
+bool eLegacyWavData::Mix(Uint16 *dest,Uint32 playlen,eAudioPos &pos,
                    REAL Rvol,REAL Lvol,REAL Speed,bool loop){
 #ifndef DEDICATED
     if ( !data )
@@ -568,8 +432,8 @@ bool eLegacyWavData::Mix(Uint8 *dest,Uint32 playlen,eAudioPos &pos,
                 while (playlen>0 && pos.pos<samples){
                     // fix endian problems for the Mac port, as well as support for other
                     // formats than  stereo...
-                    int l=((short *)dest)[0];
-                    int r=((short *)dest)[1];
+                    int l=dest[0];
+                    int r=dest[1];
                     r += (rvol*(data[(pos.pos<<1)  ]-128)) >> (VOL_SHIFT-8);
                     l += (lvol*(data[(pos.pos<<1)+1]-128)) >> (VOL_SHIFT-8);
                     if (r>MAX_VAL) r=MAX_VAL;
@@ -577,10 +441,10 @@ bool eLegacyWavData::Mix(Uint8 *dest,Uint32 playlen,eAudioPos &pos,
                     if (r<MIN_VAL) r=MIN_VAL;
                     if (l<MIN_VAL) l=MIN_VAL;
 
-                    ((short *)dest)[0]=l;
-                    ((short *)dest)[1]=r;
+                    dest[0]=l;
+                    dest[1]=r;
 
-                    dest+=4;
+                    dest+=2;
 
                     pos.pos+=speed;
 
@@ -593,20 +457,22 @@ bool eLegacyWavData::Mix(Uint8 *dest,Uint32 playlen,eAudioPos &pos,
                     playlen--;
                 }
             else{
+                Uint16 const *data16 = GetData16();
+
                 while (playlen>0 && pos.pos<samples){
-                    int l=((short *)dest)[0];
-                    int r=((short *)dest)[1];
-                    r += (rvol*(((short *)data)[(pos.pos<<1)  ])) >> VOL_SHIFT;
-                    l += (lvol*(((short *)data)[(pos.pos<<1)+1])) >> VOL_SHIFT;
+                    int l=dest[0];
+                    int r=dest[1];
+                    r += (rvol*(data16[(pos.pos<<1)  ])) >> VOL_SHIFT;
+                    l += (lvol*(data16[(pos.pos<<1)+1])) >> VOL_SHIFT;
                     if (r>MAX_VAL) r=MAX_VAL;
                     if (l>MAX_VAL) l=MAX_VAL;
                     if (r<MIN_VAL) r=MIN_VAL;
                     if (l<MIN_VAL) l=MIN_VAL;
 
-                    ((short *)dest)[0]=l;
-                    ((short *)dest)[1]=r;
+                    dest[0]=l;
+                    dest[1]=r;
 
-                    dest+=4;
+                    dest+=2;
 
                     pos.pos+=speed;
 
@@ -624,8 +490,8 @@ bool eLegacyWavData::Mix(Uint8 *dest,Uint32 playlen,eAudioPos &pos,
                 while (playlen>0 && pos.pos<samples){
                     // fix endian problems for the Mac port, as well as support for other
                     // formats than  stereo...
-                    int l=((short *)dest)[0];
-                    int r=((short *)dest)[1];
+                    int l=dest[0];
+                    int r=dest[1];
                     int d=data[pos.pos]-128;
                     l += (lvol*d) >> (VOL_SHIFT-8);
                     r += (rvol*d) >> (VOL_SHIFT-8);
@@ -634,10 +500,10 @@ bool eLegacyWavData::Mix(Uint8 *dest,Uint32 playlen,eAudioPos &pos,
                     if (r<MIN_VAL) r=MIN_VAL;
                     if (l<MIN_VAL) l=MIN_VAL;
 
-                    ((short *)dest)[0]=l;
-                    ((short *)dest)[1]=r;
+                    dest[0]=l;
+                    dest[1]=r;
 
-                    dest+=4;
+                    dest+=2;
 
                     pos.pos+=speed;
 
@@ -651,10 +517,13 @@ bool eLegacyWavData::Mix(Uint8 *dest,Uint32 playlen,eAudioPos &pos,
                 }
             }
             else
+            {
+                Uint16 const *data16 = GetData16();                
+
                 while (playlen>0 && pos.pos<samples){
-                    int l=((short *)dest)[0];
-                    int r=((short *)dest)[1];
-                    int d=((short *)data)[pos.pos];
+                    int l=dest[0];
+                    int r=dest[1];
+                    int d=data16[pos.pos];
                     l += (lvol*d) >> VOL_SHIFT;
                     r += (rvol*d) >> VOL_SHIFT;
                     if (r>MAX_VAL) r=MAX_VAL;
@@ -662,10 +531,10 @@ bool eLegacyWavData::Mix(Uint8 *dest,Uint32 playlen,eAudioPos &pos,
                     if (r<MIN_VAL) r=MIN_VAL;
                     if (l<MIN_VAL) l=MIN_VAL;
 
-                    ((short *)dest)[0]=l;
-                    ((short *)dest)[1]=r;
+                    dest[0]=l;
+                    dest[1]=r;
 
-                    dest+=4;
+                    dest+=2;
 
                     pos.pos+=speed;
 
@@ -676,6 +545,7 @@ bool eLegacyWavData::Mix(Uint8 *dest,Uint32 playlen,eAudioPos &pos,
                     }
                     playlen--;
                 }
+            }
         }
 
         if (loop && pos.pos>=samples)
@@ -690,50 +560,44 @@ bool eLegacyWavData::Mix(Uint8 *dest,Uint32 playlen,eAudioPos &pos,
 
 void eLegacyWavData::Loop(){
 #ifndef DEDICATED
-    Uint8 *buff2=tNEW(Uint8) [len];
+    if (spec.format==AUDIO_U8){
+        std::vector<Uint8>buff2{data, data+len};
 
-    if (buff2){
-        memcpy(buff2,data,len);
-        Uint32 samples;
+        Uint32 samples=len;
+        for(int i=samples-1;i>=0;i--){
+            Uint32 j=i+((len>>2)<<1);
+            if (j>=len) j-=len;
 
-        if (spec.format==AUDIO_U8){
-            samples=len;
-            for(int i=samples-1;i>=0;i--){
-                Uint32 j=i+((len>>2)<<1);
-                if (j>=len) j-=len;
+            REAL a=fabs(100*(j/REAL(samples)-.5));
+            if (a>1) a=1;
+            REAL b=1-a;
 
-                REAL a=fabs(100*(j/REAL(samples)-.5));
-                if (a>1) a=1;
-                REAL b=1-a;
-
-                data[i]=int(a*buff2[i]+b*buff2[j]);
-            }
+            data[i]=int(a*buff2[i]+b*buff2[j]);
         }
-        else if (spec.format==AUDIO_S16SYS){
-            samples=len>>1;
-            for(int i=samples-1;i>=0;i--){
-
-                /*
-                  REAL a=2*i/REAL(samples);
-                  if (a>1) a=2-a;
-                  REAL b=1-a;
-                */
-
-
-                Uint32 j=i+((samples>>2)<<1);
-                while (j>=samples) j-=samples;
-
-                REAL a=fabs(100*(j/REAL(samples)-.5));
-                if (a>1) a=1;
-                REAL b=1-a;
-
-
-                ((short *)data)[i]=int(a*((short *)buff2)[i]+b*((short *)buff2)[j]);
-            }
-        }
-        delete[] buff2;
     }
+    else if (spec.format==AUDIO_S16SYS){
+        Uint32 samples=len>>1;
+        Uint16 *data16 = GetData16();
+        std::vector<Uint8>buff2{data16, data16+samples};
+        for(int i=samples-1;i>=0;i--){
 
+            /*
+                REAL a=2*i/REAL(samples);
+                if (a>1) a=2-a;
+                REAL b=1-a;
+            */
+
+
+            Uint32 j=i+((samples>>2)<<1);
+            while (j>=samples) j-=samples;
+
+            REAL a=fabs(100*(j/REAL(samples)-.5));
+            if (a>1) a=1;
+            REAL b=1-a;
+
+            data16[i]=int(a*buff2[i]+b*buff2[j]);
+        }
+    }
 #endif
 }
 
@@ -771,7 +635,7 @@ eSoundPlayer::~eSoundPlayer()
     se_globalPlayers.Remove(this,id);
 }
 
-bool eSoundPlayer::Mix(Uint8 *dest,
+bool eSoundPlayer::Mix(Uint16 *dest,
                        Uint32 len,
                        int viewer,
                        REAL rvol,

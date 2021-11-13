@@ -4933,7 +4933,7 @@ bool gCycle::RenderCockpitFixedBefore(bool){
     return true;
 }
 
-void gCycle::SoundMix(Uint8 *dest,unsigned int len,
+void gCycle::SoundMix(Uint16 *dest,unsigned int len,
                       int viewer,REAL rvol,REAL lvol){
     if (Alive()){
         /*

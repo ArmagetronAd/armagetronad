@@ -33,6 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 // #include "eGrid.h"
 #include "eCoord.h"
 #include "tSafePTR.h"
+#include "rSDL.h"
 
 class eGrid;
 class uActionPlayer;
@@ -220,7 +221,7 @@ public:
     virtual void RenderCockpitVirtual(bool primary=false);
 
     //sound output
-    virtual void SoundMix(unsigned char *dest,unsigned int len,
+    virtual void SoundMix(Uint16 *dest,unsigned int len,
                           int viewer,REAL rvol,REAL lvol){}
 
     // internal camera

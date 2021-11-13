@@ -173,16 +173,8 @@ void zZone::RemoveFromGame(void) {
 }
 
 void zZone::RemoveFromZoneList(void) {
-    std::deque<zZone *>::iterator pos_found =
-        std::find_if(
-            sz_Zones.begin(),
-            sz_Zones.end(),
-            std::bind2nd(
-                std::equal_to<zZone *>(),
-                this)
-        );
-    if(pos_found != sz_Zones.end())
-        sz_Zones.erase(pos_found);
+    auto it = std::remove(sz_Zones.begin(), sz_Zones.end(), this);
+    sz_Zones.erase(it, sz_Zones.end());
 }
 
 void

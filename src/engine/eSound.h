@@ -63,6 +63,7 @@ public:
 class eLegacyWavData: public tListItem<eLegacyWavData>{
     SDL_AudioSpec spec; // the audio format
     Uint8         *data; // the sound data
+    std::vector<Uint16> alignedData; // if data, for some reason, is not 16 bit aligned, copy it overß
     Uint32        len;   // the data's length
     Uint32        samples; // samples
     tString       filename; // the filename
@@ -82,8 +83,9 @@ public:
     void Unload();	// remove the file from memory
     static void UnloadAll(); // unload all sounds
 
+    Uint16 *GetData16();
 
-    bool Mix(Uint8 *dest,
+    bool Mix(Uint16 *dest,
              Uint32 len,
              eAudioPos &pos,
              REAL rvol,
@@ -112,7 +114,7 @@ public:
     eSoundPlayer(eLegacyWavData &w,bool loop=false);
     ~eSoundPlayer();
 
-    bool Mix(Uint8 *dest,
+    bool Mix(Uint16 *dest,
              Uint32 len,
              int viewer,
              REAL rvol,
