@@ -334,7 +334,7 @@ void sr_ReloadFont(void) {
 rTextField::rTextField(REAL Left,REAL Top,
                        REAL Cheight, sr_fontClass Type)
         :parIndent(0),
-left(Left),top(Top),cheight(Cheight),x(0),y(0),realx(0),nextx(Left),currentWidth(0),multiline(false),type(Type),cursor(0),cursorPos(0){
+left(Left),top(Top),cheight(Cheight),x(0),y(0),realx(0),nextx(Left),currentWidth(0),multiline(false),cursor(0),cursorPos(0){
     if (cheight*sr_screenHeight<18)
         cheight=18/REAL(sr_screenHeight);
 

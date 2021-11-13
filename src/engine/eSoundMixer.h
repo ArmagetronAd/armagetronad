@@ -155,8 +155,6 @@ private:
     int FirstAvailableChannel();
 
     static eSoundMixer* _instance;
-    bool sound_is_there;
-    SDL_AudioSpec audio;
 
     static int m_Mode;
     tJUST_CONTROLLED_PTR< eGameObject > m_Owner;

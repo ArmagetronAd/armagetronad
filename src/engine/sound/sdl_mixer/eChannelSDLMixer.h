@@ -71,7 +71,6 @@ public:
 private:
     Mix_Chunk* m_WavData;
     int m_Volume;
-    bool m_Playable;
 };
 
 /*******************************************************************************
