@@ -122,7 +122,15 @@ void fill_audio(void *udata, Uint8 *stream, int len)
     {
         // aligment is good
         fill_audio_core(udata, reinterpret_cast<Uint16*>(stream), len);
+        return;
     }
+    
+    // temp copy to 16 bit buffer
+    static std::vector<Uint16> stream16;
+    stream16.resize((len+1)/2);
+    memcpy(&stream16[0], stream, len);
+    fill_audio_core(udata, &stream16[0], len);
+    memcpy(stream, &stream16[0], len);
 }
 
 #ifndef DEDICATED
