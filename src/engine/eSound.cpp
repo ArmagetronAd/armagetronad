@@ -109,12 +109,20 @@ void fill_audio_core(void *udata, Uint16 *stream, int len)
 #endif
 }
 
+#ifndef DEDICATED
+
+namespace{
 // checks whether a given buffer is 16 bit aligned
 bool is_aligned_16(void *ptr, size_t space)
 {
     const size_t alignment = alignof(Uint16);
+#ifdef HAVE_STD_ALIGN
     void *ptr_back{ptr};
     return 0 == (space % alignment) && std::align(alignment, space, ptr, space) == ptr_back;
+#else
+    // fallback for win32 and steam, assumes sensible ptr to uintptr conversion and linear memory model.
+    return 0 == (reinterpret_cast<uintptr_t>(ptr) % alignment);
+#endif
 }
 
 void fill_audio(void *udata, Uint8 *stream, int len)
@@ -133,8 +141,8 @@ void fill_audio(void *udata, Uint8 *stream, int len)
     fill_audio_core(udata, &stream16[0], len);
     memcpy(stream, &stream16[0], len);
 }
+}
 
-#ifndef DEDICATED
 #ifdef DEFAULT_SDL_AUDIODRIVER
 
 // stringification, yep, two levels required

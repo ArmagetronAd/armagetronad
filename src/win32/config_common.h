@@ -40,6 +40,9 @@
 #define WIN32
 #endif
 
+// not currently in our toolchain
+#undef HAVE_STD_ALIGN
+
 // uncomment this line to compile a version that TRIES to be compatible
 // with Windows 9X. No guarantees.
 // #define SUPPORT_WIN9X
