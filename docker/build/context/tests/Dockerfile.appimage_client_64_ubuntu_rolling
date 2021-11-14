@@ -1,6 +1,9 @@
-FROM centos:latest
+FROM ubuntu:rolling
+# rolling = most recent
 
-RUN yum -y install mesa-libGL && yum clean all
+RUN apt-get -y update && apt-get install \
+mesa-utils \
+-y
 
 COPY *.AppImage .
 RUN ./*.AppImage --appimage-extract-and-run --version

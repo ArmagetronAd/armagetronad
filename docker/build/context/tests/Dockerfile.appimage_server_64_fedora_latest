@@ -1,4 +1,4 @@
-FROM fedora:32
+FROM fedora:latest
 
 COPY *.AppImage .
 RUN ./*.AppImage --appimage-extract-and-run --version

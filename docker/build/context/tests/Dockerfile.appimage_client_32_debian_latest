@@ -1,4 +1,4 @@
-FROM i386/debian:10
+FROM i386/debian:latest
 
 RUN apt-get -y update && apt-get install \
 mesa-utils \
