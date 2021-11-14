@@ -531,7 +531,7 @@ bool eLegacyWavData::Mix(Sint16 *dest,Uint32 playlen,eAudioPos &pos,
                     mix.mix(poller);
                     break;
                 }
-                case AUDIO_U16LSB:
+                case AUDIO_U16SYS:
                 {
                     Uint16 const *data16 = GetData16();
                     auto poller = [&](Uint32 pos)
@@ -564,7 +564,7 @@ bool eLegacyWavData::Mix(Sint16 *dest,Uint32 playlen,eAudioPos &pos,
                     mix.mix(poller);
                     break;
                 }
-                case AUDIO_U16LSB:
+                case AUDIO_U16SYS:
                 {
                     Uint16 const *data16 = GetData16();
                     auto poller = [&](Uint32 pos)
@@ -576,7 +576,7 @@ bool eLegacyWavData::Mix(Sint16 *dest,Uint32 playlen,eAudioPos &pos,
                     mix.mix(poller);
                     break;
                 }
-                case AUDIO_S16LSB:
+                case AUDIO_S16SYS:
                 {
                     Sint16 const *data16 = reinterpret_cast<Sint16 *>(GetData16());
                     auto poller = [&](Uint32 pos)
