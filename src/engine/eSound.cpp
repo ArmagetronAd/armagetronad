@@ -260,21 +260,23 @@ void eLegacyWavData::Load(){
     }
 
     if (spec.format==AUDIO_S16SYS)
-        samples=len>>1;
-    //	else if(spec.format==AUDIO_U8)
-    //		samples=len;
+    {
+        samples=(len>>1)/spec.channels;
+    }
     else
     {
-        // prepare error message
-        tOutput err;
-        err.SetTemplateParameter(1, filename);
-        err << "$sound_error_unsupported";
+        auto throwError = [&](){
+            tOutput err;
+            err.SetTemplateParameter(1, filename);
+            err << "$sound_error_unsupported";
+            throw tGenericException(err, errorName);
+        };
 
         // convert to 16 bit system format
         SDL_AudioCVT cvt;
         if ( -1 == SDL_BuildAudioCVT( &cvt, spec.format, spec.channels, spec.freq, AUDIO_S16SYS, spec.channels, spec.freq ) )
         {
-            throw tGenericException(err, errorName);
+            throwError();
         }
 
         cvt.buf=reinterpret_cast<Uint8 *>( malloc( len * cvt.len_mult ) );
@@ -282,10 +284,9 @@ void eLegacyWavData::Load(){
         memcpy(cvt.buf, data, len);
         freeData = true;
 
-
         if ( -1 == SDL_ConvertAudio( &cvt ) )
         {
-            throw tGenericException(err, errorName);
+            throwError();
         }
 
         SDL_FreeWAV( data );
@@ -293,7 +294,7 @@ void eLegacyWavData::Load(){
         spec.format = AUDIO_S16SYS;
         len    = len * cvt.len_mult;
 
-        samples = len >> 1;
+        samples = (len >> 1)/spec.channels;
     }
 
     samples/=spec.channels;
