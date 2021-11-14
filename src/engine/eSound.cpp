@@ -200,7 +200,7 @@ void se_SoundPause(bool p){
 eLegacyWavData* eLegacyWavData::s_anchor = NULL;
 
 eLegacyWavData::eLegacyWavData(const char * fileName,const char *alternative)
-        :tListItem<eLegacyWavData>(s_anchor),data(NULL),len(0),freeData(false), loadError(false){
+        :tListItem<eLegacyWavData>(s_anchor), loadError(false){
     //wavs.Add(this,id);
     filename     = fileName;
     filename_alt = alternative;
@@ -210,7 +210,7 @@ eLegacyWavData::eLegacyWavData(const char * fileName,const char *alternative)
 void eLegacyWavData::Load(){
     //wavs.Add(this,id);
 
-    if (data)
+    if (!data.empty())
     {
         loadError = false;
         return;
@@ -220,84 +220,87 @@ void eLegacyWavData::Load(){
 
     static char const * errorName = "Sound Error";
 
-    freeData = false;
-
     loadError = true;
 
     alt=false;
 
     const tPath& path = tDirectories::Data();
 
-    SDL_AudioSpec *result=SDL_LoadWAV( path.GetReadPath( filename ) ,&spec,&data,&len);
-    if (result!=&spec || !data){
-        if (filename_alt.Len()>1){
-            result=SDL_LoadWAV( path.GetReadPath( filename_alt ),&spec,&data,&len);
-            if (result!=&spec || !data)
-            {
+    Uint8 *byteData{};
+    try
+    {
+        Uint32 len;
+        SDL_AudioSpec *result=SDL_LoadWAV(path.GetReadPath(filename), &spec, &byteData, &len);
+        if (result!=&spec || !byteData){
+            if (filename_alt.Len()>1){
+                result=SDL_LoadWAV(path.GetReadPath(filename_alt), &spec, &byteData, &len);
+                if (result!=&spec || !byteData)
+                {
+                    tOutput err;
+                    err.SetTemplateParameter(1, filename);
+                    err << "$sound_error_filenotfound";
+                    throw tGenericException(err, errorName);
+                }
+                else
+                    alt=true;
+            }
+            else{
+                result=SDL_LoadWAV(path.GetReadPath("sound/expl.ogg"), &spec, &byteData, &len);
+                if (result!=&spec || !byteData)
+                {
+                    tOutput err;
+                    err.SetTemplateParameter(1, "sound/expl.ogg");
+                    err << "$sound_error_filenotfount";
+                    throw tGenericException(err, errorName);
+                }
+                else
+                    len=0;
+            }
+            /*
+              tERR_ERROR("Sound file " << fileName << " not found. Have you called "
+              "Armagetron from the right directory?"); */
+        }
+
+        if (spec.format==AUDIO_S16SYS)
+        {
+            SetData(byteData, len);
+        }
+        else
+        {
+            auto throwError = [&](){
                 tOutput err;
                 err.SetTemplateParameter(1, filename);
-                err << "$sound_error_filenotfound";
+                err << "$sound_error_unsupported";
                 throw tGenericException(err, errorName);
-            }
-            else
-                alt=true;
-        }
-        else{
-            result=SDL_LoadWAV( path.GetReadPath( "sound/expl.wav" ) ,&spec,&data,&len);
-            if (result!=&spec || !data)
+            };
+
+            // convert to 16 bit system format
+            SDL_AudioCVT cvt;
+            if ( -1 == SDL_BuildAudioCVT( &cvt, spec.format, spec.channels, spec.freq, AUDIO_S16SYS, spec.channels, spec.freq ) )
             {
-                tOutput err;
-                err.SetTemplateParameter(1, "sound/expl.waw");
-                err << "$sound_error_filenotfount";
-                throw tGenericException(err, errorName);
+                throwError();
             }
-            else
-                len=0;
+
+            std::vector<Uint8> buf;
+            buf.resize(len * cvt.len_mult);
+            cvt.buf=&buf[0];
+            cvt.len=len;
+            memcpy(cvt.buf, byteData, len);
+
+            if ( -1 == SDL_ConvertAudio( &cvt ) )
+            {
+                throwError();
+            }
+
+            spec.format = AUDIO_S16SYS;
+            SetData(cvt.buf, cvt.len_cvt);
         }
-        /*
-          tERR_ERROR("Sound file " << fileName << " not found. Have you called "
-          "Armagetron from the right directory?"); */
     }
-
-    if (spec.format==AUDIO_S16SYS)
-    {
-        samples=(len>>1)/spec.channels;
+    catch(...){
+        if(byteData)
+            SDL_FreeWAV(byteData);
+        throw;
     }
-    else
-    {
-        auto throwError = [&](){
-            tOutput err;
-            err.SetTemplateParameter(1, filename);
-            err << "$sound_error_unsupported";
-            throw tGenericException(err, errorName);
-        };
-
-        // convert to 16 bit system format
-        SDL_AudioCVT cvt;
-        if ( -1 == SDL_BuildAudioCVT( &cvt, spec.format, spec.channels, spec.freq, AUDIO_S16SYS, spec.channels, spec.freq ) )
-        {
-            throwError();
-        }
-
-        cvt.buf=reinterpret_cast<Uint8 *>( malloc( len * cvt.len_mult ) );
-        cvt.len=len;
-        memcpy(cvt.buf, data, len);
-        freeData = true;
-
-        if ( -1 == SDL_ConvertAudio( &cvt ) )
-        {
-            throwError();
-        }
-
-        SDL_FreeWAV( data );
-        data = cvt.buf;
-        spec.format = AUDIO_S16SYS;
-        len    = len * cvt.len_mult;
-
-        samples = (len >> 1)/spec.channels;
-    }
-
-    samples/=spec.channels;
 
 #ifdef DEBUG
 #ifdef LINUX
@@ -314,7 +317,7 @@ void eLegacyWavData::Load(){
 
     con << "at " << spec.freq << " Hz,\n";
 
-    con << samples << " samples in " << len << " bytes.\n";
+    con << samples << " samples.\n";
 
     loadError = false;
 #endif
@@ -326,31 +329,19 @@ void eLegacyWavData::Unload(){
 #ifndef DEDICATED
     loadError = false;
 
-    alignedData.clear();
+    eSoundLocker locker;
 
-    //wavs.Add(this,id);
-    if (data){
-        eSoundLocker locker;
-        if ( freeData )
-        {
+    data.clear();
+    samples = 0;
+#endif
+}
 
-            free(data);
-
-        }
-
-        else
-
-        {
-
-            SDL_FreeWAV(data);
-
-        }
-
-
-
-        data=NULL;
-        len=0;
-    }
+void eLegacyWavData::SetData(Uint8 const *byteData, Uint32 lengthInBytes)
+{
+#ifndef DEDICATED
+    data.resize((lengthInBytes+1)/2);
+    memcpy(&data[0], byteData, lengthInBytes);
+    samples =data.size()/spec.channels;
 #endif
 }
 
@@ -362,7 +353,6 @@ void eLegacyWavData::UnloadAll(){
         wav->Unload();
         wav = wav->Next();
     }
-
 }
 
 eLegacyWavData::~eLegacyWavData(){
@@ -373,23 +363,6 @@ eLegacyWavData::~eLegacyWavData(){
 
 // from eSoundMixer.cpp
 // extern int se_mixerFrequency;
-
-Uint16 *eLegacyWavData::GetData16()
-{
-#ifndef DEDICATED
-    if(is_aligned_16(data, len))
-        return reinterpret_cast<Uint16 *>(data);
-
-    if(alignedData.size()*2 < len)
-    {
-        alignedData.resize(len/2);
-        memcpy(&alignedData[0], data, len);
-    }
-    return &alignedData[0];
-#else
-    return nullptr;
-#endif
-}
 
 #ifndef DEDICATED
 
@@ -464,13 +437,13 @@ struct partial_mix
 bool eLegacyWavData::Mix(Sint16 *dest,Uint32 playlen,eAudioPos &pos,
                    REAL Rvol,REAL Lvol,REAL Speed,bool loop){
 #ifndef DEDICATED
-    if ( !data )
+    if ( data.empty() )
     {
         if( !loadError )
         {
             Load();
         }
-        if ( !data )
+        if ( data.empty() )
         {
             return false;
         }
@@ -520,25 +493,12 @@ bool eLegacyWavData::Mix(Sint16 *dest,Uint32 playlen,eAudioPos &pos,
         if (spec.channels==2){
             switch(spec.format)
             {
-                case AUDIO_U8:
+                case AUDIO_S16SYS:
                 {
                     auto poller = [&](Uint32 pos)
                     {
-                        auto r = (static_cast<int>(data[(pos<<1)  ])-128) << 8;
-                        auto l = (static_cast<int>(data[(pos<<1)+1])-128) << 8;
-
-                        return std::make_pair(l, r);
-                    };
-                    mix.mix(poller);
-                    break;
-                }
-                case AUDIO_U16SYS:
-                {
-                    Uint16 const *data16 = GetData16();
-                    auto poller = [&](Uint32 pos)
-                    {
-                        auto r = (static_cast<int>(data16[(pos<<1)  ])-0x8000);
-                        auto l = (static_cast<int>(data16[(pos<<1)+1])-0x8000);
+                        auto r = data[(pos<<1)  ];
+                        auto l = data[(pos<<1)+1];
  
                         return std::make_pair(l, r);
                     };
@@ -554,35 +514,11 @@ bool eLegacyWavData::Mix(Sint16 *dest,Uint32 playlen,eAudioPos &pos,
         {
             switch(spec.format)
             {
-                case AUDIO_U8:
-                {
-                    auto poller = [&](Uint32 pos)
-                    {
-                        int d=(static_cast<int>(data[pos])-128) << 8;
-
-                        return std::make_pair(d, d);
-                    };
-                    mix.mix(poller);
-                    break;
-                }
-                case AUDIO_U16SYS:
-                {
-                    Uint16 const *data16 = GetData16();
-                    auto poller = [&](Uint32 pos)
-                    {
-                        int d=static_cast<int>(data16[pos])-0x8000;
-
-                        return std::make_pair(d, d);
-                    };
-                    mix.mix(poller);
-                    break;
-                }
                 case AUDIO_S16SYS:
                 {
-                    Sint16 const *data16 = reinterpret_cast<Sint16 *>(GetData16());
                     auto poller = [&](Uint32 pos)
                     {
-                        int d=data16[pos];
+                        int d = data[pos];
  
                         return std::make_pair(d, d);
                     };
@@ -613,13 +549,14 @@ bool eLegacyWavData::Mix(Sint16 *dest,Uint32 playlen,eAudioPos &pos,
 
 void eLegacyWavData::Loop(){
 #ifndef DEDICATED
-    if (spec.format==AUDIO_U8){
-        std::vector<Uint8>buff2{data, data+len};
-
-        Uint32 samples=len;
+    if (spec.format==AUDIO_S16SYS){
+        std::vector<Sint16> buff2;
+        using std::swap;
+        swap(buff2, data);
+        data.resize(buff2.size());
         for(int i=samples-1;i>=0;i--){
-            Uint32 j=i+((len>>2)<<1);
-            if (j>=len) j-=len;
+            Uint32 j=i+((samples>>2)<<1);
+            while (j>=samples) j-=samples;
 
             REAL a=fabs(100*(j/REAL(samples)-.5));
             if (a>1) a=1;
@@ -628,28 +565,9 @@ void eLegacyWavData::Loop(){
             data[i]=int(a*buff2[i]+b*buff2[j]);
         }
     }
-    else if (spec.format==AUDIO_S16SYS){
-        Uint32 samples=len>>1;
-        Uint16 *data16 = GetData16();
-        std::vector<Uint8>buff2{data16, data16+samples};
-        for(int i=samples-1;i>=0;i--){
-
-            /*
-                REAL a=2*i/REAL(samples);
-                if (a>1) a=2-a;
-                REAL b=1-a;
-            */
-
-
-            Uint32 j=i+((samples>>2)<<1);
-            while (j>=samples) j-=samples;
-
-            REAL a=fabs(100*(j/REAL(samples)-.5));
-            if (a>1) a=1;
-            REAL b=1-a;
-
-            data16[i]=int(a*buff2[i]+b*buff2[j]);
-        }
+    else
+    {
+        tASSERT(false);
     }
 #endif
 }
