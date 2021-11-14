@@ -392,7 +392,8 @@ Uint16 *eLegacyWavData::GetData16()
 
 #ifndef DEDICATED
 
-#define SPEED_FRACTION (1<<20)
+#define SPEED_SHIFT 20
+#define SPEED_FRACTION (1<<SPEED_SHIFT)
 
 #define VOL_SHIFT 16
 #define VOL_FRACTION (1<<VOL_SHIFT)
@@ -419,11 +420,19 @@ struct partial_mix
     {
         while (playlen>0 && pos.pos<samples){
             auto current = poller(pos.pos);
+            auto next = poller((pos.pos+1) % samples);
+
+            constexpr auto WEIGHT_SHIFT = 16;
+            auto nextWeight = pos.fraction >> (SPEED_SHIFT-WEIGHT_SHIFT);
+            auto currentWeight = (1 << WEIGHT_SHIFT) - nextWeight;
+
+            auto lNow = (current.first * currentWeight + next.first * nextWeight) >> WEIGHT_SHIFT;
+            auto rNow = (current.second * currentWeight + next.second * nextWeight) >> WEIGHT_SHIFT;
 
             int l=dest[0];
             int r=dest[1];
-            l += (lvol*current.first) >> VOL_SHIFT;
-            r += (rvol*current.second) >> VOL_SHIFT;
+            l += (lvol*lNow) >> VOL_SHIFT;
+            r += (rvol*rNow) >> VOL_SHIFT;
             if (r>MAX_VAL) r=MAX_VAL;
             if (l>MAX_VAL) l=MAX_VAL;
             if (r<MIN_VAL) r=MIN_VAL;
