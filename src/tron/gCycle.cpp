@@ -2812,7 +2812,10 @@ bool gCycle::Timestep(REAL currentTime){
     {
         sn_ConsoleOut( "0xff7777Admin : 0xffff77BUG had to kill a cycle because it lagged behind in the simulation. Probably the invulnerability bug. Investigate!\n" );
         st_Breakpoint();
-        KillAt( pos );
+        if( Vulnerable() )
+            KillAt( pos );
+        else
+            Kill();
         ret = false;
     }
 #endif
