@@ -59,9 +59,11 @@ workflow:
 build_prepare:
   stage: build_prepare
   rules:
-    - if: $CI_MERGE_REQUEST_ID
-      when: always
-    - when: always
+  - if: $CI_MERGE_REQUEST_ID
+    when: always
+  - if: $CI_COMMIT_REF_PROTECTED == "true"
+    when: always
+  - when: manual
   script: [""]
   artifacts:
     untracked: true
