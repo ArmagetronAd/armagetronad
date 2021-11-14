@@ -85,7 +85,7 @@ public:
 
     Uint16 *GetData16();
 
-    bool Mix(Uint16 *dest,
+    bool Mix(Sint16 *dest,
              Uint32 len,
              eAudioPos &pos,
              REAL rvol,
@@ -114,7 +114,7 @@ public:
     eSoundPlayer(eLegacyWavData &w,bool loop=false);
     ~eSoundPlayer();
 
-    bool Mix(Uint16 *dest,
+    bool Mix(Sint16 *dest,
              Uint32 len,
              int viewer,
              REAL rvol,

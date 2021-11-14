@@ -334,7 +334,7 @@ public:
 
     bool RenderCockpitFixedBefore(bool primary=true) override;
 
-    void SoundMix(Uint16 *dest,unsigned int len,
+    void SoundMix(Sint16 *dest,unsigned int len,
                   int viewer,REAL rvol,REAL lvol) override;
 #endif
 

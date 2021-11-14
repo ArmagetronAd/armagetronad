@@ -133,7 +133,7 @@ public:
     virtual void RenderCockpitVirtual(bool primary=false);
     
     //sound output
-    //virtual void SoundMix(Uint16 *dest,unsigned int len,
+    //virtual void SoundMix(Sint16 *dest,unsigned int len,
     //                      int viewer,REAL rvol,REAL lvol){};
     
     // internal camera

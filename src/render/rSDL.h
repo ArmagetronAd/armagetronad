@@ -17,6 +17,7 @@ typedef int SDL_keysym;
 typedef int SDL_Event;
 typedef unsigned char Uint8;
 typedef unsigned short Uint16;
+typedef signed short Sint16;
 typedef unsigned int Uint32;
 typedef int SDL_AudioSpec;
 #endif

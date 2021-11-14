@@ -50,7 +50,7 @@ public:
     void Render(const eCamera *cam) override;
     void Render2D(tCoord scale) const override;
 
-    //virtual void SoundMix(Uint16 *dest,unsigned int len,
+    //virtual void SoundMix(Sint16 *dest,unsigned int len,
     //                      int viewer,REAL rvol,REAL lvol);
 #endif
 

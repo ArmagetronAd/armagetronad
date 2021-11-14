@@ -80,7 +80,7 @@ static int real_sound_sources=0;
 static tList<eSoundPlayer> se_globalPlayers;
 
 
-void fill_audio_core(void *udata, Uint16 *stream, int len)
+void fill_audio_core(void *udata, Sint16 *stream, int len)
 {
 #ifndef DEDICATED
     real_sound_sources=0;
@@ -130,12 +130,12 @@ void fill_audio(void *udata, Uint8 *stream, int len)
     if(is_aligned_16(stream, len))
     {
         // aligment is good
-        fill_audio_core(udata, reinterpret_cast<Uint16*>(stream), len);
+        fill_audio_core(udata, reinterpret_cast<Sint16*>(stream), len);
         return;
     }
     
     // temp copy to 16 bit buffer
-    static std::vector<Uint16> stream16;
+    static std::vector<Sint16> stream16;
     stream16.resize((len+1)/2);
     memcpy(&stream16[0], stream, len);
     fill_audio_core(udata, &stream16[0], len);
@@ -390,7 +390,66 @@ Uint16 *eLegacyWavData::GetData16()
 #endif
 }
 
-bool eLegacyWavData::Mix(Uint16 *dest,Uint32 playlen,eAudioPos &pos,
+#ifndef DEDICATED
+
+#define SPEED_FRACTION (1<<20)
+
+#define VOL_SHIFT 16
+#define VOL_FRACTION (1<<VOL_SHIFT)
+
+#define MAX_VAL ((1<<16)-1)
+#define MIN_VAL -(1<<16)
+
+namespace
+{
+struct partial_mix
+{
+    eAudioPos &pos;
+    Sint16 *dest{};
+    Uint32 playlen{};
+    Uint32 samples{};
+    int speed{};
+    int speed_fraction{};
+
+    partial_mix(eAudioPos &pos_):pos(pos_){}
+
+    template<typename POLLER> void mix(POLLER const &poller)
+    {
+        while (playlen>0 && pos.pos<samples){
+            auto current = poller(pos.pos);
+
+            int l=dest[0];
+            int r=dest[1];
+            l += current.first;
+            r += current.second;
+            if (r>MAX_VAL) r=MAX_VAL;
+            if (l>MAX_VAL) l=MAX_VAL;
+            if (r<MIN_VAL) r=MIN_VAL;
+            if (l<MIN_VAL) l=MIN_VAL;
+
+            dest[0]=l;
+            dest[1]=r;
+
+            dest+=2;
+
+            pos.pos+=speed;
+
+            pos.fraction+=speed_fraction;
+            while (pos.fraction>=SPEED_FRACTION){
+                pos.fraction-=SPEED_FRACTION;
+                pos.pos++;
+            }
+
+            playlen--;
+        }
+    }
+};
+
+}
+
+#endif
+
+bool eLegacyWavData::Mix(Sint16 *dest,Uint32 playlen,eAudioPos &pos,
                    REAL Rvol,REAL Lvol,REAL Speed,bool loop){
 #ifndef DEDICATED
     if ( !data )
@@ -422,14 +481,6 @@ bool eLegacyWavData::Mix(Uint16 *dest,Uint32 playlen,eAudioPos &pos,
         Lvol = thresh;
     }
 
-#define SPEED_FRACTION (1<<20)
-
-#define VOL_SHIFT 16
-#define VOL_FRACTION (1<<VOL_SHIFT)
-
-#define MAX_VAL ((1<<16)-1)
-#define MIN_VAL -(1<<16)
-
     // first, split the speed into the part before and after the decimal:
     if (Speed<0) Speed=0;
 
@@ -444,129 +495,104 @@ bool eLegacyWavData::Mix(Uint16 *dest,Uint32 playlen,eAudioPos &pos,
     int rvol=int(Rvol*VOL_FRACTION);
     int lvol=int(Lvol*VOL_FRACTION);
 
+    partial_mix mix{pos};
+    mix.dest = dest;
+    mix.playlen = playlen;
+    mix.samples = samples;
+    mix.speed = speed;
+    mix.speed_fraction = speed_fraction;
 
     bool goon=true;
 
     while (goon){
         if (spec.channels==2){
-            if (spec.format==AUDIO_U8)
-                while (playlen>0 && pos.pos<samples){
-                    // fix endian problems for the Mac port, as well as support for other
-                    // formats than  stereo...
-                    int l=dest[0];
-                    int r=dest[1];
-                    r += (rvol*(data[(pos.pos<<1)  ]-128)) >> (VOL_SHIFT-8);
-                    l += (lvol*(data[(pos.pos<<1)+1]-128)) >> (VOL_SHIFT-8);
-                    if (r>MAX_VAL) r=MAX_VAL;
-                    if (l>MAX_VAL) l=MAX_VAL;
-                    if (r<MIN_VAL) r=MIN_VAL;
-                    if (l<MIN_VAL) l=MIN_VAL;
+            switch(spec.format)
+            {
+                case AUDIO_U8:
+                {
+                    auto poller = [&](Uint32 pos)
+                    {
+                        auto r = (rvol*(data[(pos<<1)  ]-128)) >> (VOL_SHIFT-8);
+                        auto l = (lvol*(data[(pos<<1)+1]-128)) >> (VOL_SHIFT-8);
 
-                    dest[0]=l;
-                    dest[1]=r;
-
-                    dest+=2;
-
-                    pos.pos+=speed;
-
-                    pos.fraction+=speed_fraction;
-                    while (pos.fraction>=SPEED_FRACTION){
-                        pos.fraction-=SPEED_FRACTION;
-                        pos.pos++;
-                    }
-
-                    playlen--;
+                        return std::make_pair(l, r);
+                    };
+                    mix.mix(poller);
+                    break;
                 }
-            else{
-                Uint16 const *data16 = GetData16();
+                case AUDIO_U16LSB:
+                {
+                    Uint16 const *data16 = GetData16();
+                    auto poller = [&](Uint32 pos)
+                    {
+                        auto r = (rvol*(data16[(pos<<1)  ])) >> VOL_SHIFT;
+                        auto l = (lvol*(data16[(pos<<1)+1])) >> VOL_SHIFT;
 
-                while (playlen>0 && pos.pos<samples){
-                    int l=dest[0];
-                    int r=dest[1];
-                    r += (rvol*(data16[(pos.pos<<1)  ])) >> VOL_SHIFT;
-                    l += (lvol*(data16[(pos.pos<<1)+1])) >> VOL_SHIFT;
-                    if (r>MAX_VAL) r=MAX_VAL;
-                    if (l>MAX_VAL) l=MAX_VAL;
-                    if (r<MIN_VAL) r=MIN_VAL;
-                    if (l<MIN_VAL) l=MIN_VAL;
-
-                    dest[0]=l;
-                    dest[1]=r;
-
-                    dest+=2;
-
-                    pos.pos+=speed;
-
-                    pos.fraction+=speed_fraction;
-                    while (pos.fraction>=SPEED_FRACTION){
-                        pos.fraction-=SPEED_FRACTION;
-                        pos.pos++;
-                    }
-                    playlen--;
+                        return std::make_pair(l, r);
+                    };
+                    mix.mix(poller);
+                    break;
                 }
+                default:
+                    tASSERT(false);
+                    break;
             }
         }
-        else{
-            if (spec.format==AUDIO_U8){
-                while (playlen>0 && pos.pos<samples){
-                    // fix endian problems for the Mac port, as well as support for other
-                    // formats than  stereo...
-                    int l=dest[0];
-                    int r=dest[1];
-                    int d=data[pos.pos]-128;
-                    l += (lvol*d) >> (VOL_SHIFT-8);
-                    r += (rvol*d) >> (VOL_SHIFT-8);
-                    if (r>MAX_VAL) r=MAX_VAL;
-                    if (l>MAX_VAL) l=MAX_VAL;
-                    if (r<MIN_VAL) r=MIN_VAL;
-                    if (l<MIN_VAL) l=MIN_VAL;
-
-                    dest[0]=l;
-                    dest[1]=r;
-
-                    dest+=2;
-
-                    pos.pos+=speed;
-
-                    pos.fraction+=speed_fraction;
-                    while (pos.fraction>=SPEED_FRACTION){
-                        pos.fraction-=SPEED_FRACTION;
-                        pos.pos++;
-                    }
-
-                    playlen--;
-                }
-            }
-            else
+        else if(spec.channels==1)
+        {
+            switch(spec.format)
             {
-                Uint16 const *data16 = GetData16();                
+                case AUDIO_U8:
+                {
+                    auto poller = [&](Uint32 pos)
+                    {
+                        int d=data[pos]-128;
+                        auto l = (lvol*d) >> (VOL_SHIFT-8);
+                        auto r = (rvol*d) >> (VOL_SHIFT-8);
 
-                while (playlen>0 && pos.pos<samples){
-                    int l=dest[0];
-                    int r=dest[1];
-                    int d=data16[pos.pos];
-                    l += (lvol*d) >> VOL_SHIFT;
-                    r += (rvol*d) >> VOL_SHIFT;
-                    if (r>MAX_VAL) r=MAX_VAL;
-                    if (l>MAX_VAL) l=MAX_VAL;
-                    if (r<MIN_VAL) r=MIN_VAL;
-                    if (l<MIN_VAL) l=MIN_VAL;
-
-                    dest[0]=l;
-                    dest[1]=r;
-
-                    dest+=2;
-
-                    pos.pos+=speed;
-
-                    pos.fraction+=speed_fraction;
-                    while (pos.fraction>=SPEED_FRACTION){
-                        pos.fraction-=SPEED_FRACTION;
-                        pos.pos++;
-                    }
-                    playlen--;
+                        return std::make_pair(l, r);
+                    };
+                    mix.mix(poller);
+                    break;
                 }
+                case AUDIO_U16LSB:
+                {
+                    Uint16 const *data16 = GetData16();
+                    auto poller = [&](Uint32 pos)
+                    {
+                        int d=static_cast<int>(data16[pos])-0x7fff;
+                        auto l = (lvol*d) >> VOL_SHIFT;
+                        auto r = (rvol*d) >> VOL_SHIFT;
+
+                        return std::make_pair(l, r);
+                    };
+                    mix.mix(poller);
+                    break;
+                }
+                case AUDIO_S16LSB:
+                {
+                    Sint16 const *data16 = reinterpret_cast<Sint16 *>(GetData16());
+                    auto poller = [&](Uint32 pos)
+                    {
+                        int d=data16[pos];
+                        auto l = (lvol*d) >> VOL_SHIFT;
+                        auto r = (rvol*d) >> VOL_SHIFT;
+
+                        return std::make_pair(l, r);
+                    };
+                    mix.mix(poller);
+                    break;
+                }
+                default:
+                    tASSERT(false);
+                    break;
             }
+        }
+        else
+        {
+            // spec.channels value unsupported
+            tASSERT(spec.channels < 2);
+            break;
         }
 
         if (loop && pos.pos>=samples)
@@ -575,7 +601,7 @@ bool eLegacyWavData::Mix(Uint16 *dest,Uint32 playlen,eAudioPos &pos,
             goon=false;
     }
 #endif
-    return (playlen>0);
+    return (mix.playlen>0);
 
 }
 
@@ -656,7 +682,7 @@ eSoundPlayer::~eSoundPlayer()
     se_globalPlayers.Remove(this,id);
 }
 
-bool eSoundPlayer::Mix(Uint16 *dest,
+bool eSoundPlayer::Mix(Sint16 *dest,
                        Uint32 len,
                        int viewer,
                        REAL rvol,
