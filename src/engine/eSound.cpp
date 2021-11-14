@@ -98,11 +98,11 @@ void fill_audio_core(void *udata, Uint16 *stream, int len)
 
     if (real_sound_sources>sound_sources+4)
         loudness_thresh+=.01;
-    if (real_sound_sources>sound_sources+1)
+    else if (real_sound_sources>sound_sources+1)
         loudness_thresh+=.001;
-    if (real_sound_sources<sound_sources-4)
+    else if (real_sound_sources<sound_sources-4)
         loudness_thresh-=.001;
-    if (real_sound_sources<sound_sources-1)
+    else if (real_sound_sources<sound_sources-1)
         loudness_thresh-=.0001;
     if (loudness_thresh<0)
         loudness_thresh=0;
