@@ -423,6 +423,9 @@ test.appimage_server_64_ubuntu_oldest: upload/$(APPIMAGE_SERVER_64)
 test.appimage_client_64_ubuntu_latest: upload/$(APPIMAGE_CLIENT_64)
 test.appimage_client_64_ubuntu_oldest: upload/$(APPIMAGE_CLIENT_64)
 
+test.appimage_server_64_ubuntu_rolling: upload/$(APPIMAGE_SERVER_64)
+test.appimage_client_64_ubuntu_rolling: upload/$(APPIMAGE_CLIENT_64)
+
 test.appimage_client_64_ubuntu_latest_skewed: upload/$(APPIMAGE_CLIENT_64)
 test.appimage_client_64_ubuntu_oldest_skewed: upload/$(APPIMAGE_CLIENT_64)
 
@@ -447,7 +450,7 @@ test.%: context/tests/Dockerfile.%
 	cp $^ $@.dir
 	cd $@.dir; docker rmi $*:last || true
 	cd $@.dir; docker tag $*:latest $*:last || true
-	cd $@.dir; docker build . -f Dockerfile.* -t $*:latest
+	cd $@.dir; docker build . -f Dockerfile.* --pull -t $*:latest
 	cd $@.dir; docker rmi $*:last || true
 	echo > $@
 
@@ -458,6 +461,8 @@ appimagetests.tag: \
 	test.appimage_client_64_ubuntu_oldest \
 	test.appimage_client_64_ubuntu_latest_skewed \
 	test.appimage_client_64_ubuntu_oldest_skewed \
+	test.appimage_server_64_ubuntu_rolling \
+	test.appimage_client_64_ubuntu_rolling \
 	test.appimage_server_64_fedora_latest \
 	test.appimage_server_64_fedora_oldest \
 	test.appimage_client_64_fedora_latest \
