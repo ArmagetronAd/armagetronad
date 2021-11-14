@@ -600,9 +600,9 @@ bool eLegacyWavData::Mix(Sint16 *dest,Uint32 playlen,eAudioPos &pos,
         else
             goon=false;
     }
-#endif
     return (mix.playlen>0);
-
+#endif
+    return false;
 }
 
 void eLegacyWavData::Loop(){
