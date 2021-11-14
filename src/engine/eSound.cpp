@@ -410,6 +410,8 @@ struct partial_mix
     Uint32 samples{};
     int speed{};
     int speed_fraction{};
+    int lvol{};
+    int rvol{};
 
     partial_mix(eAudioPos &pos_):pos(pos_){}
 
@@ -420,8 +422,8 @@ struct partial_mix
 
             int l=dest[0];
             int r=dest[1];
-            l += current.first;
-            r += current.second;
+            l += (lvol*current.first) >> VOL_SHIFT;
+            r += (rvol*current.second) >> VOL_SHIFT;
             if (r>MAX_VAL) r=MAX_VAL;
             if (l>MAX_VAL) l=MAX_VAL;
             if (r<MIN_VAL) r=MIN_VAL;
@@ -491,16 +493,16 @@ bool eLegacyWavData::Mix(Sint16 *dest,Uint32 playlen,eAudioPos &pos,
     int speed=int(floor(Speed));
     int speed_fraction=int(SPEED_FRACTION*(Speed-speed));
 
-    // secondly, make integers out of the volumes:
-    int rvol=int(Rvol*VOL_FRACTION);
-    int lvol=int(Lvol*VOL_FRACTION);
-
     partial_mix mix{pos};
     mix.dest = dest;
     mix.playlen = playlen;
     mix.samples = samples;
     mix.speed = speed;
     mix.speed_fraction = speed_fraction;
+
+    // make integers out of the volumes:
+    mix.rvol=int(Rvol*VOL_FRACTION);
+    mix.lvol=int(Lvol*VOL_FRACTION);
 
     bool goon=true;
 
@@ -512,8 +514,8 @@ bool eLegacyWavData::Mix(Sint16 *dest,Uint32 playlen,eAudioPos &pos,
                 {
                     auto poller = [&](Uint32 pos)
                     {
-                        auto r = (rvol*(data[(pos<<1)  ]-128)) >> (VOL_SHIFT-8);
-                        auto l = (lvol*(data[(pos<<1)+1]-128)) >> (VOL_SHIFT-8);
+                        auto r = (static_cast<int>(data[(pos<<1)  ])-128) << 8;
+                        auto l = (static_cast<int>(data[(pos<<1)+1])-128) << 8;
 
                         return std::make_pair(l, r);
                     };
@@ -525,9 +527,9 @@ bool eLegacyWavData::Mix(Sint16 *dest,Uint32 playlen,eAudioPos &pos,
                     Uint16 const *data16 = GetData16();
                     auto poller = [&](Uint32 pos)
                     {
-                        auto r = (rvol*(data16[(pos<<1)  ])) >> VOL_SHIFT;
-                        auto l = (lvol*(data16[(pos<<1)+1])) >> VOL_SHIFT;
-
+                        auto r = (static_cast<int>(data16[(pos<<1)  ])-0x8000);
+                        auto l = (static_cast<int>(data16[(pos<<1)+1])-0x8000);
+ 
                         return std::make_pair(l, r);
                     };
                     mix.mix(poller);
@@ -546,11 +548,9 @@ bool eLegacyWavData::Mix(Sint16 *dest,Uint32 playlen,eAudioPos &pos,
                 {
                     auto poller = [&](Uint32 pos)
                     {
-                        int d=data[pos]-128;
-                        auto l = (lvol*d) >> (VOL_SHIFT-8);
-                        auto r = (rvol*d) >> (VOL_SHIFT-8);
+                        int d=(static_cast<int>(data[pos])-128) << 8;
 
-                        return std::make_pair(l, r);
+                        return std::make_pair(d, d);
                     };
                     mix.mix(poller);
                     break;
@@ -560,11 +560,9 @@ bool eLegacyWavData::Mix(Sint16 *dest,Uint32 playlen,eAudioPos &pos,
                     Uint16 const *data16 = GetData16();
                     auto poller = [&](Uint32 pos)
                     {
-                        int d=static_cast<int>(data16[pos])-0x7fff;
-                        auto l = (lvol*d) >> VOL_SHIFT;
-                        auto r = (rvol*d) >> VOL_SHIFT;
+                        int d=static_cast<int>(data16[pos])-0x8000;
 
-                        return std::make_pair(l, r);
+                        return std::make_pair(d, d);
                     };
                     mix.mix(poller);
                     break;
@@ -575,10 +573,8 @@ bool eLegacyWavData::Mix(Sint16 *dest,Uint32 playlen,eAudioPos &pos,
                     auto poller = [&](Uint32 pos)
                     {
                         int d=data16[pos];
-                        auto l = (lvol*d) >> VOL_SHIFT;
-                        auto r = (rvol*d) >> VOL_SHIFT;
-
-                        return std::make_pair(l, r);
+ 
+                        return std::make_pair(d, d);
                     };
                     mix.mix(poller);
                     break;
