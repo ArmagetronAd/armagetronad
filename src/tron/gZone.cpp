@@ -5624,7 +5624,7 @@ bool gFlagZoneHack::Timestep( REAL time )
             {
                 gCycle *other=dynamic_cast<gCycle *>(gameObjects(i));
 
-                if (other )
+                if ( other && other->Team() )
                 {
                     // eTeam * otherTeam = other->Player()->CurrentTeam();
                     eCoord otherpos = other->Position() - pos;
