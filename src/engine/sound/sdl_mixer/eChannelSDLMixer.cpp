@@ -60,11 +60,6 @@ eWavData::eWavData(const char* filename) {
 
 void eWavData::LoadWavFile(const char* filename) {
 #ifdef HAVE_LIBSDL_MIXER
-#ifdef MACOSX
-    // BUG: This call is very very slow on my system. Disable it until I figure out what is wrong. -- Dan
-    return;
-#endif
-
     m_WavData = Mix_LoadWAV(filename);
 
     if(!m_WavData) {
