@@ -1,4 +1,4 @@
-FROM centos:8
+FROM centos:latest
 
 COPY *.AppImage .
 RUN ./*.AppImage --appimage-extract-and-run --version
