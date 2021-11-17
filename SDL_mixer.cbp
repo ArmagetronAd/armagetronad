@@ -1,199 +1,126 @@
-<?xml version="1.0"?>
-<!DOCTYPE CodeBlocks_project_file>
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_project_file>
-	<FileVersion major="1" minor="1"/>
+	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="SDL_mixer"/>
-		<Option makefile="Makefile"/>
-		<Option makefile_is_custom="0"/>
-		<Option default_target="-1"/>
-		<Option compiler="0"/>
+		<Option title="SDL_mixer" />
+		<Option pch_mode="0" />
+		<Option compiler="gcc" />
 		<Build>
 			<Target title="Win32 Release">
-				<Option output="..\dist\SDL_mixer.dll"/>
-				<Option working_dir="."/>
-				<Option object_output="tmp\SDL_mixer___Win32_Release"/>
-				<Option deps_output=".deps"/>
-				<Option type="3"/>
-				<Option compiler="0"/>
-				<Option createDefFile="1"/>
-				<Option createStaticLib="1"/>
+				<Option output="../dist/SDL_mixer.dll" imp_lib="$(TARGET_OUTPUT_DIR)lib$(TARGET_OUTPUT_BASENAME).a" def_file="$(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME)" prefix_auto="0" extension_auto="0" />
+				<Option object_output="tmp/SDL_mixer___Win32_Release" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
 				<Compiler>
-					<Add option="-O2"/>
-					<Add option="-W"/>
-					<Add option="-DNDEBUG"/>
+					<Add option="-O2" />
+					<Add option="-W" />
+					<Add option="-DNDEBUG" />
 				</Compiler>
 				<Linker>
-					<Add library="..\dist\libSDL.a"/>
-					<Add library="..\dist\libmikmod.a"/>
+					<Add library="../dist/libSDL.a" />
+					<Add library="../dist/libmikmod.a" />
 				</Linker>
 			</Target>
 			<Target title="Win32 Debug">
-				<Option output="..\debug\SDL_mixer.dll"/>
-				<Option working_dir="."/>
-				<Option object_output="tmp\SDL_mixer___Win32_Debug"/>
-				<Option deps_output=".deps"/>
-				<Option type="3"/>
-				<Option compiler="0"/>
-				<Option createDefFile="1"/>
-				<Option createStaticLib="1"/>
+				<Option output="../debug/SDL_mixer.dll" imp_lib="$(TARGET_OUTPUT_DIR)lib$(TARGET_OUTPUT_BASENAME).a" def_file="$(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME)" prefix_auto="0" extension_auto="0" />
+				<Option object_output="tmp/SDL_mixer___Win32_Debug" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
 				<Compiler>
-					<Add option="-W"/>
-					<Add option="-g"/>
-					<Add option="-D_DEBUG"/>
+					<Add option="-W" />
+					<Add option="-g" />
+					<Add option="-D_DEBUG" />
 				</Compiler>
 				<Linker>
-					<Add library="..\debug\libSDL.a"/>
-					<Add library="..\debug\libmikmod.a"/>
+					<Add library="../debug/libSDL.a" />
+					<Add library="../debug/libmikmod.a" />
 				</Linker>
 			</Target>
 		</Build>
+		<VirtualTargets>
+			<Add alias="All" targets="Win32 Release;Win32 Debug;" />
+		</VirtualTargets>
 		<Compiler>
-			<Add option="-fexceptions"/>
-			<Add option="-DWIN32"/>
-			<Add option="-D_WINDOWS"/>
-			<Add option="-DWAV_MUSIC"/>
-			<Add option="-DMOD_MUSIC"/>
-			<Add directory="..\winlibs\SDL\include"/>
-			<Add directory="..\winlibs\SDL_mixer\mikmod"/>
+			<Add option="-fexceptions" />
+			<Add option="-DWIN32" />
+			<Add option="-D_WINDOWS" />
+			<Add option="-DWAV_MUSIC" />
+			<Add option="-DMOD_MUSIC" />
+			<Add directory="../winlibs/SDL/include" />
+			<Add directory="../winlibs/SDL_mixer/mikmod" />
 		</Compiler>
-		<Unit filename="..\winlibs\SDL_mixer\SDL_mixer.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
+		<Unit filename="../winlibs/SDL_mixer/SDL_mixer.h" />
+		<Unit filename="../winlibs/SDL_mixer/VisualC/Version.rc">
+			<Option compilerVar="WINDRES" />
 		</Unit>
-		<Unit filename="..\winlibs\SDL_mixer\VisualC\Version.rc">
-			<Option compilerVar="WINDRES"/>
-			<Option objectName="winlibs\SDL_mixer\VisualC\Version.res"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
+		<Unit filename="../winlibs/SDL_mixer/VisualC/vorbis/lib/ogg_static.lib" />
+		<Unit filename="../winlibs/SDL_mixer/VisualC/vorbis/lib/vorbis_static.lib" />
+		<Unit filename="../winlibs/SDL_mixer/VisualC/vorbis/lib/vorbisfile_static.lib" />
+		<Unit filename="../winlibs/SDL_mixer/dynamic_flac.c">
+			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\winlibs\SDL_mixer\VisualC\vorbis\lib\ogg_static.lib">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
+		<Unit filename="../winlibs/SDL_mixer/dynamic_flac.h" />
+		<Unit filename="../winlibs/SDL_mixer/dynamic_mod.c">
+			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\winlibs\SDL_mixer\VisualC\vorbis\lib\vorbis_static.lib">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
+		<Unit filename="../winlibs/SDL_mixer/dynamic_mp3.c">
+			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\winlibs\SDL_mixer\VisualC\vorbis\lib\vorbisfile_static.lib">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
+		<Unit filename="../winlibs/SDL_mixer/dynamic_ogg.c">
+			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\winlibs\SDL_mixer\effect_position.c">
-			<Option compilerVar="CC"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
+		<Unit filename="../winlibs/SDL_mixer/effect_position.c">
+			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\winlibs\SDL_mixer\effect_stereoreverse.c">
-			<Option compilerVar="CC"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
+		<Unit filename="../winlibs/SDL_mixer/effect_stereoreverse.c">
+			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\winlibs\SDL_mixer\effects_internal.c">
-			<Option compilerVar="CC"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
+		<Unit filename="../winlibs/SDL_mixer/effects_internal.c">
+			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\winlibs\SDL_mixer\effects_internal.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
+		<Unit filename="../winlibs/SDL_mixer/effects_internal.h" />
+		<Unit filename="../winlibs/SDL_mixer/load_aiff.c">
+			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\winlibs\SDL_mixer\load_aiff.c">
-			<Option compilerVar="CC"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
+		<Unit filename="../winlibs/SDL_mixer/load_aiff.h" />
+		<Unit filename="../winlibs/SDL_mixer/load_flac.c">
+			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\winlibs\SDL_mixer\load_aiff.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
+		<Unit filename="../winlibs/SDL_mixer/load_flac.h" />
+		<Unit filename="../winlibs/SDL_mixer/load_ogg.c">
+			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\winlibs\SDL_mixer\load_ogg.c">
-			<Option compilerVar="CC"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
+		<Unit filename="../winlibs/SDL_mixer/load_ogg.h" />
+		<Unit filename="../winlibs/SDL_mixer/load_voc.c">
+			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\winlibs\SDL_mixer\load_ogg.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
+		<Unit filename="../winlibs/SDL_mixer/load_voc.h" />
+		<Unit filename="../winlibs/SDL_mixer/mixer.c">
+			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\winlibs\SDL_mixer\load_voc.c">
-			<Option compilerVar="CC"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
+		<Unit filename="../winlibs/SDL_mixer/music.c">
+			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\winlibs\SDL_mixer\load_voc.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
+		<Unit filename="../winlibs/SDL_mixer/music_cmd.c">
+			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\winlibs\SDL_mixer\mixer.c">
-			<Option compilerVar="CC"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
+		<Unit filename="../winlibs/SDL_mixer/music_cmd.h" />
+		<Unit filename="../winlibs/SDL_mixer/music_mod.c">
+			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\winlibs\SDL_mixer\music.c">
-			<Option compilerVar="CC"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
+		<Unit filename="../winlibs/SDL_mixer/music_mod.h" />
+		<Unit filename="../winlibs/SDL_mixer/music_ogg.c">
+			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\winlibs\SDL_mixer\music_cmd.c">
-			<Option compilerVar="CC"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
+		<Unit filename="../winlibs/SDL_mixer/music_ogg.h" />
+		<Unit filename="../winlibs/SDL_mixer/wavestream.c">
+			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="..\winlibs\SDL_mixer\music_cmd.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\winlibs\SDL_mixer\music_ogg.c">
-			<Option compilerVar="CC"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\winlibs\SDL_mixer\music_ogg.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\winlibs\SDL_mixer\wavestream.c">
-			<Option compilerVar="CC"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
-		<Unit filename="..\winlibs\SDL_mixer\wavestream.h">
-			<Option compilerVar=""/>
-			<Option compile="0"/>
-			<Option link="0"/>
-			<Option target="Win32 Release"/>
-			<Option target="Win32 Debug"/>
-		</Unit>
+		<Unit filename="../winlibs/SDL_mixer/wavestream.h" />
+		<Extensions />
 	</Project>
 </CodeBlocks_project_file>

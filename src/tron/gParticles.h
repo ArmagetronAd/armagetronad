@@ -20,7 +20,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
@@ -81,7 +81,7 @@ public:
     virtual ~gParticles(){}
 
     virtual bool Timestep(REAL currentTime);
-    virtual void GiveBirth(REAL currentTime = 0.0f);   // creates a new particle in the system
+    virtual void GiveBirth(REAL currentTime = 0.0f) = 0;   // creates a new particle in the system
 #ifndef DEDICATED
     virtual void Render(const eCamera *cam);
 #endif
