@@ -7481,15 +7481,24 @@ bool gSpeedZoneHack::Timestep( REAL time )
 //!
 // *******************************************************************************
 
+static REAL sg_accelZoneRate=40;
+static tSettingItem<REAL> sg_accelZoneRateConf("ACCELZONE_RATE",sg_accelZoneRate);
+
 void gSpeedZoneHack::OnEnter( gCycle * target, REAL time )
 {
-    if (speedType_ == TYPE_ACCEL)
+    switch(speedType_)
     {
-        target->verletSpeed_ += setSpeed_;
-    }
-    else if (speedType_ == TYPE_SPEED)
-    {
-        target->verletSpeed_ = setSpeed_;
+        case TYPE_ACCEL:
+            if(sg_accelZoneRate != 0.0)
+            {
+                REAL timestep = time - lastTime;
+                target->verletSpeed_ += setSpeed_ * ( sg_accelZoneRate * timestep );
+            }
+            else target->verletSpeed_ += setSpeed_;
+            break;
+        case TYPE_SPEED:
+            target->verletSpeed_ = setSpeed_;
+            break;
     }
 }
 
