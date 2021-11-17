@@ -154,6 +154,7 @@ gZone * sg_CreateWinDeathZone( eGrid * grid, const eCoord & pos )
     if ( sg_zoneDeath )
     {
         ret = tNEW( gDeathZoneHack( grid, pos ) );
+        ret->SetEffect(tString("death"));
         sn_ConsoleOut( "$instant_death_activated" );
 
         sg_deathZoneActivated << ret->GetID() << ret->GetName() << ret->MapPosition().x << ret->MapPosition().y;
@@ -162,6 +163,7 @@ gZone * sg_CreateWinDeathZone( eGrid * grid, const eCoord & pos )
     else
     {
         ret = tNEW( gWinZoneHack( grid, pos ) );
+        ret->SetEffect(tString("win"));
         if ( sg_currentSettings->gameType != gFREESTYLE )
         {
             sn_ConsoleOut( "$instant_win_activated" );
