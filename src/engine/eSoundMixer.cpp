@@ -278,25 +278,17 @@ void eSoundMixer::Init() {
         frequency=22050;
     }
 
-    int rc;
-
     // guesstimate the desired number of samples to calculate in advance
-    int samples = static_cast< int >( (buffersize * frequency) / 120 );
+    int samples = std::max(128, static_cast< int >( (buffersize * frequency) / 120 ));
 
-    rc = Mix_OpenAudio( frequency, AUDIO_S16LSB,
-                        numSoundcardChannels, samples );
-
-    // try fallbacks
-    if( rc!=0 )
-    {
-        rc = Mix_OpenAudio( frequency, AUDIO_S16LSB,
+    int rc = Mix_OpenAudio( frequency, AUDIO_S16LSB,
                             2, samples );
 
-        if( rc!=0 )
-        {
-            rc = Mix_OpenAudio( 22050, AUDIO_S16LSB,
-                                2, samples );
-        }
+    // try fallback
+    if( rc!=0 )
+    {
+        rc = Mix_OpenAudio( 22050, AUDIO_S16LSB,
+                            2, samples );
     }
         
     if(rc==0) {
@@ -620,10 +612,12 @@ static rPerFrameTask mixupdate(&updateMixer);
 
 uMenu Sound_menu("$sound_menu_text");
 
+/*
 static uMenuItemInt sources_men
 (&Sound_menu,"$sound_channels",
  "$sound_channels_help",
  numSoundcardChannels,2,6,2);
+*/
 
 static uMenuItemSelection<int> sq_men
 (&Sound_menu,"$sound_menu_quality_text",
