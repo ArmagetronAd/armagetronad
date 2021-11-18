@@ -112,7 +112,7 @@ static tSettingItem<REAL> sg_ballCycleBoostConf( "BALL_CYCLE_ACCEL_BOOST", sg_ba
 static bool sg_ballAutoRespawn = 1;
 static tSettingItem<bool> sg_ballAutoRespawnConf( "BALL_AUTORESPAWN", sg_ballAutoRespawn );
 
-REAL sg_cycleZonesApproach = 1000.0;
+REAL sg_cycleZonesApproach = 2000.0;
 static tSettingItem<REAL>sg_cycleZoneApprochConf("CYCLE_ZONES_APPROCH", sg_cycleZonesApproach);
 static tSettingItem<REAL>sg_cycleZoneApproachConf("CYCLE_ZONES_APPROACH", sg_cycleZonesApproach);
 
@@ -1603,10 +1603,19 @@ static bool TriggerAimZone(gCycle * cycle, gZone * zone, REAL currentTime)
         }
 #endif
         
-        if(reldir < M_PI)
-            cycle->Act(&gCycle::se_turnLeft, 1);
-        else if(reldir != M_PI)
-            cycle->Act(&gCycle::se_turnRight, 1);
+        eCoord diff = zone->Position() - cycle->Position();
+        eCoord diffEdge = ( diff * (1/(diff.Norm())) ) * (diff.Norm() - zone->GetRadius());
+        
+        gSensor p(cycle, cycle->Position(), diffEdge);
+        p.detect(1.f);
+        
+        if(p.hit >= 1.f)
+        {
+            if(reldir < M_PI)
+                cycle->Act(&gCycle::se_turnLeft, 1);
+            else if(reldir != M_PI)
+                cycle->Act(&gCycle::se_turnRight, 1);
+        }
         
         return true;
     }
