@@ -88,6 +88,7 @@ public:
 // defines the used functions, we thus need to include it before
 // we define macros for them
 #include <string.h>
+#include <iostream>
 
 // macros replacing C memory management
 #define malloc(SIZE)                static_cast<void *>(tNEW(char)[SIZE])
