@@ -2022,6 +2022,10 @@ void gZone::Render( const eCamera * cam )
 //!     @return
 //!
 // *******************************************************************************
+
+static bool sg_zoneRotationAnimate = true;
+static tSettingItem<bool> sg_zoneRotationAnimateConf("SVG_ZONE_ROTATION_ANIMATE", sg_zoneRotationAnimate);
+
 //! draws it in a svg file
 void gZone::DrawSvg(std::ofstream &f) {
     REAL r = Radius();
@@ -2034,19 +2038,24 @@ void gZone::DrawSvg(std::ofstream &f) {
         return;
     alpha *= sg_zoneAlpha * sg_zoneAlphaServer;
 
+    REAL offset = 180.f * ( atan2f(rotation_.y, rotation_.x) / M_PI );
+
     f << "  <circle cx=\"0\" cy=\"0\" r=\"" << r << "\" fill=\"none\" stroke='" << gSvgColor(color_) << "' stroke-width=\"1\" stroke-dasharray=\""
       << dash << ", " << dash << "\" opacity=\"" <<  alpha << "\" transform=\"translate("
-      << pos.x << " " << -pos.y << ")\">\n";
+      << pos.x << " " << -pos.y << " ) rotate(" << -offset << ")\">\n";
+if(sg_zoneRotationAnimate)
+{
     REAL speed = GetRotationSpeed();
     if(fabs(speed) > EPS) {
         REAL t = fabs(2*M_PI/speed);
         f << "    <animateTransform attributeName=\"transform\" attributeType=\"XML\" type=\"rotate\" from=\"0\" to=\"";
-        if(speed < 0) {
+        if(speed > 0) {
             f << '-';
         }
         f << "360\" dur=\""
           << t << "\" repeatCount=\"indefinite\" additive=\"sum\" />\n";
     }
+}
     f << "  </circle>\n";
 
 }
