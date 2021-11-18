@@ -5497,7 +5497,11 @@ void gCycle::DrawSvg(std::ofstream &f) {
         if(alpha <= 0) return;
     }
     eCoord p = PredictPosition(), dir = Direction();
+#if 1
+    float a = 180.f * ( atan2f(dir.y, dir.x) / M_PI );
+#else
     float a = Grid()->GetWindingAngle(WindingNumber())*180/M_PI;
+#endif
     f << "  <use xlink:href='#cycle' fill='" << gSvgColor(color_) << "' transform=\"translate(" << pos.x << " " << -pos.y
       << ") rotate(" << -a << ")\" opacity=\"" << alpha << "\" />\n";
     if (Player()) {

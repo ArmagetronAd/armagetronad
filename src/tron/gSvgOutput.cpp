@@ -133,6 +133,7 @@ void SvgOutput::DrawWalls(tList<gNetPlayerWall> &list) {
             curDist = (curDist - begDist) / lenDist;
             if(prevDangerous) {
                 eCoord v = endPos - begPos, begin = begPos + v * prevDist, end = begPos + v * curDist;
+                if( (end - begin).Norm() == 0 ) continue; // if 0-length, probably not a real wall
                 svgFile << "\t<path d='M" << begin.x << ',' << -begin.y
                         << ' ' << end.x << ',' << -end.y << "' stroke='" << gSvgColor(cycle->color_) << '\'';
                 if(alpha != 1) {
