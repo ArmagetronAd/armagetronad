@@ -111,6 +111,17 @@ static tConfItem<int> se("MUSIC_ACTIVE", musicActive);
 float buffersize = 1.0;
 static tConfItem<float> sbs("SOUND_BUFFER_SIZE", buffersize);
 
+namespace
+{
+static tConfigMigration migrate([](tString const &savedInVersion){
+    // default for buffersize changed from 4 to 1, 4 would mean 30 ms sound latency, clearly too much
+    if(buffersize > 1 && tConfigMigration::SavedBefore(savedInVersion, "0.4.0_alpha_z5226"))
+    {
+        buffersize = 1;
+    }
+});
+}
+
 tString titleTrack("music/titletrack.ogg");
 static tConfItemLine stt("TITLE_TRACK", titleTrack);
 
