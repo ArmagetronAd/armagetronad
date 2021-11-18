@@ -1,4 +1,5 @@
-FROM ubuntu:20.04
+FROM ubuntu:latest
+# latest = latest LTS
 
 COPY *.AppImage .
 RUN ./*.AppImage --appimage-extract-and-run --version

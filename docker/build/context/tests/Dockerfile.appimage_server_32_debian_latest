@@ -1,4 +1,4 @@
-FROM i386/debian:10
+FROM i386/debian:latest
 
 COPY *.AppImage .
 RUN ./*.AppImage --appimage-extract-and-run --version
