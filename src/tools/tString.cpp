@@ -1366,7 +1366,7 @@ tString tColoredString::RemoveColorsLoose( const char * c )
 {
     tString ret;
     int len = strlen(c);
-    
+
     // walk through string
     while(*c!='\0')
     {
@@ -1400,7 +1400,7 @@ tString tColoredString::EscapeBadColors(const char *c,std::string lastKnownGoodC
 {
     tString ret;
     int len = strlen(c);
-    
+
     // walk through string
     while(*c!='\0')
     {

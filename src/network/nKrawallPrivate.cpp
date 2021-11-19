@@ -39,9 +39,13 @@ the executable is not distributed).
 #include "tConfiguration.h"
 #include "tArray.h"
 
+#include <algorithm>
 #include <string>
+#include <iostream>
+#include <sstream>
 #include <vector>
 #include <map>
+#include <iterator>
 
 static nKrawall::nMethod sn_bmd5("bmd5"), sn_md5("md5");
 
@@ -451,30 +455,264 @@ void nKrawall::CheckScrambledPassword( nCheckResultBase & result,
     }
 }
 
-//  shorthand code BEGIN
+//!<  Shorthand code BEGIN
+
+//  Custom Shorthand List: Keeps a list of shorthands to connect to
+class CustomShorthandClass
+{
+    public:
+        tString shorthand;
+        bool enabled = true;
+        std::map<int, tString> links;
+
+        CustomShorthandClass() {}
+        CustomShorthandClass(tString s, tString link)
+        {
+            shorthand = s;
+            enabled = true;
+            links.insert({links.size(), link});
+        }
+};
+static tList<CustomShorthandClass> sn_CustomShorthandList;
+
+static void sn_CustomShorthandAdd(std::istream &s)
+{
+    int pos = 0;
+    tString params;
+    params.ReadLine(s);
+
+    tString shorthand = params.ExtractNonBlankSubString(pos);
+    tString link      = params.ExtractNonBlankSubString(pos);
+
+    if (shorthand.Filter() != "")
+    {
+        if (link.Filter() != "")
+        {
+            bool found = false;
+            CustomShorthandClass *sData;
+
+            if (sn_CustomShorthandList.Len() > 0)
+            {
+                for(int i = 0; i < sn_CustomShorthandList.Len(); i++)
+                {
+                    CustomShorthandClass *sShort = sn_CustomShorthandList[i];
+                    if (sShort->shorthand == shorthand.Filter())
+                    {
+                        found = true;
+                        sData = sShort;
+                        break;
+                    }
+                }
+            }
+
+            if(found)
+            {
+                bool sLinkFound = false;
+                for(int i = 0; i < sData->links.size(); i++)
+                {
+                    tString sLink = sData->links.at(i);
+                    if (sLink == link.Filter())
+                    {
+                        sLinkFound = true;
+                        break;
+                    }
+                }
+
+                if (!sLinkFound)
+                {
+                    sData->links.insert({sData->links.size(), link});
+                    sn_ConsoleOut(tOutput("$custom_shorthand_link_added", sData->shorthand, link.Filter()), 0);
+                }
+                else sn_ConsoleOut(tOutput("$custom_shorthand_link_exists", sData->shorthand), 0);
+            }
+            else
+            {
+               sn_CustomShorthandList.Insert(new CustomShorthandClass(shorthand.Filter(), link.Filter()));
+               sn_ConsoleOut(tOutput("$custom_shorthand_added", shorthand, link.Filter()), 0);
+            }
+        }
+    }
+}
+static tConfItemFunc sn_CustomShorthandAddConf("CUSTOM_SHORTHAND_ADD", &sn_CustomShorthandAdd);
+static tAccessLevelSetter sn_CustomShorthandAddConfLevel( sn_CustomShorthandAddConf, tAccessLevel_Moderator );
+
+static void sn_CustomShorthandRemove(std::istream &s)
+{
+    int pos = 0;
+    tString params;
+    params.ReadLine(s);
+
+    tString shorthand = params.ExtractNonBlankSubString(pos);
+
+    if (shorthand.Filter() != "")
+    {
+        bool found = false;
+        int foundKey = 0;
+        for(int i = 0; i < sn_CustomShorthandList.Len(); i++)
+        {
+            CustomShorthandClass *sShort = sn_CustomShorthandList[i];
+            if (sShort->shorthand == shorthand.Filter())
+            {
+                found = true;
+                foundKey = i;
+                break;
+            }
+        }
+
+        if(found)
+        {
+            sn_CustomShorthandList.RemoveAt(foundKey);
+            sn_ConsoleOut(tOutput("$custom_shorthand_removed", shorthand.Filter()), 0);
+        }
+        else sn_ConsoleOut(tOutput("$custom_shorthand_does_not_exist", shorthand.Filter()), 0);
+    }
+}
+static tConfItemFunc sn_CustomShorthandRemoveConf("CUSTOM_SHORTHAND_REMOVE", &sn_CustomShorthandRemove);
+static tAccessLevelSetter sn_CustomShorthandRemoveConfLevel( sn_CustomShorthandRemoveConf, tAccessLevel_Moderator );
+
+static void sn_CustomShorthandAllowed(std::istream &s)
+{
+    int pos = 0;
+    tString params;
+    params.ReadLine(s);
+
+    tString shorthand  = params.ExtractNonBlankSubString(pos);
+    tString booleanStr = params.ExtractNonBlankSubString(pos);
+
+    bool is_enabled;
+    if (booleanStr.toInt() >= 1)
+        is_enabled = true;
+    else
+        is_enabled = false;
+
+    if (shorthand.Filter() != "")
+    {
+        bool found = false;
+        CustomShorthandClass *sData;
+        for(int i = 0; i < sn_CustomShorthandList.Len(); i++)
+        {
+            sData = sn_CustomShorthandList[i];
+            if (sData->shorthand == shorthand.Filter())
+            {
+                found = true;
+                break;
+            }
+        }
+
+        if(found)
+        {
+            if (sData->enabled != is_enabled)
+            {
+                sData->enabled = is_enabled;
+
+                if (sData->enabled)
+                    sn_ConsoleOut(tOutput("$custom_shorthand_allowed", sData->shorthand), 0);
+                else
+                    sn_ConsoleOut(tOutput("$custom_shorthand_notallowed", sData->shorthand), 0);
+            }
+            else sn_ConsoleOut(tOutput("$custom_shorthand_allowed_nodiff", sData->shorthand), 0);
+        }
+        else sn_ConsoleOut(tOutput("$custom_shorthand_does_not_exist", shorthand.Filter()), 0);
+    }
+}
+static tConfItemFunc sn_CustomShorthandAllowedConf("CUSTOM_SHORTHAND_ALLOWED", &sn_CustomShorthandAllowed);
+static tAccessLevelSetter sn_CustomShorthandAllowedConfLevel( sn_CustomShorthandAllowedConf, tAccessLevel_Moderator );
+
+static void sn_CustomShorthandViewList(std::istream &s)
+{
+    tOutput out;
+    out << "Custom Shorthand (" << sn_CustomShorthandList.Len() << "): ";
+    if (sn_CustomShorthandList.Len() > 0)
+    {
+        for(int i = 0; i < sn_CustomShorthandList.Len(); i++)
+        {
+            out << sn_CustomShorthandList[i]->shorthand << "|";
+            if (sn_CustomShorthandList[i]->enabled)
+                out << "T";
+            else out << "F";
+            out << ", ";
+        }
+    }
+    out << "\n";
+    sn_ConsoleOut(out, 0);
+}
+static tConfItemFunc sn_CustomShorthandViewListConf("CUSTOM_SHORTHAND_LIST", &sn_CustomShorthandViewList);
+static tAccessLevelSetter sn_CustomShorthandViewListConfLevel( sn_CustomShorthandViewListConf, tAccessLevel_Moderator );
+
+static void sn_CustomShorthandLinksList(std::istream &s)
+{
+    int pos = 0;
+    tString params;
+    params.ReadLine(s);
+
+    tString shorthand = params.ExtractNonBlankSubString(pos);
+
+    if (shorthand.Filter() != "")
+    {
+        bool found = false;
+        CustomShorthandClass *sData;
+        for(int i = 0; i < sn_CustomShorthandList.Len(); i++)
+        {
+            sData = sn_CustomShorthandList[i];
+            if (sData->shorthand == shorthand.Filter())
+            {
+                found = true;
+                break;
+            }
+        }
+
+        if(found)
+        {
+            tString data;
+            for(int j = 0; j < sData->links.size(); j++)
+                data << sData->links.at(j) << ", ";
+
+            con <<  "Custom Shorthand '" << sData->shorthand << "': " << data << "\n";
+        }
+        else sn_ConsoleOut(tOutput("$custom_shorthand_does_not_exist", shorthand.Filter()), 0);
+    }
+}
+static tConfItemFunc sn_CustomShorthandLinksListConf("CUSTOM_SHORTHAND_LINKS_LIST", &sn_CustomShorthandLinksList);
+static tAccessLevelSetter sn_CustomShorthandLinksListConfLevel( sn_CustomShorthandLinksListConf, tAccessLevel_Moderator );
+
 bool sn_CustomShorthandEnabled = false;
 static tSettingItem<bool> sn_CustomShorthandEnabledConf("CUSTOM_SHORTHAND_ENABLED", sn_CustomShorthandEnabled);
-
-tString sn_CustomShorthand("");
-static tSettingItem<tString> sn_CustomShorthandConf("CUSTOM_SHORTHAND", sn_CustomShorthand);
-
-tString sn_CustomShorthandConnection("");
-static tSettingItem<tString> sn_CustomShorthandConnectionConf("CUSTOM_SHORTHAND_CONNECTION", sn_CustomShorthandConnection);
 
 int nKrawall::CustomShorthandCheck(int userID, tString authority, tString &fullAuthority, tOutput & error)
 {
     if (!sn_CustomShorthandEnabled) return 0;
 
     //  check if calling custom shorthand exists
-    if (authority == sn_CustomShorthand)
+    bool found = false;
+    CustomShorthandClass *sData;
+    for(int i = 0; i < sn_CustomShorthandList.Len(); i++)
     {
+        sData = sn_CustomShorthandList[i];
+        if (sData->shorthand == authority.Filter())
+        {
+            found = true;
+            break;
+        }
+    }
+
+    if (found)
+    {
+        int response = -1;
         std::stringstream answer;
 
-        //  good, put full authority with the custom connection of shorthand
-        fullAuthority = sn_CustomShorthandConnection;
+        for(int j = 0; j < sData->links.size(); j++)
+        {
+            //  good, put full authority with the custom connection of shorthand
+            fullAuthority = sData->links.at(j);
 
-        //  get the response number after fetching the methods from custom shhorthand url
-        int response = nKrawall::FetchURL( fullAuthority, "?query=methods", answer );
+            //  get the response number after fetching the methods from custom shhorthand url
+            response = nKrawall::FetchURL( fullAuthority, "?query=methods", answer );
+
+            if (response == -1)
+                continue;
+
+        }
+
         if (response == -1)
         {
             error.SetTemplateParameter(1, fullAuthority);
@@ -482,10 +720,7 @@ int nKrawall::CustomShorthandCheck(int userID, tString authority, tString &fullA
 
             return -1;
         }
-        else
-        {
-            return 1;
-        }
+        else return 1;
     }
 
     return 0;
@@ -587,6 +822,8 @@ int nKrawall::FetchURL( tString const & authority, char const * query, std::ostr
     std::ostringstream fullURL;
     fullURL << "http://" << authority << "/armaauth/0.1/";
     fullURL << query;
+
+    //con << fullURL.str() << "\n";
 
     // better not. output is not thread safe.
     // con << "Fetching authentication URL " << fullURL.str() << "\n";

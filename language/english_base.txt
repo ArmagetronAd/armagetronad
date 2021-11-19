@@ -3994,8 +3994,20 @@ logout_help   Using the given <name>, find the player and logs them out if they 
 
 custom_shorthand_enabled_help     If set to 1 and CUSTOM_SHORTHAND is found, then CUSTOM_SHORTHAND_CONNECTION will be used to connect.
 custom_shorthand_help             The custom authority to trigger when a player tries to login.
-custom_shorthand_connection_help  The link to connect to when using custom shorthand. Do not include "http://".
+custom_shorthand_add_help         Adding a custom shorthand with its link to store many links. USAGE: CUSTOM_SHORTHAND_ADD <shorthand> <link>
+custom_shorthand_remove_help      Removing a custom shorthand. USAGE: CUSTOM_SHORTHAND_REMOVE <shorthand>
+custom_shorthand_allowed_help     You are able to enable or disable an individual shorthand. USAGE: CUSTOM_SHORTHAND_ALLOWED <shorthand> <0-disable/1-enable>
+custom_shorthand_list_help        Displays a list of shorthands registered with server.
+custom_shorthand_links_list_help  Displays the list of links connected to the specified shorthand. USAGE: CUSTOM_SHORTHAND_LINKS_LIST <shorthand>
 custom_shorthand_url_unknown      Unable to connect to the custom shorthand \1.\n
+custom_shorthand_link_added       Custom Shorthand link \2 has been added to shorthand \1.\n
+custom_shorthand_link_exists      The link \2 for custom shorthand \1 already exists.\n
+custom_shorthand_added            Custom shorthand \1 is added with the link \2.\n
+custom_shorthand_removed          Removed custom shorthand \1.\n
+custom_shorthand_does_not_exist   Custom shorthand \1 doesn't exist.\n
+custom_shorthand_allowed          Allowed \1 custom shorthand to be usable.\n
+custom_shorthand_notallowed       Disallowed \1 custom shorthand from being used.\n
+custom_shorthand_allowed_nodiff   No change in allowance for \1 custom shorthand.\n
 
 custom_authority_enabled_help     If set to 1 and CUSTOM_AUTHORITY is found, then CUSTOM_AUTHORITY_CONNECTION will be used to connect.
 custom_authority_help             The custom authority to trigger when a player tries to login.
