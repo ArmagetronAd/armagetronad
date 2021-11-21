@@ -4340,7 +4340,7 @@ void gCycle::Kill(){
                 LogPlayersCycleTurns(this, logTurnsMsg);
 
                 se_cycleDestroyedWriter << Player()->GetUserName() << MapPosition().x << MapPosition().y << Direction().x << Direction().y;
-                if(Player()->CurrentTeam())
+                if( Team() )
                     se_cycleDestroyedWriter << ePlayerNetID::FilterName(Team()->Name());
                 else
                     se_cycleDestroyedWriter << "";

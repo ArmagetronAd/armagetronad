@@ -12037,6 +12037,25 @@ static void sg_SetPlayerTeam(std::istream &s)
 
 static tConfItemFunc sg_SetPlayerTeam_conf("SET_PLAYER_TEAM",&sg_SetPlayerTeam);
 
+static void sg_ApplyPlayerTeam(std::istream &s)
+{
+    ePlayerNetID * pPlayer = ReadPlayer( s );
+    if(!pPlayer) return;
+
+    pPlayer->UpdateTeamForce();
+}
+static tConfItemFunc sg_ApplyPlayerTeam_conf("APPLY_TEAM_FORCE",&sg_ApplyPlayerTeam);
+
+static void sg_ApplyPlayerSpec(std::istream &s)
+{
+    ePlayerNetID * pPlayer = ReadPlayer( s );
+    if(!pPlayer) return;
+
+    pPlayer->SetTeamForce(nullptr);
+    pPlayer->UpdateTeamForce();
+}
+static tConfItemFunc sg_ApplyPlayerSpec_conf("APPLY_SPEC_FORCE",&sg_ApplyPlayerSpec);
+
 // * =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 // * Substitute feature
 // * =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
