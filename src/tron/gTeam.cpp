@@ -213,11 +213,6 @@ public:
         uMenu playerMenu( title );
         tArray<uMenuItem*> items;
 
-        if ( player->NextTeam()!=NULL )
-        {
-            items[0] = tNEW(gMenuItemPlayerTeam) (&playerMenu, player, NULL);
-        }
-
         if ( !player->IsSpectating() )
         {
             items[ items.Len() ] = tNEW( gMenuItemSpectate ) ( &playerMenu, player );
@@ -227,7 +222,7 @@ public:
         for (i = 0; i<eTeam::teams.Len(); i++ )
         {
             eTeam *team = eTeam::teams(i);
-            if ( team != player->NextTeam() && team->PlayerMayJoin( player ) )
+            if ( team != player->NextTeam() && !team->PlayerMayJoin( player ) )
             {
                 items[ items.Len() ] = tNEW( gMenuItemPlayerTeam ) ( &playerMenu, player, team );
             }
@@ -248,6 +243,11 @@ public:
         )
         {
             items[ items.Len() ] = tNEW( gMenuItemNewTeam ) ( &playerMenu, player );
+        }
+
+        if ( player->NextTeam()!=NULL )
+        {
+            items[0] = tNEW(gMenuItemPlayerTeam) (&playerMenu, player, NULL);
         }
 
         items[items.Len()] = tNEW ( gMenuItemSpacer ) ( &playerMenu );
