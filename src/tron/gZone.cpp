@@ -2542,30 +2542,6 @@ ePlayerNetID * validatePlayer(ePlayerNetID *pPlayer)
 }
 
 
-gCycle * gDeathZoneHack::getPlayerCycle(ePlayerNetID *pPlayer)
-{
-    gCycle *pPlayerCycle = NULL;
-    if (pPlayer)
-    {
-        const tList<eGameObject>& gameObjects = Grid()->GameObjects();
-        for (int i=gameObjects.Len()-1;i>=0;i--)
-        {
-            gCycle *pCycle=dynamic_cast<gCycle *>(gameObjects(i));
-
-            if (pCycle)
-            {
-                if (pCycle->Player() == pOwner_)
-                {
-                    pPlayerCycle = pCycle;
-                    break;
-                }
-            }
-        }
-    }
-
-    return (pPlayerCycle);
-}
-
 
 // *******************************************************************************
 // *
@@ -2631,7 +2607,7 @@ void gDeathZoneHack::OnEnter( gCycle * target, REAL time )
         gCycle *pOwnerCycle = NULL;
         if (pOwner_)
         {
-            pOwnerCycle = getPlayerCycle(pOwner_);
+            pOwnerCycle = dynamic_cast<gCycle *>(pOwner_->Object());
 
             if (target->Player() == pOwner_)
             {
@@ -3057,29 +3033,6 @@ gZone & gRubberZoneHack::SetRubber(REAL rubber)
     return (*this);
 }
 
-gCycle * gRubberZoneHack::getPlayerCycle(ePlayerNetID *pPlayer)
-{
-    gCycle *pPlayerCycle = NULL;
-    if (pPlayer)
-    {
-        const tList<eGameObject>& gameObjects = Grid()->GameObjects();
-        for (int i=gameObjects.Len()-1;i>=0;i--)
-        {
-            gCycle *pCycle=dynamic_cast<gCycle *>(gameObjects(i));
-
-            if (pCycle)
-            {
-                if (pCycle->Player() == pOwner_)
-                {
-                    pPlayerCycle = pCycle;
-                    break;
-                }
-            }
-        }
-    }
-
-    return (pPlayerCycle);
-}
 
 bool gRubberZoneHack::Timestep(REAL time)
 {

@@ -367,8 +367,6 @@ class gDeathZoneHack: public gZone
 
 								 //!< reacts on objects inside the zone (kills them)
 		virtual void OnEnter( gCycle *target, REAL time );
-
-		gCycle * getPlayerCycle(ePlayerNetID *pPlayer);
 };
 //! Rubber zone: Increase players rubber on enter
 class gRubberZoneHack: public gZone
@@ -404,8 +402,6 @@ class gRubberZoneHack: public gZone
 								 //!< reacts on objects inside the zone (kills them)
 		virtual bool Timestep(REAL currentTime);
 		virtual void OnEnter( gCycle *target, REAL time );
-
-		gCycle * getPlayerCycle(ePlayerNetID *pPlayer);
 };
 
 extern inline bool BaseZoneIsAttackable();
