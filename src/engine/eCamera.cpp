@@ -2558,10 +2558,10 @@ void eCamera::SoundMixGameObject(Sint16 *dest,unsigned int len,eGameObject *go){
     if(!go)
         return;
 
-    REAL l, r, doppler;
-    GetSoundVolume(*go, r, l, doppler);
+    REAL l, r, dopplerPitch;
+    GetSoundVolume(*go, r, l, dopplerPitch);
 
-    go->SoundMix(dest, len, id, r, l);
+    go->SoundMix(dest, len, id, r, l, dopplerPitch);
 }
 
 #endif

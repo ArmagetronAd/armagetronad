@@ -51,7 +51,7 @@ public:
     void Render2D(tCoord scale) const override;
 
     //virtual void SoundMix(Sint16 *dest,unsigned int len,
-    //                      int viewer,REAL rvol,REAL lvol);
+    //                      int viewer,REAL rvol,REAL lvol, REAL dopplerPitch);
 #endif
 
     bool AccountForHole(); // will return true exactly once per explosion; to be used to make the holing score only count once.

@@ -538,9 +538,9 @@ void gExplosion::Render2D(tCoord scale) const {
 
 #if 0
 void gExplosion::SoundMix(Sint16 *dest,unsigned int len,
-                          int viewer,REAL rvol,REAL lvol){
+                          int viewer,REAL rvol,REAL lvol, REAL dopplerPitch){
 #ifndef HAVE_LaIBSDL_MIXER
-    sound.Mix(dest,len,viewer,rvol*4,lvol*4);
+    sound.Mix(dest,len,viewer,rvol*4,lvol*4, dopplerPitch);
 #endif
 }
 #endif

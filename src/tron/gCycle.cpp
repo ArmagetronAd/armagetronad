@@ -4937,7 +4937,7 @@ bool gCycle::RenderCockpitFixedBefore(bool){
 }
 
 void gCycle::SoundMix(Sint16 *dest,unsigned int len,
-                      int viewer,REAL rvol,REAL lvol){
+                      int viewer,REAL rvol,REAL lvol, REAL dopplerPitch){
     if (Alive()){
         /*
           if (!cycle_run.alt){
@@ -4947,7 +4947,7 @@ void gCycle::SoundMix(Sint16 *dest,unsigned int len,
         */
 
         if (engine)
-            engine->Mix(dest,len,viewer,rvol,lvol,verletSpeed_/(sg_speedCycleSound * SpeedMultiplier()));
+            engine->Mix(dest,len,viewer,rvol,lvol,dopplerPitch*verletSpeed_/(sg_speedCycleSound * SpeedMultiplier()));
 
 #if 0
         if (turning)

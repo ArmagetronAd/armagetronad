@@ -222,7 +222,7 @@ public:
 
     //sound output
     virtual void SoundMix(Sint16 *dest,unsigned int len,
-                          int viewer,REAL rvol,REAL lvol){}
+                          int viewer,REAL rvol,REAL lvol, REAL dopplerPitch){}
 
     // internal camera
     virtual eCoord CamDir()  const {return dir;}
