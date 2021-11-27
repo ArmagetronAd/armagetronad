@@ -215,6 +215,7 @@ public:
 #ifndef DEDICATED
     void Render();
     void SoundMix(Sint16 *dest,unsigned int len);
+    void GetSoundVolume(eGameObject const &go, REAL &r, REAL &l, REAL &dopplerPitch) const; // calculates right and left volume factors of a game object
 private:
     void SoundMixGameObject(Sint16 *dest,unsigned int len,eGameObject *go);
 public:

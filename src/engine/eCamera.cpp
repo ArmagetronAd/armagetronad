@@ -2519,13 +2519,11 @@ void eCamera::SoundMix(Sint16 *dest,unsigned int len){
     }
 }
 
-
-void eCamera::SoundMixGameObject(Sint16 *dest,unsigned int len,eGameObject *go){
-    if(!go)
-        return;
-    
-    eCoord vec((go->pos-pos).Turn(dir.Conj()));
-    REAL dist_squared=vec.NormSquared()+(z-go->z)*(z-go->z);
+// calculates right and left volume factors of a game object
+void eCamera::GetSoundVolume(eGameObject const &go, REAL &r, REAL &l, REAL &dopplerPitch) const
+{
+    eCoord vec((go.pos-pos).Turn(dir.Conj()));
+    REAL dist_squared=vec.NormSquared()+(z-go.z)*(z-go.z);
 
     //dist_squared*=.1;
     if (dist_squared<1)
@@ -2535,15 +2533,15 @@ void eCamera::SoundMixGameObject(Sint16 *dest,unsigned int len,eGameObject *go){
 
 #define MAXVOL .4
 
-    REAL l=(dist*.5+vec.y)/dist_squared;
-    REAL r=(dist*.5-vec.y)/dist_squared;
+    l=(dist*.5+vec.y)/dist_squared;
+    r=(dist*.5-vec.y)/dist_squared;
 
     if (l<0) l=0;
     if (r<0) r=0;
     if (l>MAXVOL) l=MAXVOL;
     if (r>MAXVOL) r=MAXVOL;
 
-    if (go==Center()){
+    if (&go==Center()){
         if (mode==CAMERA_IN || mode==CAMERA_SMART_IN)
             l=r=.2;
         else if (mode!=CAMERA_FREE){
@@ -2552,7 +2550,18 @@ void eCamera::SoundMixGameObject(Sint16 *dest,unsigned int len,eGameObject *go){
         }
     }
 
-    go->SoundMix(dest,len,id,r,l);
+    dopplerPitch = 1;
+}
+
+
+void eCamera::SoundMixGameObject(Sint16 *dest,unsigned int len,eGameObject *go){
+    if(!go)
+        return;
+
+    REAL l, r, doppler;
+    GetSoundVolume(*go, r, l, doppler);
+
+    go->SoundMix(dest, len, id, r, l);
 }
 
 #endif
