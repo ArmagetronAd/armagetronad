@@ -2522,6 +2522,8 @@ void eCamera::SoundMix(Sint16 *dest,unsigned int len){
 // calculates right and left volume factors of a game object
 void eCamera::GetSoundVolume(eGameObject const &go, REAL &r, REAL &l, REAL &dopplerPitch) const
 {
+    auto *c = Center();
+
     eCoord vec((go.pos-pos).Turn(dir.Conj()));
     REAL dist_squared=vec.NormSquared()+(z-go.z)*(z-go.z);
 
@@ -2533,24 +2535,36 @@ void eCamera::GetSoundVolume(eGameObject const &go, REAL &r, REAL &l, REAL &dopp
 
 #define MAXVOL .4
 
-    l=(dist*.5+vec.y)/dist_squared;
-    r=(dist*.5-vec.y)/dist_squared;
+    dopplerPitch = 0;
+
+    // calculate normalized l and r component (between 0 and 1)
+    l=(dist*.5+vec.y)/dist;
+    r=(dist*.5-vec.y)/dist;
+
+    if (&go==c){
+        l=r=.2;
+    }
+    else if(c)
+    {
+        // for loudness, the distance to the center object should matter
+        auto dz = (go.z - c->z);
+        vec = go.pos - c->pos;
+        dist = 10.0f + 2.0f * sqrt(vec.NormSquared() + dz*dz);
+
+        dopplerPitch = -go.Speed()*(tCoord::F(go.Direction(), vec));
+        if(c)
+            dopplerPitch += c->Speed()*(tCoord::F(c->Direction(), vec));
+        dopplerPitch /= std::max(0.1f, vec.Norm());
+    }
+
+    l /= dist;
+    r /= dist;
 
     if (l<0) l=0;
     if (r<0) r=0;
     if (l>MAXVOL) l=MAXVOL;
     if (r>MAXVOL) r=MAXVOL;
 
-    if (&go==Center()){
-        if (mode==CAMERA_IN || mode==CAMERA_SMART_IN)
-            l=r=.2;
-        else if (mode!=CAMERA_FREE){
-            l*=.9;
-            r*=.9;
-        }
-    }
-
-    dopplerPitch = 1;
 }
 
 

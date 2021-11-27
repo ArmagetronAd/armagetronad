@@ -4947,7 +4947,11 @@ void gCycle::SoundMix(Sint16 *dest,unsigned int len,
         */
 
         if (engine)
-            engine->Mix(dest,len,viewer,rvol,lvol,dopplerPitch*verletSpeed_/(sg_speedCycleSound * SpeedMultiplier()));
+        {
+            REAL dopplerPitchAdjusted = 0.08f*dopplerPitch/sg_speedCycleSound;
+            REAL dopplerFactor = expf(dopplerPitchAdjusted);
+            engine->Mix(dest,len,viewer,rvol,lvol,dopplerFactor*verletSpeed_/(sg_speedCycleSound * SpeedMultiplier()));
+        }
 
 #if 0
         if (turning)
