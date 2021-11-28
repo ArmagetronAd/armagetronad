@@ -2542,7 +2542,8 @@ void eCamera::GetSoundVolume(eGameObject const &go, REAL &r, REAL &l, REAL &dopp
     r=(dist*.5-vec.y)/dist;
 
     if (&go==c){
-        l=r=.2;
+        l=r=.05;
+        dist = 1;
     }
     else if(c)
     {
