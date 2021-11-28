@@ -76,8 +76,10 @@ static int sound_sources=10;
 static tConfItem<int> ss("SOUND_SOURCES",sound_sources);
 static REAL loudness_thresh=0;
 static int real_sound_sources=0;
+static REAL next_loudness_culled{0};
 static REAL max_loudness_culled{0};
 static REAL min_loudness_audible{100};
+static REAL next_loudness_audible{100};
 
 static tList<eSoundPlayer> se_globalPlayers;
 
@@ -86,8 +88,10 @@ void fill_audio_core(void *udata, Sint16 *stream, int len)
 {
 #ifndef DEDICATED
     real_sound_sources = 0;
+    next_loudness_culled = 0;
     max_loudness_culled = 0;
     min_loudness_audible = 2;
+    next_loudness_audible = 2;
     int i;
     if (eGrid::CurrentGrid())
         for(i=eGrid::CurrentGrid()->Cameras().Len()-1;i>=0;i--)
@@ -100,11 +104,12 @@ void fill_audio_core(void *udata, Sint16 *stream, int len)
     for(i=se_globalPlayers.Len()-1;i>=0;i--)
         se_globalPlayers(i)->Mix(stream,len,0,1,1);
 
-    const auto eps = 1E-6;
-    if (real_sound_sources > sound_sources+2)
-        loudness_thresh = min_loudness_audible - eps;
-    else if (real_sound_sources < sound_sources/2)
-        loudness_thresh = max_loudness_culled + eps;
+    if (real_sound_sources > sound_sources)
+        loudness_thresh = .5f*(next_loudness_audible + min_loudness_audible);
+    else if (real_sound_sources < sound_sources)
+        loudness_thresh = .5f*(max_loudness_culled + next_loudness_culled);
+    else
+        loudness_thresh = .5f*(max_loudness_culled + min_loudness_audible);
 #endif
 }
 
@@ -613,15 +618,34 @@ bool eSoundPlayer::Mix(Sint16 *dest,
                        REAL speed){
 
     if (goon[viewer]){
-        auto loudness = rvol + lvol;
+        auto const loudness = rvol + lvol;
         if (loudness > loudness_thresh){
             real_sound_sources++;
-            min_loudness_audible = std::min(min_loudness_audible, loudness);
+
+            if(loudness < min_loudness_audible)
+            {
+                next_loudness_audible = min_loudness_audible;
+                min_loudness_audible = loudness;
+            }
+            else if(loudness < next_loudness_audible)
+            {
+                next_loudness_audible = loudness;
+            }
+
             return goon[viewer]=!wav->Mix(dest,len,pos[viewer],rvol,lvol,speed,loop);
         }
         else
         {
-            max_loudness_culled = std::max(max_loudness_culled, loudness);
+            if(loudness > max_loudness_culled)
+            {
+                next_loudness_culled = max_loudness_culled;
+                max_loudness_culled = loudness;
+            }
+            else if(loudness > next_loudness_culled)
+            {
+                next_loudness_culled = loudness;
+            }
+
             return true;
         }
     }

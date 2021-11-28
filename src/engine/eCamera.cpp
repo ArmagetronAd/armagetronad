@@ -1864,7 +1864,7 @@ void eCamera::SwitchCenter(int d){
 void eCamera::Timestep(REAL ts){
     // adjust total sound volume; try yo do so smoothly
     {
-        auto bestTotalContinuousSoundNormalizer = 1.0f/std::max(1.0f, _totalContinuousSoundVolume);
+        auto bestTotalContinuousSoundNormalizer = 1.0f/std::max(1.0f, sqrtf(_totalContinuousSoundVolume));
         REAL tween = std::min(fabsf(ts), 0.1f) * (.5f + 2 * fabsf(bestTotalContinuousSoundNormalizer - _totalContinuousSoundNormalizer));
         _totalContinuousSoundNormalizerSmoother = (_totalContinuousSoundNormalizerSmoother + tween*bestTotalContinuousSoundNormalizer)/(1.0f+tween);
         _totalContinuousSoundNormalizer = (_totalContinuousSoundNormalizer + tween*_totalContinuousSoundNormalizerSmoother)/(1.0f+tween);
@@ -2547,9 +2547,9 @@ void eCamera::SoundMix(Sint16 *dest,unsigned int len){
 
     // don't allow things to become too loud due to slow smoothing
     constexpr REAL maxLoundnessOvershoot = 2.0;
-    if(_totalContinuousSoundVolume * _totalContinuousSoundNormalizer > maxLoundnessOvershoot)
+    if(_totalContinuousSoundVolume * _totalContinuousSoundNormalizer * _totalContinuousSoundNormalizer > maxLoundnessOvershoot)
     {
-        _totalContinuousSoundNormalizer = maxLoundnessOvershoot/_totalContinuousSoundVolume;
+        _totalContinuousSoundNormalizer = maxLoundnessOvershoot/sqrtf(_totalContinuousSoundVolume);
         // mix();
     }
 }
