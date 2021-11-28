@@ -4948,8 +4948,8 @@ void gCycle::SoundMix(Sint16 *dest,unsigned int len,
 
         if (engine)
         {
-            REAL dopplerPitchAdjusted = 0.08f*dopplerPitch/sg_speedCycleSound;
-            REAL dopplerFactor = expf(dopplerPitchAdjusted);
+            REAL dopplerPitchAdjusted = 0.1f*dopplerPitch/sg_speedCycleSound;
+            REAL dopplerFactor = dopplerPitchAdjusted > 0 ? 1 + dopplerPitchAdjusted : 1/(1 - dopplerPitchAdjusted);
             engine->Mix(dest,len,viewer,rvol,lvol,dopplerFactor*verletSpeed_/(sg_speedCycleSound * SpeedMultiplier()));
         }
 
