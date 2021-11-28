@@ -2595,9 +2595,9 @@ void eCamera::GetSoundVolume(eGameObject const &go, REAL &r, REAL &l, REAL &dopp
         }
 
         {
-            dopplerPitch = -go.Speed()*(tCoord::F(go.Direction(), vec));
+            dopplerPitch = -go.Speed()*(tCoord::F(go.SmoothDirection(), vec));
             if(c)
-                dopplerPitch += c->Speed()*(tCoord::F(c->Direction(), vec));
+                dopplerPitch += c->Speed()*(tCoord::F(c->SmoothDirection(), vec));
             dopplerPitch /= se_cameraSoundReceiverSize + vec.Norm();
         }
     }
