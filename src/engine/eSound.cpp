@@ -535,7 +535,7 @@ bool eWavData::Mix(Uint8 *dest,Uint32 playlen,eAudioPos &pos,
     }
 
 #define SPEED_SHIFT 20
-#define SPEED_FRACTION (1<<(SPEED_SHIFT-1))
+#define SPEED_FRACTION (1<<SPEED_SHIFT)
 
 #define VOL_SHIFT 16
 #define VOL_FRACTION (1<<VOL_SHIFT)
