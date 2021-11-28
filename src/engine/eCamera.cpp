@@ -295,10 +295,10 @@ static tSettingItem<REAL> s_glanceRotSpeedBonus("CAMERA_GLANCE_ANGULAR_VELOCITY_
 static tSettingItem<REAL> s_smartcamGlanceBack("CAMERA_SMART_GLANCING_BACK",smartcamGlancingBack);
 static tSettingItem<REAL> s_smartcamGlanceHeight("CAMERA_SMART_GLANCING_HEIGHT",smartcamGlancingHeight);
 
-static REAL se_cameraSoundReceiverSize = 6.0f;
+static REAL se_cameraSoundReceiverSize = 4.0f;
 static tSettingItem< REAL > se_confCameraSoundReceiverSize( "SOUND_RECEIVER_SIZE", se_cameraSoundReceiverSize );
 
-static REAL se_cameraSoundReceiverSizeByDistance = 0.3f;
+static REAL se_cameraSoundReceiverSizeByDistance = 0.2f;
 static tSettingItem< REAL > se_confCameraSoundReceiverSizeByDistance( "SOUND_RECEIVER_SIZE_DISTANCE", se_cameraSoundReceiverSizeByDistance );
 
 static REAL se_cameraSoundSelfFactor = 0.25f;
@@ -1865,7 +1865,7 @@ void eCamera::Timestep(REAL ts){
     // adjust total sound volume; try yo do so smoothly
     {
         auto bestTotalContinuousSoundNormalizer = 1.0f/std::max(1.0f, _totalContinuousSoundVolume);
-        REAL tween = ts*(.5f + 2 * fabsf(bestTotalContinuousSoundNormalizer - _totalContinuousSoundNormalizer));
+        REAL tween = std::min(fabsf(ts), 0.1f) * (.5f + 2 * fabsf(bestTotalContinuousSoundNormalizer - _totalContinuousSoundNormalizer));
         _totalContinuousSoundNormalizerSmoother = (_totalContinuousSoundNormalizerSmoother + tween*bestTotalContinuousSoundNormalizer)/(1.0f+tween);
         _totalContinuousSoundNormalizer = (_totalContinuousSoundNormalizer + tween*_totalContinuousSoundNormalizerSmoother)/(1.0f+tween);
     }
@@ -2579,8 +2579,6 @@ void eCamera::GetSoundVolume(eGameObject const &go, REAL &r, REAL &l, REAL &dopp
     auto soundReceiverRadius = se_cameraSoundReceiverSize;
 
     if (&go==c){
-        l *= se_cameraSoundSelfFactor;
-        r *= se_cameraSoundSelfFactor;
         dist = 0;
     }
     else if(c)
@@ -2623,6 +2621,11 @@ void eCamera::SoundMixGameObject(Sint16 *dest,unsigned int len,eGameObject *go){
 
     REAL l, r, dopplerPitch;
     GetSoundVolume(*go, r, l, dopplerPitch);
+
+    if (Center() == go){
+        l *= se_cameraSoundSelfFactor;
+        r *= se_cameraSoundSelfFactor;
+    }
 
     _totalContinuousSoundVolume += r + l;
 

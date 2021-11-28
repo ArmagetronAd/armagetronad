@@ -3784,6 +3784,11 @@ private:
     eCoord const * lastFakeDir_;
 };
 
+namespace
+{
+    auto const cycleTurnSoundVolume = 4.0f;
+}
+
 bool gCycle::DoTurn(int d)
 {
 #ifdef DELAYEDTURN_DEBUG
@@ -3811,7 +3816,7 @@ bool gCycle::DoTurn(int d)
         if ( gCycleMovement::DoTurn( d ) )
         {
             eSoundMixer* mixer = eSoundMixer::GetMixer();
-            mixer->PushButton(CYCLE_TURN, *this, 16.0);
+            mixer->PushButton(CYCLE_TURN, *this, cycleTurnSoundVolume);
 
             sg_ArchiveCoord( pos, 1 );
 
@@ -5898,7 +5903,7 @@ void gCycle::SyncEnemy ( const eCoord& begWall)
                     currentWall->Update(crossTime,crossPos);
 
                     eSoundMixer* mixer = eSoundMixer::GetMixer();
-                    mixer->PushButton(CYCLE_TURN, *this);
+                    mixer->PushButton(CYCLE_TURN, *this, cycleTurnSoundVolume);
                 }
             }
         }
