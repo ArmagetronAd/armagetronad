@@ -277,7 +277,7 @@ void eSoundMixer::Init() {
     }
 
     // guesstimate the desired number of samples to calculate in advance
-    int samples = std::max(128, static_cast< int >( (buffersize * frequency) / 120 ));
+    int samples = std::max(128, static_cast< int >( (buffersize * frequency) / 60 ));
 
     int rc = Mix_OpenAudio( frequency, AUDIO_S16LSB,
                             2, samples );
