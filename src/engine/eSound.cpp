@@ -534,13 +534,14 @@ bool eWavData::Mix(Uint8 *dest,Uint32 playlen,eAudioPos &pos,
         Lvol = thresh;
     }
 
-#define SPEED_FRACTION (1<<20)
+#define SPEED_SHIFT 20
+#define SPEED_FRACTION (1<<(SPEED_SHIFT-1))
 
 #define VOL_SHIFT 16
 #define VOL_FRACTION (1<<VOL_SHIFT)
 
-#define MAX_VAL ((1<<16)-1)
-#define MIN_VAL -(1<<16)
+#define MAX_VAL ((1<<15)-1)
+#define MIN_VAL (-(1<<15))
 
     // first, split the speed into the part before and after the decimal:
     if (Speed<0) Speed=0;
