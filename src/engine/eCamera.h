@@ -258,6 +258,10 @@ private:
 
     enum HitCacheSize{ hitCacheSize = 3 };
     REAL hitCache_[hitCacheSize];
+
+    REAL _totalContinuousSoundVolume{};
+    REAL _totalContinuousSoundNormalizer{0};
+    REAL _totalContinuousSoundNormalizerSmoother{1};
 };
 
 /*

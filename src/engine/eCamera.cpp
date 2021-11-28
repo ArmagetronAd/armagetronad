@@ -295,6 +295,15 @@ static tSettingItem<REAL> s_glanceRotSpeedBonus("CAMERA_GLANCE_ANGULAR_VELOCITY_
 static tSettingItem<REAL> s_smartcamGlanceBack("CAMERA_SMART_GLANCING_BACK",smartcamGlancingBack);
 static tSettingItem<REAL> s_smartcamGlanceHeight("CAMERA_SMART_GLANCING_HEIGHT",smartcamGlancingHeight);
 
+static REAL se_cameraSoundReceiverSize = 6.0f;
+static tSettingItem< REAL > se_confCameraSoundReceiverSize( "SOUND_RECEIVER_SIZE", se_cameraSoundReceiverSize );
+
+static REAL se_cameraSoundReceiverSizeByDistance = 0.3f;
+static tSettingItem< REAL > se_confCameraSoundReceiverSizeByDistance( "SOUND_RECEIVER_SIZE_DISTANCE", se_cameraSoundReceiverSizeByDistance );
+
+static REAL se_cameraSoundSelfFactor = 0.25f;
+static tSettingItem< REAL > se_confCameraSoundSelfFactor( "SOUND_SELF_FACTOR", se_cameraSoundSelfFactor );
+
 // turn speed of internal camera
 static REAL s_inTurnSpeed=40;
 static tSettingItem<REAL> s_iInTurnSpeed("CAMERA_IN_TURN_SPEED", s_inTurnSpeed);
@@ -517,6 +526,10 @@ static rWatchCommandLineAnalyzer se_WatchAnalyzer;
 #endif
 
 void eCamera::MyInit(){
+    // let the sound fade in from 0 to at most the default max volume for a single active engine
+    _totalContinuousSoundNormalizer = 0.0f;
+    _totalContinuousSoundNormalizerSmoother = 1.5f/std::min(1.0f, se_cameraSoundSelfFactor);
+
     if (localPlayer){
         if (cameraMain_) mode=localPlayer->startCamera; //PENDING:
         fov=localPlayer->startFOV;
@@ -1849,6 +1862,14 @@ void eCamera::SwitchCenter(int d){
 }
 
 void eCamera::Timestep(REAL ts){
+    // adjust total sound volume; try yo do so smoothly
+    {
+        auto bestTotalContinuousSoundNormalizer = 1.0f/std::max(1.0f, _totalContinuousSoundVolume);
+        REAL tween = ts*(.5f + 2 * fabsf(bestTotalContinuousSoundNormalizer - _totalContinuousSoundNormalizer));
+        _totalContinuousSoundNormalizerSmoother = (_totalContinuousSoundNormalizerSmoother + tween*bestTotalContinuousSoundNormalizer)/(1.0f+tween);
+        _totalContinuousSoundNormalizer = (_totalContinuousSoundNormalizer + tween*_totalContinuousSoundNormalizerSmoother)/(1.0f+tween);
+    }
+
     // find net player
     if (!netPlayer && localPlayer)
     {
@@ -2508,25 +2529,30 @@ void eCamera::s_Timestep(eGrid *grid, REAL time){
 void eCamera::SoundMix(Sint16 *dest,unsigned int len){
     tASSERT_THIS();
 
-    if (id>=0){
-        eGameObject *c=Center();
-        for(int i=grid->gameObjects.Len()-1;i>=0;i--){
-            eGameObject *go=grid->gameObjects(i);
-            SoundMixGameObject(dest,len,go);
+    auto mix = [&]()
+    {
+        _totalContinuousSoundVolume = 0.0;
+        if (id>=0){
+            eGameObject *c=Center();
+            for(int i=grid->gameObjects.Len()-1;i>=0;i--){
+                eGameObject *go=grid->gameObjects(i);
+                SoundMixGameObject(dest,len,go);
+            }
+            if (c && c->id<0)
+                SoundMixGameObject(dest,len,c);
         }
-        if (c && c->id<0)
-            SoundMixGameObject(dest,len,c);
+    };
+
+    mix();
+
+    // don't allow things to become too loud due to slow smoothing
+    constexpr REAL maxLoundnessOvershoot = 2.0;
+    if(_totalContinuousSoundVolume * _totalContinuousSoundNormalizer > maxLoundnessOvershoot)
+    {
+        _totalContinuousSoundNormalizer = maxLoundnessOvershoot/_totalContinuousSoundVolume;
+        // mix();
     }
 }
-
-static REAL se_cameraSoundReceiverSize = 6.0f;
-static tSettingItem< REAL > se_confCameraSoundReceiverSize( "SOUND_RECEIVER_SIZE", se_cameraSoundReceiverSize );
-
-static REAL se_cameraSoundReceiverSizeByDistance = 0.3f;
-static tSettingItem< REAL > se_confCameraSoundReceiverSizeByDistance( "SOUND_RECEIVER_SIZE_DISTANCE", se_cameraSoundReceiverSizeByDistance );
-
-static REAL se_cameraSoundSelfFactor = 0.25f;
-static tSettingItem< REAL > se_confCameraSoundSelfFactor( "SOUND_SELF_FACTOR", se_cameraSoundSelfFactor );
 
 // calculates right and left volume factors of a game object
 void eCamera::GetSoundVolume(eGameObject const &go, REAL &r, REAL &l, REAL &dopplerPitch) const
@@ -2597,6 +2623,11 @@ void eCamera::SoundMixGameObject(Sint16 *dest,unsigned int len,eGameObject *go){
 
     REAL l, r, dopplerPitch;
     GetSoundVolume(*go, r, l, dopplerPitch);
+
+    _totalContinuousSoundVolume += r + l;
+
+    r *= _totalContinuousSoundNormalizer;
+    l *= _totalContinuousSoundNormalizer;
 
     go->SoundMix(dest, len, id, r, l, dopplerPitch);
 }
