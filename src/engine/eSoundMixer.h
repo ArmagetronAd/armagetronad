@@ -78,6 +78,7 @@ extern char const * SoundEffectString[];
 // Forward declarations from other files
 class eGameObject;
 class eCoord;
+class eGrid;
 
 // Forward declarations from this file
 class eMusicTrack;
@@ -111,13 +112,10 @@ public:
     //    or GAME_TRACK
     static void SetMode(MusicMode newMode);
     void PushButton(int soundEffect);
-    void PushButton(int soundEffect, eCoord location);
-    // What type is velocity likely to be passed in as?  Do we need it for a pushbutton
-    //   effect?  'velocity' is meant to be the velocity of the object making the sound,
-    //   so we can doppler shift it.
-    // void PushButton(int soundEffect, eCoord* location, velocity);
+    void PushButton(int soundEffect, eGameObject const &noiseMaker, REAL volume = 1.0);
 
-    void SetMicrophoneOwner(eGameObject* newOwner);
+    void SetGrid(eGrid* grid);
+    eGrid *GetGrid() const { return m_Grid; }
 
     void PlayContinuous(int soundEffect, eGameObject* owner);
     void RemoveContinuous(int soundEffect, eGameObject* owner);
@@ -154,10 +152,10 @@ private:
     // Gets the first available channel
     int FirstAvailableChannel();
 
-    static eSoundMixer* _instance;
+    static std::unique_ptr<eSoundMixer> _instance;
 
     static int m_Mode;
-    tJUST_CONTROLLED_PTR< eGameObject > m_Owner;
+    tCHECKED_PTR(eGrid) m_Grid;
 
     // Use m_isDirty to indicate a mode change.  The update() method will pick up the
     //    change.  This should be handled automatically by SetMode()
@@ -168,15 +166,15 @@ private:
     bool m_active;
 
     tSong m_CurrentSong;
-    tPlayList* m_Playlist;
+    std::unique_ptr<tPlayList> m_Playlist;
 
     std::deque<eWavData> m_SoundEffects;
     std::deque<eChannel> m_Channels;
     int m_numChannels;
 
-    static eMusicTrack* m_TitleTrack;
-    static eMusicTrack* m_GuiTrack;
-    static eMusicTrack* m_GameTrack;
+    static std::unique_ptr<eMusicTrack> m_TitleTrack;
+    static std::unique_ptr<eMusicTrack> m_GuiTrack;
+    static std::unique_ptr<eMusicTrack> m_GameTrack;
 
     // Used for the music track, when a song ends, mark m_isDirty true.  Then, when
     //   you start playing a new song, mark it false.

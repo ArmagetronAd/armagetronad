@@ -13,6 +13,7 @@
 #include "tConsole.h"
 #include "tError.h"
 #include "eGameObject.h"
+#include "eCamera.h"
 #include "eCoord.h"
 
 #include "eSoundMixer.h"
@@ -141,6 +142,16 @@ void eChannel::Set3d(eCoord home, eCoord soundPos, eCoord homeDirection) {
     Mix_SetPosition(m_ChannelID, 0, 0);
     // Add the new effect
     Mix_SetPosition(m_ChannelID, bearingInt, distanceInt );
+#endif // DEDICATED
+}
+
+void eChannel::Set3d(eCamera const &camera, eGameObject const &soundOrigin, REAL volume) {
+#ifdef HAVE_LIBSDL_MIXER
+    REAL r, l, doppler;
+    camera.GetSoundVolume(soundOrigin, r, l, doppler);
+    r *= volume;
+    l *= volume;
+    Mix_SetPanning(m_ChannelID, std::min(255, static_cast<int>(l*255)), std::min(255, static_cast<int>(r*255)));
 #endif // DEDICATED
 }
 

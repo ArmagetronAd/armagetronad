@@ -3811,7 +3811,7 @@ bool gCycle::DoTurn(int d)
         if ( gCycleMovement::DoTurn( d ) )
         {
             eSoundMixer* mixer = eSoundMixer::GetMixer();
-            mixer->PushButton(CYCLE_TURN, Position());
+            mixer->PushButton(CYCLE_TURN, *this, 16.0);
 
             sg_ArchiveCoord( pos, 1 );
 
@@ -4952,9 +4952,11 @@ void gCycle::SoundMix(Sint16 *dest,unsigned int len,
 
         if (engine)
         {
+            REAL engineVolume = 0.3;
+
             REAL dopplerPitchAdjusted = sg_speedCycleSoundMach*dopplerPitch/sg_speedCycleSound;
             REAL dopplerFactor = dopplerPitchAdjusted > 0 ? 1 + dopplerPitchAdjusted : 1/(1 - dopplerPitchAdjusted);
-            engine->Mix(dest,len,viewer,rvol,lvol,dopplerFactor*verletSpeed_/(sg_speedCycleSound * SpeedMultiplier()));
+            engine->Mix(dest,len,viewer,rvol*engineVolume,lvol*engineVolume,dopplerFactor*verletSpeed_/(sg_speedCycleSound * SpeedMultiplier()));
         }
 
 #if 0
@@ -5891,11 +5893,12 @@ void gCycle::SyncEnemy ( const eCoord& begWall)
                 tASSERT( fabs ( ( crossPos - lastSyncMessage_.pos ) * lastSyncMessage_.dir ) < 1 );
 
                 // update the old wall
-                if (currentWall) {
+                if (currentWall)
+                {
                     currentWall->Update(crossTime,crossPos);
 
                     eSoundMixer* mixer = eSoundMixer::GetMixer();
-                    mixer->PushButton(CYCLE_TURN, crossPos);
+                    mixer->PushButton(CYCLE_TURN, *this);
                 }
             }
         }

@@ -214,7 +214,7 @@ void zShape::applyVisuals( gParserState & state ) {
 void
 zShape::OnBirth() {
     eSoundMixer* mixer = eSoundMixer::GetMixer();
-    mixer->PushButton(ZONE_SPAWN, Position());
+    mixer->PushButton(ZONE_SPAWN, *this);
 }
 
 
