@@ -366,13 +366,13 @@ eLegacyWavData::~eLegacyWavData(){
 #ifndef DEDICATED
 
 #define SPEED_SHIFT 20
-#define SPEED_FRACTION (1<<SPEED_SHIFT)
+#define SPEED_FRACTION (1<<(SPEED_SHIFT-1))
 
 #define VOL_SHIFT 16
-#define VOL_FRACTION (1<<VOL_SHIFT)
+#define VOL_FRACTION (1<<(VOL_SHIFT-1))
 
-#define MAX_VAL ((1<<16)-1)
-#define MIN_VAL -(1<<16)
+#define MAX_VAL ((1<<15)-1)
+#define MIN_VAL (-(1<<15))
 
 namespace
 {
@@ -399,8 +399,8 @@ struct partial_mix
             auto nextWeight = pos.fraction >> (SPEED_SHIFT-WEIGHT_SHIFT);
             auto currentWeight = (1 << WEIGHT_SHIFT) - nextWeight;
 
-            auto lNow = (current.first * currentWeight + next.first * nextWeight) >> WEIGHT_SHIFT;
-            auto rNow = (current.second * currentWeight + next.second * nextWeight) >> WEIGHT_SHIFT;
+            int lNow = (current.first * currentWeight + next.first * nextWeight) >> WEIGHT_SHIFT;
+            int rNow = (current.second * currentWeight + next.second * nextWeight) >> WEIGHT_SHIFT;
 
             int l=dest[0];
             int r=dest[1];
