@@ -295,6 +295,15 @@ static tSettingItem<REAL> s_glanceRotSpeedBonus("CAMERA_GLANCE_ANGULAR_VELOCITY_
 static tSettingItem<REAL> s_smartcamGlanceBack("CAMERA_SMART_GLANCING_BACK",smartcamGlancingBack);
 static tSettingItem<REAL> s_smartcamGlanceHeight("CAMERA_SMART_GLANCING_HEIGHT",smartcamGlancingHeight);
 
+static REAL se_cameraSoundReceiverSize = 4.0f;
+static tSettingItem< REAL > se_confCameraSoundReceiverSize( "SOUND_RECEIVER_SIZE", se_cameraSoundReceiverSize );
+
+static REAL se_cameraSoundReceiverSizeByDistance = 0.2f;
+static tSettingItem< REAL > se_confCameraSoundReceiverSizeByDistance( "SOUND_RECEIVER_SIZE_DISTANCE", se_cameraSoundReceiverSizeByDistance );
+
+static REAL se_cameraSoundSelfFactor = 0.25f;
+static tSettingItem< REAL > se_confCameraSoundSelfFactor( "SOUND_SELF_FACTOR", se_cameraSoundSelfFactor );
+
 // turn speed of internal camera
 static REAL s_inTurnSpeed=40;
 static tSettingItem<REAL> s_iInTurnSpeed("CAMERA_IN_TURN_SPEED", s_inTurnSpeed);
@@ -517,6 +526,10 @@ static rWatchCommandLineAnalyzer se_WatchAnalyzer;
 #endif
 
 void eCamera::MyInit(){
+    // let the sound fade in from 0 to at most the default max volume for a single active engine
+    _totalContinuousSoundNormalizer = 0.0f;
+    _totalContinuousSoundNormalizerSmoother = 1.5f/std::min(1.0f, se_cameraSoundSelfFactor);
+
     if (localPlayer){
         if (cameraMain_) mode=localPlayer->startCamera; //PENDING:
         fov=localPlayer->startFOV;
@@ -1849,6 +1862,14 @@ void eCamera::SwitchCenter(int d){
 }
 
 void eCamera::Timestep(REAL ts){
+    // adjust total sound volume; try yo do so smoothly
+    {
+        auto bestTotalContinuousSoundNormalizer = 1.0f/std::max(1.0f, sqrtf(_totalContinuousSoundVolume));
+        REAL tween = std::min(fabsf(ts), 0.1f) * (.5f + 2 * fabsf(bestTotalContinuousSoundNormalizer - _totalContinuousSoundNormalizer));
+        _totalContinuousSoundNormalizerSmoother = (_totalContinuousSoundNormalizerSmoother + tween*bestTotalContinuousSoundNormalizer)/(1.0f+tween);
+        _totalContinuousSoundNormalizer = (_totalContinuousSoundNormalizer + tween*_totalContinuousSoundNormalizerSmoother)/(1.0f+tween);
+    }
+
     // find net player
     if (!netPlayer && localPlayer)
     {
@@ -2508,24 +2529,38 @@ void eCamera::s_Timestep(eGrid *grid, REAL time){
 void eCamera::SoundMix(Sint16 *dest,unsigned int len){
     tASSERT_THIS();
 
-    if (id>=0){
-        eGameObject *c=Center();
-        for(int i=grid->gameObjects.Len()-1;i>=0;i--){
-            eGameObject *go=grid->gameObjects(i);
-            SoundMixGameObject(dest,len,go);
+    auto mix = [&]()
+    {
+        _totalContinuousSoundVolume = 0.0;
+        if (id>=0){
+            eGameObject *c=Center();
+            for(int i=grid->gameObjects.Len()-1;i>=0;i--){
+                eGameObject *go=grid->gameObjects(i);
+                SoundMixGameObject(dest,len,go);
+            }
+            if (c && c->id<0)
+                SoundMixGameObject(dest,len,c);
         }
-        if (c && c->id<0)
-            SoundMixGameObject(dest,len,c);
+    };
+
+    mix();
+
+    // don't allow things to become too loud due to slow smoothing
+    constexpr REAL maxLoundnessOvershoot = 2.0;
+    if(_totalContinuousSoundVolume * _totalContinuousSoundNormalizer * _totalContinuousSoundNormalizer > maxLoundnessOvershoot)
+    {
+        _totalContinuousSoundNormalizer = maxLoundnessOvershoot/sqrtf(_totalContinuousSoundVolume);
+        // mix();
     }
 }
 
+// calculates right and left volume factors of a game object
+void eCamera::GetSoundVolume(eGameObject const &go, REAL &r, REAL &l, REAL &dopplerPitch) const
+{
+    auto *c = Center();
 
-void eCamera::SoundMixGameObject(Sint16 *dest,unsigned int len,eGameObject *go){
-    if(!go)
-        return;
-    
-    eCoord vec((go->pos-pos).Turn(dir.Conj()));
-    REAL dist_squared=vec.NormSquared()+(z-go->z)*(z-go->z);
+    eCoord vec((go.pos-pos).Turn(dir.Conj()));
+    REAL dist_squared=vec.NormSquared()+(z-go.z)*(z-go.z);
 
     //dist_squared*=.1;
     if (dist_squared<1)
@@ -2535,24 +2570,69 @@ void eCamera::SoundMixGameObject(Sint16 *dest,unsigned int len,eGameObject *go){
 
 #define MAXVOL .4
 
-    REAL l=(dist*.5+vec.y)/dist_squared;
-    REAL r=(dist*.5-vec.y)/dist_squared;
+    dopplerPitch = 0;
+
+    // calculate normalized l and r component (between 0 and 1)
+    l=(dist*.5+vec.y)/dist;
+    r=(dist*.5-vec.y)/dist;
+
+    auto soundReceiverRadius = se_cameraSoundReceiverSize;
+
+    if (&go==c){
+        dist = 0;
+    }
+    else if(c)
+    {
+        {
+            auto dz = z - c->z;
+            soundReceiverRadius += se_cameraSoundReceiverSizeByDistance*sqrt((pos - c->pos).NormSquared() + dz*dz);
+        }
+        {
+            // for loudness, the distance to the center object should matter
+            auto dz = (go.z - c->z);
+            vec = go.pos - c->pos;
+            dist = sqrt(vec.NormSquared() + dz*dz);
+        }
+
+        {
+            dopplerPitch = -go.Speed()*(tCoord::F(go.SmoothDirection(), vec));
+            if(c)
+                dopplerPitch += c->Speed()*(tCoord::F(c->SmoothDirection(), vec));
+            dopplerPitch /= se_cameraSoundReceiverSize + vec.Norm();
+        }
+    }
+
+    auto volumeByDistance = soundReceiverRadius/(soundReceiverRadius + dist);
+
+    l *= volumeByDistance;
+    r *= volumeByDistance;
 
     if (l<0) l=0;
     if (r<0) r=0;
     if (l>MAXVOL) l=MAXVOL;
     if (r>MAXVOL) r=MAXVOL;
 
-    if (go==Center()){
-        if (mode==CAMERA_IN || mode==CAMERA_SMART_IN)
-            l=r=.2;
-        else if (mode!=CAMERA_FREE){
-            l*=.9;
-            r*=.9;
-        }
+}
+
+
+void eCamera::SoundMixGameObject(Sint16 *dest,unsigned int len,eGameObject *go){
+    if(!go)
+        return;
+
+    REAL l, r, dopplerPitch;
+    GetSoundVolume(*go, r, l, dopplerPitch);
+
+    if (Center() == go){
+        l *= se_cameraSoundSelfFactor;
+        r *= se_cameraSoundSelfFactor;
     }
 
-    go->SoundMix(dest,len,id,r,l);
+    _totalContinuousSoundVolume += r + l;
+
+    r *= _totalContinuousSoundNormalizer;
+    l *= _totalContinuousSoundNormalizer;
+
+    go->SoundMix(dest, len, id, r, l, dopplerPitch);
 }
 
 #endif

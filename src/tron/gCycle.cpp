@@ -143,6 +143,10 @@ static REAL sg_speedCycleSound=15;
 static nSettingItem<REAL> c_ss("CYCLE_SOUND_SPEED",
                                sg_speedCycleSound);
 
+static REAL sg_speedCycleSoundMach=0.1f;
+static tSettingItem<REAL> c_ssm("CYCLE_SOUND_MACH",
+                               sg_speedCycleSoundMach);
+
 // time after spawning it takes the cycle to start building a wall
 static REAL sg_cycleWallTime=0.0;
 static nSettingItemWatched<REAL>
@@ -3780,6 +3784,11 @@ private:
     eCoord const * lastFakeDir_;
 };
 
+namespace
+{
+    auto const cycleTurnSoundVolume = 4.0f;
+}
+
 bool gCycle::DoTurn(int d)
 {
 #ifdef DELAYEDTURN_DEBUG
@@ -3807,7 +3816,7 @@ bool gCycle::DoTurn(int d)
         if ( gCycleMovement::DoTurn( d ) )
         {
             eSoundMixer* mixer = eSoundMixer::GetMixer();
-            mixer->PushButton(CYCLE_TURN, Position());
+            mixer->PushButton(CYCLE_TURN, *this, cycleTurnSoundVolume);
 
             sg_ArchiveCoord( pos, 1 );
 
@@ -4937,7 +4946,7 @@ bool gCycle::RenderCockpitFixedBefore(bool){
 }
 
 void gCycle::SoundMix(Sint16 *dest,unsigned int len,
-                      int viewer,REAL rvol,REAL lvol){
+                      int viewer,REAL rvol,REAL lvol, REAL dopplerPitch){
     if (Alive()){
         /*
           if (!cycle_run.alt){
@@ -4947,7 +4956,13 @@ void gCycle::SoundMix(Sint16 *dest,unsigned int len,
         */
 
         if (engine)
-            engine->Mix(dest,len,viewer,rvol,lvol,verletSpeed_/(sg_speedCycleSound * SpeedMultiplier()));
+        {
+            REAL const engineVolume = 0.3;
+
+            REAL const dopplerPitchAdjusted = sg_speedCycleSoundMach*dopplerPitch/sg_speedCycleSound;
+            REAL const dopplerFactor = dopplerPitchAdjusted > 0 ? 1 + dopplerPitchAdjusted : 1/(1 - dopplerPitchAdjusted);
+            engine->Mix(dest,len,viewer,rvol*engineVolume,lvol*engineVolume,dopplerFactor*verletSpeed_/(sg_speedCycleSound * SpeedMultiplier()));
+        }
 
 #if 0
         if (turning)
@@ -5883,11 +5898,12 @@ void gCycle::SyncEnemy ( const eCoord& begWall)
                 tASSERT( fabs ( ( crossPos - lastSyncMessage_.pos ) * lastSyncMessage_.dir ) < 1 );
 
                 // update the old wall
-                if (currentWall) {
+                if (currentWall)
+                {
                     currentWall->Update(crossTime,crossPos);
 
                     eSoundMixer* mixer = eSoundMixer::GetMixer();
-                    mixer->PushButton(CYCLE_TURN, crossPos);
+                    mixer->PushButton(CYCLE_TURN, *this, cycleTurnSoundVolume);
                 }
             }
         }

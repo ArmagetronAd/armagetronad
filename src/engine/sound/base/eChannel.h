@@ -43,6 +43,7 @@ typedef int Mix_Music;
 // Forward declarations from other files
 class eGameObject;
 class eCoord;
+class eCamera;
 
 // Forward declarations from this file
 class eWavData;
@@ -87,6 +88,7 @@ public:
     void SetId(int newID) { m_ChannelID = newID; };
 
     void Set3d(eCoord home, eCoord soundPos, eCoord homeDirection);
+    void Set3d(eCamera const &camera, eGameObject const &soundOrigin, REAL volume);
     void PlaySound(eWavData& sound);
     void LoopSound(eWavData& sound);
     void StopSound() {

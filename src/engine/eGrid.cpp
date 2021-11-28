@@ -37,6 +37,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "eTimer.h"
 #include "eWall.h"
 #include "eGameObject.h"
+#include "eSoundMixer.h"
 #include "eCamera.h"
 
 #include "tMath.h"
@@ -2689,13 +2690,19 @@ eGrid::eGrid()
         base(100,100)
 {
     currentGrid = this;
+    auto mixer = eSoundMixer::GetMixer();
+    mixer->SetGrid(this);
 }
 
 
 eGrid::~eGrid()
 {
     if (currentGrid == this)
-        currentGrid = NULL;
+        currentGrid = nullptr;
+
+    auto mixer = eSoundMixer::GetMixer();
+    if(mixer->GetGrid() == this)
+        mixer->SetGrid(nullptr);
 }
 
 static REAL s_rangeSquared;

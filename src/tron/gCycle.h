@@ -335,7 +335,7 @@ public:
     bool RenderCockpitFixedBefore(bool primary=true) override;
 
     void SoundMix(Sint16 *dest,unsigned int len,
-                  int viewer,REAL rvol,REAL lvol) override;
+                  int viewer,REAL rvol,REAL lvol, REAL dopplerPitch) override;
 #endif
 
     eCoord CamPos() const override;

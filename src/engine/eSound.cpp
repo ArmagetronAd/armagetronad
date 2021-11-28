@@ -76,6 +76,10 @@ static int sound_sources=10;
 static tConfItem<int> ss("SOUND_SOURCES",sound_sources);
 static REAL loudness_thresh=0;
 static int real_sound_sources=0;
+static REAL next_loudness_culled{0};
+static REAL max_loudness_culled{0};
+static REAL min_loudness_audible{100};
+static REAL next_loudness_audible{100};
 
 static tList<eSoundPlayer> se_globalPlayers;
 
@@ -83,7 +87,11 @@ static tList<eSoundPlayer> se_globalPlayers;
 void fill_audio_core(void *udata, Sint16 *stream, int len)
 {
 #ifndef DEDICATED
-    real_sound_sources=0;
+    real_sound_sources = 0;
+    next_loudness_culled = 0;
+    max_loudness_culled = 0;
+    min_loudness_audible = 2;
+    next_loudness_audible = 2;
     int i;
     if (eGrid::CurrentGrid())
         for(i=eGrid::CurrentGrid()->Cameras().Len()-1;i>=0;i--)
@@ -96,16 +104,12 @@ void fill_audio_core(void *udata, Sint16 *stream, int len)
     for(i=se_globalPlayers.Len()-1;i>=0;i--)
         se_globalPlayers(i)->Mix(stream,len,0,1,1);
 
-    if (real_sound_sources>sound_sources+4)
-        loudness_thresh+=.01;
-    else if (real_sound_sources>sound_sources+1)
-        loudness_thresh+=.001;
-    else if (real_sound_sources<sound_sources-4)
-        loudness_thresh-=.001;
-    else if (real_sound_sources<sound_sources-1)
-        loudness_thresh-=.0001;
-    if (loudness_thresh<0)
-        loudness_thresh=0;
+    if (real_sound_sources > sound_sources)
+        loudness_thresh = .5f*(next_loudness_audible + min_loudness_audible);
+    else if (real_sound_sources < sound_sources)
+        loudness_thresh = .5f*(max_loudness_culled + next_loudness_culled);
+    else
+        loudness_thresh = .5f*(max_loudness_culled + min_loudness_audible);
 #endif
 }
 
@@ -372,8 +376,8 @@ eLegacyWavData::~eLegacyWavData(){
 #define VOL_SHIFT 16
 #define VOL_FRACTION (1<<VOL_SHIFT)
 
-#define MAX_VAL ((1<<16)-1)
-#define MIN_VAL -(1<<16)
+#define MAX_VAL ((1<<15)-1)
+#define MIN_VAL (-(1<<15))
 
 namespace
 {
@@ -400,8 +404,8 @@ struct partial_mix
             auto nextWeight = pos.fraction >> (SPEED_SHIFT-WEIGHT_SHIFT);
             auto currentWeight = (1 << WEIGHT_SHIFT) - nextWeight;
 
-            auto lNow = (current.first * currentWeight + next.first * nextWeight) >> WEIGHT_SHIFT;
-            auto rNow = (current.second * currentWeight + next.second * nextWeight) >> WEIGHT_SHIFT;
+            int lNow = (current.first * currentWeight + next.first * nextWeight) >> WEIGHT_SHIFT;
+            int rNow = (current.second * currentWeight + next.second * nextWeight) >> WEIGHT_SHIFT;
 
             int l=dest[0];
             int r=dest[1];
@@ -614,12 +618,36 @@ bool eSoundPlayer::Mix(Sint16 *dest,
                        REAL speed){
 
     if (goon[viewer]){
-        if (rvol+lvol>loudness_thresh){
+        auto const loudness = rvol + lvol;
+        if (loudness > loudness_thresh){
             real_sound_sources++;
+
+            if(loudness < min_loudness_audible)
+            {
+                next_loudness_audible = min_loudness_audible;
+                min_loudness_audible = loudness;
+            }
+            else if(loudness < next_loudness_audible)
+            {
+                next_loudness_audible = loudness;
+            }
+
             return goon[viewer]=!wav->Mix(dest,len,pos[viewer],rvol,lvol,speed,loop);
         }
         else
+        {
+            if(loudness > max_loudness_culled)
+            {
+                next_loudness_culled = max_loudness_culled;
+                max_loudness_culled = loudness;
+            }
+            else if(loudness > next_loudness_culled)
+            {
+                next_loudness_culled = loudness;
+            }
+
             return true;
+        }
     }
     else
         return false;

@@ -139,6 +139,7 @@ public:
 
     virtual eCoord Position()const{return pos;}
     virtual eCoord Direction()const{return dir;}
+    virtual eCoord SmoothDirection()const{return dir;}
     virtual eCoord LastDirection()const{return dir;}
     virtual REAL DeathTime()const{return deathTime;}
     virtual REAL  Speed()const{return 20;}
@@ -222,7 +223,7 @@ public:
 
     //sound output
     virtual void SoundMix(Sint16 *dest,unsigned int len,
-                          int viewer,REAL rvol,REAL lvol){}
+                          int viewer,REAL rvol,REAL lvol, REAL dopplerPitch){}
 
     // internal camera
     virtual eCoord CamDir()  const {return dir;}
