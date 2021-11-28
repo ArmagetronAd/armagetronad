@@ -76,6 +76,8 @@ static int sound_sources=10;
 static tConfItem<int> ss("SOUND_SOURCES",sound_sources);
 static REAL loudness_thresh=0;
 static int real_sound_sources=0;
+static REAL max_loudness_culled{0};
+static REAL min_loudness_audible{100};
 
 static tList<eSoundPlayer> se_globalPlayers;
 
@@ -83,7 +85,9 @@ static tList<eSoundPlayer> se_globalPlayers;
 void fill_audio_core(void *udata, Sint16 *stream, int len)
 {
 #ifndef DEDICATED
-    real_sound_sources=0;
+    real_sound_sources = 0;
+    max_loudness_culled = 0;
+    min_loudness_audible = 2;
     int i;
     if (eGrid::CurrentGrid())
         for(i=eGrid::CurrentGrid()->Cameras().Len()-1;i>=0;i--)
@@ -96,16 +100,11 @@ void fill_audio_core(void *udata, Sint16 *stream, int len)
     for(i=se_globalPlayers.Len()-1;i>=0;i--)
         se_globalPlayers(i)->Mix(stream,len,0,1,1);
 
-    if (real_sound_sources>sound_sources+4)
-        loudness_thresh+=.01;
-    else if (real_sound_sources>sound_sources+1)
-        loudness_thresh+=.001;
-    else if (real_sound_sources<sound_sources-4)
-        loudness_thresh-=.001;
-    else if (real_sound_sources<sound_sources-1)
-        loudness_thresh-=.0001;
-    if (loudness_thresh<0)
-        loudness_thresh=0;
+    const auto eps = 1E-6;
+    if (real_sound_sources > sound_sources+2)
+        loudness_thresh = min_loudness_audible - eps;
+    else if (real_sound_sources < sound_sources/2)
+        loudness_thresh = max_loudness_culled + eps;
 #endif
 }
 
@@ -614,12 +613,17 @@ bool eSoundPlayer::Mix(Sint16 *dest,
                        REAL speed){
 
     if (goon[viewer]){
-        if (rvol+lvol>loudness_thresh){
+        auto loudness = rvol + lvol;
+        if (loudness > loudness_thresh){
             real_sound_sources++;
+            min_loudness_audible = std::min(min_loudness_audible, loudness);
             return goon[viewer]=!wav->Mix(dest,len,pos[viewer],rvol,lvol,speed,loop);
         }
         else
+        {
+            max_loudness_culled = std::max(max_loudness_culled, loudness);
             return true;
+        }
     }
     else
         return false;
