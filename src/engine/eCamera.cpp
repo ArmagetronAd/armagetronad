@@ -2519,6 +2519,15 @@ void eCamera::SoundMix(Sint16 *dest,unsigned int len){
     }
 }
 
+static REAL se_cameraSoundReceiverSize = 6.0f;
+static tSettingItem< REAL > se_confCameraSoundReceiverSize( "SOUND_RECEIVER_SIZE", se_cameraSoundReceiverSize );
+
+static REAL se_cameraSoundReceiverSizeByDistance = 0.3f;
+static tSettingItem< REAL > se_confCameraSoundReceiverSizeByDistance( "SOUND_RECEIVER_SIZE_DISTANCE", se_cameraSoundReceiverSizeByDistance );
+
+static REAL se_cameraSoundSelfFactor = 0.25f;
+static tSettingItem< REAL > se_confCameraSoundSelfFactor( "SOUND_SELF_FACTOR", se_cameraSoundSelfFactor );
+
 // calculates right and left volume factors of a game object
 void eCamera::GetSoundVolume(eGameObject const &go, REAL &r, REAL &l, REAL &dopplerPitch) const
 {
@@ -2541,25 +2550,38 @@ void eCamera::GetSoundVolume(eGameObject const &go, REAL &r, REAL &l, REAL &dopp
     l=(dist*.5+vec.y)/dist;
     r=(dist*.5-vec.y)/dist;
 
+    auto soundReceiverRadius = se_cameraSoundReceiverSize;
+
     if (&go==c){
-        l=r=.05;
-        dist = 1;
+        l *= se_cameraSoundSelfFactor;
+        r *= se_cameraSoundSelfFactor;
+        dist = 0;
     }
     else if(c)
     {
-        // for loudness, the distance to the center object should matter
-        auto dz = (go.z - c->z);
-        vec = go.pos - c->pos;
-        dist = 10.0f + 2.0f * sqrt(vec.NormSquared() + dz*dz);
+        {
+            auto dz = z - c->z;
+            soundReceiverRadius += se_cameraSoundReceiverSizeByDistance*sqrt((pos - c->pos).NormSquared() + dz*dz);
+        }
+        {
+            // for loudness, the distance to the center object should matter
+            auto dz = (go.z - c->z);
+            vec = go.pos - c->pos;
+            dist = sqrt(vec.NormSquared() + dz*dz);
+        }
 
-        dopplerPitch = -go.Speed()*(tCoord::F(go.Direction(), vec));
-        if(c)
-            dopplerPitch += c->Speed()*(tCoord::F(c->Direction(), vec));
-        dopplerPitch /= 5.0 + vec.Norm();
+        {
+            dopplerPitch = -go.Speed()*(tCoord::F(go.Direction(), vec));
+            if(c)
+                dopplerPitch += c->Speed()*(tCoord::F(c->Direction(), vec));
+            dopplerPitch /= se_cameraSoundReceiverSize + vec.Norm();
+        }
     }
 
-    l /= dist;
-    r /= dist;
+    auto volumeByDistance = soundReceiverRadius/(soundReceiverRadius + dist);
+
+    l *= volumeByDistance;
+    r *= volumeByDistance;
 
     if (l<0) l=0;
     if (r<0) r=0;
