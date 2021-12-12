@@ -331,6 +331,12 @@ void eTeam::UpdateAppearance()
                     // use player name as teamname
                     updateName = oldest->GetName();
                 }
+                
+                tString ugh = tColoredString::RemoveColorsLoose(updateName);
+                if( ugh.Len() > 30 )
+                {
+                    updateName = ugh.SubStr( 0, 30 );
+                }
             }
 
             r = oldest->r;
@@ -367,6 +373,7 @@ void eTeam::UpdateAppearance()
             && oldest
             && name != ""
             && ( lastWasCustomTeamName_ || ( updateName != oldest->GetName() && !nameTeamColor ) )
+            && oldest->GetShuffleSpam().ShouldAnnounce()
         )
         {
             tOutput message;
@@ -382,6 +389,12 @@ void eTeam::UpdateAppearance()
             message.SetTemplateParameter(2, resetColor);
             message << "$team_renamed";
             sn_ConsoleOut(message);
+            
+            oldest->GetShuffleSpam().Shuffle();
+            if( !oldest->GetShuffleSpam().ShouldAnnounce() )
+            {
+                sn_ConsoleOut(tOutput("$team_rename_suppress"));
+            }
         }
         name = updateName;
         lastWasCustomTeamName_ = isCustomTeamName;
