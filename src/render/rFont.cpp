@@ -292,6 +292,9 @@ rTextField::~rTextField(){
 static bool sr_renderBrightBackground = false;
 static tConfItem<bool> rbb("TEXT_BRIGHT_BACKGROUND",sr_renderBrightBackground);
 
+static int sr_textShadow = 1;
+static tConfItem<int> textShadowConf("TEXT_SHADOW", sr_textShadow);
+
 void rTextField::FlushLine(int len,bool newline){
 #ifndef DEDICATED
     // reload textures if alpha blending changed
@@ -348,6 +351,48 @@ void rTextField::FlushLine(int len,bool newline){
             }
             RenderEnd(true);
             glEnable(GL_TEXTURE_2D);
+        }
+        
+        if( sr_textShadow && (
+            ( color_.IsDark() && (sr_textShadow&1) ) ||
+            (!color_.IsDark() && (sr_textShadow&2) )
+        ))
+        {
+            int fakex = realx;
+            REAL l,t;
+            
+            if( color_.IsDark() )
+            {
+                glColor4f( 1, 1, 1, blendColor_.a_*a );
+            }
+            else
+            {
+                glColor4f( 0, 0, 0, blendColor_.a_*a );
+            }
+            
+            #if 0
+                {
+                    static REAL offset[8][2] = {{0,1},{1,1},{1,0},{0,-1},{-1,-1},{-1,0},{-1,1},{1,-1}};
+                    for(i=0;i<len;++i)
+                    {
+                        for(int z=0;z<8;++z)
+                        {
+                            l=(left+(0.002*offset[z][0]))+fakex*cwidth;
+                            t=(top+(0.002*offset[z][0]))-y*cheight;
+                            F->Render(buffer[fakex],l,t,l+cwidth,t-cheight);
+                        }
+                        fakex++;
+                    }
+                }
+            #else
+                    for(i=0;i<len;i++)
+                    {
+                        l=(left+0.0025)+fakex*cwidth;
+                        t=(top-0.0025)-y*cheight;
+                        F->Render(buffer[fakex],l,t,l+cwidth,t-cheight);
+                        fakex++;
+                    }
+            #endif
         }
 
 
