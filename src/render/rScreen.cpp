@@ -945,7 +945,6 @@ static bool lowlevel_sr_InitDisplay(){
         if (!SDL_SetWindowFullscreen(sr_screen, 0))
         {
             SDL_SetWindowSize(sr_screen, sr_screenWidthInPoints, sr_screenHeightInPoints);
-
             {
                 // Sometimes, setting the window size fails. Check the actual size to ver
                 int w = sr_screenWidthInPoints, h = sr_screenHeightInPoints;
@@ -961,6 +960,18 @@ static bool lowlevel_sr_InitDisplay(){
             }
 
             SDL_SetWindowPosition(sr_screen, defaultX, defaultY);
+            {
+                // Get/SetWindowPosition don't always agree on what position means.
+                // compensate for any constant offset (for window title bar, for example)
+                // if that is the case.
+                int x, y;
+                SDL_GetWindowPosition(sr_screen, &x, &y);
+                if(x != defaultX || y != defaultY)
+                {
+                    SDL_SetWindowPosition(sr_screen, 2*defaultX-x, 2*defaultY-y);
+                }
+            }
+
 #if SDL_VERSION_ATLEAST(2, 0, 5)
             // we're already setting the relevant flag on creation, but maybe it gets lost in fullscreen mode
             SDL_SetWindowResizable(sr_screen, SDL_TRUE);
