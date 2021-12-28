@@ -945,6 +945,21 @@ static bool lowlevel_sr_InitDisplay(){
         if (!SDL_SetWindowFullscreen(sr_screen, 0))
         {
             SDL_SetWindowSize(sr_screen, sr_screenWidthInPoints, sr_screenHeightInPoints);
+
+            {
+                // Sometimes, setting the window size fails. Check the actual size to ver
+                int w = sr_screenWidthInPoints, h = sr_screenHeightInPoints;
+                SDL_GetWindowSize(sr_screen, &w, &h);
+                if(w != sr_screenWidthInPoints || h != sr_screenHeightInPoints ||
+                 SDL_GetWindowFlags(sr_screen) & (SDL_WINDOW_MAXIMIZED | SDL_WINDOW_MINIMIZED))
+                {
+                    // Mismatch. Try to shake it free.
+                    SDL_MaximizeWindow(sr_screen);
+                    SDL_RestoreWindow(sr_screen);
+                    SDL_SetWindowSize(sr_screen, sr_screenWidthInPoints, sr_screenHeightInPoints);
+                }
+            }
+
             SDL_SetWindowPosition(sr_screen, defaultX, defaultY);
 #if SDL_VERSION_ATLEAST(2, 0, 5)
             // we're already setting the relevant flag on creation, but maybe it gets lost in fullscreen mode
