@@ -36,7 +36,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #else // HAVE_BOOST_THREAD
 
-#ifndef HAVE_PTHREAD
+#ifdef HAVE_PTHREAD
 
 #include <pthread.h>
 
