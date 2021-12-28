@@ -902,7 +902,9 @@ LIBS="${PTHREAD_LIBS} ${LIBS}"
 CXXFLAGS="${CXXFLAGS} ${PTHREAD_CFLAGS}"
 CC="${PTHREAD_CC}"
 AC_DEFINE(HAVE_PTHREAD,1,[Define if you have POSIX threads libraries and header files.])
-])
+],
+AC_MSG_ERROR([You need boost::thread or pthread to compile ${progtitle}.])
+)
 fi
 
 dnl *************************************************
