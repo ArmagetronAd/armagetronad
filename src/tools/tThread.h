@@ -34,13 +34,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include <boost/thread/thread.hpp>
 
-#define HAVE_THREADS
-
 #else // HAVE_BOOST_THREAD
 
 #ifndef HAVE_PTHREAD
-
-#define HAVE_THREADS
 
 #include <pthread.h>
 
@@ -109,37 +105,6 @@ private:
 
         return NULL;
     }
-};
-}
-
-#else  // HAVE_PTHREAD
-
-#include "tError.h"
-
-namespace boost
-{
-class thread
-{
-public:
-    struct attributes{
-        void set_stack_size(size_t){}
-    };
-
-    template< class T>
-    thread( attributes const & a, T const & t )
-    {
-        // should never be called, then
-        tVERIFY(0);
-    }
-
-    template< class T>
-    thread( T const & t )
-    {
-        // should never be called, then
-        tVERIFY(0);
-    }
-
-    void detach(){}
 };
 }
 

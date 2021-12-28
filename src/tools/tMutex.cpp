@@ -39,37 +39,28 @@ namespace boost
 
     mutex::mutex()
     {
-#ifdef HAVE_REAL_MUTEX
         // TODO: error checking
         pthread_mutex_init(&mutex_, NULL);
-#endif
     }
 
     mutex::~mutex()
     {
-#ifdef HAVE_REAL_MUTEX
         pthread_mutex_destroy(&mutex_);
-#endif
     }
 
     void mutex::lock()
     {
-#ifdef HAVE_REAL_MUTEX
         pthread_mutex_lock(&mutex_);
-#endif
     }
 
     void mutex::unlock()
     {
-#ifdef HAVE_REAL_MUTEX
         pthread_mutex_unlock(&mutex_);
-#endif
     }
 
     recursive_mutex::recursive_mutex()
     : mutex(5)
     {
-#ifdef HAVE_REAL_MUTEX
         // TODO: error checking
         pthread_mutexattr_t mta;
 
@@ -77,7 +68,6 @@ namespace boost
         pthread_mutexattr_settype(&mta, PTHREAD_MUTEX_RECURSIVE);
         pthread_mutex_init(&mutex_, &mta);
         pthread_mutexattr_destroy(&mta);
-#endif
     }
 }
 

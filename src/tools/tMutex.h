@@ -47,10 +47,7 @@ private:
     mutex( mutex const & );
     mutex & operator = ( mutex const & );
 protected:
-#ifdef HAVE_PTHREAD
-#define HAVE_REAL_MUTEX
     pthread_mutex_t mutex_;
-#endif
 
     // special constructor, do not initialize mutex
     explicit mutex( int );
