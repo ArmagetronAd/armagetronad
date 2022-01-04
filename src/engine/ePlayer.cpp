@@ -5867,7 +5867,9 @@ ePlayerNetID::ePlayerNetID(nMessage &m):nNetObject(m),listID(-1), teamListID(-1)
     r = g = b = 15;
 
     nameTeamAfterMe = false;
+
     teamname = "";
+    teamnameSync = "";
 
     substitute          = NULL;
 
@@ -7663,7 +7665,18 @@ void ePlayerNetID::ReadSync(nMessage &m)
 
     if (!m.End())
     {
-        m >> teamname;
+        m >> teamnameNew;
+
+        if( lastTeamName <= lastTeamNameSync || teamnameSync != teamnameNew )
+        {
+            if(teamname != teamnameNew)
+            {
+                SetTeamname(teamnameNew);
+
+                teamnameSync = teamname;
+                lastTeamNameSync = lastTeamName;
+            }
+        }
     }
     // con << "Player info updated.\n";
 
@@ -8792,7 +8805,8 @@ void ePlayerNetID::Update()
 
                 sg_ClampPingCharity();
                 p->pingCharity=::pingCharity;
-                p->SetTeamname(local_p->Teamname());
+                if( sn_GetNetState() != nSERVER )
+                    p->SetTeamname(local_p->Teamname());
 
                 // update spectator status
                 bool spectate = local_p->spectate;
@@ -9560,6 +9574,7 @@ void ePlayerNetID::SetTeam( eTeam* newTeam )
 void ePlayerNetID::SetTeamname(const char* newTeamname)
 {
     teamname = newTeamname;
+    lastTeamName = tSysTimeFloat();
     if (bool(currentTeam) && currentTeam->OldestHumanPlayer() &&
             currentTeam->OldestHumanPlayer()->ID()==ID())
     {

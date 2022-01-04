@@ -294,6 +294,8 @@ public:
     int    pID;
     // REAL	rubberstatus;
     tString teamname;
+    tString teamnameNew, teamnameSync;
+    REAL lastTeamName, lastTeamNameSync;
     tArray<tString> lastSaid;
     tArray<nTimeRolling> lastSaidTimes;
     //	void SetLastSaid(tString ls);
