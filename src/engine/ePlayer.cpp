@@ -10100,7 +10100,7 @@ static void se_MoveToConf(std::istream &s, REAL severity, const char * command )
     // and kick.
     if ( num > 0 && !s.good() )
     {
-        sn_KickUser( num ,  reason.Len() > 1 ? static_cast< char const *>( reason ) : "$network_kill_kick", severity, &redirect );
+        sn_KickUser( num ,  reason.Len() > 1 ? static_cast< char const *>( reason ) : ( severity > 0 ? "$network_kill_kick" : "" ), severity, &redirect );
     }
     else
     {
