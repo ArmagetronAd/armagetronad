@@ -4812,10 +4812,12 @@ void gCycle::Render2D(tCoord scale) const {
 static REAL fadeOutNameAfter = 5.0f;	/* 0: never show, < 0 always show */
 //static int fadeOutNameMode = 1;			// 0: never show, 1: show for fadeOutNameAfter, 2: always show
 static bool showOwnName = 0;			// show name on own cycle?
+static REAL fadeOutNameOpacity = 0.75f;
 
 static tSettingItem< bool > sg_showOwnName( "SHOW_OWN_NAME", showOwnName );
 //static tSettingItem< int > sg_fadeOutNameMode( "FADEOUT_NAME_MODE", showOwnName )
 static tSettingItem< REAL > sg_fadeOutNameAfter( "FADEOUT_NAME_DELAY", fadeOutNameAfter );
+static tSettingItem< REAL > sg_fadeOutNameOpacity( "FADEOUT_NAME_OPACITY", fadeOutNameOpacity );
 
 static bool sg_displayColoredNameOverCycles = true;		        // show colored names on cycles?
 
@@ -4829,7 +4831,7 @@ void gCycle::RenderName( const eCamera* cam ) {
     float modelviewMatrix[16], projectionMatrix[16];
     float x, y, z, w;
     float xp, yp, wp;
-    float alpha = 0.75;
+    float alpha = fadeOutNameOpacity;
 
     if (fadeOutNameAfter == 0) return; /* XXX put that in ::Render() */
     if ( !cam->RenderingMain() ) return; // no name in mirrored image
@@ -4884,8 +4886,8 @@ void gCycle::RenderName( const eCamera* cam ) {
             doname = false;
         } else if (now - timeCameIntoView > fadeOutNameAfter - 1) {
             /* start to fade out */
-            alpha = 0.75 - (now - timeCameIntoView -
-                            (fadeOutNameAfter - 1)) * 0.75;
+            alpha = fadeOutNameOpacity - (now - timeCameIntoView -
+                            (fadeOutNameAfter - 1)) * fadeOutNameOpacity;
         }
     }
 
@@ -4899,13 +4901,14 @@ void gCycle::RenderName( const eCamera* cam ) {
 
     glTranslatef(xp, yp, 0.);
     if(doname) {
-        glColor4f(1, 1, 1, alpha);
+        rTextField::SetBlendColor(tColor(1,1,1,alpha));
         tColoredString name;
         if(sg_displayColoredNameOverCycles)
             name << *this->player;
         else
             name << this->player->GetName();
         DisplayText(0, 0, rCHEIGHT_NORMAL, name, sr_fontCycleLabel, 0, 0);
+        rTextField::SetDefaultColor(tColor(1,1,1));
     }
     static cCockpit cycleCockpit(cCockpit::VIEWPORT_CYCLE);
     cycleCockpit.SetCycle(*this);
