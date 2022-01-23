@@ -2690,8 +2690,8 @@ eGrid::eGrid()
         base(100,100)
 {
     currentGrid = this;
-    auto mixer = eSoundMixer::GetMixer();
-    mixer->SetGrid(this);
+    auto& mixer = eSoundMixer::GetMixer();
+    mixer.SetGrid(this);
 }
 
 
@@ -2700,9 +2700,9 @@ eGrid::~eGrid()
     if (currentGrid == this)
         currentGrid = nullptr;
 
-    auto mixer = eSoundMixer::GetMixer();
-    if(mixer->GetGrid() == this)
-        mixer->SetGrid(nullptr);
+    auto& mixer = eSoundMixer::GetMixer();
+    if(mixer.GetGrid() == this)
+        mixer.SetGrid(nullptr);
 }
 
 static REAL s_rangeSquared;

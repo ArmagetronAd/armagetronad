@@ -131,7 +131,7 @@ private:
     tSong m_CurrentSong;
 
     std::map<tString, Mix_Music*> m_Tracklist;
-    eSoundMixer* m_mixer;
+    eSoundMixer& m_mixer;
 
     // The file associated with this music track
     tString m_Filename;

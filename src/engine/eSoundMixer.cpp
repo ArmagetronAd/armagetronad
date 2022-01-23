@@ -590,22 +590,21 @@ void eSoundMixer::ShutDown() {
 #endif // DEDICATED
 }
 
-eSoundMixer* eSoundMixer::GetMixer() {
-#ifdef HAVE_LIBSDL_MIXER
-    if(_instance == 0) {
+eSoundMixer& eSoundMixer::GetMixer() {
+    if(!_instance) {
+        // the division into constructor and Init() is required right now because we have cyclical dependencies with eMusicTrack. Init creates some, and they look for eSoundMixer.
         _instance.reset(new eSoundMixer());
         _instance->Init();
     }
 
-#endif // DEDICATED
-    return _instance.get();
+    return *_instance;
 }
 
 #ifdef HAVE_LIBSDL_MIXER
 // Play this every frame
 static void updateMixer() {
-    eSoundMixer* mixer = eSoundMixer::GetMixer();
-    mixer->Update();
+    eSoundMixer& mixer = eSoundMixer::GetMixer();
+    mixer.Update();
 }
 
 static rPerFrameTask mixupdate(&updateMixer);
@@ -671,10 +670,10 @@ static uMenuItemString bc(&Sound_menu, "$sound_customplaylist_text",
 void se_SoundMenu(){
     int oldUsePlaylist = usePlaylist;
     tString oldCustomPlaylist = customPlaylist;
-    eSoundMixer* mixer = eSoundMixer::GetMixer();
+    eSoundMixer& mixer = eSoundMixer::GetMixer();
 
     Sound_menu.Enter();
-    if( oldUsePlaylist != usePlaylist || oldCustomPlaylist != customPlaylist) mixer->LoadPlaylist();
+    if( oldUsePlaylist != usePlaylist || oldCustomPlaylist != customPlaylist) mixer.LoadPlaylist();
 }
 
 // Media player keybinds

@@ -162,8 +162,8 @@ gExplosion::gExplosion(eGrid *grid, const eCoord &pos,REAL time, gRealColor& col
         owner_(owner)
 {
     radius_ = gCycle::ExplosionRadius() + owner_->Speed() * sg_explosionSpeedFactor;
-    eSoundMixer* mixer = eSoundMixer::GetMixer();
-    mixer->PushButton(CYCLE_EXPLOSION, *this, 4.0);
+    eSoundMixer& mixer = eSoundMixer::GetMixer();
+    mixer.PushButton(CYCLE_EXPLOSION, *this, 4.0);
     //std::cout << "explosion sound effect\n";
     holeAccountedFor_ = false;
 
