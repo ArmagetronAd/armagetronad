@@ -472,7 +472,7 @@ nStreamMessage& nStreamMessage::operator>>(REAL &x){
 
 #ifdef DEBUG
 #ifndef WIN32
-    if (!isfinite(x))
+    if (!std::isfinite(x))
         st_Breakpoint();
     // con << " , x= " << x << '\n';
 #endif
