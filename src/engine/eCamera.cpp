@@ -1225,7 +1225,7 @@ bool eCamera::AutoSwitchIncam(){
         return false;
 }
 
-static inline void makefinite(REAL &x,REAL y=2){if (!finite(x)) x=y;}
+static inline void makefinite(REAL &x,REAL y=2){if (!std::isfinite(x)) x=y;}
 static inline void makefinite(eCoord &x){makefinite(x.x);makefinite(x.y);}
 
 // Smart camera settings

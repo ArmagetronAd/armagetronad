@@ -585,7 +585,7 @@ void gPlayerWall::Flip(){
 }
 
 static void clamp01(REAL &c){
-    if (!finite(c))
+    if (!std::isfinite(c))
         c = 0.5;
 
     if (c<0)
@@ -1580,10 +1580,10 @@ void gNetPlayerWall::MyInitAfterCreation()
 
     //w=
 #ifdef DEBUG
-    if (!finite(end.x) || !finite(end.y))
+    if (!std::isfinite(end.x) || !std::isfinite(end.y))
         st_Breakpoint();
 
-    if (!finite(beg.x) || !finite(beg.y))
+    if (!std::isfinite(beg.x) || !std::isfinite(beg.y))
         st_Breakpoint();
 #endif
 
@@ -1633,7 +1633,7 @@ void gNetPlayerWall::Update(REAL Tend,REAL dend){
 		end=beg + dir*(dend-dbegin);
 
 #ifdef DEBUG
-		if (!finite(end.x) || !finite(end.y))
+		if (!std::isfinite(end.x) || !std::isfinite(end.y))
 			st_Breakpoint();
 #endif
 
@@ -1682,7 +1682,7 @@ void gNetPlayerWall::real_Update(REAL Tend,const eCoord &pend, bool force )
     }
 
 #ifdef DEBUG
-    if (!finite(end.x) || !finite(end.y))
+    if (!std::isfinite(end.x) || !std::isfinite(end.y))
         st_Breakpoint();
 #endif
 
@@ -2302,8 +2302,8 @@ void gNetPlayerWall::Check() const
     for ( i = coords_.Len() -1 ; i>=0; --i )
     {
         gPlayerWallCoord* coords = &( coords_( i ) );
-        tASSERT( finite( coords[0].Pos ) );
-        tASSERT( finite( coords[0].Time ) );
+        tASSERT( std::isfinite( coords[0].Pos ) );
+        tASSERT( std::isfinite( coords[0].Time ) );
     }
 #endif
 }
@@ -2434,7 +2434,7 @@ bool gNetPlayerWall::IsDangerousApartFromHoles( REAL a, REAL time ) const
     // the distance value at the spot we hit
     REAL wallDistance = Pos( a );
 
-    // test for finite wall lenght
+    // test for finite wall length
     if ( gCycle::WallsLength() > 0 )
     {
         // the distance the cycle traveled so far

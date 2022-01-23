@@ -110,7 +110,7 @@ extern REAL sg_suicideTimeout;
 static inline void clamp(REAL &c, REAL min, REAL max){
     tASSERT(min < max);
 
-    if (!finite(c))
+    if (!std::isfinite(c))
         c = 0;
 
     if (c<min)
@@ -1204,7 +1204,7 @@ void gDestination::CopyFrom(const gCycleMovement &other)
     turns 		= other.GetTurns();
 
 #ifdef DEBUG
-    if (!finite(gameTime) || !finite(speed) || !finite(distance))
+    if (!std::isfinite(gameTime) || !std::isfinite(speed) || !std::isfinite(distance))
         st_Breakpoint();
 #endif
     if ( other.Owner() && other.Player() )
@@ -1957,7 +1957,7 @@ bool gCycleExtrapolator::TimestepCore(REAL currentTime, bool calculateAccelerati
     // correct distance
     // distance = dest->distance - DistanceToDestination( *dest );
     // REAL distanceBefore = GetDistance();
-    tASSERT(finite(distance));
+    tASSERT(std::isfinite(distance));
 
     // delegate
     bool ret = false;
@@ -2393,12 +2393,12 @@ void gCycle::MyInitAfterCreation(){
 
 void gCycle::InitAfterCreation(){
 #ifdef DEBUG
-    if (!finite(Speed()))
+    if (!std::isfinite(Speed()))
         st_Breakpoint();
 #endif
     gCycleMovement::InitAfterCreation();
 #ifdef DEBUG
-    if (!finite(Speed()))
+    if (!std::isfinite(Speed()))
         st_Breakpoint();
 #endif
     MyInitAfterCreation();
@@ -2849,7 +2849,7 @@ static void DecaySmooth( REAL& smooth, REAL relSpeed, REAL minSpeed, REAL clamp 
 
     // apply minimal correction
     if ( fabs( speed ) < minSpeed )
-        speed = copysign ( minSpeed , smooth );
+        speed = std::copysign ( minSpeed , smooth );
 
     // don't overshoot
     if ( fabs( speed ) > fabs( smooth ) )
@@ -2880,9 +2880,9 @@ REAL sg_GetSparksDistance();
 
 
 bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
-    if (!finite(skew))
+    if (!std::isfinite(skew))
         skew=0;
-    if (!finite(skewDot))
+    if (!std::isfinite(skewDot))
         skewDot=0;
 
     // eCoord oldpos=pos;
@@ -2925,7 +2925,7 @@ bool gCycle::TimestepCore(REAL currentTime, bool calculateAcceleration ){
     //if ( 0 )
 
     REAL animts=currentTime-lastTimeAnim;
-    if (animts<0 || !finite(animts))
+    if (animts<0 || !std::isfinite(animts))
         animts=0;
     else
         lastTimeAnim=currentTime;
@@ -4259,8 +4259,8 @@ void gCycle::Render(const eCamera *cam){
     glProgramLocalParameter4fARB_ptr = (glProgramLocalParameter4fARB_Func) SDL_GL_GetProcAddress("glProgramLocalParameter4fARB");
 #endif
 #endif    
-    if (!finite(z) || !finite(pos.x) ||!finite(pos.y)||!finite(dir.x)||!finite(dir.y)
-            || !finite(skew))
+    if (!std::isfinite(z) || !std::isfinite(pos.x) ||!std::isfinite(pos.y)||!std::isfinite(dir.x)||!std::isfinite(dir.y)
+            || !std::isfinite(skew))
         st_Breakpoint();
     if (Alive()){
         //con << "Drawing cycle at " << pos << '\n';
@@ -5531,7 +5531,7 @@ void gCycle::ReadSync( nMessage &m )
         REAL ratio = (interpolatedDistance - bef->distance)/
                      (aft->distance - bef->distance);
 
-        if (!finite(ratio))
+        if (!std::isfinite(ratio))
             ratio = 0;
 
         // interpolate when the cycle was at the position the sync message was sent
