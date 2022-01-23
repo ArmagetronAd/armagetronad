@@ -38,7 +38,7 @@ bool eMusicTrack::musicIsPlaying = 0;
 eMusicTrack* eMusicTrack::currentMusic = 0;
 
 eMusicTrack::eMusicTrack()
-: m_mixer{eSoundMixer::GetMixer()}
+: m_mixer(eSoundMixer::GetMixer())
 {
 #ifdef HAVE_LIBSDL_MIXER
     // Do nothing constructor
@@ -48,7 +48,7 @@ eMusicTrack::eMusicTrack()
 }
 
 eMusicTrack::eMusicTrack(const char* filename, bool isinstalled)
-: m_mixer{eSoundMixer::GetMixer()}
+: m_mixer(eSoundMixer::GetMixer())
 {
 #ifdef HAVE_LIBSDL_MIXER
     Init(isinstalled);
