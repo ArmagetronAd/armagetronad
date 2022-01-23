@@ -1427,7 +1427,7 @@ nMessage& nMessage::operator>>(REAL &x){
 
 #ifdef DEBUG
 #ifndef WIN32
-    if (!finite(x))
+    if (!std::isfinite(x))
         st_Breakpoint();
     // con << " , x= " << x << '\n';
 #endif

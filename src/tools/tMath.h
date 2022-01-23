@@ -29,21 +29,19 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define ArmageTron_MATH_H
 
 //includes math headers
-#include <math.h>
-
-#ifdef WIN32
-#include <float.h>
-#define finite _finite
-#define copysign _copysign
-#endif
+#include <cmath>
+#include "defs.h"
 
 #ifdef SOLARIS
 #include <ieeefp.h>
 #endif
 
+// force us to use the std:: versions
+#define finite() error
+
 inline bool good( REAL f )
 {
-    return finite( f );
+    return std::isfinite( f );
 }
 
 #endif
