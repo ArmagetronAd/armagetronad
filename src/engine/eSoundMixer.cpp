@@ -591,13 +591,11 @@ void eSoundMixer::ShutDown() {
 }
 
 eSoundMixer* eSoundMixer::GetMixer() {
-#ifdef HAVE_LIBSDL_MIXER
     if(_instance == 0) {
         _instance.reset(new eSoundMixer());
         _instance->Init();
     }
 
-#endif // DEDICATED
     return _instance.get();
 }
 
