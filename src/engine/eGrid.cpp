@@ -731,7 +731,7 @@ ePoint * eGrid::DrawLine(ePoint *start, const eCoord &end, eWall *w, bool change
     //tJUST_CONTROLLED_PTR< eWall > wal( w );
 
     // sanity check
-    if ( !isfinite( end.x ) || !isfinite( end.y ) )
+    if ( !std::isfinite( end.x ) || !std::isfinite( end.y ) )
         return start;
 
     Range(end.NormSquared());

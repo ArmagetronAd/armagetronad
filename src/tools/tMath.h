@@ -30,30 +30,24 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 //includes math headers
 #include <cmath>
-#include <math.h>
-
-#ifdef WIN32
-#include <float.h>
-#define finite _finite
-#define copysign _copysign
-#define isfinite finite
-#else
-using std::isfinite;
-#endif
+#include "defs.h"
 
 #ifdef SOLARIS
 #include <ieeefp.h>
 #endif
 
+// force us to use the std:: versions
+#define finite() error
+
 inline bool good( REAL f )
 {
-    return isfinite( f );
+    return std::isfinite( f );
 }
 
 static inline bool clamp(REAL &c, REAL min, REAL max){
     tASSERT(min <= max);
 
-    if (!isfinite(c))
+    if (!std::isfinite(c))
     {
         c = 0;
         return true;
