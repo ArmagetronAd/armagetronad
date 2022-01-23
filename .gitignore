@@ -104,3 +104,16 @@ src/.project
 src/.settings
 autogen.sh
 .vscode
+*.o
+*.a
+*.dmg
+*.tar.gz
+*.zip
+src/macosx/build_bundle.sh
+desktop/armagetronad.desktop
+docker/build/setup_ci_test.sh
+docker/build/context/version.sh
+docker/deploy/targets.sh
+src/nTrueVersion.h
+.changetag
+fingerprint

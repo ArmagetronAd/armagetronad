@@ -422,6 +422,18 @@ post_test:
   script:
     - make -C gitlab_build/docker/build appimagetests_ci || exit $?
 
+# post-build tests that require our own runners (or a docker upgrade on GitLab)
+post_test_extra:
+  stage: build_collect
+  rules: 
+  - if: $CI_MERGE_REQUEST_ID
+    when: never
+  - if: $CI_COMMIT_REF_PROTECTED == "true"
+    when: on_success
+  - when: never
+  script:
+    - make -C gitlab_build/docker/build appimagetests_extra || exit $?
+
 # pack up the downloadable build files in one handy artifact
 pack:
   stage: stage
