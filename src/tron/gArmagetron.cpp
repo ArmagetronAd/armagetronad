@@ -343,10 +343,9 @@ static void welcome(){
 #endif
 
         // Start the music up
-        eSoundMixer* mixer;
-        mixer = eSoundMixer::GetMixer();
-        mixer->SetMode(TITLE_TRACK);
-        mixer->Update();
+        auto& mixer = eSoundMixer::GetMixer();
+        mixer.SetMode(TITLE_TRACK);
+        mixer.Update();
 
         // disable splash screen when recording (it's annoying)
         static const char * splashSection = "SPLASH";

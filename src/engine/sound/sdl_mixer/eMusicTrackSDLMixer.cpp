@@ -63,7 +63,7 @@ void eMusicTrack::Init(bool isinstalled) {
     m_Loop = false;
     m_Volume = 100;
     m_HasSong = false;
-    m_mixer = eSoundMixer::GetMixer();
+    m_mixer = &eSoundMixer::GetMixer();
     m_SequencePos = m_Tracklist.begin();
 #endif
 }

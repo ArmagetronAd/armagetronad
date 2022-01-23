@@ -2379,8 +2379,8 @@ void gCycle::MyInitAfterCreation(){
     }
 
     // Start the cycle engine sound
-    eSoundMixer* mixer = eSoundMixer::GetMixer();
-    mixer->PlayContinuous(CYCLE_MOTOR, this);
+    eSoundMixer& mixer = eSoundMixer::GetMixer();
+    mixer.PlayContinuous(CYCLE_MOTOR, this);
 #endif // DEDICATED
 
     /*
@@ -2492,8 +2492,8 @@ gCycle::~gCycle(){
 #endif
     // clear the destination list
 
-    eSoundMixer* mixer = eSoundMixer::GetMixer();
-    mixer->RemoveContinuous(CYCLE_MOTOR, this);
+    eSoundMixer& mixer = eSoundMixer::GetMixer();
+    mixer.RemoveContinuous(CYCLE_MOTOR, this);
 
     tDESTROY(engine);
 
@@ -3815,8 +3815,8 @@ bool gCycle::DoTurn(int d)
 
         if ( gCycleMovement::DoTurn( d ) )
         {
-            eSoundMixer* mixer = eSoundMixer::GetMixer();
-            mixer->PushButton(CYCLE_TURN, *this, cycleTurnSoundVolume);
+            eSoundMixer& mixer = eSoundMixer::GetMixer();
+            mixer.PushButton(CYCLE_TURN, *this, cycleTurnSoundVolume);
 
             sg_ArchiveCoord( pos, 1 );
 
@@ -5902,8 +5902,8 @@ void gCycle::SyncEnemy ( const eCoord& begWall)
                 {
                     currentWall->Update(crossTime,crossPos);
 
-                    eSoundMixer* mixer = eSoundMixer::GetMixer();
-                    mixer->PushButton(CYCLE_TURN, *this, cycleTurnSoundVolume);
+                    eSoundMixer& mixer = eSoundMixer::GetMixer();
+                    mixer.PushButton(CYCLE_TURN, *this, cycleTurnSoundVolume);
                 }
             }
         }

@@ -104,7 +104,7 @@ public:
     ~eSoundMixer();
     // Use this function to get the instance of the sound mixer object
     //   If it doesn't exist, it will be created
-    static eSoundMixer* GetMixer();
+    static eSoundMixer& GetMixer();
 
     static void ShutDown();
     void Init();

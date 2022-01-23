@@ -409,7 +409,7 @@ tValue::BasePtr cCockpit::cb_TimeToImpactLeft(void){
 }
 
 tValue::BasePtr cCockpit::cb_CurrentSong(void){
-    return tValue::BasePtr(new tValue::String(eSoundMixer::GetMixer()->GetCurrentSong()));
+    return tValue::BasePtr(new tValue::String(eSoundMixer::GetMixer().GetCurrentSong()));
 }
 
 tValue::BasePtr cCockpit::cb_CurrentName(void) {

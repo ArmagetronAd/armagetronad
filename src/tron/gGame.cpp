@@ -2703,7 +2703,6 @@ nNetObjectDescriptorBase const & gGame::DoGetDescriptor() const
 
 
 void gGame::Init(){
-    m_Mixer = eSoundMixer::GetMixer();
     grid = tNEW(eGrid());
     state=GS_CREATED;
     stateNext=GS_TRANSFER_SETTINGS;
@@ -2796,7 +2795,9 @@ void gGame::Verify()
     exit_game_grid(grid);
 }
 
-gGame::gGame(){
+gGame::gGame()
+: m_Mixer(eSoundMixer::GetMixer())
+{
     synced_ = true;
     gLogo::SetDisplayed(false);
     if (sn_GetNetState()!=nCLIENT)
@@ -2806,6 +2807,7 @@ gGame::gGame(){
 
 gGame::gGame( Game::GameSync const & sync, nSenderInfo const & sender )
 : nNetObject( sync.base(), sender )
+, m_Mixer(eSoundMixer::GetMixer())
 {
     synced_ = false;
     Init();
@@ -3999,7 +4001,7 @@ void gGame::Analysis(REAL time){
                             message << eTeam::teams[winner-1]->Name();
 #endif
 
-                            m_Mixer->PushButton(ROUND_WINNER);
+                            m_Mixer.PushButton(ROUND_WINNER);
 
                             sn_CenterMessage(message);
                             message << '\n';
@@ -4153,7 +4155,7 @@ void gGame::Analysis(REAL time){
                             message << "$gamestate_champ_center";
                             sn_CenterMessage(message);
 
-                            m_Mixer->PushButton(MATCH_WINNER);
+                            m_Mixer.PushButton(MATCH_WINNER);
                         }
 
                         tOutput message;
@@ -4216,7 +4218,7 @@ void gGame::Analysis(REAL time){
 
                         sn_ConsoleOut(message);
 
-                        m_Mixer->PushButton(MATCH_WINNER);
+                        m_Mixer.PushButton(MATCH_WINNER);
 
                         wintimer=time;
                         absolute_winner=1;
@@ -4496,16 +4498,16 @@ bool gGame::GameLoop(bool input){
 
             switch (cd) {
             case 3:
-                m_Mixer->PushButton(ANNOUNCER_3);
+                m_Mixer.PushButton(ANNOUNCER_3);
                 break;
             case 2:
-                m_Mixer->PushButton(ANNOUNCER_2);
+                m_Mixer.PushButton(ANNOUNCER_2);
                 break;
             case 1:
-                m_Mixer->PushButton(ANNOUNCER_1);
+                m_Mixer.PushButton(ANNOUNCER_1);
                 break;
             case 0:
-                m_Mixer->PushButton(ANNOUNCER_GO);
+                m_Mixer.PushButton(ANNOUNCER_GO);
                 break;
             }
             con.CenterDisplay(s,0);
@@ -4837,8 +4839,8 @@ void sg_EnterGameCore( nNetState enter_state ){
     sr_con.SetHeight(7);
 
     //  exit_game_objects(grid);
-    eSoundMixer* mixer = eSoundMixer::GetMixer();
-    mixer->SetMode(GRID_TRACK);
+    eSoundMixer& mixer = eSoundMixer::GetMixer();
+    mixer.SetMode(GRID_TRACK);
 
     // enter single player settings
     if ( sn_GetNetState() != nCLIENT )
@@ -4903,8 +4905,8 @@ void sg_EnterGameCleanup()
 {
     //gStatistics - save high scores
 
-    eSoundMixer* mixer = eSoundMixer::GetMixer();
-    mixer->SetMode(GUI_TRACK);
+    eSoundMixer& mixer = eSoundMixer::GetMixer();
+    mixer.SetMode(GUI_TRACK);
 
     sn_SetNetState( nSTANDALONE );
 

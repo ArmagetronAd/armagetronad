@@ -134,7 +134,7 @@ public:
 
     void StartNewMatchNow();
 
-    eSoundMixer* m_Mixer;
+    eSoundMixer& m_Mixer;
 
 private:
     bool WarmupTeamsAreReady() const;
