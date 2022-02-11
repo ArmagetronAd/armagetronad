@@ -32,6 +32,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 static tOutput* PrepareTeamText(tOutput* text, eTeam* team, const ePlayerNetID* player, const char* textTemplate)
 {
+    if( textTemplate == "$team_menu_join" && ( !team || !team->PlayerMayJoin(player) ) )
+        *text << "0x808080";
+    
     if (team)
     {
         text->SetTemplateParameter(1 , team->Name() );
