@@ -27,6 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "gAICharacter.h"
 #include "tDirectories.h"
+#include "tConfiguration.h"
 #include "tRecorder.h"
 #include <fstream>
 #include <sstream>
@@ -103,4 +104,13 @@ void gAICharacter::LoadAll(const tString& filename)
             LoadSingleAI( line );
     }
 }
+
+
+static void sg_AIReload(std::istream &s)
+{
+    gAICharacter::s_Characters.Clear();
+    gAICharacter::LoadAll(tString( "aiplayers.cfg" ));
+    con << gAICharacter::s_Characters.Len() << " AIs loaded\n";
+}
+static tConfItemFunc sg_reai( "AI_RELOAD", &sg_AIReload );
 
