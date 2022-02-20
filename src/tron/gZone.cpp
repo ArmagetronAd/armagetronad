@@ -6509,12 +6509,12 @@ void gFlagZoneHack::OwnerDropped()
 // *******************************************************************************
 
 // time in sec before the zone vanished. -1 for infinite
-static int sg_targetTimeBeforeVanish = -1;
-static tSettingItem<int> sg_targetTimeBeforeVanishConf( "TARGET_LIFETIME", sg_targetTimeBeforeVanish );
+static REAL sg_targetTimeBeforeVanish = -1;
+static tSettingItem<REAL> sg_targetTimeBeforeVanishConf( "TARGET_LIFETIME", sg_targetTimeBeforeVanish );
 
 // time in sec before the zone vanished once a player entered. -1 for infinite
-static int sg_targetTimeBeforeVanishOnceConquered = 10;
-static tSettingItem<int> sg_targetTimeBeforeVanishOnceConqueredConf( "TARGET_SURVIVE_TIME", sg_targetTimeBeforeVanishOnceConquered );
+static REAL sg_targetTimeBeforeVanishOnceConquered = 10;
+static tSettingItem<REAL> sg_targetTimeBeforeVanishOnceConqueredConf( "TARGET_SURVIVE_TIME", sg_targetTimeBeforeVanishOnceConquered );
 
 // score for the first player entering the zone
 static int sg_targetInitScore = 10;
@@ -6691,7 +6691,7 @@ static eLadderLogWriter sg_targetzoneConqueredWriter("TARGETZONE_CONQUERED", fal
 bool gTargetZoneHack::Timestep( REAL time )
 {
     // check if the zone must collapse ...
-    if ( (currentState_ != State_Conquered) && (currentState_ != State_Conquering) && (sg_targetTimeBeforeVanish>0) && ((time - createTime_ - 3.5)>sg_targetTimeBeforeVanish) )
+    if ( (currentState_ != State_Conquered) && (currentState_ != State_Conquering) && (sg_targetTimeBeforeVanish>=0) && ((time - createTime_ - 3.5)>sg_targetTimeBeforeVanish) )
     {
         // zone is conquered, make the zone collapse ...
         currentState_ = State_Conquered;
@@ -6703,7 +6703,7 @@ bool gTargetZoneHack::Timestep( REAL time )
         sg_targetzoneTimeoutWriter.write();
     }
 
-    if ( ((currentState_ == State_Conquering) && (sg_targetTimeBeforeVanishOnceConquered>0) && (time - timeFirstEntry_>sg_targetTimeBeforeVanishOnceConquered))
+    if ( ((currentState_ == State_Conquering) && (sg_targetTimeBeforeVanishOnceConquered>=0) && (time - timeFirstEntry_>sg_targetTimeBeforeVanishOnceConquered))
         ||((currentState_ != State_Conquered) && (zoneScore_<=0) && (zoneScore_!=zoneInitialScore_)) )
     {
         // zone is conquered, make the zone collapse ...
