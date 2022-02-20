@@ -7181,10 +7181,10 @@ void gCycle::TeleportTo(eCoord dest, eCoord dir, REAL time) {
 	// Cycle must be alive !
 	if (!Alive()) return;
 	// Drop current wall if exists, without building a new one ...
-	gNetPlayerWall *nwall = ((CurrentWall())?CurrentWall()->NetWall():0);
+	tJUST_CONTROLLED_PTR<gNetPlayerWall> nwall = ((CurrentWall())?CurrentWall()->NetWall():0);
 	if (nwall) {
 		DropWall(false);
-		//nwall->RequestSync();
+		nwall->RequestSync();
 	}
 	// Do a safe move to destination
 	MoveSafely(dest,time,time);
@@ -7357,6 +7357,7 @@ static void sg_TeleportPlayer(std::istream &s)
 		con << "Usage: TELEPORT <player> <x> <y> <rel|abs> <xdir> <ydir>\n";
 		return;
 	}
+	int p_ra_pos = pos;
 	tString relabs = params.ExtractNonBlankSubString(pos);
 	if( relabs == "" )
 	{
@@ -7364,6 +7365,11 @@ static void sg_TeleportPlayer(std::istream &s)
 			relabs = "dist";
 		else
 			relabs = "rel";
+	}
+	else if( ( relabs[0] >= '0' && relabs[0] <= '9' ) || relabs[0] == '.' || relabs[0] == '-' )
+	{
+		// if it's a number, move back position to take it as xdir instead
+		pos = p_ra_pos;
 	}
 
 	const tString xdir_str = params.ExtractNonBlankSubString(pos);
