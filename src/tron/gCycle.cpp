@@ -7274,24 +7274,26 @@ static void sg_RespawnPlayer(std::istream &s)
         tString x_str, y_str;
         REAL dirx,diry;
         
-        tString str0(""); s >> str0;
-        tString str1(""); s >> str1;
-        tString str2(""); s >> str2;
-        tString str3(""); s >> str3;
-        tString str4(""); s >> str4;
+        #define RESPAWN_MAX_PARAMS 5
+        tString str[RESPAWN_MAX_PARAMS];
+        for(int i=0;i<RESPAWN_MAX_PARAMS;++i)
+        {
+            s >> str[i];
+        }
         
-        if(str0[0] == 't' || str0[0] == 'f' || str4 != "") // we'll assume the first one is the message flag
+        tString str0 = str[0].ToLower();
+        if(str0[0] == 't' || str0[0] == 'f' || str[4] != "") // we'll assume the first one is the message flag
         {
-            if(str0 == "1" || str0[0] == 't') message = true;
-            else message = false;
-            x_str = str1; y_str = str2;
-            dirx = atof(str3); diry = atof(str4);
+            message = (
+                str0[0] == 't' || 
+                ( str[0][0] >= '0' && str[0][0] <= '9' && bool(atoi(str[0])) )
+            );
+            
+            ++pos;
         }
-        else
-        {
-            x_str = str0; y_str = str1;
-            dirx = atof(str2); diry = atof(str3);
-        }
+        
+        x_str = str[pos++]; y_str = str[pos++];
+        dirx = strtof(str[pos++], 0); diry = strtof(str[pos++], 0);
         
         // prepare coord and direction ...
         eCoord ppos, pdir;
