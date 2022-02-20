@@ -7358,7 +7358,13 @@ static void sg_TeleportPlayer(std::istream &s)
 		return;
 	}
 	tString relabs = params.ExtractNonBlankSubString(pos);
-	if (relabs=="") relabs="rel";
+	if( relabs == "" )
+	{
+		if( y_str == "" )
+			relabs = "dist";
+		else
+			relabs = "rel";
+	}
 
 	const tString xdir_str = params.ExtractNonBlankSubString(pos);
 	REAL xdir = atof(xdir_str);
@@ -7379,6 +7385,15 @@ static void sg_TeleportPlayer(std::istream &s)
 		(pGameObject->Alive()))
 	{
 		if (relabs=="rel") ppos = ppos + pGameObject->Position();
+		else if( relabs == "dist" )
+		{
+			eCoord pppos( pGameObject->Direction() * ppos.x );
+			if( ppos.y )
+			{
+				pppos = pppos + eCoord( pGameObject->Direction().Turn(0, -1) * ppos.y );
+			}
+			ppos = pGameObject->Position() + pppos;
+		}
 		// Jump to new position without creating walls
 		REAL time = pGameObject->LastTime();
 		pGameObject->TeleportTo(ppos, dir, time);
