@@ -3617,6 +3617,7 @@ flag_drop_time_help                 If positive, enables player to drop flag by 
 flag_hold_score_help                Points given for holding the flag see FLAG_HOLD_SCORE_TIME
 flag_hold_score_time_help           Seconds until points are awarded for holding the flag see FLAG_HOLD_SCORE
 flag_hold_time_help                 Time in seconds that the player can hold the flag before it is returned home, -1 to disable
+flag_hold_time_drop_help            Whether the flag is sent back home or dropped where it is after FLAG_HOLD_TIME
 flag_home_randomness_x_help         Y direction the flag can vary from its starting spot when returned.
 flag_home_randomness_y_help         X direction the flag can vary from its starting spot when returned.
 flag_required_home_help             Flag indicating whether flags need to be home to score

@@ -5512,6 +5512,9 @@ static tSettingItem<float> sg_flagBlinkTrackTimeConfig( "FLAG_BLINK_TRACK_TIME",
 static float sg_flagHoldTime = -1;
 static tSettingItem<float> sg_flagHoldTimeConfig( "FLAG_HOLD_TIME", sg_flagHoldTime );
 
+static bool sg_flagHoldTimeDrop = false;
+static tSettingItem<bool> sg_flagHoldTimeDropConfig( "FLAG_HOLD_TIME_DROP", sg_flagHoldTimeDrop );
+
 float sg_flagDropTime = 3;
 static tSettingItem<float> sg_flagDropTimeConfig( "FLAG_DROP_TIME", sg_flagDropTime );
 
@@ -5642,8 +5645,16 @@ bool gFlagZoneHack::Timestep( REAL time )
             (sg_flagHoldTime > 0) &&
             (time >= (ownerTime_ + sg_flagHoldTime)))
         {
-            // go home
-            GoHome();
+            if( sg_flagHoldTimeDrop )
+            {
+                // drop flag
+                OwnerDropped();
+            }
+            else
+            {
+                // return the flag home
+                GoHome();
+            }
 
             sg_flagTimeoutWriter << player->GetUserName();
             if(team){
