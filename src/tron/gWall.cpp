@@ -202,39 +202,17 @@ static void gWallRim_helper(eCoord p1,eCoord p2,REAL tBeg,REAL tEnd,REAL h,
 
     BeginQuads();
 
-    // NOTE: display lists on nvidia cards don't like infinite points
-    if (h<9000 || !sr_infinityPlane || rDisplayList::IsRecording() ){
-        TexVertex(p1.x, p1.y, 0,
-                  tBeg      , 1);
+    TexVertex(p1.x, p1.y, 0,
+              tBeg      , 1);
 
-        TexVertex(p1.x, p1.y, h,
-                  tBeg,       1-h/Z_SCALE);
+    TexVertex(p1.x, p1.y, h,
+              tBeg,       1-h/Z_SCALE);
 
-        TexVertex(p2.x, p2.y, h,
-                  tEnd,       1-h/Z_SCALE);
+    TexVertex(p2.x, p2.y, h,
+              tEnd,       1-h/Z_SCALE);
 
-        TexVertex(p2.x, p2.y, 0,
-                  tEnd      , 1);
-    }
-
-    else{
-        TexVertex(p1.x, p1.y, 0,
-                  tBeg,       1);
-
-        TexCoord(0,-1/REAL(Z_SCALE),0,0);
-
-#ifndef WIN32
-        Vertex(0,0,1,0);
-        Vertex(0,0,1,0);
-#else
-        Vertex(0.001f,0.001f,1,0); // Windows OpenGL has problems with
-        // infitite points perpenticular to the viewing direction
-        Vertex(0.001f,0.001f,1,0);
-#endif
-
-        TexVertex(p2.x, p2.y, 0,
-                  tEnd,       1);
-    }
+    TexVertex(p2.x, p2.y, 0,
+              tEnd      , 1);
 }
 
 // maximal size of the arena wall shadow compared to the camera height
