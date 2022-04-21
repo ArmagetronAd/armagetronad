@@ -414,15 +414,11 @@ void uMenu::HandleEvent( SDL_Event event )
 
                 case(SDLK_UP):
                                 lastkey=tSysTimeFloat();
-                    if( selected >=0 && selected < items.Len() ) items[selected]->Deselect();
-                    selected = GetNextSelectable(selected);
-                    if( selected >=0 && selected < items.Len() ) items[selected]->Select();
+                    SetSelected(GetNextSelectable(selected));
                     break;
                 case(SDLK_DOWN):
                                 lastkey=tSysTimeFloat();
-                    if( selected >=0 && selected < items.Len() ) items[selected]->Deselect();
-                    selected = GetPrevSelectable(selected);
-                    if( selected >=0 && selected < items.Len() ) items[selected]->Select();
+                    SetSelected(GetPrevSelectable(selected));
                     break;
 
             case(SDLK_LEFT):
@@ -513,6 +509,13 @@ int uMenu::GetPrevSelectable(int start)
 #ifndef DEDICATED
 static bool s_idleBackground = false;
 #endif
+
+void uMenu::SetSelected( int s )
+{
+    if( selected >= 0 && selected < items.Len() ) items[selected]->Deselect();
+    selected = s;
+    if( selected >= 0 && selected < items.Len() ) items[selected]->Select();
+}
 
 // select the menu item above "start"
 int uMenu::GetNextSelectable(int start)

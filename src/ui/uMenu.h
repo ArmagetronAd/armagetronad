@@ -142,7 +142,7 @@ public:
     void SetBot(REAL b) {menuBot=b;spaceBelow=1+menuBot;}
     REAL GetTop() const {return menuTop;}
     REAL GetBot() const {return menuBot;}
-    void SetSelected(int s) {selected = s;}
+    void SetSelected(int s);
     int GetSelected() const {return selected;}
     int  NumItems()         {return items.Len();}
     uMenuItem* Item(int i)  { return items[i]; }
