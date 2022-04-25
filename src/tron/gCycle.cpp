@@ -30,6 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "rModel.h"
 //#include "eTess.h"
 #include "eGrid.h"
+#include "gGame.h"
 #include "rTexture.h"
 #include "eTimer.h"
 #include "tInitExit.h"
@@ -7253,7 +7254,7 @@ static tConfItem<bool> sg_RespawnPlayerStrictConf("RESPAWN_STRICT",sg_RespawnPla
 static void sg_RespawnPlayer(std::istream &s)
 {
         eGrid *grid = eGrid::CurrentGrid();
-        if(!grid || grid->GameObjects().Len() == 0)
+        if( !grid || !SafeToSpawnObject() )
         {
                 con << "Must be called while a grid exists!\n";
                 return;
@@ -7336,7 +7337,7 @@ static tConfItemFunc sg_Respawn_conf("RESPAWN",&sg_RespawnPlayer);
 static void sg_TeleportPlayer(std::istream &s)
 {
 	eGrid *grid = eGrid::CurrentGrid();
-	if(!grid || grid->GameObjects().Len() == 0)
+	if( !grid || !SafeToSpawnObject() )
 	{
 		con << "Must be called while a grid exists!\n";
 		return;

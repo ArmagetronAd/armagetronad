@@ -1475,12 +1475,14 @@ gArena Arena;
 
 
 
-
+static bool gridExist = false;
 
 void exit_game_grid(eGrid *grid){
     eSoundLocker soundLocker;
 
     grid->Clear();
+
+    gridExist = false;
 }
 
 extern std::vector<ePolyLine> se_unsplittedRimWalls;
@@ -1549,6 +1551,8 @@ extern bool sg_axesIndicator;
 void init_game_grid(eGrid *grid, gParser *aParser){
     se_ResetGameTimer();
     se_PauseGameTimer(true, eTIMER_PAUSE_GAME);
+
+    gridExist = true;
 
     eSoundLocker soundLocker;
 
@@ -5602,6 +5606,11 @@ bool gGame::GridIsReady(int client){
     return HasBeenTransmitted(client) &&
            (client_gamestate[client]>=GS_TRANSFER_OBJECTS &&
             client_gamestate[client]<=GS_DELETE_OBJECTS);
+}
+
+bool SafeToSpawnObject()
+{
+    return gridExist;
 }
 
 #include <fcntl.h>

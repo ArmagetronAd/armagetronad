@@ -128,6 +128,8 @@ void MainMenu(bool ingame=false);
 
 bool GridIsReady(int c);
 
+bool SafeToSpawnObject();
+
 void Activate(bool act);
 
 void sg_DeclareWinner( eTeam* team, char const * message );

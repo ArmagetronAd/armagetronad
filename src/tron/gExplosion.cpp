@@ -33,6 +33,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "gCycle.h"
 #include "gSvgOutput.h"
 #include "eGrid.h"
+#include "gGame.h"
 #include "ePlayer.h"
 #include "tRandom.h"
 #include "tMath.h"
@@ -503,7 +504,7 @@ extern REAL se_GameTime();
 static void sg_SetExplosion(std::istream &s)
 {
         eGrid *grid = eGrid::CurrentGrid();
-        if(!grid || grid->GameObjects().Len() == 0)
+        if( !grid || !SafeToSpawnObject() )
         {
                 con << "Must be called while a grid exists!\n";
                 return;
