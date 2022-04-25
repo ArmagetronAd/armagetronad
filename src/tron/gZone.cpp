@@ -128,6 +128,12 @@ static tSettingItem<REAL> sg_zoneBottomConf( "ZONE_BOTTOM", sg_zoneBottom );
 static REAL sg_zoneHeight = 5.0f;
 static tSettingItem<REAL> sg_zoneHeightConf( "ZONE_HEIGHT", sg_zoneHeight );
 
+// FIXME: allow more zone types in a more flexible system later
+static REAL sg_zoneHeightFort = 1.0f;
+static tSettingItem<REAL> sg_zoneHeightFortConf( "ZONE_HEIGHT_FORT", sg_zoneHeightFort );
+static REAL sg_zoneHeightKOH = 1.0f;
+static tSettingItem<REAL> sg_zoneHeightKOHConf( "ZONE_HEIGHT_KOH", sg_zoneHeightKOH );
+
 static bool sg_zoneNoFadeInSvr = false;
 static tSettingItem<bool> sg_zoneNoFadeInSvrConf( "ZONE_NO_FADE_IN_SERVER", sg_zoneNoFadeInSvr );
 
@@ -615,6 +621,10 @@ void gZone::WriteSync( nMessage & m )
 
     // write rotation speed
     m << rotationSpeed_;
+    
+    // write zone type, only on initial sync
+    if( m.Descriptor() == CreatorDescriptor().ID() )
+        m << effect_;
 }
 
 
@@ -672,6 +682,11 @@ void gZone::ReadSync( nMessage & m )
         // set fixed values
         SetRotationSpeed( .3f );
         SetRotationAcceleration( 0.0f );
+    }
+    
+    if( !m.End() && m.Descriptor() == CreatorDescriptor().ID() )
+    {
+        m >> effect_;
     }
 }
 
@@ -1952,9 +1967,15 @@ void gZone::Render( const eCamera * cam )
     REAL seglen = 2 * M_PI / sg_zoneSegments * sg_zoneSegLength;
 
     REAL r = Radius();
+    REAL h = sg_zoneHeight;
+    if( effect_ == "fortress" || effect_ == "sumo" )
+        h = sg_zoneHeightFort;
+    else if( effect_ == "koh" )
+        h = sg_zoneHeightKOH;
+    
     GLfloat m[4][4]={{r*rotation_.x,r*rotation_.y,0,0},
                      {-r*rotation_.y,r*rotation_.x,0,0},
-                     {0,0,sg_zoneHeight,0},
+                     {0,0,h,0},
                      {pos.x,pos.y,sg_zoneBottom,1}};
 
     glMultMatrixf(&m[0][0]);
