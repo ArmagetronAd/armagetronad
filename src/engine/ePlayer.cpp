@@ -4822,6 +4822,9 @@ static void ConsoleSay_conf(std::istream &s)
     switch (sn_GetNetState())
     {
         case nCLIENT:
+#ifndef DEDICATED
+        case nSERVER:
+#endif
         {
             ePlayerNetID *me = se_GetLocalPlayer();
 
@@ -4830,6 +4833,7 @@ static void ConsoleSay_conf(std::istream &s)
 
             break;
         }
+#ifdef DEDICATED
         case nSERVER:
         {
             tColoredString send;
@@ -4846,6 +4850,7 @@ static void ConsoleSay_conf(std::istream &s)
 
             break;
         }
+#endif
         default:
         {
             ePlayerNetID *me = se_GetLocalPlayer();
@@ -4866,38 +4871,20 @@ static void ConsoleSpeakAsAdmin_conf(std::istream &s)
     tString message;
     message.ReadLine( s, true );
 
-    switch (sn_GetNetState())
     {
-        case nCLIENT:
-        {
-            ePlayerNetID *me = se_GetLocalPlayer();
-
-            if (me)
-                me->Chat( message );
-
-            break;
-        }
-        case nSERVER:
         {
             tColoredString send;
             send << tColoredString::ColorString( 1,0,0 );
+#ifdef DEDICATED
             send << "Admin";
+#else
+            send << sg_AdminName;
+#endif
             send << tColoredString::ColorString( 1,1,.5 );
             send << ": " << message << "\n";
 
             // display it
             sn_ConsoleOut( send );
-
-            break;
-        }
-        default:
-        {
-            ePlayerNetID *me = se_GetLocalPlayer();
-
-            if ( me )
-                se_DisplayChatLocally( me, message );
-
-            break;
         }
     }
 }
