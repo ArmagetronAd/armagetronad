@@ -2116,7 +2116,8 @@ bool gNetPlayerWall::ClearToTransmit(int user) const{
 #endif
 
     return GridIsReady(user) && nNetObject::ClearToTransmit(user)
-           && bool(this->cycle_) && this->cycle_->HasBeenTransmitted(user) && inGrid;
+           && bool(this->cycle_) && this->cycle_->HasBeenTransmitted(user) && inGrid
+           && this->IsDangerousAnywhere( se_GameTime() - 1.f );
 }
 
 void gNetPlayerWall::WriteSync(nMessage &m){
