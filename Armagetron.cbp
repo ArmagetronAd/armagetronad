@@ -263,6 +263,8 @@
 		<Unit filename="src/tron/gGame.h" />
 		<Unit filename="src/tron/gHud.cpp" />
 		<Unit filename="src/tron/gHud.h" />
+		<Unit filename="src/tron/gHudMap.cpp" />
+		<Unit filename="src/tron/gHudMap.h" />
 		<Unit filename="src/tron/gLanguageMenu.cpp" />
 		<Unit filename="src/tron/gLanguageMenu.h" />
 		<Unit filename="src/tron/gLogo.cpp" />

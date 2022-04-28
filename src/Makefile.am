@@ -115,6 +115,7 @@ libtron_a_SOURCES=tron/gAIBase.cpp tron/gAIBase.h tron/gAICharacter.cpp tron/gAI
 	tron/gFriends.h tron/gFriends.cpp\
 	tron/gServerFavorites.h tron/gServerFavorites.cpp\
   tron/gRotation.h tron/gRotation.cpp\
+  tron/gHudMap.cpp tron/gHudMap.h\
   tron/gRace.h tron/gRace.cpp
 
 libui_a_SOURCES=ui/uInput.cpp ui/uInput.h ui/uInputQueue.cpp ui/uInputQueue.h ui/uMenu.cpp ui/uMenu.h

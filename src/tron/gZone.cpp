@@ -2042,6 +2042,53 @@ void gZone::Render( const eCamera * cam )
 #endif
 }
 
+void gZone::Render2D(eCoord) const {
+#ifndef DEDICATED
+    REAL alpha = ( lastTime - createTime_ ) * .2f;
+    if ( alpha <= 0 )
+        return;
+
+    GLfloat m[4][4]={{rotation_.x,rotation_.y,0,0},
+                     {-rotation_.y,rotation_.x,0,0},
+                     {0,0,1,0},
+                     {pos.x,pos.y,0,1}};
+
+    ModelMatrix();
+    glPushMatrix();
+
+    glMultMatrixf(&m[0][0]);
+    //	glScalef(.5,.5,.5);
+
+    BeginLines();
+
+    REAL seglen = sg_zoneSegLength / 2;
+
+    glColor4f( color_.r ,color_.g,color_.b, alpha );
+
+    REAL r = Radius();
+    for ( int i = sg_zoneSegments - 1; i>=0; --i )
+    {
+        REAL a = i * 2 * 3.14159 / REAL( sg_zoneSegments );
+        REAL b = a + seglen;
+
+        REAL sa = r * sin(a);
+        REAL ca = r * cos(a);
+        REAL sb = r * sin(b);
+        REAL cb = r * cos(b);
+
+        glVertex2f(sa, ca);
+        glVertex2f(sb, cb);
+    }
+
+    RenderEnd();
+
+    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+    glDepthMask(GL_TRUE);
+
+    glPopMatrix();
+#endif
+}
+
 
 // *******************************************************************************
 // *

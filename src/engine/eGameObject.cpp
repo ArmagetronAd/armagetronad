@@ -641,6 +641,7 @@ void eGameObject::Kill(){}
 
 // draws it to the screen using OpenGL
 void eGameObject::Render(const eCamera *){}
+void eGameObject::Render2D(eCoord scale) const {}
 
 //! draws it in a svg file
 void eGameObject::DrawSvg(std::ofstream &f) {}

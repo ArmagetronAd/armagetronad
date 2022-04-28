@@ -31,6 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "rScreen.h"
 #include "nConfig.h"
 #include "rConsole.h"
+#include "gHudMap.h"
 #include "tToDo.h"
 #include "rGL.h"
 #include "eTimer.h"
@@ -115,6 +116,12 @@ void GLmeter_subby(float value,float max, float locx, float locy, float size, co
 
     	RenderEnd();*/
 
+#if 1
+    glEnable( GL_LINE_SMOOTH );
+    glHint( GL_LINE_SMOOTH_HINT, GL_NICEST );
+    glLineWidth( 2 );
+#endif
+
     glDisable(GL_TEXTURE_2D);
     Color(r,g, b);
     BeginLines();
@@ -122,6 +129,10 @@ void GLmeter_subby(float value,float max, float locx, float locy, float size, co
     Vertex(-x*size+locx,y*size+locy,0);
     RenderEnd();
 
+#if 1
+    glDisable( GL_LINE_SMOOTH );
+    glLineWidth( 1 );
+#endif
 
     rTextField min_t(-size-(0.1*size)+locx,locy,.12*size,.24*size);
     rTextField max_t(+size+(0.1*size)+locx,locy,.12*size,.24*size);
@@ -632,6 +643,44 @@ static void display_fps_subby()
 
 }
 
+
+static int simplemapmode = 1;
+static tConfItem<int> simplemapmode_con("HUD_MAP", simplemapmode);
+
+static bool stc_forbidHudMap = false;
+static nSettingItem<bool> fcs("FORBID_HUD_MAP", stc_forbidHudMap);
+
+static void drawMinimap()
+{
+    if(stc_forbidHudMap) return;
+    
+    sr_ResetRenderState(true);
+
+    if(simplemapmode & 1)
+    {
+        gHudMapDrawConf c;
+        
+        c.cycleSize = 5;
+        c.border = 10;
+        
+        c.x = .5; c.y = -1;
+        c.w = .5; c.h = .5 * sr_screenWidth / sr_screenHeight;
+        c.rw = .25 * sr_screenWidth; c.rh = .25 * sr_screenWidth;
+        c.ix = 1; c.iy = 1; // iy was 0
+        
+        DrawMap( c );
+    }
+    
+    if(simplemapmode & 2)
+    {
+        DrawMap(true, true, true,
+                5.5, 10,
+                -1, -1, 2, 2,
+                sr_screenWidth, sr_screenHeight, .5, .5);
+    }
+}
+
+
 static void display_hud_subby_all()
 {
     sr_ResetRenderState(true);
@@ -653,6 +702,8 @@ static void display_hud_subby_all()
         // delegate
         display_hud_subby( player );
     }
+    
+    drawMinimap();
 }
 
 static rPerFrameTask dfps(&display_hud_subby_all);
