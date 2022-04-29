@@ -229,6 +229,7 @@ static eLadderLogWriter se_teamDestroyWriter("TEAM_DESTROYED", true);
 static eLadderLogWriter se_teamAddWriter("TEAM_PLAYER_ADDED", true);
 static eLadderLogWriter se_teamRemoveWriter("TEAM_PLAYER_REMOVED", true);
 static eLadderLogWriter se_teamColoredName("TEAM_COLORED_NAME", false);
+static eLadderLogWriter se_playerSpecWriter("PLAYER_JOINS_SPECTATORS", true);
 
 // update name and color
 void eTeam::UpdateAppearance()
@@ -1286,7 +1287,12 @@ void eTeam::RemovePlayerDirty( ePlayerNetID* player )
     se_teamRemoveWriter.write();
 
     if ( player->IsSpectating() || player->IsSuspended() )
+    {
         player->LogActivity(ACTIVITY_JOINED_SPECTATOR_FROM_GRID);
+
+        se_playerSpecWriter << player->GetLogName() << player->GetName();
+        se_playerSpecWriter.write();
+    }
 
     // remove team from list
     if ( listID >= 0 && players.Len() == 0 )
