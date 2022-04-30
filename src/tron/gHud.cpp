@@ -647,8 +647,7 @@ static void display_fps_subby()
 static int simplemapmode = 1;
 static tConfItem<int> simplemapmode_con("HUD_MAP", simplemapmode);
 
-static bool stc_forbidHudMap = false;
-static nSettingItem<bool> fcs("FORBID_HUD_MAP", stc_forbidHudMap);
+extern bool stc_forbidHudMap;
 
 static void drawMinimap()
 {
