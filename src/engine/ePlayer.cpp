@@ -6240,6 +6240,7 @@ static nDescriptor player_removed_from_game(202,&player_removed_from_game_handle
 
 static eLadderLogWriter se_playerLeftWriter("PLAYER_LEFT", true);
 static eLadderLogWriter se_playerAILeftWriter("PLAYER_AI_LEFT", true);
+static eLadderLogWriter se_playerSpecLeaveWriter("PLAYER_LEAVES_SPECTATORS", true);
 
 void ePlayerNetID::RemoveFromGame()
 {
@@ -6286,6 +6287,7 @@ void ePlayerNetID::RemoveFromGame()
             if( IsHuman() )
             {
                 se_playerLeftWriter << userName_ << nMachine::GetMachine(Owner()).GetIP();
+                se_playerLeftWriter << GetName();
                 se_playerLeftWriter.write();
 
                 this->LogActivity(ACTIVITY_LEFT);
@@ -7580,6 +7582,15 @@ void ePlayerNetID::ReadSync(nMessage &m)
 
             if ( chatting_ != newChat || spectating_ != newSpectate || newStealth != stealth_ )
                 lastActivity_ = tSysTimeFloat();
+
+            if(spectating_ && !newSpectate && strlen(GetLogName()) > 0)
+            {
+                se_playerSpecLeaveWriter << GetLogName() << GetName();
+                se_playerSpecLeaveWriter.write();
+
+                LogActivity(ACTIVITY_JOINED_GAME_FROM_SPECTATOR);
+            }
+
             chatting_   = newChat;
             spectating_ = newSpectate;
             stealth_    = newStealth;
