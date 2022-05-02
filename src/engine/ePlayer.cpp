@@ -7455,7 +7455,7 @@ static void se_OptionalNameFilters( tString & remoteName, int owner )
         return;
     
     if(sn_GetNetState() == nSERVER)
-        remoteName = tColoredString::EscapeBadColors(remoteName);
+        remoteName = tColoredString::ReplaceBadColors(remoteName);
 
     // strip whitespace
     if ( se_stripNames )

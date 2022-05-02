@@ -204,7 +204,11 @@ public:
     
     static tString RemoveColorsLoose( const char *c );      //!< Removes only actual unescaped color codes from a string
     
+    static tString RemoveBadColors( const char * c );      //!< Remove invalid color codes
+    
     static tString EscapeBadColors( const char *c, std::string lastKnownGoodColor = "0xRESETT" ); // !< Cancels out nonexistant color codes.
+    static tString ReplaceBadColors( const char * c ); // !< Replaces invalid color codes with can't-be-interpreted as color code
+    
     
     void SetPos( int len, bool cut=false );                 //!< Makes sure string has length len when color codes are removed
 
