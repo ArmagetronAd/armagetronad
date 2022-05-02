@@ -818,7 +818,7 @@ moviepack_rim_wall_stretch_y_help  Extension of the rim wall texture in the vert
 swapoptimize_text           Optimize Swap for:
 swapoptimize_help           Determines the algorithm used on buffer swaps and syncs.
 swapoptimize_latency_text   Low Latency
-swapoptimize_latency_help   This optimizes for low latency between input and display (also known as input lag).
+swapoptimize_latency_help   This optimizes for low latency between input and display (also known as input lag). This only does some good if VSYNC is enabled.
 swapoptimize_auto_text       Automatic
 swapoptimize_auto_help       This choses low latency mode if your framerate appears stable and high enough and falls into throughput mode if too many frames are dropped or framerates are so high that latency is not a problem anyway. Recommended setting.
 swapoptimize_throughput_text Throughput

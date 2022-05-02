@@ -634,6 +634,10 @@ public:
         switch( rSysDep::swapOptimize_ )
         {
         case rSysDep::rSwap_Auto:
+            // no auto-low-latency unless vsync is explicitly on; rSwap_Throughput is a good enough safe default.
+            if (currentScreensetting.vSync != ArmageTron_VSync_On)
+                return rSysDep::rSwap_Throughput;
+
             // check for ridiculously high framerate
             if (frameTimesMax_.GetMin() > -lowFrameTime_)
             {
@@ -819,6 +823,11 @@ public:
 #endif
 
         rSysDep::rSwapOptimize opt = GetCurrentSwapOptimizeMode();
+
+        // Low latency mode adds delays before polling input to avoid delays waiting for vsync later.
+        // Naturally, that is nonsense if vsync is off. Switch to the lowest latency throughput mode instead.
+        if(opt == rSysDep::rSwap_Latency && currentScreensetting.vSync >= ArmageTron_VSync_Off)
+            opt = rSysDep::rSwap_Throughput;
 
         REAL neededToWait = ( opt == rSysDep::rSwap_Throughput ) ? ThroughputSwap(swap) : LatencySwap(swap);
         StopSwap( neededToWait, opt );

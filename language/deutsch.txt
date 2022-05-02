@@ -798,7 +798,7 @@ moviepack_rim_wall_stretch_y_help Ausdehnung der Textur der Arenabegrenzung, ver
 swapoptimize_text             Optimiere Swap für:
 swapoptimize_help             Bestimmt den Algorithmus, der für Buffer-Swaps und Syncs benutzt wird.
 swapoptimize_latency_text     Geringe Wartezeit
-swapoptimize_latency_help     Dies optimiert das Spiel für eine geringe Wartezeit zwischen Input und Anzeige (auch bekannt als Input-Lag)
+swapoptimize_latency_help     Dies optimiert das Spiel für eine geringe Wartezeit zwischen Input und Anzeige (auch bekannt als Input-Lag). Kann nur etwas Gutes mit aktivem VSYNC bewirken.
 swapoptimize_auto_text        Automatisch
 swapoptimize_auto_help        Dies wählt den Modus für geringe Wartezeit wenn deine Framerate stabil wirkt und hoch genug ist. Wenn zu viele Frames fallengelassen werden oder die Framerate so hoch ist, dass kein Warten nötig ist, geschieht ein Wechsel zum Verarbeitungsmengenmodus. Empfohlen.
 swapoptimize_throughput_text  Verarbeitungsmenge
