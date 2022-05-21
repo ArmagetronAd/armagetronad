@@ -233,6 +233,7 @@ context.debsrc_test: context.debsrc_dapper
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*'
 #	extract fake secrets
 	base64 -d < ${srcdir}/../deploy/anonymous_secrets.b64 | tar -xjf - --one-top-level=$@.dir
+#   reverse to pack: tar -cjf - secrets | base64 > anonymous_secrets.b64 
 	mv $@.dir/secrets/* $@.dir
 	rmdir $@.dir/secrets/
 	echo > $@
