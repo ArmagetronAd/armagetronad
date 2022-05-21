@@ -105,6 +105,9 @@ if ! test -z "${APPLE_ID}"; then
         	break
     	fi
 	done
+
+	# check state
+	spctl --assess --type open --context context:primary-signature --verbose "${DMG}"
 fi
 
 rm -rf "${DMG_SRC}"
