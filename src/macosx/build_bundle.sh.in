@@ -45,9 +45,13 @@ if ! test -z "${APPLE_ID}"; then
 	export DEVELOPER_DIR=/Applications/$(ls /Applications | grep Xcode | head -n 1)
 	export XCODE_DEVELOPER_DIR_PATH=${DEVELOPER_DIR}/Contents/Developer
 
-	xcrun codesign --force --options runtime --deep --sign "${APPLE_SIGN_ID}" "${BUNDLE}"/usr/bin/* || exit $?
-	for f in "${BUNDLE}"/usr/libs/*.dylib; do
-		xcrun codesign --force --sign "${APPLE_SIGN_ID}" "$f" || exit $?
+	for f in "${BUNDLE}"@prefix@/bin/*; do
+		xcrun codesign --force --options runtime --deep --sign "${APPLE_SIGN_ID}" "$f" || exit $?
+	done
+	for f in "${BUNDLE}"@prefix@/libs/*.dylib; do
+		if test -r "$f"; then 
+			xcrun codesign --force --sign "${APPLE_SIGN_ID}" "$f" || exit $?
+		fi
 	done
 fi
 
