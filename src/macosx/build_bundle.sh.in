@@ -7,8 +7,9 @@ test -z "${DIR}" && DIR="`pwd`"
 
 # expected to contain:
 # APPLE_ID: email address/apple ID of developer
-# APPLE_PASSWORD: application specific password
+# APPLE_PASSWORD: application specific password from develop.apple.com
 # APPLE_SIGN_ID: passed to signing program
+# LOGIN_PASSWORD: the user's login password to unlock the keychain
 test -r ~/.ssh/armabuild_secrets && . ~/.ssh/armabuild_secrets
 
 TITLE="@progtitle@@progtitle_server@"
@@ -44,6 +45,11 @@ if ! test -z "${APPLE_ID}"; then
 	# find correct real XCODE, the command line tools will not do (https://github.com/xamarin/xamarin-macios/issues/3931)
 	export DEVELOPER_DIR=/Applications/$(ls /Applications | grep Xcode | head -n 1)
 	export XCODE_DEVELOPER_DIR_PATH=${DEVELOPER_DIR}/Contents/Developer
+
+	# unlock keychain https://stackoverflow.com/a/57719571
+	set +x
+	test -z "${LOGIN_PASSWORD}" || security unlock-keychain -p "${LOGIN_PASSWORD}" login.keychain || exit $?
+	set -x
 
 	for f in "${BUNDLE}"@prefix@/bin/*; do
 		xcrun codesign --force --options runtime --deep --sign "${APPLE_SIGN_ID}" "$f" || exit $?
