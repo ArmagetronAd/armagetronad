@@ -46,7 +46,7 @@ DESTDIR="${BUNDLE}" make install || exit $?
 
 # bundle libraries
 #(cd "${BUNDLE}"; dylibbundler -od -b -x "./Contents/MacOS/@progname@" -d "./Contents/Frameworks/" -i /usr/lib/ -p '@executable_path/../Frameworks/') || exit $?
-(cd "${BUNDLE}"; dylibbundler -od -b -x "./@bindir@/@progname@" -d "./@libdir@/" -i /usr/lib/) || exit $?
+(cd "${BUNDLE}"; dylibbundler -od -b -x "./@bindir@/@progname@" -d "./@libdir@/" -i /usr/lib/ -p @executable_path/../..@libdir@/) || exit $?
 
 # Sign executable
 # original source: https://localazy.com/blog/how-to-automatically-sign-macos-apps-using-github-actions
@@ -73,26 +73,15 @@ if ! test -z "${APPLE_ID}"; then
 		fi
 	done
 
-	#for f in "${BUNDLE}"/Contents/MacOS/*; do
-	#for f in "${BUNDLE}"@bindir@/*; do
-	#	xcrun codesign --force --verify --verbose --options runtime -i com.sourceforge.ArmagetronAdvanced --sign "${APPLE_SIGN_ID}" "$f" || exit $?
-	#	spctl -a -t exec -vv "$f"
-	#	xcrun codesign --verify --verbose "$f" || exit $?
-	#done
-
-	#cp "${BUNDLE}/Info.plist" .
 	xcrun codesign --force --options runtime --sign "${APPLE_SIGN_ID}" "${BUNDLE}" || exit $?
-	#diff "${BUNDLE}/Info.plist" Info.plist
+
 	xcrun codesign --verify --verbose "${BUNDLE}" || exit $?
 
 	for f in "${BUNDLE}"@bindir@/*; do
- 	#	xcrun codesign --force --verify --verbose --options runtime --sign "${APPLE_SIGN_ID}" "$f" || exit $?
-	#	spctl -a -t exec -vv "$f"
 		xcrun codesign --verify --verbose --deep "$f" || exit $?
 	done
 	for f in "${BUNDLE}"@libdir@/*.dylib; do
 		if test -r "$f"; then
-			# spctl -a -t exec -vv "$f"
 			xcrun codesign --verify --verbose --deep "$f" || exit $?
 		fi
 	done
