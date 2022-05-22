@@ -75,16 +75,23 @@ if ! test -z "${APPLE_ID}"; then
 		xcrun codesign --verify --verbose "$f" || exit $?
 	done
 
+	#cp "${BUNDLE}/Info.plist" .
 	#xcrun codesign --force --sign "${APPLE_SIGN_ID}" "${BUNDLE}" || exit $?
+	#diff "${BUNDLE}/Info.plist" Info.plist
 	#xcrun codesign --verify --verbose "${BUNDLE}" || exit $?
 
 	for f in "${BUNDLE}"@prefix@/bin/*; do
  	#	xcrun codesign --force --verify --verbose --options runtime --sign "${APPLE_SIGN_ID}" "$f" || exit $?
 	#	spctl -a -t exec -vv "$f"
-		xcrun codesign --verify --verbose "$f" || exit $?
+		xcrun codesign --verify --verbose --deep "$f" || exit $?
 	done
-
-	xcrun codesign --verify --verbose "${BUNDLE}" || exit $?
+	for f in "${BUNDLE}"@prefix@/libs/*.dylib; do
+		if test -r "$f"; then
+			# spctl -a -t exec -vv "$f"
+			xcrun codesign --verify --verbose --deep "$f" || exit $?
+		fi
+	done
+	xcrun codesign --verify --verbose --deep "${BUNDLE}" || exit $?
 fi
 
 #rm -rf "${BUNDLE}"/etc "${BUNDLE}"/usr
