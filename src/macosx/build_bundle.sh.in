@@ -100,13 +100,14 @@ if ! test -z "${APPLE_ID}"; then
 
 	# notarize
 	set +x # password in command line, do not log any more
-	xcrun altool --notarize-app --primary-bundle-id org.armagetronad -u "${APPLE_ID}" -p "${APPLE_PASSWORD}" --file ${DMG} || exit $?
+	# xcrun altool --notarize-app --primary-bundle-id org.armagetronad -u "${APPLE_ID}" -p "${APPLE_PASSWORD}" --file ${DMG} || exit $?
 
 	# staple
-	sleep 150
+	# sleep 150
 	exit_status=65
 	for (( ; ; ))
 	do
+		break
     	xcrun stapler staple ${DMG}
     	exit_status=$?
     	if [ "${exit_status}" = "65" ]
