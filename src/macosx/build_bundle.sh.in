@@ -100,7 +100,7 @@ if ! test -z "${APPLE_ID}"; then
 	xcrun altool --notarize-app --primary-bundle-id org.armagetronad -u "${APPLE_ID}" -p "${APPLE_PASSWORD}" --file ${DMG} || exit $?
 
 	# staple
-	sleep 30
+	sleep 150
 	exit_status=65
 	for (( ; ; ))
 	do
@@ -109,7 +109,7 @@ if ! test -z "${APPLE_ID}"; then
     	if [ "${exit_status}" = "65" ]
     	then
         	echo "Waiting for notarization to complete"
-	        sleep 30
+	        sleep 60
     	else
         	echo "Stapler status: ${exit_status}"
         	break
