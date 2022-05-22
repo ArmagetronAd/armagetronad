@@ -2,7 +2,7 @@
 
 # expected to contain:
 # APPLE_ID: email address/apple ID of developer
-# APPLE_PASSWORD: application specific password from develop.apple.com
+# APPLE_PASSWORD: application specific password from developer.apple.com
 # APPLE_SIGN_ID: passed to signing program
 # LOGIN_PASSWORD: the user's login password to unlock the keychain
 test -r ~/.ssh/armabuild_secrets && . ~/.ssh/armabuild_secrets
@@ -48,7 +48,10 @@ if ! test -z "${APPLE_ID}"; then
 
 	# unlock keychain https://stackoverflow.com/a/57719571
 	set +x
-	test -z "${LOGIN_PASSWORD}" || security unlock-keychain -p "${LOGIN_PASSWORD}" login.keychain || exit $?
+	if ! test -z "${LOGIN_PASSWORD}"; then
+		echo security unlock-keychain -p ... login.keychain
+		security unlock-keychain -p "${LOGIN_PASSWORD}" login.keychain || exit $?
+	fi
 	set -x
 
 	for f in "${BUNDLE}"@prefix@/bin/*; do
