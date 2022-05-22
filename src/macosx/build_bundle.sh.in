@@ -1,16 +1,16 @@
 #!/bin/bash
 
-set -x
-
-DIR=$1
-test -z "${DIR}" && DIR="`pwd`"
-
 # expected to contain:
 # APPLE_ID: email address/apple ID of developer
 # APPLE_PASSWORD: application specific password from develop.apple.com
 # APPLE_SIGN_ID: passed to signing program
 # LOGIN_PASSWORD: the user's login password to unlock the keychain
 test -r ~/.ssh/armabuild_secrets && . ~/.ssh/armabuild_secrets
+
+set -x
+
+DIR=$1
+test -z "${DIR}" && DIR="`pwd`"
 
 TITLE="@progtitle@@progtitle_server@"
 BUNDLE="${DIR}/${TITLE}.app"
