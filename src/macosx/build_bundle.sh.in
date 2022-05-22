@@ -7,6 +7,9 @@
 # LOGIN_PASSWORD: the user's login password to unlock the keychain
 test -r ~/.ssh/armabuild_secrets && . ~/.ssh/armabuild_secrets
 
+# BUNDLE STRUCTURE
+# https://developer.apple.com/library/archive/documentation/CoreFoundation/Conceptual/CFBundles/BundleTypes/BundleTypes.html
+
 set -x
 
 DIR=$1
@@ -19,19 +22,20 @@ rm -rf "${BUNDLE}"
 mkdir -p "${BUNDLE}" || exit $?
 
 # add plist with @v@ -> value and progtitle replacements
-sed < "@abs_srcdir@/Info.plist" > "${BUNDLE}/Info.plist" \
+#mkdir -p "${BUNDLE}/Contents/English.lproj" || exit $?
+mkdir -p "${BUNDLE}/Contents" || exit $?
+sed < "@abs_srcdir@/Info.plist" > "${BUNDLE}/Contents/Info.plist" \
 -e "s,Armagetron Advanced,${TITLE},g" \
--e "s,usr/bin/armagetronad,.@prefix@/bin/@progname@,g" \
+-e "s,usr/bin/armagetronad,MacOS/@progname@,g" \
 || exit $?
-mkdir -p "${BUNDLE}/English.lproj" || exit $?
-sed < "@abs_srcdir@/English.lproj/InfoPlist.strings.in" > "${BUNDLE}/English.lproj/InfoPlist.strings" \
--e "s,Armagetron Advanced,${TITLE},g" \
--e "s,@vers[i]on@,@version@,g" \
--e "s,@year@,`date +%Y`,g" \
-|| exit $?
+#sed < "@abs_srcdir@/English.lproj/InfoPlist.strings.in" > "${BUNDLE}/Contents/English.lproj/InfoPlist.strings" \
+#-e "s,Armagetron Advanced,${TITLE},g" \
+#-e "s,@vers[i]on@,@version@,g" \
+#-e "s,@year@,`date +%Y`,g" \
+#|| exit $?
 
 # add icons
-cp "@abs_top_srcdir@/MacOS/Armagetron Advanced.icns" "${BUNDLE}/${TITLE}.icns"
+cp "@abs_top_srcdir@/MacOS/Armagetron Advanced.icns" "${BUNDLE}@prefix@/${TITLE}.icns"
 
 # install game into bundle
 DESTDIR="${BUNDLE}" make install || exit $?
@@ -42,7 +46,7 @@ DESTDIR="${BUNDLE}" make install || exit $?
 
 # bundle libraries
 #(cd "${BUNDLE}"; dylibbundler -od -b -x "./Contents/MacOS/@progname@" -d "./Contents/Frameworks/" -i /usr/lib/ -p '@executable_path/../Frameworks/') || exit $?
-(cd "${BUNDLE}"; dylibbundler -od -b -x "./@prefix@/bin/@progname@" -d "./@prefix@/libs/" -i /usr/lib/) || exit $?
+(cd "${BUNDLE}"; dylibbundler -od -b -x "./@bindir@/@progname@" -d "./@libdir@/" -i /usr/lib/) || exit $?
 
 # Sign executable
 # original source: https://localazy.com/blog/how-to-automatically-sign-macos-apps-using-github-actions
@@ -61,31 +65,32 @@ if ! test -z "${APPLE_ID}"; then
 	set -x
 
 	#for f in "${BUNDLE}"/Contents/Frameworks/*.dylib; do
-	for f in "${BUNDLE}"@prefix@/libs/*.dylib "${BUNDLE}"@prefix@/libs/*image*.dylib; do
+	for f in "${BUNDLE}@prefix@/${TITLE}.icns" "${BUNDLE}"@libdir@/*.dylib "${BUNDLE}"@libdir@/*image*.dylib; do
 		if test -r "$f"; then 
 			xcrun codesign --force --verify --verbose --sign "${APPLE_SIGN_ID}" "$f" || exit $?
 			spctl -a -t exec -vv "$f"
 			xcrun codesign --verify --verbose "$f" || exit $?
 		fi
 	done
+
 	#for f in "${BUNDLE}"/Contents/MacOS/*; do
-	for f in "${BUNDLE}"@prefix@/bin/*; do
-		xcrun codesign --force --verify --verbose --options runtime -i com.sourceforge.ArmagetronAdvanced --sign "${APPLE_SIGN_ID}" "$f" || exit $?
-		spctl -a -t exec -vv "$f"
-		xcrun codesign --verify --verbose "$f" || exit $?
-	done
+	#for f in "${BUNDLE}"@bindir@/*; do
+	#	xcrun codesign --force --verify --verbose --options runtime -i com.sourceforge.ArmagetronAdvanced --sign "${APPLE_SIGN_ID}" "$f" || exit $?
+	#	spctl -a -t exec -vv "$f"
+	#	xcrun codesign --verify --verbose "$f" || exit $?
+	#done
 
 	#cp "${BUNDLE}/Info.plist" .
-	#xcrun codesign --force --sign "${APPLE_SIGN_ID}" "${BUNDLE}" || exit $?
+	xcrun codesign --force --options runtime --sign "${APPLE_SIGN_ID}" "${BUNDLE}" || exit $?
 	#diff "${BUNDLE}/Info.plist" Info.plist
-	#xcrun codesign --verify --verbose "${BUNDLE}" || exit $?
+	xcrun codesign --verify --verbose "${BUNDLE}" || exit $?
 
-	for f in "${BUNDLE}"@prefix@/bin/*; do
+	for f in "${BUNDLE}"@bindir@/*; do
  	#	xcrun codesign --force --verify --verbose --options runtime --sign "${APPLE_SIGN_ID}" "$f" || exit $?
 	#	spctl -a -t exec -vv "$f"
 		xcrun codesign --verify --verbose --deep "$f" || exit $?
 	done
-	for f in "${BUNDLE}"@prefix@/libs/*.dylib; do
+	for f in "${BUNDLE}"@libdir@/*.dylib; do
 		if test -r "$f"; then
 			# spctl -a -t exec -vv "$f"
 			xcrun codesign --verify --verbose --deep "$f" || exit $?
