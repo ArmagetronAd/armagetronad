@@ -70,7 +70,7 @@ if ! test -z "${APPLE_ID}"; then
 	done
 	#for f in "${BUNDLE}"/Contents/MacOS/*; do
 	for f in "${BUNDLE}"@prefix@/bin/*; do
-		xcrun codesign --force --verify --verbose --options runtime --sign "${APPLE_SIGN_ID}" "$f" || exit $?
+		xcrun codesign --force --verify --verbose --options runtime -i com.sourceforge.ArmagetronAdvanced --sign "${APPLE_SIGN_ID}" "$f" || exit $?
 		spctl -a -t exec -vv "$f"
 		xcrun codesign --verify --verbose "$f" || exit $?
 	done
