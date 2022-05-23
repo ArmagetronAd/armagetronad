@@ -6,10 +6,10 @@
   	  <string>English</string>
   	  
   	<key>CFBundleExecutable</key>
-  	  <string>./@bindir@/@progname@</string>
+  	  <string>.@bindir@/@progname@</string>
   	  
   	<key>CFBundleIconFile</key>
-  	  <string>@progtitle@.icns</string>
+  	  <string>@progtitle@@progtitle_server@.icns</string>
   	  
   	<key>CFBundleIdentifier</key>
   	  <string>org.armagetronad.@progname@</string>

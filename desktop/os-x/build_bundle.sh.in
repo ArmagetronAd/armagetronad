@@ -28,7 +28,7 @@ mkdir -p "${BUNDLE}" || exit $?
 DESTDIR="${BUNDLE}" make install || exit $?
 
 # add plist with @v@ -> value and progtitle replacements
-cp "`dirname $0`/Info.plist" "${BUNDLE}/" || exit $?
+cp "`dirname $0`/Info.plist" "${BUNDLE}@prefix@" || exit $?
 
 # add icons
 cp "@abs_srcdir@/armagetronad.icns" "${BUNDLE}@datadir@/${TITLE}.icns" || exit $?
@@ -63,6 +63,13 @@ if ! test -z "${APPLE_ID}"; then
 			xcrun codesign --force --verify --verbose --sign "${APPLE_SIGN_ID}" "$f" || exit $?
 			spctl -a -t exec -vv "$f"
 			xcrun codesign --verify --verbose "$f" || exit $?
+		fi
+	done
+
+	for f in "${BUNDLE}"@bindir@/*serverquery "${BUNDLE}"@bindir@/@progname@; do
+		if test -r "$f"; then 
+			xcrun codesign --force --verify --verbose --options runtime --sign "${APPLE_SIGN_ID}" "$f" || exit $?
+			xcrun codesign --verify --verbose --deep "$f" || exit $?
 		fi
 	done
 
