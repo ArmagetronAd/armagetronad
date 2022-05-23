@@ -30,12 +30,12 @@ sed < "@abs_srcdir@/Info.plist" > "${BUNDLE}/Contents/Info.plist" \
 -e "s,Armagetron Advanced,${TITLE},g" \
 -e "s,MacOS/armagetronad,MacOS/@progname@,g" \
 || exit $?
-#mkdir -p "${BUNDLE}/Contents/en.lproj" || exit $?
-#sed < "@abs_srcdir@/English.lproj/InfoPlist.strings.in" > "${BUNDLE}/Contents/en.lproj/InfoPlist.strings" \
-#-e "s,Armagetron Advanced,${TITLE},g" \
-#-e "s,@vers[i]on@,@version@,g" \
-#-e "s,@year@,`date +%Y`,g" \
-#|| exit $?
+mkdir -p "${BUNDLE}/Contents/Resources/en.lproj" || exit $?
+sed < "@abs_srcdir@/English.lproj/InfoPlist.strings.in" > "${BUNDLE}/Contents/Resources/en.lproj/InfoPlist.strings" \
+-e "s,Armagetron Advanced,${TITLE},g" \
+-e "s,@vers[i]on@,@version@,g" \
+-e "s,@year@,`date +%Y`,g" \
+|| exit $?
 
 # add icons
 cp "@abs_top_srcdir@/MacOS/Armagetron Advanced.icns" "${BUNDLE}@datadir@/${TITLE}.icns" || exit $?
