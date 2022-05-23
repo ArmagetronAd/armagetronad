@@ -9,6 +9,7 @@ test -r ~/.ssh/armabuild_secrets && . ~/.ssh/armabuild_secrets
 
 # BUNDLE STRUCTURE
 # https://developer.apple.com/library/archive/documentation/CoreFoundation/Conceptual/CFBundles/BundleTypes/BundleTypes.html
+# for correct results, use the configure_for_bundle.sh script here instead of configure in the main source directory
 
 set -x
 
