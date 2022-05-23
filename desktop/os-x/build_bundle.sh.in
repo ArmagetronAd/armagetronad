@@ -18,7 +18,8 @@ test -z "${DIR}" && DIR="`pwd`"
 
 TITLE="@progtitle@@progtitle_server@"
 BUNDLE="${DIR}/${TITLE}.app"
-BUNDLE_ID=org.$(echo @progname@ | sed -e s,-,.,)
+# must match ID from info.plist
+BUNDLE_ID=org.armagetronad.@progname@
 
 rm -rf "${BUNDLE}"
 mkdir -p "${BUNDLE}" || exit $?
