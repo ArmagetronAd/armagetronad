@@ -274,12 +274,11 @@ context.test: rootcontext.64
 #***************************************************************
 
 # macOS builds are done without docker
-MACOS_CONFIG_ARGS="--disable-restoreold --enable-automakedefaults --disable-useradd --disable-sysinstall --disable-initscripts --disable-uninstall --disable-etc --prefix=/usr"
 MACOS_BUILD_BUNDLE="./src/macosx/build_bundle.sh"
 
 macOS/client_build.tag: context.64 #Makefile
 	mkdir -p macOS/client
-	cd macOS/client && ../../$<.dir/source/configure "${MACOS_CONFIG_ARGS}" && ${MAKE}
+	cd macOS/client && ../../$<.dir/source/src/macosx/configure_for_bundle.sh && ${MAKE}
 	echo > $@
 
 macOS/client.tag: macOS/client_build.tag upload/.tag #Makefile
@@ -290,7 +289,7 @@ macOS/client.tag: macOS/client_build.tag upload/.tag #Makefile
 
 macOS/server_build.tag: context.64 #Makefile
 	mkdir -p macOS/server
-	cd macOS/server && ../../$<.dir/source/configure --disable-glout "${MACOS_CONFIG_ARGS}" && ${MAKE}
+	cd macOS/server && ../../$<.dir/source/src/macosx/configure_for_bundle.sh --disable-glout && ${MAKE}
 	echo > $@
 
 macOS/server.tag: macOS/client.tag macOS/server_build.tag upload/.tag #Makefile
@@ -822,6 +821,7 @@ deploy_download: result.deploy_download
 deploy_itch: result.deploy_itch
 
 deploy_ppa: \
+deploy_ppa_kinetic \
 deploy_ppa_jammy \
 deploy_ppa_impish \
 deploy_ppa_focal \
