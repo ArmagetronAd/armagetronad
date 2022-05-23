@@ -6,7 +6,7 @@
   	  <string>English</string>
   	  
   	<key>CFBundleExecutable</key>
-  	  <string>./@prefix@/bin/@progname@</string>
+  	  <string>./@bindir@/@progname@</string>
   	  
   	<key>CFBundleIconFile</key>
   	  <string>@progtitle@.icns</string>
