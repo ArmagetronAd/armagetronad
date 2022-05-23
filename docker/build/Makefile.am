@@ -284,7 +284,7 @@ MACOS_BUILD_BUNDLE="./desktop/os-x/build_bundle.sh"
 
 macOS/client_build.tag: context.64 #Makefile
 	mkdir -p macOS/client
-	cd macOS/client && ../../$<.dir/source/src/macosx/configure_for_bundle.sh && ${MAKE}
+	cd macOS/client && ../../$<.dir/source/desktop/os-x/configure_for_bundle.sh && ${MAKE}
 	echo > $@
 
 macOS/client.tag: macOS/client_build.tag upload/.tag #Makefile
@@ -295,7 +295,7 @@ macOS/client.tag: macOS/client_build.tag upload/.tag #Makefile
 
 macOS/server_build.tag: context.64 #Makefile
 	mkdir -p macOS/server
-	cd macOS/server && ../../$<.dir/source/src/macosx/configure_for_bundle.sh --disable-glout && ${MAKE}
+	cd macOS/server && ../../$<.dir/source/desktop/os-x/configure_for_bundle.sh --disable-glout && ${MAKE}
 	echo > $@
 
 macOS/server.tag: macOS/client.tag macOS/server_build.tag upload/.tag #Makefile
