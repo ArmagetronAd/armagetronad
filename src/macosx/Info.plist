@@ -9,7 +9,7 @@
 	<key>CFBundleIconFile</key>
 	<string>Armagetron Advanced.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.sourceforge.ArmagetronAdvanced</string>
+	<string>org.armagetronad</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
