@@ -22,24 +22,23 @@ BUNDLE="${DIR}/${TITLE}.app"
 rm -rf "${BUNDLE}"
 mkdir -p "${BUNDLE}" || exit $?
 
+# install game into bundle
+DESTDIR="${BUNDLE}" make install || exit $?
+
 # add plist with @v@ -> value and progtitle replacements
-#mkdir -p "${BUNDLE}/Contents/English.lproj" || exit $?
-mkdir -p "${BUNDLE}/Contents" || exit $?
 sed < "@abs_srcdir@/Info.plist" > "${BUNDLE}/Contents/Info.plist" \
 -e "s,Armagetron Advanced,${TITLE},g" \
--e "s,usr/bin/armagetronad,MacOS/@progname@,g" \
+-e "s,MacOS/armagetronad,MacOS/@progname@,g" \
 || exit $?
-#sed < "@abs_srcdir@/English.lproj/InfoPlist.strings.in" > "${BUNDLE}/Contents/English.lproj/InfoPlist.strings" \
+#mkdir -p "${BUNDLE}/Contents/en.lproj" || exit $?
+#sed < "@abs_srcdir@/English.lproj/InfoPlist.strings.in" > "${BUNDLE}/Contents/en.lproj/InfoPlist.strings" \
 #-e "s,Armagetron Advanced,${TITLE},g" \
 #-e "s,@vers[i]on@,@version@,g" \
 #-e "s,@year@,`date +%Y`,g" \
 #|| exit $?
 
 # add icons
-cp "@abs_top_srcdir@/MacOS/Armagetron Advanced.icns" "${BUNDLE}@prefix@/${TITLE}.icns"
-
-# install game into bundle
-DESTDIR="${BUNDLE}" make install || exit $?
+cp "@abs_top_srcdir@/MacOS/Armagetron Advanced.icns" "${BUNDLE}@datadir@/${TITLE}.icns" || exit $?
 
 # adapt to MacOS expected structure https://stackoverflow.com/a/32025478
 #mv "${BUNDLE}"@prefix@ "${BUNDLE}"/Contents 
