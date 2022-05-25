@@ -98,8 +98,47 @@ du "${BUNDLE}"
 # xattr -w -r com.apple.quarantine "0181;628a01ca;Firefox;6710DDFB-2A74-41E4-8763-14F065F9DA1F" "${BUNDLE}"
 # exit 0
 
+# pack for notarization
+# according to http://www.zarkonnen.com/signing_notarizing_catalina https://www.reddit.com/r/gamedev/comments/di61ms/have_a_mac_game_on_steam_heres_a_guide_to_signing/
+ZIP="${DIR}/${TITLE}".zip
+/usr/bin/ditto -c -k --keepParent "${BUNDLE}" "$ZIP"
+
+if ! test -z "${APPLE_ID}"; then
+	# Sign image
+	# xcrun codesign --force --sign "${APPLE_SIGN_ID}" "${DMG}" || exit $?
+
+	# notarize
+	set +x # password in command line, do not log any more
+	xcrun altool --notarize-app --primary-bundle-id ${BUNDLE_ID} -u "${APPLE_ID}" -p "${APPLE_PASSWORD}" --file "${ZIP}" || exit $?
+
+	# staple
+	sleep 150
+	exit_status=65
+	for (( ; ; ))
+	do
+		# break
+    	xcrun stapler staple "${BUNDLE}"
+    	exit_status=$?
+    	if [ "${exit_status}" = "65" ]
+    	then
+        	echo "Waiting for notarization to complete"
+	        sleep 60
+    	else
+        	echo "Stapler status: ${exit_status}"
+        	break
+    	fi
+	done
+
+	# for testing: manually quarantine
+	# xattr -w com.apple.quarantine "0181;628a01ca;Firefox;6710DDFB-2A74-41E4-8763-14F065F9DA1F" "${DMG}"
+
+	# check state
+	spctl --assess --type open --context context:primary-signature --verbose "${BUNDLE}"
+fi
+
 # zip
-(cd "${BUNDLE}" && zip -r ../@progname@-@version@.macOS.zip .) || exit $?
+# (cd "${BUNDLE}" && zip -r ../@progname@-@version@.macOS.zip .) || exit $?
+mv "${ZIP}" "${DIR}/@progname@-@version@.macOS.zip" || exit $?
 
 # pack dmg
 
@@ -124,38 +163,5 @@ create-dmg \
 
 # alternative, native way, less powerful
 # hdiutil create -volname "@progtitle@" -srcfolder "${BUNDLE}" -ov -format UDIF "${DMG}"
-
-if ! test -z "${APPLE_ID}"; then
-	# Sign image
-	xcrun codesign --force --sign "${APPLE_SIGN_ID}" "${DMG}" || exit $?
-
-	# notarize
-	set +x # password in command line, do not log any more
-	xcrun altool --notarize-app --primary-bundle-id ${BUNDLE_ID} -u "${APPLE_ID}" -p "${APPLE_PASSWORD}" --file ${DMG} || exit $?
-
-	# staple
-	sleep 150
-	exit_status=65
-	for (( ; ; ))
-	do
-		# break
-    	xcrun stapler staple ${DMG}
-    	exit_status=$?
-    	if [ "${exit_status}" = "65" ]
-    	then
-        	echo "Waiting for notarization to complete"
-	        sleep 60
-    	else
-        	echo "Stapler status: ${exit_status}"
-        	break
-    	fi
-	done
-
-	# for testing: manually quarantine
-	# xattr -w com.apple.quarantine "0181;628a01ca;Firefox;6710DDFB-2A74-41E4-8763-14F065F9DA1F" "${DMG}"
-
-	# check state
-	spctl --assess --type open --context context:primary-signature --verbose "${DMG}"
-fi
 
 rm -rf "${DMG_SRC}"
