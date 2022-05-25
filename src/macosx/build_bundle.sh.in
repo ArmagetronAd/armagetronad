@@ -101,7 +101,7 @@ du "${BUNDLE}"
 # pack for notarization
 # according to http://www.zarkonnen.com/signing_notarizing_catalina https://www.reddit.com/r/gamedev/comments/di61ms/have_a_mac_game_on_steam_heres_a_guide_to_signing/
 ZIP="${DIR}/${TITLE}".zip
-/usr/bin/ditto -c -k --keepParent "${BUNDLE}" "$ZIP"
+/usr/bin/ditto -c -k --keepParent "${BUNDLE}" "$ZIP" || exit $?
 
 if ! test -z "${APPLE_ID}"; then
 	# Sign image
@@ -138,7 +138,7 @@ fi
 
 # zip
 # (cd "${BUNDLE}" && zip -r ../@progname@-@version@.macOS.zip .) || exit $?
-mv "${ZIP}" "${DIR}/@progname@-@version@.macOS.zip" || exit $?
+/usr/bin/ditto -c -k --keepParent "${BUNDLE}" "${DIR}/@progname@-@version@.macOS.zip" || exit $?
 
 # pack dmg
 
