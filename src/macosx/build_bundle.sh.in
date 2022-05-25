@@ -139,6 +139,7 @@ fi
 # zip
 # (cd "${BUNDLE}" && zip -r ../@progname@-@version@.macOS.zip .) || exit $?
 /usr/bin/ditto -c -k --keepParent "${BUNDLE}" "${DIR}/@progname@-@version@.macOS.zip" || exit $?
+rm -rf "${ZIP}"
 
 # pack dmg
 
