@@ -103,7 +103,7 @@ du "${BUNDLE}"
 TMP_ZIP="${DIR}/${TITLE}".zip
 /usr/bin/ditto -c -k --keepParent "${BUNDLE}" "${TMP_ZIP}" || exit $?
 
-if ! test -z "${APPLE_IDX}"; then
+if ! test -z "${APPLE_ID}"; then
 	# Sign image
 	# xcrun codesign --force --sign "${APPLE_SIGN_ID}" "${DMG}" || exit $?
 

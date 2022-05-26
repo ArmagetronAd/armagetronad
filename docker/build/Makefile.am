@@ -285,29 +285,29 @@ macOS/client_build.tag: context.64 #Makefile
 	echo > $@
 
 macOS/client.tag: macOS/client_build.tag upload/.tag #Makefile
-	rm -rf macOS/client/*.app
+	rm -rf macOS/client/*.app macOS/client/*.zip macOS/client/*.dmg 
 	cd macOS/client && bash ${MACOS_BUILD_BUNDLE}
 	cp macOS/client/*.dmg macOS/client/*.macOS.zip upload/
 	echo > $@
 
-macOS/server_build.tag: context.64 #Makefile
+macOS/server_build.tag: context.64 macOS/client_build.tag #Makefile
 	mkdir -p macOS/server
 	cd macOS/server && ../../$<.dir/source/src/macosx/configure_for_bundle.sh --disable-glout && ${MAKE}
 	echo > $@
 
-macOS/server.tag: macOS/client.tag macOS/server_build.tag upload/.tag #Makefile
-	rm -rf macOS/server/*.app
+macOS/server.tag: macOS/server_build.tag macOS/client.tag upload/.tag #Makefile
+	rm -rf macOS/server/*.app macOS/server/*.zip macOS/server/*.dmg
 	cd macOS/server && bash ${MACOS_BUILD_BUNDLE}
 	cp macOS/server/*.dmg macOS/server/*.macOS.zip upload/
 	echo > $@
 
-macOS/steam_build.tag: context.steam #Makefile
+macOS/steam_build.tag: context.steam macOS/client_build.tag #Makefile
 	mkdir -p macOS/steam
 	cd macOS/steam && ../../$<.dir/source/src/macosx/configure_for_bundle.sh progname="${STEAM_PACKAGE_NAME}" progtitle="${STEAM_PACKAGE_TITLE}" && ${MAKE}
 	echo > $@
 
-macOS/steam.tag: macOS/server.tag macOS/steam_build.tag upload/.tag #Makefile
-	rm -rf macOS/steam/*.app
+macOS/steam.tag: macOS/steam_build.tag macOS/server.tag upload/.tag #Makefile
+	rm -rf macOS/steam/*.app macOS/steam/*.zip macOS/steam/*.dmg
 	cd macOS/steam && bash ${MACOS_BUILD_BUNDLE}
 	cp macOS/steam/*.dmg macOS/steam/*.macOS.zip upload/
 	echo > $@
