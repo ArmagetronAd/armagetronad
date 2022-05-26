@@ -93,7 +93,7 @@ for f in upload/*client*macOS.zip; do
 done
 
 for f in upload/*server*macOS.zip; do
-    update_stream dedicated-MacOSX $f "${PACKAGE_TITLE} Dedicated.app/Contents/MacOS/${PACKAGE_NAME}-dedicated"
+    update_stream dedicated-MacOSX $f "${PACKAGE_TITLE} Server.app/Contents/MacOS/${PACKAGE_NAME}-dedicated"
 done
 
 for f in upload/*client*win32.zip; do
