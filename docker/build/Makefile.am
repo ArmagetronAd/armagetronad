@@ -223,7 +223,7 @@ context.steam: context.64 gits_artifacts.tag
 	sed < $<.dir/source/src/engine/ePlayer.cpp > $@.dir/source/src/engine/ePlayer.cpp -e "s/pr0n/cat videos/"
 #   install alternative title, adapt sources
 	cp gits/steam/title.png $@.dir/source/textures/
-	for f in source/src/tron/gLogo.cpp source/src/Makefile.am; do \
+	for f in source/src/tron/gLogo.cpp source/Makefile.am; do \
 		rm -f $@.dir/$$f; \
 		sed < $<.dir/$$f > $@.dir/$$f -e "s,textures/title.jpg,textures/title.png,"; \
 	done
