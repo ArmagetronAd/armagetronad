@@ -55,6 +55,7 @@ function upload()
 }
 
 # upload
+upload appdir_macos macos-x64
 upload appdir_linux_32 linux-32
 upload appdir_linux_64 linux-64
 upload appdir_windows windows-32
