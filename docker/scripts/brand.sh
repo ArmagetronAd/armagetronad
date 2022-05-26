@@ -21,8 +21,12 @@ if test -z "${CI_DEFAULT_BRANCH}" || test -z "${CI_COMMIT_REF_PROTECTED}"; then
 	unix_date=`git -C ${git_repo} log -1 --format=%at` || exit $?
 	CI_RELEASE_YEAR=`date --date=@${unix_date} +%Y` || exit $?
 else
-	# CI_COMMIT_TIMESTAMP is of the form 2020-12-21T02:13:17+01:00
-	CI_RELEASE_YEAR=`echo ${CI_COMMIT_TIMESTAMP} | sed -e "s/-.*//"` || exit $?
+	if test -z "${CI_COMMIT_TIMESTAMP}"; then
+		CI_RELEASE_YEAR=$(date '+%Y')
+	else
+		# CI_COMMIT_TIMESTAMP is of the form 2020-12-21T02:13:17+01:00
+		CI_RELEASE_YEAR=`echo ${CI_COMMIT_TIMESTAMP} | sed -e "s/-.*//"` || exit $?
+	fi
 fi
 
 if test "${CI_COMMIT_REF_PROTECTED}" = "true"; then
