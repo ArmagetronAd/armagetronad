@@ -672,12 +672,20 @@ steamdirs/steam_windows: result.winbuild_steam steamdirs/.tag ${srcdir}/context/
 	rm -rf $@.dir/banner*
 	echo > $@
 
+steamdirs/steam_macos: macOS/steam.tag steamdirs/.tag
+	rm -rf $@.dir
+	mkdir -p $@.dir
+	cd $@.dir; unzip ../../upload/${MACZIP_CLIENT}
+	echo > $@
+
 steam_linux.tag: steamdirs/steam_linux result.appdir_client_steam result.appdir_server_steam
 	echo > $@
 steam_windows.tag: steamdirs/steam_windows result.winbuild_steam
 	echo > $@
+steam_macos.tag: steamdirs/steam_macos
+	echo > $@
 
-steam.tag: steam_windows.tag steam_linux.tag
+steam.tag: steam_windows.tag steam_linux.tag steam_macos.tag
 	echo > $@
 .PHONY: steam steam_windows steam_linux
 
