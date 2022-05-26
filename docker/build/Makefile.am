@@ -741,6 +741,7 @@ context.deploy_steam: context.deploy_base_steam ${srcdir}/../deploy/steamcontent
 	mkdir -p $@.dir/steamcontentbuilder/content $@.dir/steamcontentbuilder/output
 	cp -al steamdirs/steam_windows.dir $@.dir/steamcontentbuilder/content/steam_windows
 	cp -al steamdirs/steam_linux.dir $@.dir/steamcontentbuilder/content/steam_linux
+	cp -al steamdirs/steam_macos.dir $@.dir/steamcontentbuilder/content/steam_macos
 	rm -rf $@.dir/upload
 	rm -f $@.dir/image
 	echo "steamcmd" > $@.dir/image
