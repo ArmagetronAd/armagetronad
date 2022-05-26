@@ -303,7 +303,7 @@ macOS/server.tag: macOS/client.tag macOS/server_build.tag upload/.tag #Makefile
 
 macOS/steam_build.tag: context.steam #Makefile
 	mkdir -p macOS/steam
-	cd macOS/steam && ../../$<.dir/source/configure "${MACOS_CONFIG_ARGS}" progname="${STEAM_PACKAGE_NAME}" progtitle="${STEAM_PACKAGE_TITLE}" && ${MAKE}
+	cd macOS/steam && ../../$<.dir/source/src/macosx/configure_for_bundle.sh progname="${STEAM_PACKAGE_NAME}" progtitle="${STEAM_PACKAGE_TITLE}" && ${MAKE}
 	echo > $@
 
 macOS/steam.tag: macOS/server.tag macOS/steam_build.tag upload/.tag #Makefile
@@ -312,8 +312,8 @@ macOS/steam.tag: macOS/server.tag macOS/steam_build.tag upload/.tag #Makefile
 	cp macOS/steam/*.dmg macOS/steam/*.macOS.zip upload/
 	echo > $@
 
-macOS_build: macOS/client_build.tag macOS/server_build.tag #macOS/steam_build.tag
-macOS: macOS/client.tag macOS/server.tag #macOS/steam.tag
+macOS_build: macOS/client_build.tag macOS/server_build.tag macOS/steam_build.tag
+macOS: macOS/client.tag macOS/server.tag macOS/steam.tag
 
 #***************************************************************
 
