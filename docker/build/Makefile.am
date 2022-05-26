@@ -276,8 +276,8 @@ context.test: rootcontext.64
 # macOS builds are done without docker
 MACOS_BUILD_BUNDLE="./src/macosx/build_bundle.sh"
 
-MACZIP_CLIENT:=$(PACKAGE_NAME)-$(PACKAGE_VERSION).macOS.zip
-MACZIP_SERVER:=$(PACKAGE_NAME)-dedicated-$(PACKAGE_VERSION).macOS.zip
+MACZIP_CLIENT:=$(PACKAGE_NAME)-client-$(PACKAGE_VERSION).macOS.zip
+MACZIP_SERVER:=$(PACKAGE_NAME)-server-$(PACKAGE_VERSION).macOS.zip
 
 macOS/client_build.tag: context.64 #Makefile
 	mkdir -p macOS/client
