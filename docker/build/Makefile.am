@@ -274,33 +274,25 @@ context.test: rootcontext.64
 #***************************************************************
 
 # macOS builds are done without docker
-MACOS_BUILD_BUNDLE="./src/macosx/build_bundle.sh"
+MACOS_BUILD_BUNDLE="src/macosx/build_bundle.sh"
+MACOS_CONFIGURE_BUNDLE="src/macosx/configure_for_bundle.sh"
 
 MACZIP_CLIENT:=$(PACKAGE_NAME)-client-$(PACKAGE_VERSION).macOS.zip
 MACZIP_SERVER:=$(PACKAGE_NAME)-server-$(PACKAGE_VERSION).macOS.zip
 
 macOS/steam_build.tag: context.steam #macOS/client_build.tag #Makefile
-	@echo ////////////////////////
-	@echo // Build macOS steam
-	@echo ////////////////////////
 	mkdir -p macOS/steam
-	. context.steam.dir/version.sh && cd macOS/steam && ../../$<.dir/source/src/macosx/configure_for_bundle.sh progname="$${PACKAGE_NAME}" progtitle="$${PACKAGE_TITLE}" && ${MAKE}
+	. context.steam.dir/version.sh && cd macOS/steam && ../../$<.dir/source/$(MACOS_CONFIGURE_BUNDLE) progname="$${PACKAGE_NAME}" progtitle="$${PACKAGE_TITLE}" && ${MAKE}
 	echo > $@
 
 macOS/server_build.tag: context.64 #smacOS/client_build.tag #Makefile
-	@echo ////////////////////////
-	@echo // Build macOS server
-	@echo ////////////////////////
 	mkdir -p macOS/server
-	cd macOS/server && ../../$<.dir/source/src/macosx/configure_for_bundle.sh --disable-glout && ${MAKE}
+	cd macOS/server && ../../$<.dir/source/$(MACOS_CONFIGURE_BUNDLE) --disable-glout && ${MAKE}
 	echo > $@
 
 macOS/client_build.tag: context.64 #Makefile
-	@echo ////////////////////////
-	@echo // Build macOS client
-	@echo ////////////////////////
 	mkdir -p macOS/client
-	cd macOS/client && ../../$<.dir/source/src/macosx/configure_for_bundle.sh && ${MAKE}
+	cd macOS/client && ../../$<.dir/source/$(MACOS_CONFIGURE_BUNDLE) && ${MAKE}
 	echo > $@
 
 
