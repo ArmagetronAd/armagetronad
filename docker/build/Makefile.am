@@ -675,7 +675,7 @@ steamdirs/steam_windows: result.winbuild_steam steamdirs/.tag ${srcdir}/context/
 steamdirs/steam_macos: macOS/steam.tag steamdirs/.tag
 	rm -rf $@.dir
 	mkdir -p $@.dir
-	cd $@.dir; unzip ../../upload/${MACZIP_CLIENT}
+	cd $@.dir; unzip ../../upload/${STEAM_PACKAGE_NAME}-client-$(PACKAGE_VERSION).macOS.zip
 	echo > $@
 
 steam_linux.tag: steamdirs/steam_linux result.appdir_client_steam result.appdir_server_steam
