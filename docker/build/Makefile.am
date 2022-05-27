@@ -290,23 +290,23 @@ macOS/client.tag: macOS/client_build.tag upload/.tag #Makefile
 	cp macOS/client/*.dmg macOS/client/*.macOS.zip upload/
 	echo > $@
 
-macOS/server_build.tag: context.64 macOS/client_build.tag #Makefile
+macOS/server_build.tag: context.64 #smacOS/client_build.tag #Makefile
 	mkdir -p macOS/server
 	cd macOS/server && ../../$<.dir/source/src/macosx/configure_for_bundle.sh --disable-glout && ${MAKE}
 	echo > $@
 
-macOS/server.tag: macOS/server_build.tag macOS/client.tag upload/.tag #Makefile
+macOS/server.tag: macOS/server_build.tag upload/.tag #macOS/client.tag #Makefile
 	rm -rf macOS/server/*.app macOS/server/*.zip macOS/server/*.dmg
 	cd macOS/server && bash ${MACOS_BUILD_BUNDLE}
 	cp macOS/server/*.dmg macOS/server/*.macOS.zip upload/
 	echo > $@
 
-macOS/steam_build.tag: context.steam macOS/client_build.tag #Makefile
+macOS/steam_build.tag: context.steam #macOS/client_build.tag #Makefile
 	mkdir -p macOS/steam
-	cd macOS/steam && ../../$<.dir/source/src/macosx/configure_for_bundle.sh progname="${STEAM_PACKAGE_NAME}" progtitle="${STEAM_PACKAGE_TITLE}" && ${MAKE}
+	. context.steam.dir/version.sh && cd macOS/steam && ../../$<.dir/source/src/macosx/configure_for_bundle.sh progname="$${PACKAGE_NAME}" progtitle="$${PACKAGE_TITLE}" && ${MAKE}
 	echo > $@
 
-macOS/steam.tag: macOS/steam_build.tag macOS/server.tag upload/.tag #Makefile
+macOS/steam.tag: macOS/steam_build.tag upload/.tag #macOS/server.tag #Makefile
 	rm -rf macOS/steam/*.app macOS/steam/*.zip macOS/steam/*.dmg
 	cd macOS/steam && bash ${MACOS_BUILD_BUNDLE}
 	cp macOS/steam/*.dmg macOS/steam/*.macOS.zip upload/
@@ -675,7 +675,9 @@ steamdirs/steam_windows: result.winbuild_steam steamdirs/.tag ${srcdir}/context/
 steamdirs/steam_macos: macOS/steam.tag steamdirs/.tag
 	rm -rf $@.dir
 	mkdir -p $@.dir
-	cd $@.dir; unzip ../../upload/${STEAM_PACKAGE_NAME}-client-$(PACKAGE_VERSION).macOS.zip
+	cd $@.dir; unzip ../../upload/${STEAM_PACKAGE_TITLE}*-client-$(PACKAGE_VERSION).macOS.zip
+	mv $@.dir/*.app $@.dir/CLIENT.app
+	mv $@.dir/CLIENT.app $@.dir/${STEAM_PACKAGE_TITLE}.app
 	echo > $@
 
 steam_linux.tag: steamdirs/steam_linux result.appdir_client_steam result.appdir_server_steam
