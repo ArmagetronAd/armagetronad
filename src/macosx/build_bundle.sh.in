@@ -148,8 +148,9 @@ fi
 suffix=client
 test "@progname@" = "@prognamebase@" || suffix=server
 ZIP="${DIR}/@prognamebase@-${suffix}-@version@.macOS.zip"
+rm -f "${ZIP}"
 /usr/bin/ditto -c -k --keepParent "${BUNDLE}" "${ZIP}" || exit $?
-rm -rf "${TMP_ZIP}"
+rm -f "${TMP_ZIP}"
 
 # pack dmg
 
