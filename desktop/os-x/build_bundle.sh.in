@@ -158,8 +158,8 @@ rm -rf "${TMP_ZIP}"
 DMG_SRC=${BUNDLE}
 DMG="${DIR}/@progname@-@version@.dmg"
 rm -f "${DMG}"
-ICON="@abs_top_srcdir@/MacOS/Armagetron Advanced.icns"
-BG="@abs_top_srcdir@/MacOS/background.png"
+ICON="@abs_top_srcdir@/desktop/os-x/armagetronad.icns"
+BG="@abs_top_srcdir@/desktop/os-x/background.png"
 create-dmg \
 	--volicon "$ICON" \
 	--app-drop-link 470 180 --window-pos 200 112 --window-size 650 330 \
