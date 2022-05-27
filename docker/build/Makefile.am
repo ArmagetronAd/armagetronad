@@ -279,12 +279,12 @@ MACOS_BUILD_BUNDLE="./src/macosx/build_bundle.sh"
 MACZIP_CLIENT:=$(PACKAGE_NAME)-client-$(PACKAGE_VERSION).macOS.zip
 MACZIP_SERVER:=$(PACKAGE_NAME)-server-$(PACKAGE_VERSION).macOS.zip
 
-macOS/client_build.tag: context.64 #Makefile
+macOS/steam_build.tag: context.steam #macOS/client_build.tag #Makefile
 	@echo ////////////////////////
-	@echo // Build macOS client
+	@echo // Build macOS steam
 	@echo ////////////////////////
-	mkdir -p macOS/client
-	cd macOS/client && ../../$<.dir/source/src/macosx/configure_for_bundle.sh && ${MAKE}
+	mkdir -p macOS/steam
+	. context.steam.dir/version.sh && cd macOS/steam && ../../$<.dir/source/src/macosx/configure_for_bundle.sh progname="$${PACKAGE_NAME}" progtitle="$${PACKAGE_TITLE}" && ${MAKE}
 	echo > $@
 
 macOS/server_build.tag: context.64 #smacOS/client_build.tag #Makefile
@@ -295,13 +295,14 @@ macOS/server_build.tag: context.64 #smacOS/client_build.tag #Makefile
 	cd macOS/server && ../../$<.dir/source/src/macosx/configure_for_bundle.sh --disable-glout && ${MAKE}
 	echo > $@
 
-macOS/steam_build.tag: context.steam #macOS/client_build.tag #Makefile
+macOS/client_build.tag: context.64 #Makefile
 	@echo ////////////////////////
-	@echo // Build macOS steam
+	@echo // Build macOS client
 	@echo ////////////////////////
-	mkdir -p macOS/steam
-	. context.steam.dir/version.sh && cd macOS/steam && ../../$<.dir/source/src/macosx/configure_for_bundle.sh progname="$${PACKAGE_NAME}" progtitle="$${PACKAGE_TITLE}" && ${MAKE}
+	mkdir -p macOS/client
+	cd macOS/client && ../../$<.dir/source/src/macosx/configure_for_bundle.sh && ${MAKE}
 	echo > $@
+
 
 macOS/%_sign.tag: macOS/%_build.tag #Makefile
 	@echo /////////////////////////////////////////
