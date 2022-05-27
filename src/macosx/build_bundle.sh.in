@@ -18,7 +18,10 @@ test -z "${DIR}" && DIR="`pwd`"
 
 TITLE="@progtitle@@progtitle_server@"
 BUNDLE="${DIR}/${TITLE}.app"
+TMP_ZIP="${DIR}/${TITLE}".zip
 BUNDLE_ID=org.$(echo @progname@ | sed -e s,-,.,)
+
+if test "yes" != "${SKIP_PART_1}"; then
 
 rm -rf "${BUNDLE}"
 mkdir -p "${BUNDLE}" || exit $?
@@ -100,7 +103,6 @@ du "${BUNDLE}"
 
 # pack for notarization
 # according to http://www.zarkonnen.com/signing_notarizing_catalina https://www.reddit.com/r/gamedev/comments/di61ms/have_a_mac_game_on_steam_heres_a_guide_to_signing/
-TMP_ZIP="${DIR}/${TITLE}".zip
 /usr/bin/ditto -c -k --keepParent "${BUNDLE}" "${TMP_ZIP}" || exit $?
 
 if ! test -z "${APPLE_ID}"; then
@@ -110,9 +112,14 @@ if ! test -z "${APPLE_ID}"; then
 	# notarize
 	set +x # password in command line, do not log any more
 	xcrun altool --notarize-app --primary-bundle-id ${BUNDLE_ID} -u "${APPLE_ID}" -p "${APPLE_PASSWORD}" --file "${TMP_ZIP}" || exit $?
+fi
 
+fi # SKIP_PART_1
+if test yes = "${SKIP_PART_2}"; then exit 0; fi
+
+if ! test -z "${APPLE_ID}"; then
 	# staple
-	sleep 150
+	sleep 30
 	exit_status=65
 	for (( ; ; ))
 	do
@@ -168,4 +175,4 @@ create-dmg \
 # alternative, native way, less powerful
 # hdiutil create -volname "@progtitle@" -srcfolder "${BUNDLE}" -ov -format UDIF "${DMG}"
 
-rm -rf "${DMG_SRC}"
+# rm -rf "${DMG_SRC}"

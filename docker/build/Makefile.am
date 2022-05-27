@@ -280,37 +280,49 @@ MACZIP_CLIENT:=$(PACKAGE_NAME)-client-$(PACKAGE_VERSION).macOS.zip
 MACZIP_SERVER:=$(PACKAGE_NAME)-server-$(PACKAGE_VERSION).macOS.zip
 
 macOS/client_build.tag: context.64 #Makefile
+	@echo ////////////////////////
+	@echo // Build macOS client
+	@echo ////////////////////////
 	mkdir -p macOS/client
 	cd macOS/client && ../../$<.dir/source/src/macosx/configure_for_bundle.sh && ${MAKE}
 	echo > $@
 
-macOS/client.tag: macOS/client_build.tag upload/.tag #Makefile
-	rm -rf macOS/client/*.app macOS/client/*.zip macOS/client/*.dmg 
-	cd macOS/client && bash ${MACOS_BUILD_BUNDLE}
-	cp macOS/client/*.dmg macOS/client/*.macOS.zip upload/
-	echo > $@
-
 macOS/server_build.tag: context.64 #smacOS/client_build.tag #Makefile
+	@echo ////////////////////////
+	@echo // Build macOS server
+	@echo ////////////////////////
 	mkdir -p macOS/server
 	cd macOS/server && ../../$<.dir/source/src/macosx/configure_for_bundle.sh --disable-glout && ${MAKE}
 	echo > $@
 
-macOS/server.tag: macOS/server_build.tag upload/.tag #macOS/client.tag #Makefile
-	rm -rf macOS/server/*.app macOS/server/*.zip macOS/server/*.dmg
-	cd macOS/server && bash ${MACOS_BUILD_BUNDLE}
-	cp macOS/server/*.dmg macOS/server/*.macOS.zip upload/
-	echo > $@
-
 macOS/steam_build.tag: context.steam #macOS/client_build.tag #Makefile
+	@echo ////////////////////////
+	@echo // Build macOS steam
+	@echo ////////////////////////
 	mkdir -p macOS/steam
 	. context.steam.dir/version.sh && cd macOS/steam && ../../$<.dir/source/src/macosx/configure_for_bundle.sh progname="$${PACKAGE_NAME}" progtitle="$${PACKAGE_TITLE}" && ${MAKE}
 	echo > $@
 
-macOS/steam.tag: macOS/steam_build.tag upload/.tag #macOS/server.tag #Makefile
-	rm -rf macOS/steam/*.app macOS/steam/*.zip macOS/steam/*.dmg
-	cd macOS/steam && bash ${MACOS_BUILD_BUNDLE}
-	cp macOS/steam/*.dmg macOS/steam/*.macOS.zip upload/
+macOS/%_sign.tag: macOS/%_build.tag #Makefile
+	@echo /////////////////////////////////////////
+	@echo // Bundle, sign and notarize macOS $*
+	@echo /////////////////////////////////////////
+	rm -rf macOS/$*/*.app macOS/$*/*.zip macOS/$*/*.dmg 
+	cd macOS/$* && SKIP_PART_2=yes bash ${MACOS_BUILD_BUNDLE}
 	echo > $@
+
+macOS/%.tag: macOS/%_sign.tag upload/.tag #Makefile
+	@echo /////////////////////////////////
+	@echo // Staple and pack macOS $*
+	@echo /////////////////////////////////
+	cd macOS/$* && SKIP_PART_1=yes bash ${MACOS_BUILD_BUNDLE}
+	cp macOS/$*/*.dmg macOS/$*/*.macOS.zip upload/
+	echo > $@
+
+#macOS/server_sign.tag: macOS/steam_sign.tag
+#macOS/client_sign.tag: macOS/server_sign.tag
+macOS/server.tag: macOS/steam.tag
+macOS/client.tag: macOS/server.tag
 
 macOS_build: macOS/client_build.tag macOS/server_build.tag macOS/steam_build.tag
 macOS: macOS/client.tag macOS/server.tag macOS/steam.tag
