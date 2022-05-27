@@ -88,11 +88,11 @@ function update_stream(){
 	    ${XML} || exit $?
 }
 
-for f in upload/*client*macOS.zip; do
+for f in upload/${PACKAGE_NAME}*client*macOS.zip; do
     update_stream MacOSX $f "${PACKAGE_TITLE}.app/Contents/MacOS/${PACKAGE_NAME}"
 done
 
-for f in upload/*server*macOS.zip; do
+for f in upload/${PACKAGE_NAME}*server*macOS.zip; do
     update_stream dedicated-MacOSX $f "${PACKAGE_TITLE} Server.app/Contents/MacOS/${PACKAGE_NAME}-dedicated"
 done
 
