@@ -41,8 +41,8 @@ if ! test ${STAGING} == true; then
     git push || exit $?
 fi
 
-# upload only relevant files
-CHANGED="${CHANGED} ${PACKAGE_NAME_BASE}-${ZI_SERIES}.xml"
+# upload all files
+CHANGED=`ls *.xml`
 CHANGED_XML="${CHANGED}"
 
 # sign XML files

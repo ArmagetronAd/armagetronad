@@ -267,6 +267,7 @@ DOWNLOAD_SITE_GIT=git@gitlab.com:armagetronad/downloads.git
 
 function trust_bugfarm(){
 # trust 0install hoster ssh host keys
+mkdir -p ~/.ssh
 cat >> ~/.ssh/known_hosts <<EOF
 |1|IQsnrFzF+xc7UpzVH0ZgRehX5J4=|3JZPjzsKe/lmC+v5L3V1wp8z4j4= ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBFsnvkpv4UWhmrt+l4DWvcsJPXdNKKbES12DTMoDdxLI6ofYVBuRw9mnrdLcAphmBCORaRT+M4wd8vZocJrYVZE=
 |1|kcWjcRE5DYV8KSPdJJCHCLn7+0E=|kVOPZia7i0WRp5jYlls3ZZvLvPE= ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBFsnvkpv4UWhmrt+l4DWvcsJPXdNKKbES12DTMoDdxLI6ofYVBuRw9mnrdLcAphmBCORaRT+M4wd8vZocJrYVZE=
@@ -275,6 +276,7 @@ EOF
 
 function trust_gitlab(){
 # GitLab's ssh host keys
+mkdir -p ~/.ssh
 cat >> ~/.ssh/known_hosts <<EOF
 |1|8y0lCy+vAcMMUA/WHRlwhCI/4FY=|HFJc/qi8WvgywwEtI/871TqwUwA= ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBFSMqzJeV9rUzU4kWitGjeR4PWSa29SPqJ1fVkhtj3Hw9xjLVXVYrU9QlYWrOLXBpQ6KWjbjTDTdDkoohFzgbEY=
 |1|K5IGevrCwWL+vF9CoEMeQaKINMs=|GMi0dv2Wm5oWoJJrCNGWU8+eLqU= ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBFSMqzJeV9rUzU4kWitGjeR4PWSa29SPqJ1fVkhtj3Hw9xjLVXVYrU9QlYWrOLXBpQ6KWjbjTDTdDkoohFzgbEY=
@@ -283,6 +285,7 @@ EOF
 
 function trust_github(){
 # GitHub's ssh host keys
+mkdir -p ~/.ssh
 cat >> ~/.ssh/known_hosts <<EOF
 |1|KRA9jEjogp3RGFX3U2SESqtUkKw=|EeIeiAjDuOEvmm0CING5gnKeKDo= ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==
 |1|FEIACzRx2yRt3VP2h1VHVlmFUi4=|wOwfBt2ioSBsskNq5n1BykyN6rs= ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==
