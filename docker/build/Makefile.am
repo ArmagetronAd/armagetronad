@@ -323,6 +323,10 @@ macOS/%.tag: macOS/%_sign.tag upload/.tag #Makefile
 macOS/server.tag: macOS/steam.tag
 macOS/client.tag: macOS/server.tag
 
+.PRECIOUS: macOS/server_build.tag macOS/client_build.tag macOS/steam_build.tag
+.PRECIOUS: macOS/server_sign.tag macOS/client_sign.tag macOS/steam_sign.tag
+.PRECIOUS: macOS/server.tag macOS/client.tag macOS/steam.tag
+
 macOS_build: macOS/client_build.tag macOS/server_build.tag macOS/steam_build.tag
 macOS: macOS/client.tag macOS/server.tag macOS/steam.tag
 

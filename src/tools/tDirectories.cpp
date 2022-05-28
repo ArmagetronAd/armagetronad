@@ -63,6 +63,10 @@ static const char * s_topSourceDir = ".";
 #endif
 #endif
 
+#ifndef PROGTITLE
+#define PROGTITLE "Armagetron Advanced"
+#endif
+
 #ifndef PROGNAMEBASE
 #define PROGNAMEBASE "armagetronad"
 #endif
@@ -184,7 +188,16 @@ static tString st_MusicDir(expand_home_c(DATA_DIR));    // directory for game mu
 #ifdef USE_XDG
 #define USER_DATA_DIR "${XDG_DATA_HOME}/" PROGDIR
 #else
+#ifdef __APPLE__
+#define USER_DATA_DIR_BASE "~/Library/Application Support/" PROGTITLE
+#ifdef DEDICATED
+#define USER_DATA_DIR USER_DATA_DIR_BASE " Server"
+#else
+#define USER_DATA_DIR USER_DATA_DIR_BASE
+#endif
+#else
 #define USER_DATA_DIR "~/." PROGDIR
+#endif
 #endif
 #endif
 static tString st_UserDataDir(expand_home_c(USER_DATA_DIR));    // directory for game data

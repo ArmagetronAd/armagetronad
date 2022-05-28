@@ -1355,6 +1355,7 @@ fi
 AC_DEFINE_UNQUOTED(TOP_SOURCE_DIR,"${srcdir}", [Define the top source directory])
 AC_DEFINE_UNQUOTED(PROGNAME,"${progname}", [Define the short progam name (with possible -dedicated suffix)])
 AC_DEFINE_UNQUOTED(PROGNAMEBASE,"${prognamebase}", [Define the short progam name])
+AC_DEFINE_UNQUOTED(PROGTITLE,"${progtitle}", [Define the fully captialized project tile (witout possible " Server" suffix)])
 
 realprefix="${prefix}"
 test "x${realprefix}" = xNONE && realprefix="${ac_default_prefix}"
