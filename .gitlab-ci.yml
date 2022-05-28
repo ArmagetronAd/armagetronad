@@ -263,7 +263,7 @@ build_collect:
     - gitlab_build/docker/build/make_ci.sh debtest.tag CI || exit $?
     - rm -rf src
      # consider mac builds newer than anything else, they must not be redone
-    - touch gitlab_build/docker/build/macOS/*
+    - if test -d gitlab_build/docker/build/macOS; then touch gitlab_build/docker/build/macOS/*; fi
   artifacts:
     untracked: true
     expire_in: 1 week
