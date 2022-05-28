@@ -13,8 +13,6 @@ test -r ~/.ssh/armabuild_secrets && . ~/.ssh/armabuild_secrets
 
 set -x
 
-APPLE_ID=""
-
 DIR=$1
 test -z "${DIR}" && DIR="`pwd`"
 
