@@ -30,7 +30,7 @@ mkdir -p "${BUNDLE}" || exit $?
 DESTDIR="${BUNDLE}" make install || exit $?
 
 # add plist with @v@ -> value and progtitle replacements
-sed < "@abs_srcdir@/Info.plist" > "${BUNDLE}@prefix@/Info.plist" \
+sed < "@abs_builddir@/Info.plist" > "${BUNDLE}@prefix@/Info.plist" \
 -e "s,BUNDLE_ID,${BUNDLE_ID},g" \
 || exit $?
 
