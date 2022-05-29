@@ -811,7 +811,7 @@ result.deploy_fp: context.deploy_fp deploy_external result.deploy_download
 
 context.deploy_itch: context.deploy_base_itch ${srcdir}/../deploy/*_itch.sh upload/$(APPTAR_CLIENT_64) upload/$(APPTAR_CLIENT_32) $(WINZIP_CLIENT) upload/${MACZIP_CLIENT}
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' ${srcdir}/../deploy/*_itch.sh
-	mkdir -p $@.dir/appdir_macos; cd $@.dir/appdir_macos; unzip ../../upload/$(MACZIP_CLIENT); mv ${PACKAGE_TITLE}.app ${PACKAGE_TITLE}" ${PACKAGE_VERSION}"
+	mkdir -p $@.dir/appdir_macos; cd $@.dir/appdir_macos; unzip ../../upload/$(MACZIP_CLIENT); mv ${PACKAGE_TITLE}.app ${PACKAGE_TITLE}" ${PACKAGE_VERSION}".app
 	mkdir -p $@.dir/appdir_linux_64; cd $@.dir/appdir_linux_64; tar -xjf ../../upload/$(APPTAR_CLIENT_64)
 	mkdir -p $@.dir/appdir_linux_32; cd $@.dir/appdir_linux_32; tar -xjf ../../upload/$(APPTAR_CLIENT_32)
 	mkdir -p $@.dir/appdir_windows; cd $@.dir/appdir_windows; unzip ../../$(WINZIP_CLIENT)
