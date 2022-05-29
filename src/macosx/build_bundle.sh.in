@@ -19,7 +19,7 @@ test -z "${DIR}" && DIR="`pwd`"
 TITLE="@progtitle@@progtitle_server@"
 BUNDLE="${DIR}/${TITLE}.app"
 TMP_ZIP="${DIR}/${TITLE}".zip
-BUNDLE_ID=org.$(echo @progname@ | sed -e s,-,.,)
+BUNDLE_ID=org.$(echo @progname@ | sed -e s,-@version@,, -e s,-,.,g -e s,_,.,g)
 
 if test "yes" != "${SKIP_PART_1}"; then
 
@@ -35,8 +35,8 @@ sed < "@abs_srcdir@/Info.plist" > "${BUNDLE}@prefix@/Info.plist" \
 -e "s,org.armagetronad,${BUNDLE_ID},g" \
 -e "s,MacOS/armagetronad,MacOS/@progname@,g" \
 || exit $?
-mkdir -p "${BUNDLE}/Contents/Resources/en.lproj" || exit $?
-sed < "@abs_srcdir@/English.lproj/InfoPlist.strings.in" > "${BUNDLE}/Contents/Resources/en.lproj/InfoPlist.strings" \
+mkdir -p "${BUNDLE}@datadir@/en.lproj" || exit $?
+sed < "@abs_srcdir@/English.lproj/InfoPlist.strings.in" > "${BUNDLE}@datadir@/en.lproj/InfoPlist.strings" \
 -e "s,Armagetron Advanced,${TITLE},g" \
 -e "s,@vers[i]on@,@version@,g" \
 -e "s,@year@,`date +%Y`,g" \
@@ -70,7 +70,7 @@ if ! test -z "${APPLE_ID}"; then
 	set -x
 
 	#for f in "${BUNDLE}"/Contents/Frameworks/*.dylib; do
-	for f in "${BUNDLE}@prefix@/${TITLE}.icns" "${BUNDLE}"@libdir@/*.dylib "${BUNDLE}"@libdir@/*image*.dylib; do
+	for f in "${BUNDLE}"@libdir@/*.dylib "${BUNDLE}"@libdir@/*image*.dylib; do
 		if test -r "$f"; then 
 			xcrun codesign --force --verify --verbose --sign "${APPLE_SIGN_ID}" "$f" || exit $?
 			spctl -a -t exec -vv "$f"

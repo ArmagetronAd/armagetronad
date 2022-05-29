@@ -282,7 +282,7 @@ MACZIP_SERVER:=$(PACKAGE_NAME)-server-$(PACKAGE_VERSION).macOS.zip
 
 macOS/steam_build.tag: context.steam #macOS/client_build.tag #Makefile
 	mkdir -p macOS/steam
-	. context.steam.dir/version.sh && cd macOS/steam && ../../$<.dir/source/$(MACOS_CONFIGURE_BUNDLE) progname="$${PACKAGE_NAME}" progtitle="$${PACKAGE_TITLE}" && ${MAKE}
+	. context.steam.dir/version.sh && cd macOS/steam && ../../$<.dir/source/$(MACOS_CONFIGURE_BUNDLE) progname="$${PACKAGE_NAME}-${PACKAGE_VERSION}" progtitle="$${PACKAGE_TITLE}" && ${MAKE}
 	echo > $@
 
 macOS/server_build.tag: context.64 #smacOS/client_build.tag #Makefile
