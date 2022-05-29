@@ -19,7 +19,7 @@ test -z "${DIR}" && DIR="`pwd`"
 TITLE="@progtitle@@progtitle_server@"
 BUNDLE="${DIR}/${TITLE}.app"
 TMP_ZIP="${DIR}/${TITLE}".zip
-BUNDLE_ID=org.$(echo @progname@ | sed -e s,-,.,)
+BUNDLE_ID=org.$(echo @progname@ | sed -e s,-@version@,, -e s,-,.,g -e s,_,.,g)
 
 if test "yes" != "${SKIP_PART_1}"; then
 
@@ -30,7 +30,9 @@ mkdir -p "${BUNDLE}" || exit $?
 DESTDIR="${BUNDLE}" make install || exit $?
 
 # add plist with @v@ -> value and progtitle replacements
-cp "`dirname $0`/Info.plist" "${BUNDLE}@prefix@" || exit $?
+sed < "@abs_srcdir@/Info.plist" > "${BUNDLE}@prefix@/Info.plist" \
+-e "s,BUNDLE_ID,${BUNDLE_ID},g" \
+|| exit $?
 
 # add icons
 cp "@abs_srcdir@/armagetronad.icns" "${BUNDLE}@datadir@/${TITLE}.icns" || exit $?
@@ -60,7 +62,7 @@ if ! test -z "${APPLE_ID}"; then
 	set -x
 
 	#for f in "${BUNDLE}"/Contents/Frameworks/*.dylib; do
-	for f in "${BUNDLE}@prefix@/${TITLE}.icns" "${BUNDLE}"@libdir@/*.dylib "${BUNDLE}"@libdir@/*image*.dylib; do
+	for f in "${BUNDLE}"@libdir@/*.dylib "${BUNDLE}"@libdir@/*image*.dylib; do
 		if test -r "$f"; then 
 			xcrun codesign --force --verify --verbose --sign "${APPLE_SIGN_ID}" "$f" || exit $?
 			spctl -a -t exec -vv "$f"

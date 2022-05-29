@@ -288,7 +288,7 @@ MACZIP_SERVER:=$(PACKAGE_NAME)-server-$(PACKAGE_VERSION).macOS.zip
 
 macOS/steam_build.tag: context.steam #macOS/client_build.tag #Makefile
 	mkdir -p macOS/steam
-	. context.steam.dir/version.sh && cd macOS/steam && ../../$<.dir/source/$(MACOS_CONFIGURE_BUNDLE) progname="$${PACKAGE_NAME}" progtitle="$${PACKAGE_TITLE}" && ${MAKE}
+	. context.steam.dir/version.sh && cd macOS/steam && ../../$<.dir/source/$(MACOS_CONFIGURE_BUNDLE) progname="$${PACKAGE_NAME}-${PACKAGE_VERSION}" progtitle="$${PACKAGE_TITLE}" && ${MAKE}
 	echo > $@
 
 macOS/server_build.tag: context.64 #smacOS/client_build.tag #Makefile
@@ -329,6 +329,8 @@ macOS/client.tag: macOS/server.tag
 
 macOS_build: macOS/client_build.tag macOS/server_build.tag macOS/steam_build.tag
 macOS: macOS/client.tag macOS/server.tag macOS/steam.tag
+upload/${MACZIP_CLIENT}: macOS/client.tag
+upload/${MACZIP_SERVER}: macOS/server.tag
 
 #***************************************************************
 
@@ -819,9 +821,9 @@ result.deploy_fp: context.deploy_fp deploy_external result.deploy_download
 	+$(srcdir)/context_to_result.sh $@.dir ./deploy_flatpak.sh
 	echo > $@
 
-context.deploy_itch: context.deploy_base_itch ${srcdir}/../deploy/*_itch.sh upload/$(APPTAR_CLIENT_64) upload/$(APPTAR_CLIENT_32) $(WINZIP_CLIENT)
+context.deploy_itch: context.deploy_base_itch ${srcdir}/../deploy/*_itch.sh upload/$(APPTAR_CLIENT_64) upload/$(APPTAR_CLIENT_32) $(WINZIP_CLIENT) upload/${MACZIP_CLIENT}
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' ${srcdir}/../deploy/*_itch.sh
-	mkdir -p $@.dir/appdir_macos; cd $@.dir/appdir_macos; unzip ../../upload/$(MACZIP_CLIENT)
+	mkdir -p $@.dir/appdir_macos; cd $@.dir/appdir_macos; unzip ../../upload/$(MACZIP_CLIENT); mv ${PACKAGE_TITLE}.app ${PACKAGE_TITLE}" ${PACKAGE_VERSION}".app
 	mkdir -p $@.dir/appdir_linux_64; cd $@.dir/appdir_linux_64; tar -xjf ../../upload/$(APPTAR_CLIENT_64)
 	mkdir -p $@.dir/appdir_linux_32; cd $@.dir/appdir_linux_32; tar -xjf ../../upload/$(APPTAR_CLIENT_32)
 	mkdir -p $@.dir/appdir_windows; cd $@.dir/appdir_windows; unzip ../../$(WINZIP_CLIENT)

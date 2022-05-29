@@ -12,7 +12,7 @@
   	  <string>@progtitle@@progtitle_server@.icns</string>
   	  
   	<key>CFBundleIdentifier</key>
-  	  <string>org.armagetronad.@progname@</string>
+  	  <string>BUNDLE_ID</string>
 
 	<key>CFBundleGetInfoString</key>
 	  <string>@progtitle@ @version@, © The Armagetron Advanced Developer Team, 2003, 2013</string>
