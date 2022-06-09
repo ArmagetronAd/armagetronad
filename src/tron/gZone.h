@@ -61,6 +61,7 @@ class tFunction
 		inline REAL const & GetOffset( void ) const;
 								 //!< Gets offset value
 		inline tFunction const & GetOffset( REAL & offset ) const;
+		
 								 //!< Sets function slope
 		inline tFunction & SetSlope( REAL const & slope );
 								 //!< Gets function slope
@@ -115,6 +116,9 @@ public:
     gZone &         SetWallBouncesLeft  (int wallBouncesLeft) {wallBouncesLeft_=wallBouncesLeft; return *this;}
     bool            GetWallInteract     () { return wallInteract_; }
     int             GetBouncesLeft      () { return wallBouncesLeft_; }
+    
+    gZone &         SetCycleInteract    (bool cyclInteract) {cycleInteract_=cyclInteract; return *this;}
+    bool            GetCycleInteract    () { return cycleInteract_; }
 
     gZone &         SetColor            (gRealColor color) {color_ = color; return *this;}      //!< Sets the current color
     gRealColor &    GetColor            () {return color_;}             //!< Gets the current color
@@ -190,6 +194,9 @@ protected:
 
     bool wallInteract_;
     int wallBouncesLeft_;
+    
+    bool cycleInteract_;
+    
     eWall *pLastWall_; // dumb pointer is OK, it is never dereferenced.
     REAL lastImpactTime_;
     REAL newImpactTime_;
@@ -234,6 +241,8 @@ protected:
 
     virtual bool Timestep(REAL currentTime);     //!< simulates behaviour up to currentTime
     virtual void OnVanish();                     //!< called when the zone vanishes
+
+    bool DoCycleInteract( gCycle * target, REAL time ); //!< called to make the zone bounce off the cycle
 
 private:
     virtual void WriteCreate(nMessage &m); //!< writes data for network constructor

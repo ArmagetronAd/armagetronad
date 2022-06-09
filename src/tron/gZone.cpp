@@ -103,8 +103,10 @@ static REAL sg_ballSpeedHitDecay = 0;
 static tSettingItem<REAL> sg_ballSpeedHitDecayConf( "BALL_SPEED_HIT_DECAY", sg_ballSpeedHitDecay );
 static tSettingItem<REAL> sg_zoneSpeedHitDecayConf( "ZONE_SPEED_HIT_DECAY", sg_ballSpeedHitDecay );
 
+/*
 static bool sg_ballRimStop = false;
 static tSettingItem<bool> sg_ballRimStopConf( "BALL_STOP_IF_RIM_AND_CYCLE", sg_ballRimStop );
+*/
 
 static REAL sg_ballCycleBoost = 0;
 static tSettingItem<REAL> sg_ballCycleBoostConf( "BALL_CYCLE_ACCEL_BOOST", sg_ballCycleBoost );
@@ -1867,6 +1869,142 @@ void gZone::OnNear( gCycle *target, REAL time )
 
 void gZone::OnNear( gZone *target, REAL time )
 {
+}
+
+// *******************************************************************************
+// *
+// *    DoCycleInteract
+// *
+// *******************************************************************************
+//!
+//!     @param  target  the cycle that should interact with the zone
+//!     @param  time    the current time
+//!
+// *******************************************************************************
+
+bool gZone::DoCycleInteract( gCycle * target, REAL time )
+{
+    SetReferenceTime();
+    
+    REAL dt = time - referenceTime_;
+    
+    eCoord dest(posx_(dt), posy_(dt));
+    
+    //if(sg_ballRimStop)
+    {
+        // HACK: don't process cycle walls this time...
+        s_zoneWallInteractionFound = false;
+        s_zoneWallInteractionCycleIgnored = true;
+        s_zoneWallInteractionCoord = GetPosition();
+        s_zoneWallInteractionRadius = GetRadius();
+        s_zoneWallInteractionZoneVelocity = GetVelocity();
+        s_zoneWallInteractionZoneDeltaTime = time - lastImpactTime_;
+        s_zoneWallInteractionZoneDeltaTime = (s_zoneWallInteractionZoneDeltaTime>1)?1:s_zoneWallInteractionZoneDeltaTime;
+        grid->ProcessWallsInRange(&S_ZoneWallInteraction,
+            s_zoneWallInteractionCoord,
+            s_zoneWallInteractionRadius*1.5,
+            CurrentFace());
+        s_zoneWallInteractionCycleIgnored = false;
+
+        s_zoneWallInteractionFound = false;
+        s_zoneWallInteractionCoord = dest;
+        s_zoneWallInteractionRadius = GetRadius();
+        grid->ProcessWallsInRange(&S_ZoneWallIntersect,
+            s_zoneWallInteractionCoord,
+            s_zoneWallInteractionRadius,
+            CurrentFace());
+        if (s_zoneWallInteractionFound)
+        {
+            if(GetVelocity().Norm() == 0)
+            {
+                // Attempt to move the ball away from the wall when stuck
+                SetVelocity( (-target->Direction()) * target->Speed() );
+                RequestSync();
+            }
+            return false;
+        }
+    }
+    
+    //  calculate the bounce off. Source: gBallZoneHack
+    eCoord p2 = target->Position();
+    eCoord v2 = target->Direction()*target->Speed();
+
+    REAL r1 = this->GetRadius();
+    REAL r2 = target->Player()->ping/.2;                             // the cycle "radius". accomidates for higher ping players
+    REAL R = r1 + r2;
+    eCoord p1 = this->Position();
+    eCoord dp = p2 - p1;
+    REAL c = dp.NormSquared() - R * R;
+    // first find the real time and position of the impact ...
+    eCoord v1 = this->GetVelocity();
+    eCoord dv = v2 - v1;
+    REAL a = dv.NormSquared();
+    REAL b = 2*(dp.x*dv.x+dp.y*dv.y);
+    REAL delta = b*b-4*a*c;
+    if (delta<0) return false;         // no t. it can't be, an impact just occured ...
+    delta = sqrt(delta);
+    REAL t1 = (-b-delta)/(2*a);
+    REAL t2 = (-b+delta)/(2*a);
+    REAL t = 0;
+    if ((t1>0) && (t2>0)) return false;// can't be, again ...
+    if (t1>0) t = t2;
+    else if (t2>0) t = t1;
+    else if (t1>t2) t = t1;
+    else t = t2;
+
+    // workaround for some ball teleports
+    if(t < -0.06f) t = -0.06f;
+
+    // now that we have the time, get the positions ...
+    eCoord p1c = p1+v1*t;
+    eCoord p2c = p2+v2*t;
+    // now compute the impact : new velocities and new correct positions ...
+    eCoord base = (p2c-p1c);
+    base.Normalize();
+    eCoord new_v1 = base*-target->Speed();
+    eCoord new_p1 = p1c + new_v1*(-t+0.01);
+    new_v1 = new_v1*(1+sg_ballCycleBoost*target->GetAcceleration()/100);
+    
+    //if(sg_ballRimStop)
+    {
+        s_zoneWallInteractionFound = false;
+        s_zoneWallInteractionCoord = new_p1 + new_v1 * dt;
+        s_zoneWallInteractionRadius = GetRadius();
+        grid->ProcessWallsInRange(&S_ZoneWallIntersect,
+            s_zoneWallInteractionCoord,
+            s_zoneWallInteractionRadius,
+            CurrentFace());
+        if (s_zoneWallInteractionFound || (t < lastImpactTime_ - time))
+        {
+            // Try to determine which way the wall we hit was
+            if(s_zoneWallInteractionImpactCoord.x == s_zoneWallInteractionClosestCoord.x)
+            {
+                new_p1.x = dest.x;
+            }
+            else if(s_zoneWallInteractionImpactCoord.y == s_zoneWallInteractionClosestCoord.y)
+            {
+                new_p1.y = dest.y;
+            }
+            else
+            {
+                // Just set our velocity and let the wall bounce handle it
+                SetVelocity(new_v1);                    
+                RequestSync();
+                return false;
+            }
+        }
+    }
+
+    SetPosition(new_p1);
+    SetVelocity(new_v1);
+
+    this->newImpactTime_ = time+5;
+    this->newImpactWall_ = nullptr;
+    this->lastImpactTime_ = 0;
+
+    RequestSync();
+    
+    return true;
 }
 
 // *******************************************************************************
@@ -5209,80 +5347,7 @@ void gBallZoneHack::OnEnter( gCycle * target, REAL time )
         lastPlayer_ = target->Player();
     }
 
-    //Only process the cycle kick if there is no wall inside the zone
-    if (s_zoneWallInteractionFound)
-    {
-        if(sg_ballRimStop)
-        {
-            this->SetVelocity(eCoord(0,0));
-            RequestSync();
-        }
-        return;
-    }
-
-    REAL r1 = this->GetRadius();
-    REAL r2 = target->Player()->ping/.2;                             // the cycle "radius". accomidates for higher ping players
-    REAL R = r1 + r2;
-    eCoord p1 = this->Position();
-    eCoord dp = p2 - p1;
-    REAL c = dp.NormSquared() - R * R;
-    // first find the real time and position of the impact ...
-    eCoord v1 = this->GetVelocity();
-    eCoord dv = v2 - v1;
-    REAL a = dv.NormSquared();
-    REAL b = 2*(dp.x*dv.x+dp.y*dv.y);
-    REAL delta = b*b-4*a*c;
-    if (delta<0) return;         // no t. it can't be, an impact just occured ...
-    delta = sqrt(delta);
-    REAL t1 = (-b-delta)/(2*a);
-    REAL t2 = (-b+delta)/(2*a);
-    REAL t = 0;
-    if ((t1>0) && (t2>0)) return;// can't be, again ...
-    if (t1>0) t = t2;
-    else if (t2>0) t = t1;
-    else if (t1>t2) t = t1;
-    else t = t2;
-
-    // if a wall impact happens too close, just skip cycle bouncing for now ...
-    if (t < lastImpactTime_ - time) return;
-
-    // now that we have the time, get the positions ...
-    eCoord p1c = p1+v1*t;
-    eCoord p2c = p2+v2*t;
-    // now compute the impact : new velocities and new correct positions ...
-    eCoord base = (p2c-p1c);
-    base.Normalize();
-    eCoord new_v1 = base*-target->Speed();
-    eCoord new_p1 = p1c + new_v1*(-t+0.01);
-    new_v1 = new_v1*(1+sg_ballCycleBoost*target->GetAcceleration()/100);
-
-    s_zoneWallInteractionFound = false;
-    s_zoneWallInteractionCoord = new_p1 + new_v1 * dt;
-    s_zoneWallInteractionRadius = GetRadius();
-    grid->ProcessWallsInRange(&S_ZoneWallIntersect,
-        s_zoneWallInteractionCoord,
-        s_zoneWallInteractionRadius,
-        CurrentFace());
-
-    if (s_zoneWallInteractionFound)
-    {
-        if(sg_ballRimStop)
-        {
-            this->SetVelocity(eCoord(0,0));
-            RequestSync();
-        }
-        return;
-    }
-
-    SetReferenceTime();
-    this->SetPosition(new_p1);
-    this->SetVelocity(new_v1);
-
-    this->newImpactTime_ = time+5;
-    this->newImpactWall_ = nullptr;
-    this->lastImpactTime_ = 0;
-
-    RequestSync();
+    DoCycleInteract( target, time );
 }
 
 void gBallZoneHack::OnEnter( gZone * target, REAL time )
@@ -8211,137 +8276,19 @@ void gSoccerZoneHack::OnEnter( gCycle *target, REAL time )
 {
     if (!team && (zoneType == gSoccer_BALL || zoneType == gSoccer_BALL_SCORED))
     {
-        SetReferenceTime();
-        
-        REAL dt = time - referenceTime_;
-        
-        eCoord dest(posx_(dt), posy_(dt));
-        
-        //if(sg_ballRimStop)
+        if( DoCycleInteract( target, time ) )
         {
-            // HACK: don't process cycle walls this time...
-            s_zoneWallInteractionFound = false;
-            s_zoneWallInteractionCycleIgnored = true;
-            s_zoneWallInteractionCoord = GetPosition();
-            s_zoneWallInteractionRadius = GetRadius();
-            s_zoneWallInteractionZoneVelocity = GetVelocity();
-            s_zoneWallInteractionZoneDeltaTime = time - lastImpactTime_;
-            s_zoneWallInteractionZoneDeltaTime = (s_zoneWallInteractionZoneDeltaTime>1)?1:s_zoneWallInteractionZoneDeltaTime;
-            grid->ProcessWallsInRange(&S_ZoneWallInteraction,
-                s_zoneWallInteractionCoord,
-                s_zoneWallInteractionRadius*1.5,
-                CurrentFace());
-            s_zoneWallInteractionCycleIgnored = false;
+            //  set last player to hit the zone
+            lastTeamIn_ = target->Team();
+            lastPlayerIn_ = target->Player();
 
-            s_zoneWallInteractionFound = false;
-            s_zoneWallInteractionCoord = dest;
-            s_zoneWallInteractionRadius = GetRadius();
-            grid->ProcessWallsInRange(&S_ZoneWallIntersect,
-                s_zoneWallInteractionCoord,
-                s_zoneWallInteractionRadius,
-                CurrentFace());
-            if (s_zoneWallInteractionFound)
-            {
-                if(GetVelocity().Norm() == 0)
-                {
-                    // Attempt to move the ball away from the wall when stuck
-                    SetVelocity( (-target->Direction()) * target->Speed() );
-                    RequestSync();
-                }
-                return;
-            }
+            sg_soccerBallPlayerEntered << target->Player()->GetUserName();
+            if( target->Team() ) 
+                sg_soccerBallPlayerEntered << target->Team()->Name().Filter();
+            else
+                sg_soccerBallPlayerEntered << "";
+            sg_soccerBallPlayerEntered.write();
         }
-        
-        //  calculate the bounce off. Source: gBallZoneHack
-        eCoord p2 = target->Position();
-        eCoord v2 = target->Direction()*target->Speed();
-
-        REAL r1 = this->GetRadius();
-        REAL r2 = target->Player()->ping/.2;                             // the cycle "radius". accomidates for higher ping players
-        REAL R = r1 + r2;
-        eCoord p1 = this->Position();
-        eCoord dp = p2 - p1;
-        REAL c = dp.NormSquared() - R * R;
-        // first find the real time and position of the impact ...
-        eCoord v1 = this->GetVelocity();
-        eCoord dv = v2 - v1;
-        REAL a = dv.NormSquared();
-        REAL b = 2*(dp.x*dv.x+dp.y*dv.y);
-        REAL delta = b*b-4*a*c;
-        if (delta<0) return;         // no t. it can't be, an impact just occured ...
-        delta = sqrt(delta);
-        REAL t1 = (-b-delta)/(2*a);
-        REAL t2 = (-b+delta)/(2*a);
-        REAL t = 0;
-        if ((t1>0) && (t2>0)) return;// can't be, again ...
-        if (t1>0) t = t2;
-        else if (t2>0) t = t1;
-        else if (t1>t2) t = t1;
-        else t = t2;
-
-        // workaround for some ball teleports
-        if(t < -0.06f) t = -0.06f;
-
-        // now that we have the time, get the positions ...
-        eCoord p1c = p1+v1*t;
-        eCoord p2c = p2+v2*t;
-        // now compute the impact : new velocities and new correct positions ...
-        eCoord base = (p2c-p1c);
-        base.Normalize();
-        eCoord new_v1 = base*-target->Speed();
-        eCoord new_p1 = p1c + new_v1*(-t+0.01);
-        new_v1 = new_v1*(1+sg_ballCycleBoost*target->GetAcceleration()/100);
-        
-        //if(sg_ballRimStop)
-        {
-            s_zoneWallInteractionFound = false;
-            s_zoneWallInteractionCoord = new_p1 + new_v1 * dt;
-            s_zoneWallInteractionRadius = GetRadius();
-            grid->ProcessWallsInRange(&S_ZoneWallIntersect,
-                s_zoneWallInteractionCoord,
-                s_zoneWallInteractionRadius,
-                CurrentFace());
-            if (s_zoneWallInteractionFound || (t < lastImpactTime_ - time))
-            {
-                // Try to determine which way the wall we hit was
-                if(s_zoneWallInteractionImpactCoord.x == s_zoneWallInteractionClosestCoord.x)
-                {
-                    new_p1.x = dest.x;
-                }
-                else if(s_zoneWallInteractionImpactCoord.y == s_zoneWallInteractionClosestCoord.y)
-                {
-                    new_p1.y = dest.y;
-                }
-                else
-                {
-                    // Just set our velocity and let the wall bounce handle it
-                    SetVelocity(new_v1);                    
-                    RequestSync();
-                    return;
-                }
-            }
-        }
-
-        SetPosition(new_p1);
-        SetVelocity(new_v1);
-
-        this->newImpactTime_ = time+5;
-        this->newImpactWall_ = nullptr;
-        this->lastImpactTime_ = 0;
-
-        RequestSync();
-
-        //  set last player to hit the zone
-        lastTeamIn_ = target->Team();
-        lastPlayerIn_ = target->Player();
-
-        sg_soccerBallPlayerEntered << target->Player()->GetUserName();
-        if( target->Team() ) 
-            sg_soccerBallPlayerEntered << target->Team()->Name().Filter();
-        else
-            sg_soccerBallPlayerEntered << "";
-        sg_soccerBallPlayerEntered.write();
-
     }
     else if (team && (zoneType == gSoccer_GOAL))
     {
