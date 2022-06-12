@@ -187,6 +187,7 @@ public:
     virtual void RenderBackground();
 
     virtual void Enter();
+    virtual void Select() override;
 
     // handles a key press
     virtual bool Event( SDL_Event& event );
@@ -984,6 +985,12 @@ void gServerMenuItem::Enter()
         ConnectToServer(server);
 }
 
+void gServerMenuItem::Select()
+{
+    // reset help display state
+    this->displayHelp_ = false;
+    this->helpAlpha_ = 0.0f;
+}
 
 void gServerMenuItem::SetServer(nServerInfo *s)
 {
