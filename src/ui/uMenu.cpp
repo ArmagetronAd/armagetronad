@@ -185,7 +185,7 @@ void uMenu::OnEnter(){
     yOffset=menuTop;
     REAL lastt=0;
     REAL ts=0;
-    static bool snapScroll = false;
+    bool snapScroll = false;
 
 #ifndef DEDICATED
     lastkey=tSysTimeFloat();
@@ -228,7 +228,7 @@ void uMenu::OnEnter(){
             {
                 // almost standard exponential decay; the proximity factor makes it
                 // approach the target position like t -> t^2 for negative t
-                REAL proximity = std::min(1.0f, 10.0f * sqrt(fabsf(delta)));
+                REAL proximity = std::min(1.0f, 10.0f * sqrtf(fabsf(delta)));
                 REAL speed = std::min(1.0f, ts * 6 / proximity);
                 yOffset += speed * delta;
             }
@@ -445,19 +445,19 @@ void uMenu::HandleEvent( SDL_Event event )
                 break;
 
                 case(SDLK_UP):
-                                lastkey=tSysTimeFloat();
+                    lastkey=tSysTimeFloat();
                     SetSelected(GetNextSelectable(selected));
                     break;
                 case(SDLK_DOWN):
-                                lastkey=tSysTimeFloat();
+                    lastkey=tSysTimeFloat();
                     SetSelected(GetPrevSelectable(selected));
                     break;
 
             case(SDLK_LEFT):
-                            items[selected]->LeftRight(-1);
+                items[selected]->LeftRight(-1);
                 break;
             case(SDLK_RIGHT):
-                            items[selected]->LeftRight(1);
+                items[selected]->LeftRight(1);
                 break;
 
             case(SDLK_SPACE):
