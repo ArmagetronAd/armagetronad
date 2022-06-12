@@ -417,7 +417,7 @@ void uMenu::HandleEvent( SDL_Event event )
                 break;
 
             case(SDLK_UP):
-                            lastkey=tSysTimeFloat();
+                lastkey=tSysTimeFloat();
                 selected++;
                 if (selected>=items.Len())
                 {
@@ -426,10 +426,11 @@ void uMenu::HandleEvent( SDL_Event event )
                     else
                         selected=items.Len()-1;
                 }
+                items[selected]->DisplayHelp(false, 0, 0.0f);
                 break;
 
             case(SDLK_DOWN):
-                            lastkey=tSysTimeFloat();
+                lastkey=tSysTimeFloat();
                 selected--;
                 if (selected<0)
                 {
@@ -438,14 +439,14 @@ void uMenu::HandleEvent( SDL_Event event )
                     else
                         selected=0;
                 }
-
+                items[selected]->DisplayHelp(false, 0, 0.0f);
                 break;
 
             case(SDLK_LEFT):
-                            items[selected]->LeftRight(-1);
+                items[selected]->LeftRight(-1);
                 break;
             case(SDLK_RIGHT):
-                            items[selected]->LeftRight(1);
+                items[selected]->LeftRight(1);
                 break;
 
             case(SDLK_SPACE):
