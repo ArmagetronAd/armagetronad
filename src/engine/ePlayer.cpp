@@ -6241,10 +6241,8 @@ eLadderLogWriter::~eLadderLogWriter() {
     if(conf) {
         delete conf;
     }
-    // generic algorithms aren't exactly easier to understand than regular
-    // code, but anyways, let's try one...
-    std::list<eLadderLogWriter *> list = writers();
-    list.erase(std::find_if(list.begin(), list.end(), std::bind2nd(std::equal_to<eLadderLogWriter *>(), this)));
+
+    writers().remove(this);
 }
 
 void eLadderLogWriter::write() {
