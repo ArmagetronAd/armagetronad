@@ -3763,6 +3763,9 @@ void sn_DisconnectUser(int i, const tOutput& reason, nServerInfoBase * redirectT
 
 void sn_DisconnectUserNoWarn(int i, const tOutput& reason, nServerInfoBase * redirectTo )
 {
+    if(i < 0 || i > MAXCLIENTS+1)
+        return;
+
     nCurrentSenderID senderID( i );
 
     nWaitForAck::AckAllPeer(i);
@@ -3783,8 +3786,8 @@ void sn_DisconnectUserNoWarn(int i, const tOutput& reason, nServerInfoBase * red
 
         nMessage::SendCollected(i);
 
-        // to make sure...
-        if ( i!=0 && i != MAXCLIENTS+2 && sn_GetNetState() == nSERVER ){
+        // send disconnect message to peer
+        if ( i!=0 && sn_GetNetState() == nSERVER ){
             printMessage = true;
             for(int j=2;j>=0;j--){
                 nMessage* mess = (new nMessage(login_deny));
