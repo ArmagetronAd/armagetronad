@@ -183,14 +183,14 @@ public:
     void SetServer(nServerInfo *s);
     gServerInfo *GetServer();
 
-    virtual void Render(REAL x,REAL y,REAL alpha=1, bool selected=0);
-    virtual void RenderBackground();
+    void Render(REAL x,REAL y,REAL alpha=1, bool selected=0) override;
+    void RenderBackground() override;
 
-    virtual void Enter();
-    virtual void Select() override;
+    void Enter() override;
+    void Select() override;
 
     // handles a key press
-    virtual bool Event( SDL_Event& event );
+    bool Event( SDL_Event& event ) override;
 
     gServerMenuItem(gServerMenu *men);
     virtual ~gServerMenuItem();
