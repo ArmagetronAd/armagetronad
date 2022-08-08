@@ -838,7 +838,6 @@ deploy_itch: result.deploy_itch
 deploy_ppa: \
 deploy_ppa_kinetic \
 deploy_ppa_jammy \
-deploy_ppa_impish \
 deploy_ppa_focal \
 deploy_ppa_bionic \
 deploy_ppa_xenial \

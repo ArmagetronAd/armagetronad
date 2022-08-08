@@ -2891,11 +2891,13 @@ static void rec_peer(unsigned int peer){
                 }
 #endif
             }
+
+            static int recursionCount = 0;
+            int lastRecursionCount = recursionCount;
 	#ifndef NOEXCEPT
             try
             {
 	#endif
-                static int recursionCount = 0;
                 ++recursionCount;
 
                 // handle messages
@@ -2908,12 +2910,6 @@ static void rec_peer(unsigned int peer){
                     if ( sn_Connections[ mess->SenderID() ].socket )
                         nDescriptor::HandleMessage( *mess );
                 }
-
-                if ( --recursionCount <= 0 )
-                {
-                    nCallbackReceivedComplete::ReceivedComplete();
-                }
-
 	#ifndef NOEXCEPT
             }
 
@@ -2924,6 +2920,10 @@ static void rec_peer(unsigned int peer){
             }
 	#endif
 
+            if ( 0 == (recursionCount = lastRecursionCount) )
+            {
+                nCallbackReceivedComplete::ReceivedComplete();
+            }
         }
     }
 }
