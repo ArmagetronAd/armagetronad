@@ -1864,8 +1864,8 @@ void nNetObject::ClearAllDeleted()
 {
     // forget about objects that were deleted in the past. The swap trick is to
     // avoid that the objects try to remove themselves from the list while it is cleared.
-    nDeletedInfos swap;
-    swap.swap( sn_netObjectsDeleted );
+    nDeletedInfos swap{std::move(sn_netObjectsDeleted)};
+    sn_netObjectsDeleted.clear();
     swap.clear();
 
     // send out object deletion messages
