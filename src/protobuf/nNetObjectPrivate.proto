@@ -1,3 +1,5 @@
+syntax = "proto2";
+
 // Protocol buffer types for nNetObject.cpp's private use
 package Network;
 
