@@ -118,6 +118,7 @@ if ! test -z "${APPLE_ID}"; then
 		xcrun altool --notarize-app --primary-bundle-id ${BUNDLE_ID} -u "${APPLE_ID}" -p "${APPLE_PASSWORD}" --file "${TMP_ZIP}" || exit $?
 		sleep 30
 	fi
+fi
 
 fi # SKIP_PART_1
 if test yes = "${SKIP_PART_2}"; then exit 0; fi
