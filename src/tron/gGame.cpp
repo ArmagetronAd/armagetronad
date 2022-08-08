@@ -2297,7 +2297,7 @@ static void sg_ShowDocumentation()
 static void sg_ShowIRC()
 {
     std::ostringstream s;
-    s << "http://webchat.freenode.net/?channels=armagetron&prompt=1&nick="
+    s << "http://webchat.oftc.net/?channels=armagetron&prompt=1&nick="
       << ePlayer::PlayerConfig(0)->Name();
     sg_OpenURI(s.str().c_str());
 }
