@@ -1389,8 +1389,14 @@ help_menu_doc_text            Zeige Dokumentation
 help_menu_doc_help            Öffne die mitgelieferte HTML-Dokumentation in einem externen Browser
 help_menu_doc_file            index.html
 
+help_menu_discord_text	      Öffne Discord
+help_menu_discord_help	      Öffnet eine Einladung auf unser Discord... Chat... Ding. Warum nennen die das "Server"? Das ist genau, was es nicht ist.\nHier findet man tatsächlich hilfsbereite Menschen.
+
+help_menu_forums_text	      Öffne Forum
+help_menu_forums_help	      Öffnet die Web-Foren im Browser. Zum Posten muss man sich registrieren, Lesen geht auch so.
+
 help_menu_irc_text            Öffne IRC Chatroom
-help_menu_irc_help            Öffnet ein Web-Interface zu unserem IRC-Chatroom, wo du mit etwas Glück einen anständigen Spieler findest, der deine Fragen beantwortet.
+help_menu_irc_help            Öffnet ein Web-Interface zu unserem IRC-Chatroom. Hier findet man noch die ganz alten Hasen, es dauert schon mal ein paar Tage, bis jemand antwortet.
 
 help_menu_directories_text    Öffne Ordner
 help_menu_directories_help    Erleichtert den Zugang zu den Spieldateien und Konfigurationsmenüs.

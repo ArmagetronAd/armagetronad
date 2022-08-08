@@ -2293,7 +2293,19 @@ static void sg_ShowDocumentation()
     sg_OpenURI( s.str().c_str() );
 }
 
-// opens the system data directory
+// opens the Discord invide
+static void sg_ShowDiscord()
+{
+    sg_OpenURI("http://armagetronad.org/discord");
+}
+
+// opens the forums
+static void sg_ShowForums()
+{
+    sg_OpenURI("https://forums3.armagetronad.net");
+}
+
+// opens the IRC channel
 static void sg_ShowIRC()
 {
     std::ostringstream s;
@@ -2349,6 +2361,18 @@ static uMenuItemFunction sg_ircMenuItem
  "$help_menu_irc_text",
  "$help_menu_irc_help",
  &sg_ShowIRC);
+
+static uMenuItemFunction sg_forumsMenuItem
+(&sg_helpMenu,
+ "$help_menu_forums_text",
+ "$help_menu_forums_help",
+ &sg_ShowForums);
+
+static uMenuItemFunction sg_discordMenuItem
+(&sg_helpMenu,
+ "$help_menu_discord_text",
+ "$help_menu_discord_help",
+ &sg_ShowDiscord);
 
 static uMenuItemFunction sg_wikiMenuItem 
 (&sg_helpMenu,
