@@ -456,6 +456,7 @@ static void sr_SetSwapControl( int frames, bool after = false )
     hack[0] = '0' + frames;
     hack[1] = 0;
     setenv( "__GL_SYNC_TO_VBLANK", hack, 1 );
+    setenv( "vblank_mode", hack, 1 );
     #endif
 
     #ifdef WIN32
@@ -484,7 +485,7 @@ static void sr_SetSwapControl( int frames, bool after = false )
     #if SDL_VERSION_ATLEAST(1, 2, 10)
     if ( !success )
     #if SDL_VERSION_ATLEAST(2, 0, 0)
-        SDL_GL_SetSwapInterval( frames );
+        success = !SDL_GL_SetSwapInterval( frames );
     #else
         SDL_GL_SetAttribute( SDL_GL_SWAP_CONTROL, frames );
     #endif
@@ -1161,6 +1162,9 @@ static bool lowlevel_sr_InitDisplay(){
     lastSuccess=currentScreensetting;
     failed_attempts = 0;
 //    sr_useDirectX = use_directx_back;
+
+    sr_CompleteGLAttributes();
+
     st_SaveConfig();
 
     return true;
