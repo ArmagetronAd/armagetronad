@@ -15,7 +15,7 @@ set -x
 # only leave the first three dots
 GITLAB_VERSION=`echo ${PACKAGE_VERSION} | sed -e 's,[[:alpha:]_+-]\+,.,g' -e 's,\.\([0-9]\)\.,.0\1.,g' -e 's,\.\([0-9]\)\.,.0\1.,g' -e 's,\.\([0-9]\)\.,.0\1.,g' -e 's,^0.,0,' -e 's,\.,,3g'` || exit $?
 
-if ${STAGING} == true; then
+if ${STAGING} == true || "${ZI_SERIES}" != "stable"; then
 	exit 0
 fi
 
