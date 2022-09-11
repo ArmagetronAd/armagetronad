@@ -70,7 +70,7 @@ build_prepare:
   script: [""]
   artifacts:
     untracked: true
-    expire_in: 1 week
+    expire_in: 1 day
 
 
 build_server_32_raw:
@@ -267,7 +267,7 @@ build_collect:
     - if test -d gitlab_build/docker/build/macOS; then touch gitlab_build/docker/build/macOS/*; fi
   artifacts:
     untracked: true
-    expire_in: 1 week
+    expire_in: 1 day
 
 # deploy to staged environment
 deploy_staged:
@@ -460,7 +460,7 @@ pack:
     - fi
     - ./docker/scripts/fix_gits.sh || exit $?
   artifacts:
-    expire_in: 1 week
+    expire_in: 1 day
     paths:
       - gitlab_build/docker/build/upload
 
