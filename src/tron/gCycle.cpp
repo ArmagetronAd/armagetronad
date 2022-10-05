@@ -7215,11 +7215,21 @@ void sg_DetermineSpawnPoint(ePlayerNetID *p,eCoord &pos,eCoord &dir)
 {
     switch(sg_defaultRespawnPosition)
     {
+        case 3:
         case 2:
             if(p->Object())
             {
-                pos = p->Object()->Position();
                 dir = p->Object()->Direction();
+                
+                // move position back by current direction
+                // hopefully just enough to prevent going through rim
+                pos = p->Object()->Position() - ( dir * 0.001 );
+                
+                if( sg_defaultRespawnPosition == 3 )
+                {
+                    // flip direction if desired
+                    dir = -dir;
+                }
                 break;
             }
             //falls through
