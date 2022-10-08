@@ -3445,6 +3445,20 @@ void gGame::Verify()
     }
 }
 
+bool * sg_GetSpecs()
+{
+    static bool isSpec[ MAXCLIENTS + 1 ]; std::fill_n(isSpec, MAXCLIENTS + 1, true);
+    
+    for (int i=se_PlayerNetIDs.Len()-1;i>=0;--i)
+    {
+        ePlayerNetID * player = se_PlayerNetIDs(i);
+        if( isSpec[ player->Owner() ] )
+            isSpec[ player->Owner() ] = !( player->CurrentTeam() || ( player->NextTeam() && player->NextTeam()->PlayerMayJoin( player ) ) );
+    }
+    
+    return isSpec;
+}
+
 gGame::gGame(){
     synced_ = true;
     gLogo::SetDisplayed(false);
@@ -3544,6 +3558,8 @@ static nDescriptor client_gs(311,client_gamestate_handler,"client_gamestate");
 
 void gGame::SyncState(unsigned short state){
     if (sn_GetNetState()==nSERVER){
+        
+        //bool * isSpec = sg_GetSpecs();
 
         bool firsttime=true;
         bool goon=true;
@@ -3655,6 +3671,7 @@ static tSettingItem<bool> sg_showMapCreationConf("SHOW_MAP_CREATION", sg_showMap
 
 static bool sg_showMapAxes = true;
 static tSettingItem<bool> sg_showMapAxesConf("SHOW_MAP_AXES", sg_showMapAxes);
+
 
 void gGame::StateUpdate(){
 
@@ -3874,13 +3891,17 @@ void gGame::StateUpdate(){
 
             // push all data
             if(sn_GetNetState()==nSERVER){
+                
+                // first determine which clients have players which are playing
+                bool * isSpec = sg_GetSpecs();
+                
                 bool goon=true;
                 double timeout=tSysTimeFloat()+sg_Timeout*.4;
                 while(goon && tSysTimeFloat()<timeout){
                     NetSyncIdle();
                     goon=false;
                     for(int i=MAXCLIENTS;i>0;i--)
-                        if (sn_Connections[i].socket)
+                        if( sn_Connections[i].socket && !isSpec[i] )
                             for(int j=sn_netObjects.Len()-1;j>=0;j--)
                                 if (sn_netObjects(j) &&
                                         !sn_netObjects(j)->HasBeenTransmitted(i) &&

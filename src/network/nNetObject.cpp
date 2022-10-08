@@ -1935,6 +1935,8 @@ static nDescriptor sync_ack_nd(27,sync_ack_handler,"sync_ack");
 static void sync_msg_handler(nMessage &m);
 static nDescriptor sync_nd(28,sync_msg_handler,"sync_msg");
 
+extern bool * sg_GetSpecs();
+
 // from nNetwork.C
 
 void sn_Sync(REAL timeout,bool sync_sn_netObjects, bool otherEnd){
@@ -1997,11 +1999,17 @@ void sn_Sync(REAL timeout,bool sync_sn_netObjects, bool otherEnd){
         }
     }
     else if (sn_GetNetState()==nSERVER){
+        // first determine which clients have players which are playing
+        bool * isSpec = sg_GetSpecs();
+        
         for(int user=MAXCLIENTS;user>0;user--){
             sync_ack[user]=false;
             if(sn_Connections[user].socket){
                 tJUST_CONTROLLED_PTR< nMessage > m=new nMessage(sync_nd);
-                *m << timeout;
+                if( !isSpec[user] )
+                    *m << timeout;
+                else
+                    *m << 0.f;
                 m->Write(sync_sn_netObjects);
                 m->Write(c_sync);
                 m->Send(user);
@@ -2020,6 +2028,7 @@ void sn_Sync(REAL timeout,bool sync_sn_netObjects, bool otherEnd){
             for(int user=MAXCLIENTS;user>0;user--)
             {
                 if(sn_Connections[user].socket &&
+                    !isSpec[user] &&
                         (!sync_ack[user] || sn_Connections[user].ackPending>0 || sn_QueueLen(user)))
                 {
                     goon=true;
