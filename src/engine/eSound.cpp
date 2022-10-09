@@ -424,7 +424,7 @@ void eWavData::Load(){
         SDL_FreeWAV( data );
         data = cvt.buf;
         spec.format = AUDIO_S16SYS;
-        len    = len * cvt.len_mult;
+        len    = len * cvt.len_ratio;
 
         samples = len >> 1;
     }
