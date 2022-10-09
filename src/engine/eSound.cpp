@@ -394,8 +394,8 @@ void eWavData::Load(){
 
     if (spec.format==AUDIO_S16SYS)
         samples=len>>1;
-    //	else if(spec.format==AUDIO_U8)
-    //		samples=len;
+    else if(spec.format==AUDIO_U8)
+        samples=len;
     else
     {
         // prepare error message
