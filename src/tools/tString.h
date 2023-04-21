@@ -105,6 +105,10 @@ public:
     bool StartsWith( const tString & other ) const;
     bool StartsWith( const char * other ) const;
 
+    tString LTrim() const;                          //!< returns a copy with leading whitespace removed
+    tString RTrim() const;                          //!< returns a copy with trailing whitespace removed
+    tString Trim() const;                           //!< returns a copy with leading and trailing whitespace removed
+
     //Get the position of a substring within a string...
     int StrPos( const tString &tofind ) const;      //!< Get the position of a substring within this string.
     int StrPos( int start, const tString &tofind ) const; //!< Get the position of a substring within this string.

@@ -602,6 +602,72 @@ bool tString::EndsWith( const char* other) const {
     return EndsWith( tString(other) );
 }
 
+// *******************************************************************************
+// *
+// *	LTrim
+// *
+// *******************************************************************************
+//!
+//!		@return		the trimmed string
+//!
+// *******************************************************************************
+
+tString tString::LTrim( void ) const
+{
+    tString toReturn;
+    bool trim = true;
+
+    for( size_t i = 0; i<Len(); i++ )
+    {
+        if( !isblank((*this)[i]) )
+            trim = false;
+        if( !trim)
+            toReturn << (*this)[i];
+    }
+    return toReturn;
+}
+
+// *******************************************************************************
+// *
+// *	RTrim
+// *
+// *******************************************************************************
+//!
+//!		@return		the trimmed string
+//!
+// *******************************************************************************
+
+tString tString::RTrim( void ) const
+{
+    int lastNonSpace = Len() - 2;
+    while ( lastNonSpace >= 0 && ( (*this)[lastNonSpace] == 0 || isblank((*this)[lastNonSpace]) ) )
+    {
+        --lastNonSpace;
+    }
+
+    if ( lastNonSpace < Len() - 2 )
+    {
+        return SubStr( 0, lastNonSpace + 1 );
+    }
+    
+    return *this;
+}
+
+// *******************************************************************************
+// *
+// *	Trim
+// *
+// *******************************************************************************
+//!
+//!		@return		the trimmed string
+//!
+// *******************************************************************************
+
+tString tString::Trim( void ) const
+{
+    return LTrim().RTrim();
+}
+
 /*
 bool tString::operator==(const tString &other) const
 {
