@@ -69,6 +69,12 @@ private:
 
 static nConsoleDateFilter sn_consoleFilter;
 
+bool * sg_GetSpecs()
+{
+    static bool isSpec[ MAXCLIENTS + 1 ] = {0};
+    return isSpec;
+}
+
 int main(int argc, char** argv)
 {
     tCommandLineData commandLine;
