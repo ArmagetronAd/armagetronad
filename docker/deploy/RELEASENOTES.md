@@ -9,6 +9,6 @@ to upgrade to 0.2.9 just yet.
 If you are in that camp and need help integrating the changes into your build, 
 contact us.
 
-We started to integrate builds for [macOS](http://wiki.armagetronad.org/index.php?title=MacOS).
+We started to integrate builds for [macOS](https://wiki.armagetronad.org/index.php?title=MacOS).
 Consider them alpha for now, testing and patches very welcome. The current macOS specific issues
 can be viewed [on our tracker](https://gitlab.com/armagetronad/armagetronad/-/issues?label_name%5B%5D=macOS).

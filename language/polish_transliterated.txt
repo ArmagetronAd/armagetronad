@@ -1223,7 +1223,7 @@ game_menu_disconnect_help     Rozlacza gre i powraca do glownego menu.
 #********************************************
 version_info_title            Informacje o tej instalacji \g
 version_info_version          Posiadana wersja gry \g: \1
-version_info_misc_stuff       \n0xff8888Oficjalna strona:0xRESETT http://armagetronad.net/\n0xff8888Oficjalne forum:0xRESETT https://forums3.armagetronad.net/\n0xff8888Wiki (strategie, zawody, ...):0xRESETT http://wiki.armagetronad.net/\n0xff8888Administratorzy projektu:0xRESETT z-man, Tank Program (guru3), Lucifer
+version_info_misc_stuff       \n0xff8888Oficjalna strona:0xRESETT http://armagetronad.net/\n0xff8888Oficjalne forum:0xRESETT https://forums3.armagetronad.net/\n0xff8888Wiki (strategie, zawody, ...):0xRESETT https://wiki.armagetronad.net/\n0xff8888Administratorzy projektu:0xRESETT z-man, Tank Program (guru3), Lucifer
 
 path_info_user_cfg            Polozenie pliku user.cfg:
 path_info_config              Foldery konfiguracji:
