@@ -35,6 +35,55 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <string>
 #include <map>
 
+//! transform a string from latin1 to utf8 unicode
+tColoredString st_Latin1ToUTF8( tString const & s )
+{
+    tColoredString newStr;
+    
+    for(const char * i=s;*i!=0;++i)
+    {
+        unsigned char u = *i;
+        
+        if( u < 0x80 ) // ASCII
+            newStr << *i;
+        else
+            newStr << (char)( 0xC0 | ( u >> 6 ) ) << (char)( 0x80 | ( u & 0x3F ) );
+    }
+    
+    return newStr;
+}
+
+//! transform a string from utf8 unicode to latin1
+tColoredString st_UTF8ToLatin1( tString const & s )
+{
+    tColoredString newStr;
+    
+    unsigned int c;
+    for(const char * i=s;*i!=0;)
+    {
+        unsigned char u = *i;
+        
+        if( u < 0x80 ) // ASCII
+            c = u;
+        else if( u < 0xC0 )
+            c = ( c << 6 ) | ( u & 0x3F );
+        else if( u < 0xE0 )
+            c = u & 0x1F;
+        else if( u < 0xF0 )
+            c = u & 0x0F;
+        else
+            c = u & 0x07;
+        
+        ++i;
+        if( ( ( *i & 0xC0 ) != 0x80 ) && ( c <= 0x10FFFF ) )
+        {
+            newStr << (char)c;
+        }
+    }
+    
+    return newStr;
+}
+
 const tString st_internalEncoding("latin1");
 
 class tLocaleSubItem; // identifies a single string in a single language

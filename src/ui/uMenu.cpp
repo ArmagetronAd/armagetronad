@@ -906,11 +906,9 @@ bool uMenuItemString::Event(SDL_Event &e){
         else if (c.sym == SDLK_k) {
             killForwards = true;
         }
-#ifdef WIN32
         else if (c.sym == SDLK_v) {
             pasteText = true;
         }
-#endif
     }
     // moveWordLeft = moveWordRight = deleteWordLeft = deleteWordRight = moveBeginning = moveEnd = killForwards
 
@@ -935,13 +933,28 @@ bool uMenuItemString::Event(SDL_Event &e){
     else if (killForwards) {
         content->RemoveSubStr(cursorPos,content->Len()-1-cursorPos);
     }
-#ifdef WIN32
     else if (pasteText) {
+#ifndef WIN32
+        std::unique_ptr<FILE, decltype(&pclose)> clip(popen("xclip -selection clipboard -o", "r"), pclose);
+        if( clip )
+#else
         if (OpenClipboard(0))
+#endif
         {
+#ifdef WIN32
             HANDLE hClipboardData = GetClipboardData(CF_TEXT);
             char *pchData = (char*)GlobalLock(hClipboardData);
             tString cData(pchData);
+#else
+            tString cData;
+            char buf[128];
+            while( std::fgets(buf, 128, clip.get()) )
+            {
+                cData << buf;
+            }
+            
+            cData = st_UTF8ToLatin1( cData );
+#endif
 
             tString oContent(*content);
             tString aContent = oContent.SubStr(0, cursorPos);
@@ -952,11 +965,12 @@ bool uMenuItemString::Event(SDL_Event &e){
             *content = nContent;
             cursorPos += cData.Len()-1;
 
+#ifdef WIN32
             GlobalUnlock(hClipboardData);
             CloseClipboard();
+#endif
         }
     }
-#endif
     else if (c.sym == SDLK_LEFT) {
         if (cursorPos > 0) {
             cursorPos--;
