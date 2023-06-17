@@ -893,7 +893,7 @@ zdepth_help                   Z-Buffer-Tiefe: 0 für 16 Bit, 1 für Standard, 2 fü
 last_zdepth_help              Z-Buffer-Tiefe, letzte erfolgreiche Einstellung
 use_sdl_help                  Initiiere OpenGL über SDL?
 last_use_sdl_help             Initiiere OpenGL über SDL, letzte erfolgreiche Einstellung
-failed_attempts_help          Anzahl der erfolglosen Versuche, die Graphik zu initialisieren
+failed_attempts_help          Anzahl der erfolglosen Versuche, die Grafik zu initialisieren
 software_renderer_help        Ist der OpenGL Renderer nicht Hadware-Beschleunigt?
 
 #model
@@ -1257,7 +1257,7 @@ player_mainmenu_text          Spieler konfigurieren
 player_mainmenu_help          Spielernamen, Tastatureinstellung, Kameraoptionen....
 
 system_settings_menu_text     System konfigurieren
-system_settings_menu_help     Einstellungen für Sound, Graphik und allgemeines Erscheinungsbild
+system_settings_menu_help     Einstellungen für Sound, Grafik und allgemeines Erscheinungsbild
 
 main_menu_about_text          Über \g
 main_menu_about_help          Displays detailed information about this game.
@@ -1624,7 +1624,7 @@ friend_help                   Server mit diesem Spieler werden angezeigt, wenn d
 #********************************************
 
 misc_menu_text                Verschiedenes
-misc_menu_help                Diverse Dinge, die sonst nirdendwo gepasst haben, wie z.B. globale Tastatureinstellung.
+misc_menu_help                Diverse Dinge, die sonst nirgendwo gepasst haben, wie z.B. globale Tastatureinstellung.
 
 misc_global_key_text          Globale Tastatureinstellung
 misc_global_key_help          Einige Tastaturbefehle, die unabhängig von den Spielern interpretiert werden.
@@ -1636,7 +1636,7 @@ misc_textout_text             Textausgabe:
 misc_textout_help             Kontolliert die Ausgabe diverser Textnachrichten (Chat, Statusmeldungen...).
 
 misc_moviepack_text           Moviepack:
-misc_moviepack_help           Aktiviert die Unterstützung für das separat verfügbare Moviepack, das die Graphiken mehr an den Film "Tron" angleicht.
+misc_moviepack_help           Aktiviert die Unterstützung für das separat verfügbare Moviepack, damit Grafiken wie aus den "Tron"-Film aussehen.
 
 misc_initial_menu_title       Ersteinstellung wiederholen
 misc_initial_menu_help        Geht erneut in das kleine Menu, in dem man Farbe und Tastatureinstellungs-Vorgaben wählen kann.
@@ -1955,7 +1955,7 @@ sound_menu_buffer_vhigh_help  Verzögerung: 0.4s.
 
 #display menu
 display_settings_menu         Grafikeinstellungen
-display_settings_menu_help    Hier kann man ettliche Darstellungsoptionen an die eigenen Wünsche anpassen.
+display_settings_menu_help    Hier kann man etliche Darstellungsoptionen an die eigenen Wünsche anpassen.
 
 screen_mode_menu              Anzeige
 screen_mode_menu_help         Auflösung, Farbtiefe,...
@@ -2025,13 +2025,13 @@ screen_colordepth_text        Farbtiefe:
 screen_colordepth_help        Die Farbtiefe bestimmt die Bildqualität.
 
 screen_colordepth_16_text     16 Bit
-screen_colordepth_16_help     Niedrige Qualität; empfohlen für ältere Graphikkarten. \g verwendet keine aufwändigen Blendingeffekte, daher fällt die Rasterung nicht so sehr auf.
+screen_colordepth_16_help     Niedrige Qualität; empfohlen für ältere Grafikkarten. \g verwendet keine aufwändigen Blendingeffekte, daher fällt die Rasterung nicht so sehr auf.
 
 screen_colordepth_desk_text   Voreinstellung
 screen_colordepth_desk_help   Das System gibt eine "optimale" Farbtiefe vor; üblicherweise kommt sie von den Einstellungen des Desktops.
 
 screen_colordepth_32_text     32 Bit
-screen_colordepth_32_help     Hohe Qualität; empfohlen für alle Graphikkarten vom GeForce/Radeon-Kaliber.
+screen_colordepth_32_help     Hohe Qualität; empfohlen für alle Grafikkarten vom GeForce/Radeon-Kaliber.
 
 screen_zdepth_text            Z-Buffer-Tiefe:
 screen_zdepth_help            Bestimmt die Genauigkeit des Tiefenpuffers. Zum übernehmen muss \g neugestartet oder auf Aktivieren geklickt werden.
@@ -2046,7 +2046,7 @@ screen_zdepth_32_text         32 Bit
 screen_zdepth_32_help         Hohe Qualität; verringert Artefakte.
 
 screen_check_errors_text      Beachte Fehler:
-screen_check_errors_help      Soll \g bei der Graphikinitialisierung auf Warnungen des Systems achten? Üblicherweise sollte man diese Option so lassen, wie sie ist.
+screen_check_errors_help      Soll \g bei der Grafikinitialisierung auf Warnungen des Systems achten? Üblicherweise sollte man diese Option so lassen, wie sie ist.
 
 screen_use_sdl_text           Verwende SDL
 screen_use_sdl_help           Wenn aktiviert, wird OpenGL über die sauberen Initialisierungsroutinen von SDL gestartet. Sonst wird ein Hack benutzt. (SDL: Multiplattformbibliothek, die bei \g für Eingabe, Sound und Fenstermanagement verwendet wird)
@@ -2117,10 +2117,10 @@ pref_skymove_text             Himmelsbewegung:
 pref_skymove_help             Wenn aktiviert, dann wird die untere Himmelsebene ein wenig animiert.
 
 pref_lowersky_text            Unterer Himmel:
-pref_lowersky_help            Wird die untere Himmelsebene gezeichnet? Beide Himmelsebenen an zu zeigen verringert die Geschwindigkeit
+pref_lowersky_help            Wird die untere Himmelsebene gezeichnet? Beide Himmelsebenen anzuzeigen verringert die Geschwindigkeit
 
 pref_uppersky_text            Oberer Himmel:
-pref_uppersky_help            Wird die obere Himmelsebene gezeichnet? Beide Himmelsebenen an zu zeigen verringert die Geschwindigkeit
+pref_uppersky_help            Wird die obere Himmelsebene gezeichnet? Beide Himmelsebenen anzuzeigen verringert die Geschwindigkeit
 
 pref_highrim_text             Hoher Rand:
 pref_highrim_help             Macht die Wände am Rand der Arena unendlich hoch. Sonst sind die Wände so hoch wie die von Spielern.
@@ -2159,7 +2159,7 @@ pref_showrubber_text          Gummianzeige
 pref_showrubber_help          Zeigt den Status des etwas obskuren Gummifüllstands (regelt die Toleranz bei Kollisionen mit Wänden)
 
 misc_fps_text                 FPS-Anzeige:
-misc_fps_help                 Wenn die FPS-Anzeige aktiviert ist, wird die aktuelle Geschwindigkeit der Graphikausgabe am unteren linken Bildschirmrand in Bildern pro Sekunde (frames per second) angezeigt.
+misc_fps_help                 Wenn die FPS-Anzeige aktiviert ist, wird die aktuelle Geschwindigkeit der Grafikausgabe am oberen rechten Bildschirmrand in Bildern pro Sekunde (frames per second) angezeigt.
 
 misc_recording_time_text      Aufzeichnungszeit-Anzeige:
 misc_recording_time_help      Wenn die Aufzeichnungszeit-Anzeige aktiviert ist, wird die aktuelle Laufzeit einer Aufzeichnung oben rechts angezeigt.
@@ -2563,13 +2563,13 @@ camera_watching_ai            Beobachte Computergegner\n
 camera_watching_player        Beobachte \1\n
 
 #score table
-team_scoretable_name          Team:
-team_scoretable_score         Score:
+team_scoretable_name          Teams:
+team_scoretable_score         Punkte
 player_scoretable_name        Spieler:
-player_scoretable_team        Mitglied von Team:
-player_scoretable_score       Punkte:
-player_scoretable_ping        Ping:
-player_scoretable_alive       Lebendig:
+player_scoretable_team        Team
+player_scoretable_score       Punkte
+player_scoretable_ping        Ping
+player_scoretable_alive       Aktiv
 player_scoretable_alive_yes   Ja
 player_scoretable_alive_no    Nein
 player_scoretable_pingcharity Ping-Spende:            
@@ -2607,7 +2607,7 @@ network_message_abortconn_inter Der Server hat die Verbindung abgebrochen.
 
 network_master_timeout_retry  Einer der Master-Server antwortet nicht. Nächster wird kontaktiert...\n
 network_master_timeout_title  Master-Server antworten nicht
-network_master_timeout_inter  Die Master-Server sind momentan nicht erreichbar und die Liste der Server konnte nicht aktualisiert werden. Wir versuchen es mit der alten Liste.\n\nWahrscheinlichster Grund für diesen Fehler ist ein lokales Netzwerkproblem. Überprufe bitte, ob der Internetzugang im Allgemeinen funktionniert, z.B. indem Du mit einem Web-Browser www.armagetronad.net besuchst.\nManchmal ist auch eine Firewall für Verbindungsprobleme verantwortlich. Am einfachsten testet man das, indem man die betreffende Firewall deaktiviert, und dann erneut ein Internet-Spiel zu starten versucht. Wenn es dann klappt, solltest Du die Firewall wieder aktivieren, aber speziefisch Armagetron den Zugang erlauben. Wir verwenden UDP, Ports 4533 bis 4540. Sorge auch dafür, dass armagetronad(.exe) nicht in der Liste der erlaubten Anwendungen ist.\nWenn Teile des Netzwerkes sich Deiner Kontrolle entziehen, z.B. weil Du an einem öffentlichen WLAN-Hotspot sitzt oder in einem Unternehmens- oder Schulnetzwerk, dann sprich mit dem Administrator des Netzwerks.\nUnwahrscheinlich, aber möglich, ist es auch, dass die Master-Server Infrastruktur gerade zusammengebrochen ist. Besuche das Forum auf forums3.armagetronad.net oder den IRC-Kanal #armagetron auf irc.freenode.net für aktuelle Nachrichten.
+network_master_timeout_inter  Die Master-Server sind momentan nicht erreichbar und die Liste der Server konnte nicht aktualisiert werden. Wir versuchen es mit der alten Liste.\n\nWahrscheinlichster Grund für diesen Fehler ist ein lokales Netzwerkproblem. Überprufe bitte, ob der Internetzugang im Allgemeinen funktionniert, z.B. indem Du mit einem Web-Browser www.armagetronad.net besuchst.\nManchmal ist auch eine Firewall für Verbindungsprobleme verantwortlich. Am einfachsten testet man das, indem man die betreffende Firewall deaktiviert, und dann erneut ein Internet-Spiel zu starten versucht. Wenn es dann klappt, solltest Du die Firewall wieder aktivieren, aber speziefisch Armagetron den Zugang erlauben. Wir verwenden UDP, Ports 4533 bis 4540. Sorge auch dafür, dass armagetronad(.exe) nicht in der Liste der erlaubten Anwendungen ist.\nWenn Teile des Netzwerkes sich Deiner Kontrolle entziehen, z.B. weil Du an einem öffentlichen WLAN-Hotspot sitzt oder in einem Unternehmens- oder Schulnetzwerk, dann sprich mit dem Administrator des Netzwerks.\nUnwahrscheinlich, aber möglich, ist es auch, dass die Master-Server Infrastruktur gerade zusammengebrochen ist. Besuche das Forum auf forums3.armagetronad.net oder den IRC-Kanal #armagetron auf irc.oftc.net für aktuelle Nachrichten.
 
 network_master_denied_title   Verbindung zum Master-Server abgelehnt
 network_master_denied_inter   Der Master-Server lässt keine Verbindung zu sich aufbauen. Vermutlich greifen gerade zu viele Benutzer auf ihn zu.\nWir versuchen es mal mit der alten Liste...

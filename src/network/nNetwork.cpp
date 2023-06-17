@@ -1447,7 +1447,7 @@ nMessage& nMessage::operator>>(REAL &x){
 
 #ifdef DEBUG
 #ifndef WIN32
-    if (!finite(x))
+    if (!std::isfinite(x))
         st_Breakpoint();
     // con << " , x= " << x << '\n';
 #endif
@@ -2911,11 +2911,13 @@ static void rec_peer(unsigned int peer){
                 }
 #endif
             }
+
+            static int recursionCount = 0;
+            int lastRecursionCount = recursionCount;
 	#ifndef NOEXCEPT
             try
             {
 	#endif
-                static int recursionCount = 0;
                 ++recursionCount;
 
                 // handle messages
@@ -2928,12 +2930,6 @@ static void rec_peer(unsigned int peer){
                     if ( sn_Connections[ mess->SenderID() ].socket )
                         nDescriptor::HandleMessage( *mess );
                 }
-
-                if ( --recursionCount <= 0 )
-                {
-                    nCallbackReceivedComplete::ReceivedComplete();
-                }
-
 	#ifndef NOEXCEPT
             }
 
@@ -2944,6 +2940,10 @@ static void rec_peer(unsigned int peer){
             }
 	#endif
 
+            if ( 0 == (recursionCount = lastRecursionCount) )
+            {
+                nCallbackReceivedComplete::ReceivedComplete();
+            }
         }
     }
 }
@@ -3795,6 +3795,9 @@ void sn_DisconnectUser(int i, const tOutput& reason, nServerInfoBase * redirectT
 
 void sn_DisconnectUserNoWarn(int i, const tOutput& reason, nServerInfoBase * redirectTo )
 {
+    if(i < 0 || i > MAXCLIENTS+1)
+        return;
+
     nCurrentSenderID senderID( i );
 
     nWaitForAck::AckAllPeer(i);
@@ -3815,8 +3818,8 @@ void sn_DisconnectUserNoWarn(int i, const tOutput& reason, nServerInfoBase * red
 
         nMessage::SendCollected(i);
 
-        // to make sure...
-        if ( i!=0 && i != MAXCLIENTS+2 && sn_GetNetState() == nSERVER ){
+        // send disconnect message to peer
+        if ( i!=0 && sn_GetNetState() == nSERVER ){
             printMessage = true;
             for(int j=2;j>=0;j--){
                 nMessage* mess = (new nMessage(login_deny));

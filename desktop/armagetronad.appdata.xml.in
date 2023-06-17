@@ -23,17 +23,17 @@
   <x-flatpak-launchable type="desktop-id">@progid@.desktop</x-flatpak-launchable>
   <screenshots>
     <screenshot type="default">
-      <image>http://www.armagetronad.org/screenshots/ss_fort_1.png</image>
+      <image>https://www.armagetronad.org/screenshots/ss_fort_1.png</image>
     </screenshot>
     <screenshot>
-      <image>http://www.armagetronad.org/screenshots/ss_sumo_1.png</image>
+      <image>https://www.armagetronad.org/screenshots/ss_sumo_1.png</image>
     </screenshot>
     <screenshot>
-      <image>http://www.armagetronad.org/screenshots/screenshot_23.png</image>
+      <image>https://www.armagetronad.org/screenshots/screenshot_23.png</image>
     </screenshot>
   </screenshots>
 
-  <url type="homepage">http://www.armagetronad.org</url>
+  <url type="homepage">https://www.armagetronad.org</url>
   <url type="bugtracker">https://gitlab.com/armagetronad/armagetronad/-/issues</url>
 
   <releases>

@@ -397,8 +397,8 @@ void eWavData::Load(){
 
     if (spec.format==AUDIO_S16SYS)
         samples=len>>1;
-    //	else if(spec.format==AUDIO_U8)
-    //		samples=len;
+    else if(spec.format==AUDIO_U8)
+        samples=len;
     else
     {
         // prepare error message
@@ -427,7 +427,7 @@ void eWavData::Load(){
         SDL_FreeWAV( data );
         data = cvt.buf;
         spec.format = AUDIO_S16SYS;
-        len    = len * cvt.len_mult;
+        len    = len * cvt.len_ratio;
 
         samples = len >> 1;
     }
@@ -536,13 +536,14 @@ bool eWavData::Mix(Uint8 *dest,Uint32 playlen,eAudioPos &pos,
         Lvol = thresh;
     }
 
-#define SPEED_FRACTION (1<<20)
+#define SPEED_SHIFT 20
+#define SPEED_FRACTION (1<<SPEED_SHIFT)
 
 #define VOL_SHIFT 16
 #define VOL_FRACTION (1<<VOL_SHIFT)
 
-#define MAX_VAL ((1<<16)-1)
-#define MIN_VAL -(1<<16)
+#define MAX_VAL ((1<<15)-1)
+#define MIN_VAL (-(1<<15))
 
     // first, split the speed into the part before and after the decimal:
     if (Speed<0) Speed=0;

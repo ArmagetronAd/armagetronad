@@ -45,7 +45,7 @@ static tList< gExplosion > sg_Explosions;
 
 void clamp01(REAL &c)
 {
-    if (!isfinite(c))
+    if (!std::isfinite(c))
         c = 0.5;
 
     if (c<0)

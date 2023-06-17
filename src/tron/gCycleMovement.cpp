@@ -455,7 +455,7 @@ static tSettingItem<int> conf_sgCycleMaxRefCount ("CYCLE_MAX_REFCOUNT", sg_cycle
 static inline bool clamp(REAL &c, REAL min, REAL max){
     tASSERT(min <= max);
 
-    if (!finite(c))
+    if (!std::isfinite(c))
     {
         c = 0;
         return true;
@@ -2836,7 +2836,7 @@ void gCycleMovement::CopyFrom( const gCycleMovement & other )
     windingNumber_          = other.windingNumber_;
     windingNumberWrapped_   = other.windingNumberWrapped_;
 
-    tASSERT(isfinite(distance));
+    tASSERT(std::isfinite(distance));
 
     // std::cout << "copy: " << brakingReservoir << ":" << braking << "\n";
 
@@ -2881,7 +2881,7 @@ void gCycleMovement::CopyFrom( const SyncData & sync, const gCycleMovement & oth
     brakingReservoir= sync.brakingReservoir;
     // std::cout << "fromsync: " << brakingReservoir << ":" << braking << "\n";
 
-    tASSERT(isfinite(distance));
+    tASSERT(std::isfinite(distance));
 
     // reset winding number and acceleration
     this->SetWindingNumberWrapped( Grid()->DirectionWinding(dirDrive) );
@@ -2935,12 +2935,12 @@ void gCycleMovement::CopyFrom( const SyncData & sync, const gCycleMovement & oth
 void gCycleMovement::InitAfterCreation( void )
 {
 #ifdef DEBUG
-    if (!isfinite(verletSpeed_))
+    if (!std::isfinite(verletSpeed_))
         st_Breakpoint();
 #endif
     eNetGameObject::InitAfterCreation();
 #ifdef DEBUG
-    if (!isfinite(verletSpeed_))
+    if (!std::isfinite(verletSpeed_))
         st_Breakpoint();
 #endif
     MyInitAfterCreation();
@@ -3700,7 +3700,7 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
     clamp(ts, -10, 10);
 
     REAL step=verletSpeed_*ts;
-    tASSERT(isfinite(step));
+    tASSERT(std::isfinite(step));
 
     int numTries = 0;
     bool emergency = false;
@@ -4089,8 +4089,8 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
         }
 #endif
 
-        tASSERT(isfinite(distance));
-        tASSERT(isfinite(step));
+        tASSERT(std::isfinite(distance));
+        tASSERT(std::isfinite(step));
         distance += step;
         lastTimeAlive_ = currentTime;
     }
@@ -4158,9 +4158,9 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
                 rubber = rubber_granted;
 
                 // update distance to include the really covered space
-                tASSERT(isfinite(distance));
+                tASSERT(std::isfinite(distance));
                 distance += eCoord::F( dirDrive, pos - lastPos )/dirDrive.NormSquared();
-                tASSERT(isfinite(distance));
+                tASSERT(std::isfinite(distance));
 
                 throw;
             }
@@ -4271,7 +4271,7 @@ bool gCycleMovement::TimestepCore( REAL currentTime, bool calculateAcceleration 
     if ( !sg_verletIntegration.Supported() )
         this->ApplyAcceleration( ts );
 
-    tASSERT(isfinite(distance));
+    tASSERT(std::isfinite(distance));
 
     tASSERT( rubber >= 0 );
 
@@ -4330,7 +4330,7 @@ void gCycleMovement::MyInitAfterCreation( void )
 
     lastTimeAlive_ = lastTime;
 
-    if (!isfinite(verletSpeed_)){
+    if (!std::isfinite(verletSpeed_)){
         st_Breakpoint();
         verletSpeed_ = 1;
     }

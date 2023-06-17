@@ -170,6 +170,7 @@ void uMenu::OnEnter(){
     yOffset=menuTop;
     REAL lastt=0;
     REAL ts=0;
+    bool snapScroll = false;
 
 #ifndef DEDICATED
     lastkey=tSysTimeFloat();
@@ -186,6 +187,32 @@ void uMenu::OnEnter(){
         ts=tSysTimeFloat()-lastt;
         lastt=tSysTimeFloat();
         if (ts>.2) ts=.2;
+
+        if(snapScroll)
+        {
+            if(ts * 30 < 1)
+                snapScroll = false;
+        }
+        else
+        {
+            if(ts * 15 > 1)
+                snapScroll = true;
+        }
+        auto scrollBy = [this, snapScroll, ts](REAL delta)
+        {
+            if(snapScroll || fabsf(delta) < 1E-6)
+            {
+                yOffset += delta;
+            }
+            else
+            {
+                // almost standard exponential decay; the proximity factor makes it
+                // approach the target position like t -> t^2 for negative t
+                REAL proximity = std::min(1.0f, 10.0f * sqrtf(fabsf(delta)));
+                REAL speed = std::min(1.0f, ts * 6 / proximity);
+                yOffset += speed * delta;
+            }
+        };
 
         menuentries=items.Len();
 
@@ -267,11 +294,16 @@ void uMenu::OnEnter(){
 
         REAL ysel=YPos(selected);
 
-        if (ysel<menuBot+border)
-            yOffset+=(menuBot+border-ysel)*6*ts;
-
-        if (ysel>menuTop-border)
-            yOffset+=(menuTop-border-ysel)*6*ts;
+        {
+            REAL scrollUp = menuBot+border-ysel;
+            if(scrollUp > 0)
+                scrollBy(scrollUp);
+        }
+        {
+            REAL scrollDown = menuTop-border-ysel;
+            if(scrollDown < 0)
+                scrollBy(scrollDown);
+        }
 
         if (ysel<menuBot)
             yOffset+=(menuBot-ysel);
@@ -382,35 +414,21 @@ void uMenu::HandleEvent( SDL_Event event )
 
             case(SDLK_UP):
                 lastkey=tSysTimeFloat();
-                /*selected++;
-                if (selected>=items.Len())
-                {
-                    if (wrap)
-                        selected=0;
-                    else
-                        selected=items.Len()-1;
-                }*/
                 selected = GetNextSelectable(selected);
+                items[selected]->DisplayHelp(false, 0, 0.0f);
                 break;
 
             case(SDLK_DOWN):
-                            lastkey=tSysTimeFloat();
-                /*selected--;
-                if (selected<0)
-                {
-                    if (wrap)
-                        selected=items.Len()-1;
-                    else
-                        selected=0;
-                }*/
+                lastkey=tSysTimeFloat();
                 selected = GetPrevSelectable(selected);
+                items[selected]->DisplayHelp(false, 0, 0.0f);
                 break;
 
             case(SDLK_LEFT):
-                            items[selected]->LeftRight(-1);
+                items[selected]->LeftRight(-1);
                 break;
             case(SDLK_RIGHT):
-                            items[selected]->LeftRight(1);
+                items[selected]->LeftRight(1);
                 break;
 
             case(SDLK_SPACE):

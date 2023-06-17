@@ -61,6 +61,10 @@ static const char * s_topSourceDir = ".";
 #endif
 #endif
 
+#ifndef PROGTITLE
+#define PROGTITLE "Armagetron Advanced"
+#endif
+
 #ifndef PROGNAMEBASE
 #define PROGNAMEBASE "armagetronad"
 #endif
@@ -151,7 +155,15 @@ static tString st_DataDir(".");    // directory for game data
 #ifdef USER_DATA_DIR
 static tString st_UserDataDir(expand_home_c(USER_DATA_DIR));    // directory for game data
 #else
+#ifdef __APPLE__
+static tString st_UserDataDir(expand_home_c("~/Library/Application Support/" PROGTITLE
+#ifdef DEDICATED
+" Server"
+#endif
+));    // directory for game data
+#else
 static tString st_UserDataDir(expand_home_c("~/." PROGDIR));    // directory for game data
+#endif
 #endif
 
 #ifdef CONFIG_DIR

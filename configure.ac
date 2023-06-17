@@ -314,7 +314,7 @@ test -z "`echo $CXXFLAGS | grep "\-O"`" && CXXFLAGS="$CXXFLAGS -O2"
 
 test $DEBUGLEVEL -ge 1 && CXXFLAGS="`echo $CXXFLAGS | sed -e 's,-O.,,'` -g -O0"
 test $DEBUGLEVEL -ge 2 && CXXFLAGS="$CXXFLAGS -DDEBUG"
-test $DEBUGLEVEL -ge 3 && enable_memmanager=yes
+dnl test $DEBUGLEVEL -ge 3 && enable_memmanager=yes
 test $DEBUGLEVEL -ge 4 && CXXFLAGS="$CXXFLAGS -DDEBUG_EXPENSIVE"
 test $DEBUGLEVEL -ge 5 && CXXFLAGS="$CXXFLAGS -DMEM_DEB"
 
@@ -854,6 +854,7 @@ CPPFLAGS="-iquote . -iquote .. $CPPFLAGS"
 AC_DEFINE_UNQUOTED(TOP_SOURCE_DIR,"${srcdir}", [Define the top source directory])
 AC_DEFINE_UNQUOTED(PROGNAME,"${progname}", [Define the short progam name (with possible -dedicated suffix)])
 AC_DEFINE_UNQUOTED(PROGNAMEBASE,"${prognamebase}", [Define the short progam name])
+AC_DEFINE_UNQUOTED(PROGTITLE,"${progtitle}", [Define the fully captialized project tile (witout possible " Server" suffix)])
 
 realprefix=${prefix}
 test x${realprefix} = xNONE && realprefix=${ac_default_prefix}

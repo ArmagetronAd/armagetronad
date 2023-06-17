@@ -69,7 +69,7 @@ build_prepare:
   script: [""]
   artifacts:
     untracked: true
-    expire_in: 1 week
+    expire_in: 1 day
 
 
 build_server_32_raw:
@@ -230,12 +230,10 @@ build_server_32:
     expire_in: 1 day
 
 # macOS builds need a special runner, but can start early.
-# iIt should build directly from git content, the prepared linux source directories have soft links that won't work.
+# it should build directly from git content, the prepared linux source directories have soft links that won't work.
 build_macos:
-  needs:
-  - build_prepare
-  dependencies:
-  - build_prepare
+  needs: []
+  dependencies: []
   tags:
   - macos
   stage: build_main
@@ -264,9 +262,11 @@ build_collect:
   script:
     - gitlab_build/docker/build/make_ci.sh debtest.tag CI || exit $?
     - rm -rf src
+     # consider mac builds newer than anything else, they must not be redone
+    - if test -d gitlab_build/docker/build/macOS; then touch gitlab_build/docker/build/macOS/*; fi
   artifacts:
     untracked: true
-    expire_in: 1 week
+    expire_in: 1 day
 
 # deploy to staged environment
 deploy_staged:
@@ -422,6 +422,18 @@ post_test:
   script:
     - make -C gitlab_build/docker/build appimagetests_ci || exit $?
 
+# post-build tests that require our own runners (or a docker upgrade on GitLab)
+post_test_extra:
+  stage: build_collect
+  rules: 
+  - if: $CI_MERGE_REQUEST_ID
+    when: never
+  - if: $CI_COMMIT_REF_PROTECTED == "true"
+    when: on_success
+  - when: never
+  script:
+    - make -C gitlab_build/docker/build appimagetests_extra || exit $?
+
 # pack up the downloadable build files in one handy artifact
 pack:
   stage: stage
@@ -447,7 +459,7 @@ pack:
     - fi
     - ./docker/scripts/fix_gits.sh || exit $?
   artifacts:
-    expire_in: 1 week
+    expire_in: 1 day
     paths:
       - gitlab_build/docker/build/upload
 

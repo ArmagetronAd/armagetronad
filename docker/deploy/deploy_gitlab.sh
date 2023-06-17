@@ -19,6 +19,10 @@ if ${STAGING} == true; then
 	exit 0
 fi
 
+if "${ZI_SERIES}" != "rc" && "${ZI_SERIES}" != "stable"; then
+	exit 0
+fi
+
 function upload(){
 	curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file $1 "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PACKAGE_NAME}/${GITLAB_VERSION}/`basename $1`"
 }

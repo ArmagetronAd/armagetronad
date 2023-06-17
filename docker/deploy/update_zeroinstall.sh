@@ -47,7 +47,10 @@ case ${STAGING}+${ZI_SERIES}+${ZEROVERSION} in
 esac
 
 trust_gitlab || exit $?
-git clone ${ZI_GIT} zeroinstall || exit $?
+
+# the fallback git URI won't work for pushing later, but is fine for local testing when you don't have set up push rights anyway
+git clone ${ZI_GIT} zeroinstall || git clone https://gitlab.com/armagetronad/zeroinstall.git zeroinstall || exit $?
+
 cp zeroinstall/*.gpg . || exit $?
 
 # FeedLint requires this
@@ -78,12 +81,20 @@ function update_stream(){
 	    --archive-url=${URI} \
 	    --archive-file=${FILE} \
 	    ${STAB} \
-	    --set-main=${MAIN} \
+	    --set-main="${MAIN}" \
 	    --set-released=today -c -x || exit $?
 
     0launch -o -c 'http://0install.net/2007/interfaces/FeedLint.xml' -o \
 	    ${XML} || exit $?
 }
+
+for f in upload/${PACKAGE_NAME}*client*macOS.zip; do
+    update_stream MacOSX $f "${PACKAGE_TITLE}.app/Contents/MacOS/${PACKAGE_NAME}"
+done
+
+for f in upload/${PACKAGE_NAME}*server*macOS.zip; do
+    update_stream dedicated-MacOSX $f "${PACKAGE_TITLE} Server.app/Contents/MacOS/${PACKAGE_NAME}-dedicated"
+done
 
 for f in upload/*client*win32.zip; do
     update_stream Windows $f ${PACKAGE_NAME}.exe

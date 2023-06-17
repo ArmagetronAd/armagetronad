@@ -223,7 +223,7 @@ context.steam: context.64 gits_artifacts.tag
 	sed < $<.dir/source/src/engine/ePlayer.cpp > $@.dir/source/src/engine/ePlayer.cpp -e "s/pr0n/cat videos/"
 #   install alternative title, adapt sources
 	cp gits/steam/title.png $@.dir/source/textures/
-	for f in source/src/tron/gLogo.cpp source/src/Makefile.am; do \
+	for f in source/src/tron/gLogo.cpp source/Makefile.am; do \
 		rm -f $@.dir/$$f; \
 		sed < $<.dir/$$f > $@.dir/$$f -e "s,textures/title.jpg,textures/title.png,"; \
 	done
@@ -247,6 +247,7 @@ context.debsrc_test: context.debsrc_dapper
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*'
 #	extract fake secrets
 	base64 -d < ${srcdir}/../deploy/anonymous_secrets.b64 | tar -xjf - --one-top-level=$@.dir
+#   reverse to pack: tar -cjf - secrets | base64 > anonymous_secrets.b64 
 	mv $@.dir/secrets/* $@.dir
 	rmdir $@.dir/secrets/
 	echo > $@
@@ -273,44 +274,57 @@ context.test: rootcontext.64
 #***************************************************************
 
 # macOS builds are done without docker
-MACOS_CONFIG_ARGS="--disable-restoreold --enable-automakedefaults --disable-useradd --disable-sysinstall --disable-initscripts --disable-uninstall --disable-etc --prefix=/usr"
-MACOS_BUILD_BUNDLE="./src/macosx/build_bundle.sh"
+MACOS_BUILD_BUNDLE="src/macosx/build_bundle.sh"
+MACOS_CONFIGURE_BUNDLE="src/macosx/configure_for_bundle.sh"
+
+MACZIP_CLIENT:=$(PACKAGE_NAME)-client-$(PACKAGE_VERSION).macOS.zip
+MACZIP_SERVER:=$(PACKAGE_NAME)-server-$(PACKAGE_VERSION).macOS.zip
+
+macOS/steam_build.tag: context.steam #macOS/client_build.tag #Makefile
+	mkdir -p macOS/steam
+	. context.steam.dir/version.sh && cd macOS/steam && ../../$<.dir/source/$(MACOS_CONFIGURE_BUNDLE) progname="$${PACKAGE_NAME}-${PACKAGE_VERSION}" progtitle="$${PACKAGE_TITLE}" && ${MAKE}
+	echo > $@
+
+macOS/server_build.tag: context.64 #smacOS/client_build.tag #Makefile
+	mkdir -p macOS/server
+	cd macOS/server && ../../$<.dir/source/$(MACOS_CONFIGURE_BUNDLE) --disable-glout && ${MAKE}
+	echo > $@
 
 macOS/client_build.tag: context.64 #Makefile
 	mkdir -p macOS/client
-	cd macOS/client && ../../$<.dir/source/configure "${MACOS_CONFIG_ARGS}" && ${MAKE}
+	cd macOS/client && ../../$<.dir/source/$(MACOS_CONFIGURE_BUNDLE) && ${MAKE}
 	echo > $@
 
-macOS/client.tag: macOS/client_build.tag upload/.tag #Makefile
-	rm -rf macOS/client/*.app
-	cd macOS/client && bash ${MACOS_BUILD_BUNDLE}
-	cp macOS/client/*.dmg macOS/client/*.macOS.zip upload/
+
+macOS/%_sign.tag: macOS/%_build.tag #Makefile
+	@echo /////////////////////////////////////////
+	@echo // Bundle, sign and notarize macOS $*
+	@echo /////////////////////////////////////////
+	rm -rf macOS/$*/*.app macOS/$*/*.zip macOS/$*/*.dmg 
+	cd macOS/$* && SKIP_PART_2=yes bash ${MACOS_BUILD_BUNDLE}
 	echo > $@
 
-macOS/server_build.tag: context.64 #Makefile
-	mkdir -p macOS/server
-	cd macOS/server && ../../$<.dir/source/configure --disable-glout "${MACOS_CONFIG_ARGS}" && ${MAKE}
+macOS/%.tag: macOS/%_sign.tag upload/.tag #Makefile
+	@echo /////////////////////////////////
+	@echo // Staple and pack macOS $*
+	@echo /////////////////////////////////
+	cd macOS/$* && SKIP_PART_1=yes bash ${MACOS_BUILD_BUNDLE}
+	cp macOS/$*/*.dmg macOS/$*/*.macOS.zip upload/
 	echo > $@
 
-macOS/server.tag: macOS/client.tag macOS/server_build.tag upload/.tag #Makefile
-	rm -rf macOS/server/*.app
-	cd macOS/server && bash ${MACOS_BUILD_BUNDLE}
-	cp macOS/server/*.dmg macOS/server/*.macOS.zip upload/
-	echo > $@
+#macOS/server_sign.tag: macOS/steam_sign.tag
+#macOS/client_sign.tag: macOS/server_sign.tag
+macOS/server.tag: macOS/steam.tag
+macOS/client.tag: macOS/server.tag
 
-macOS/steam_build.tag: context.steam #Makefile
-	mkdir -p macOS/steam
-	cd macOS/steam && ../../$<.dir/source/configure "${MACOS_CONFIG_ARGS}" progname="${STEAM_PACKAGE_NAME}" progtitle="${STEAM_PACKAGE_TITLE}" && ${MAKE}
-	echo > $@
+.PRECIOUS: macOS/server_build.tag macOS/client_build.tag macOS/steam_build.tag
+.PRECIOUS: macOS/server_sign.tag macOS/client_sign.tag macOS/steam_sign.tag
+.PRECIOUS: macOS/server.tag macOS/client.tag macOS/steam.tag
 
-macOS/steam.tag: macOS/server.tag macOS/steam_build.tag upload/.tag #Makefile
-	rm -rf macOS/steam/*.app
-	cd macOS/steam && bash ${MACOS_BUILD_BUNDLE}
-	cp macOS/steam/*.dmg macOS/steam/*.macOS.zip upload/
-	echo > $@
-
-macOS_build: macOS/client_build.tag macOS/server_build.tag #macOS/steam_build.tag
-macOS: macOS/client.tag macOS/server.tag #macOS/steam.tag
+macOS_build: macOS/client_build.tag macOS/server_build.tag macOS/steam_build.tag
+macOS: macOS/client.tag macOS/server.tag macOS/steam.tag
+upload/${MACZIP_CLIENT}: macOS/client.tag
+upload/${MACZIP_SERVER}: macOS/server.tag
 
 #***************************************************************
 
@@ -525,8 +539,6 @@ appimagetests: appimagetests.tag
 appimagetests_ci.tag: \
 	test.appimage_client_64_ubuntu_latest \
 	test.appimage_client_64_ubuntu_oldest_skewed \
-	test.appimage_server_64_ubuntu_rolling \
-	test.appimage_client_64_ubuntu_rolling \
 	test.appimage_client_64_fedora_latest \
 	test.appimage_server_64_centos_oldest \
 	test.appimage_client_64_centos_oldest \
@@ -536,6 +548,14 @@ appimagetests_ci.tag: \
 	echo > $@
 
 appimagetests_ci: appimagetests_ci.tag
+
+appimagetests_extra.tag: \
+	test.appimage_server_64_ubuntu_rolling \
+	test.appimage_client_64_ubuntu_rolling \
+	upload/.tag
+	echo > $@
+
+appimagetests_extra: appimagetests_extra.tag
 
 #***************************************************************
 
@@ -663,12 +683,22 @@ steamdirs/steam_windows: result.winbuild_steam steamdirs/.tag ${srcdir}/context/
 	rm -rf $@.dir/banner*
 	echo > $@
 
+steamdirs/steam_macos: macOS/steam.tag steamdirs/.tag
+	rm -rf $@.dir
+	mkdir -p $@.dir
+	cd $@.dir; unzip ../../upload/${STEAM_PACKAGE_TITLE}*-client-$(PACKAGE_VERSION).macOS.zip
+	mv $@.dir/*.app $@.dir/CLIENT.app
+	mv $@.dir/CLIENT.app $@.dir/${STEAM_PACKAGE_TITLE}.app
+	echo > $@
+
 steam_linux.tag: steamdirs/steam_linux result.appdir_client_steam result.appdir_server_steam
 	echo > $@
 steam_windows.tag: steamdirs/steam_windows result.winbuild_steam
 	echo > $@
+steam_macos.tag: steamdirs/steam_macos
+	echo > $@
 
-steam.tag: steam_windows.tag steam_linux.tag
+steam.tag: steam_windows.tag steam_linux.tag steam_macos.tag
 	echo > $@
 .PHONY: steam steam_windows steam_linux
 
@@ -718,12 +748,13 @@ result.deploy_%: context.deploy_%
 	echo > $@
 
 # special case steam: run in steamcmd image
-context.deploy_steam: context.deploy_base_steam ${srcdir}/../deploy/steamcontentbuilder/*/* steamdirs/* deploy_essential
+context.deploy_steam: context.deploy_base_steam ${srcdir}/../deploy/steamcontentbuilder/*/* steam.tag deploy_essential
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' ${srcdir}/../deploy/steamcontentbuilder
 	sed -i $@.dir/steamcontentbuilder/scripts/app_build_1306180.vdf -e "s/BUILD_DESCRIPTION/$(STEAM_PACKAGE_TITLE)$(PACKAGE_TITLE_SUFFIX) $(PACKAGE_VERSION)/"
 	mkdir -p $@.dir/steamcontentbuilder/content $@.dir/steamcontentbuilder/output
 	cp -al steamdirs/steam_windows.dir $@.dir/steamcontentbuilder/content/steam_windows
 	cp -al steamdirs/steam_linux.dir $@.dir/steamcontentbuilder/content/steam_linux
+	cp -al steamdirs/steam_macos.dir $@.dir/steamcontentbuilder/content/steam_macos
 	rm -rf $@.dir/upload
 	rm -f $@.dir/image
 	echo "steamcmd" > $@.dir/image
@@ -768,17 +799,6 @@ context.deploy_zi: context.deploy_base_zeroinstall result.update_zi ${srcdir}/..
 result.deploy_zi: context.deploy_zi deploy_external result.deploy_download
 	+$(srcdir)/context_to_result.sh $@.dir ./deploy_zeroinstall.sh
 	echo > $@
-context.deploy_itch: context.deploy_base_itch ${srcdir}/../deploy/*_itch.sh upload/$(APPTAR_CLIENT_64) upload/$(APPTAR_CLIENT_32) $(WINZIP_CLIENT)
-	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' ${srcdir}/../deploy/*_itch.sh
-	mkdir -p $@.dir/appdir_linux_64; cd $@.dir/appdir_linux_64; tar -xjf ../../upload/$(APPTAR_CLIENT_64)
-	mkdir -p $@.dir/appdir_linux_32; cd $@.dir/appdir_linux_32; tar -xjf ../../upload/$(APPTAR_CLIENT_32)
-	mkdir -p $@.dir/appdir_windows; cd $@.dir/appdir_windows; unzip ../../$(WINZIP_CLIENT)
-	rm -f $@.dir/image
-	echo "armadeploy_64" > $@.dir/image
-	echo > $@
-result.deploy_itch: context.deploy_itch
-	+$(srcdir)/context_to_result.sh $@.dir ./deploy_itch.sh
-	echo > $@
 
 context.deploy_fp: context.deploy_base_flatpak ${srcdir}/../deploy/*_flatpak.sh
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' ${srcdir}/../deploy/*_flatpak.sh
@@ -789,8 +809,9 @@ result.deploy_fp: context.deploy_fp deploy_external result.deploy_download
 	+$(srcdir)/context_to_result.sh $@.dir ./deploy_flatpak.sh
 	echo > $@
 
-context.deploy_itch: context.deploy_base_itch ${srcdir}/../deploy/*_itch.sh upload/$(APPTAR_CLIENT_64) upload/$(APPTAR_CLIENT_32) $(WINZIP_CLIENT)
+context.deploy_itch: context.deploy_base_itch ${srcdir}/../deploy/*_itch.sh upload/$(APPTAR_CLIENT_64) upload/$(APPTAR_CLIENT_32) $(WINZIP_CLIENT) upload/${MACZIP_CLIENT}
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' ${srcdir}/../deploy/*_itch.sh
+	mkdir -p $@.dir/appdir_macos; cd $@.dir/appdir_macos; unzip ../../upload/$(MACZIP_CLIENT); mv ${PACKAGE_TITLE}.app ${PACKAGE_TITLE}" ${PACKAGE_VERSION}".app
 	mkdir -p $@.dir/appdir_linux_64; cd $@.dir/appdir_linux_64; tar -xjf ../../upload/$(APPTAR_CLIENT_64)
 	mkdir -p $@.dir/appdir_linux_32; cd $@.dir/appdir_linux_32; tar -xjf ../../upload/$(APPTAR_CLIENT_32)
 	mkdir -p $@.dir/appdir_windows; cd $@.dir/appdir_windows; unzip ../../$(WINZIP_CLIENT)
@@ -815,9 +836,8 @@ deploy_download: result.deploy_download
 deploy_itch: result.deploy_itch
 
 deploy_ppa: \
+deploy_ppa_kinetic \
 deploy_ppa_jammy \
-deploy_ppa_impish \
-deploy_ppa_hirsute \
 deploy_ppa_focal \
 deploy_ppa_bionic \
 deploy_ppa_xenial \
