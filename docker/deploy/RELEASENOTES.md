@@ -4,6 +4,6 @@ Changes in AppImage Land: Our AppImage files now are signed and support bandwidt
 
 We now support installation via Flatpak for the 64-bit Linux client. Get the stable versions from [Flathub](https://flathub.org/apps/details/org.armagetronad.ArmagetronAdvanced); [our own repository](https://download.armagetronad.org/docs/flatpak/) has those and also carries the usual test builds.
 
-We started to integrate builds for [macOS](http://wiki.armagetronad.org/index.php?title=MacOS).
+We started to integrate builds for [macOS](https://wiki.armagetronad.org/index.php?title=MacOS).
 Consider them alpha for now, testing and patches very welcome. The current macOS specific issues
 can be viewed [on our tracker](https://gitlab.com/armagetronad/armagetronad/-/issues?label_name%5B%5D=macOS).

@@ -1285,7 +1285,7 @@ game_menu_disconnect_help	Disconnects from the server and returns to the main me
 #********************************************
 version_info_title              About this installation of \g
 version_info_version            Version of \g: \1
-version_info_misc_stuff         \n0xff8888Official website:0xRESETT http://armagetronad.net/\n0xff8888Official forums:0xRESETT https://forums3.armagetronad.net/\n0xff8888Wiki (strategies, tournaments, ...):0xRESETT http://wiki.armagetronad.net/\n0xff8888Project admins:0xRESETT z-man, Tank Program (guru3), Lucifer
+version_info_misc_stuff         \n0xff8888Official website:0xRESETT https://armagetronad.net/\n0xff8888Official forums:0xRESETT https://forums3.armagetronad.net/\n0xff8888Wiki (strategies, tournaments, ...):0xRESETT https://wiki.armagetronad.net/\n0xff8888Project admins:0xRESETT z-man, Tank Program (guru3), Lucifer
 
 path_info_user_cfg              Location of user.cfg:
 path_info_config                Configuration directories:
@@ -2752,7 +2752,7 @@ network_master_host_lan_help	This will start a network game that is only visible
 
 resource_not_cached         Resource \1 not found in cache. Downloading it, please be patient...\n
 resource_downloading        Downloading \1 ...\n
-resource_fetcherror_noconnect ERROR: Impossible to reach host of URI \1. This may be caused by a DNS resolving issue, please report to https://forums3.armagetronad.net/ if this happens with the main resource repository(http://resource.armagetronad.net/resource/).\n
+resource_fetcherror_noconnect ERROR: Impossible to reach host of URI \1. This may be caused by a DNS resolving issue, please report to https://forums3.armagetronad.net/ if this happens with the main resource repository(https://resource.armagetronad.net/resource/).\n
 resource_fetcherror_404     ERROR: Return value 404 : File not found.\n
 resource_fetcherror         ERROR: Return value \1 != 200.\n
 resource_no_filename        ERROR: NULL or empty filename.\n
