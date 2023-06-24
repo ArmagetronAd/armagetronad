@@ -44,6 +44,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <iostream>
 #include <deque>
 #include <algorithm>
+#include <random>
 #include "rRender.h"
 #include "rFont.h"
 #include "rSysdep.h"
@@ -8064,8 +8065,11 @@ void ePlayerNetID::ScrambleTeams()
     ePlayerNetID::Scramble = false;
     sn_CenterMessage("$gamestate_scramble_teams_center");
 
+    static std::random_device rd;
+    std::mt19937 g(rd());
+
     ePlayerNetID::Update();
-    std::random_shuffle(ScramblePlayerIDs.begin(), ScramblePlayerIDs.end());
+    std::shuffle(ScramblePlayerIDs.begin(), ScramblePlayerIDs.end(), g);
 
     for ( int i = ScramblePlayerIDs.size()-1; i>=0; i--)
     {
