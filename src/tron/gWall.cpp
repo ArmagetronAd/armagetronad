@@ -1409,20 +1409,39 @@ REAL gPlayerWall::Pos(REAL a) const
     return begDist_ + ( endDist_ - begDist_ ) * a;
 }
 
+namespace
+{
+// return a in [0,1] so that begin + (end - begin)*a == inBetween, or as close as possible
+inline REAL GetAlpha(REAL begin, REAL end, REAL inBetween)
+{
+    REAL diff = ( end - begin );
+
+    if ( diff > 0 )
+    {
+        REAL a = (inBetween - begin) / diff;
+
+        // can happen from time to time due to numeric instabilities, especially in HR.
+        // tASSERT ( -.001 < a );
+        // tASSERT ( 1.001 > a );
+
+        clamp01(a);
+        return a;
+    }
+
+    if(inBetween < begin)
+        return 0;
+    if(inBetween > end)
+        return 1;
+
+    return 0.5;
+}
+}
+
 REAL gPlayerWall::Alpha(REAL pos) const
 {
     CHECKWALL;
 
-    REAL diff = ( endDist_  - begDist_ );
-    REAL a = pos - begDist_;
-
-    if ( diff > 0 )
-        a /= diff;
-
-    tASSERT ( -.001 < a );
-    tASSERT ( 1.001 > a );
-
-    return a;
+    return ::GetAlpha(begDist_, endDist_, pos);
 }
 
 bool gPlayerWall::IsDangerousAnywhere( REAL time ) const
@@ -2363,16 +2382,7 @@ REAL gNetPlayerWall::Alpha(REAL pos) const
 {
     CHECKWALL;
 
-    REAL diff = ( EndPos()  - BegPos() );
-    REAL a = pos - BegPos();
-
-    if ( diff > 0 )
-        a /= diff;
-
-    tASSERT ( -.001 < a );
-    tASSERT ( 1.001 > a );
-
-    return a;
+    return ::GetAlpha(BegPos(), EndPos(), pos);
 }
 
 bool gNetPlayerWall::IsDangerousAnywhere( REAL time ) const

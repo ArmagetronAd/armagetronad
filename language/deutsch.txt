@@ -1448,7 +1448,7 @@ game_menu_disconnect_help     Trennt die Verbindung zum Server und führt wieder 
 #********************************************
 version_info_title            Über diese Installation von \g
 version_info_version          Version von \g: \1
-version_info_misc_stuff       \n0xff8888Offizielle Website:0xRESETT http://armagetronad.net/\n0xff8888Offizielles Forum:0xRESETT https://forums3.armagetronad.net/\n0xff8888Wiki (Strategie, Turniere, Dokumentation, ...):0xRESETT http://wiki.armagetronad.net/\n0xff8888Projektverwalter:0xRESETT z-man, Tank Program (guru3), Lucifer
+version_info_misc_stuff       \n0xff8888Offizielle Website:0xRESETT https://armagetronad.net/\n0xff8888Offizielles Forum:0xRESETT https://forums3.armagetronad.net/\n0xff8888Wiki (Strategie, Turniere, Dokumentation, ...):0xRESETT https://wiki.armagetronad.net/\n0xff8888Projektverwalter:0xRESETT z-man, Tank Program (guru3), Lucifer
 
 path_info_user_cfg            Pfad zu user.cfg:
 path_info_config              Konfigurationsverzeichnisse:
@@ -3248,7 +3248,7 @@ classification_maps           Benutzerdefinierte Karte
 
 resource_not_cached           Datei \1 befindet sich nicht im lokalen Speicher. Bitte etwas Geduld, sie wird heruntergeladen...\n
 resource_downloading          Lade \1 herunter ...\n
-resource_fetcherror_noconnect FEHLER: Der host von URI \1 ist nicht erreichbar. Das kann ein DNS Namensauflösungsfehler sein. Falls es sich um das Hauptlager für Resourcen (http://resource.armagetronad.net/resource/) handelt, melde dies bitte auf https://forums3.armagetronad.net/.\n
+resource_fetcherror_noconnect FEHLER: Der host von URI \1 ist nicht erreichbar. Das kann ein DNS Namensauflösungsfehler sein. Falls es sich um das Hauptlager für Resourcen (https://resource.armagetronad.net/resource/) handelt, melde dies bitte auf https://forums3.armagetronad.net/.\n
 resource_fetcherror_404       FEHLER 404 : Datei nicht gefunden.\n
 resource_fetcherror           FEHLER \1 != 200.\n
 resource_no_filename          FEHLER: Leerer Dateiname.\n
