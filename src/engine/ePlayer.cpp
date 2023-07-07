@@ -4094,6 +4094,40 @@ void ePlayerNetID::SetShuffleWish( int pos )
     teamListID = pos;
 }
 
+static void se_ShufflePlayer(std::istream &s)
+{
+    tString params;
+    s >> params;
+    
+    ePlayerNetID * p = ePlayerNetID::FindPlayerByName(params);
+    if (!p) return;
+    
+    int IDWish;
+    s >> IDWish;
+    
+    if (IDWish < 0)
+        IDWish = 0;
+    
+    if( p->CurrentTeam() )
+    {
+        int len = p->CurrentTeam()->NumPlayers();
+        if (IDWish >= len)
+            IDWish = len-1;
+        
+        p->CurrentTeam()->Shuffle( p->TeamListID(), IDWish );
+    }
+    else
+    {
+        int len = eTeam::maxPlayers;
+        if (IDWish >= len)
+            IDWish = len-1;
+        
+        p->SetShuffleWish( IDWish );
+    }
+}
+static tConfItemFunc se_ShufflePlayerConf("SHUFFLE_PLAYER", &se_ShufflePlayer);
+static tAccessLevelSetter se_ShufflePlayerConfLevel( se_Login_Conf, tAccessLevel_Moderator );
+
 // substitute: swap 2 players within a team
 static void se_ChatSubstitute( ePlayerNetID * p, std::istream & s );
 
