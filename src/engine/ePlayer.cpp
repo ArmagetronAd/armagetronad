@@ -4105,6 +4105,8 @@ static void se_ShufflePlayer(std::istream &s)
     int IDWish;
     s >> IDWish;
     
+    IDWish -= 1;
+    
     if (IDWish < 0)
         IDWish = 0;
     
