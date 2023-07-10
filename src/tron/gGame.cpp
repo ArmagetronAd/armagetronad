@@ -1723,6 +1723,9 @@ void update_settings( bool const * goon )
         eTeam::teams(i)->UpdateProperties();
 }
 
+static bool sg_spawnEnabled = true;
+static tSettingItem<bool> sg_spawnEnabledConf( "SPAWN_ENABLED", sg_spawnEnabled);
+
 static int sg_spawnPointGroupSize=0;
 static tSettingItem< int > sg_spawnPointGroupSizeConf( "SPAWN_POINT_GROUP_SIZE", sg_spawnPointGroupSize );
 
@@ -1835,7 +1838,8 @@ void init_game_objects(eGrid *grid){
 
                 eCoord pos,dir;
                 gCycle *cycle=NULL;
-                if (sn_GetNetState()!=nCLIENT){
+                if( sg_spawnEnabled && sn_GetNetState() != nCLIENT )
+                {
 #ifdef DEBUG
                     //                std::cout << "spawning player " << pni->name << '\n';
 #endif
