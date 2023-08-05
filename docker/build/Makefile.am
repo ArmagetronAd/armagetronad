@@ -702,8 +702,8 @@ deploy_download: result.deploy_download
 deploy_itch: result.deploy_itch
 
 deploy_ppa: \
+deploy_ppa_mantic \
 deploy_ppa_lunar \
-deploy_ppa_kinetic \
 deploy_ppa_jammy \
 deploy_ppa_focal \
 deploy_ppa_bionic \

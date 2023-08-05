@@ -29,12 +29,23 @@ def RepresentsInt(s):
 	except ValueError:
 		return False
 
+# exception filter for lambdas, taken from https://stackoverflow.com/a/24912979
+def replace_exception(original, default=None):
+   def safe(*args, **kwargs):
+       try:
+          return original(*args, **kwargs)
+       except:
+          return default
+   return safe
+
 # retrieve tags from git repository
 def GetTags(repo, tag_lower_limit):
 	alltags_raw=subprocess.run(["git", "-C", repo, "tag", "-l", "--merged"], stdout=subprocess.PIPE)
 	alltags=alltags_raw.stdout.decode('utf-8').split('\n')
-	tags=list(filter(lambda x: len(x) > 0 and version.parse(x) >= version.parse(tag_lower_limit), alltags))
-	#return tags
+	lower_limit_version=version.parse(tag_lower_limit)
+	tags=list(filter(replace_exception(lambda x: len(x) > 0 and version.parse(x) >= lower_limit_version, False), alltags))
+	# print(tags)
+	# return tags
 
 	# sort tags in chronological order (assuming they're all on the same branch)
 	revisions={}
@@ -243,7 +254,7 @@ tag_lower_limit=GetLastFrozenTag(frozen)
 
 # get all tags relevant to the current branch
 tags=GetTags(repo, tag_lower_limit)
-#print("tags =", tags)
+# print("tags =", tags)
 
 fixed_after_tag=FixedAfterTag(repo, team, project, tags)
 #print(fixed_after_tag)
