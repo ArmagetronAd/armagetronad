@@ -681,6 +681,7 @@ deploy_zi: result.deploy_zi
 deploy_download: result.deploy_download
 
 deploy_ppa: \
+deploy_ppa_mantic \
 deploy_ppa_lunar \
 deploy_ppa_jammy \
 deploy_ppa_focal \
