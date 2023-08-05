@@ -341,6 +341,8 @@ eWavData::eWavData(const char * fileName,const char *alternative)
 
 }
 
+#ifndef DEDICATED
+
 #ifdef SDL_LoadWAV
 #undef SDL_LoadWAV
 #endif
@@ -353,6 +355,8 @@ static SDL_AudioSpec * SDLCALL SDL_LoadWAV(char const *file, SDL_AudioSpec *spec
 
     return SDL_LoadWAV_RW(rw,1, spec,audio_buf,audio_len);
 }
+
+#endif
 
 void eWavData::Load(){
     //wavs.Add(this,id);
