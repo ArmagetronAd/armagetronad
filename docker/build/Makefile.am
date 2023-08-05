@@ -241,6 +241,7 @@ context.debsrc_test: context.debsrc_dapper
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*'
 #	extract fake secrets
 	base64 -d < ${srcdir}/../deploy/anonymous_secrets.b64 | tar -xjf - --one-top-level=$@.dir
+#   reverse to pack: tar -cjf - secrets | base64 > anonymous_secrets.b64 
 	mv $@.dir/secrets/* $@.dir
 	rmdir $@.dir/secrets/
 	echo > $@
@@ -701,8 +702,9 @@ deploy_download: result.deploy_download
 deploy_itch: result.deploy_itch
 
 deploy_ppa: \
-deploy_ppa_impish \
-deploy_ppa_hirsute \
+deploy_ppa_lunar \
+deploy_ppa_kinetic \
+deploy_ppa_jammy \
 deploy_ppa_focal \
 deploy_ppa_bionic \
 deploy_ppa_xenial \
