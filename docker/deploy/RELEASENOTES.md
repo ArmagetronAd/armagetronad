@@ -23,3 +23,5 @@ and the tutorial tooltips are spammed less.
 
 Furthermore, compatibility of the generic Linux binaries has been improved, 
 with more systems supported out of the box.
+
+0.2.9.1.1 works around a crash bug in the (otherwise splendid) sdl12-compat library.
