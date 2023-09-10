@@ -1,6 +1,7 @@
 # closest to our legacy style...
 BasedOnStyle: Microsoft
-#IndentWidth: 4
+IndentWidth: 4
+AccessModifierOffset: -4
 
 # do not mess with includes
 SortIncludes: false
