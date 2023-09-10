@@ -5,7 +5,15 @@ AccessModifierOffset: -4
 
 # do not mess with includes
 SortIncludes: false
-#SpacesInParentheses: true
+
+# the code has them more often than not, and this follows the astyle config
+# f( x ) instead of f(x)
+SpacesInParentheses: true
 
 # we have more "int* x" than "int *x" (or "int * x")
 PointerAlignment: Left
+
+AllowShortFunctionsOnASingleLine: true
+AllowShortBlocksOnASingleLine: true
+
+#AllowAllConstructorInitializersOnNextLine: true
