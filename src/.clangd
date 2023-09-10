@@ -12,5 +12,5 @@ CompileFlags:                     # Tweak the parse settings
     -I/usr/local/include,
     -I/usr/include/SDL,
     -I/usr/local/include/SDL]
-  # include directories. Add win32 so a dummy config.h can be found 
+  # include directories. Add win32 so a dummy config.h can be found
 

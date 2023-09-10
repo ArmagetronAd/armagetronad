@@ -1,0 +1,10 @@
+# closest to our legacy style...
+BasedOnStyle: Microsoft
+#IndentWidth: 4
+
+# do not mess with includes
+SortIncludes: false
+#SpacesInParentheses: true
+
+# we have more "int* x" than "int *x" (or "int * x")
+PointerAlignment: Left
