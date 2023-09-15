@@ -38,7 +38,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //! transform a string from latin1 to utf8 unicode
 tColoredString st_Latin1ToUTF8( tString const & s )
 {
-    tColoredString newStr;
+    tString newStr;
     
     for(const char * i=s;*i!=0;++i)
     {
@@ -50,13 +50,13 @@ tColoredString st_Latin1ToUTF8( tString const & s )
             newStr << (char)( 0xC0 | ( u >> 6 ) ) << (char)( 0x80 | ( u & 0x3F ) );
     }
     
-    return newStr;
+    return tColoredString( newStr );
 }
 
 //! transform a string from utf8 unicode to latin1
 tColoredString st_UTF8ToLatin1( tString const & s )
 {
-    tColoredString newStr;
+    tString newStr;
     
     unsigned int c;
     for(const char * i=s;*i!=0;)
@@ -81,7 +81,7 @@ tColoredString st_UTF8ToLatin1( tString const & s )
         }
     }
     
-    return newStr;
+    return tColoredString( newStr );
 }
 
 const tString st_internalEncoding("latin1");
