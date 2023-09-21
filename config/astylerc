@@ -6,4 +6,4 @@ mode=c
 # changes we don't want as long as there are changes
 # from 0.2.8 to merge.
 
-one-line=keep-blocks
+# one-line=keep-blocks
