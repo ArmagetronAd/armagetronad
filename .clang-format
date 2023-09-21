@@ -1,7 +1,11 @@
+Language: Cpp
+
 # closest to our legacy style...
 BasedOnStyle: Microsoft
 IndentWidth: 4
 AccessModifierOffset: -4
+TabWidth: 4
+UseTab: Never
 
 # do not mess with includes
 SortIncludes: false
