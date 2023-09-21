@@ -1,5 +1,9 @@
 Language: Cpp
 
+# to apply these settings on git commit on changed lines only,
+# one way is this pre-commit hook: https://github.com/barisione/clang-format-hooks
+# clone it somewhere, run '/path/to/clone/git-pre-commit-format install'
+
 # closest to our legacy style...
 BasedOnStyle: Microsoft
 IndentWidth: 4
