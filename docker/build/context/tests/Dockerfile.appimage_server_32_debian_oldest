@@ -1,4 +1,4 @@
-FROM i386/debian:9
+FROM i386/debian:oldoldstable
 
 COPY *.AppImage .
 RUN ./*.AppImage --appimage-extract-and-run --version

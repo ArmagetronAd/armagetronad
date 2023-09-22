@@ -2,6 +2,7 @@
 
 . targets.sh || exit $?
 
+#echo ${STAGING}+${STEAM_BRANCH}+${ZI_SERIES}
 case ${STAGING}+${STEAM_BRANCH}+${ZI_SERIES} in
     *++*)
 	echo "No steam branch, no release"
@@ -33,8 +34,8 @@ esac
 set -x
 
 # move steam guard token (generated below) to its place
-mkdir -p /home/steam/Steam || exit $?
-mv secrets/ssfn* /home/steam/Steam/ || true
+mkdir -p /home/steam/Steam/config || exit $?
+mv secrets/config.vdf /home/steam/Steam/config || true
 
 # go to build directory
 cd steamcontentbuilder/scripts || exit $?
@@ -44,14 +45,19 @@ sed -i app_build_1306180.vdf -e "s/^.*setlive.*$/	\"setlive\" \"${STEAM_BRANCH}\
 
 script_dir=`pwd`
 set +x
+
 /home/steam/steamcmd/steamcmd.sh +login "${STEAM_USER}" "${STEAM_PASSWORD}" +run_app_build_http ${script_dir}/app_build_1306180.vdf +quit || exit $?
 
-# the login above will fail the first time, propting for a steam guard code.
+# the login above will fail the first time, prompting for a steam guard code.
 # comment the line above, uncomment the lines below and store
-# the ssfn* file from the .result.deploy_steam.error in
-# among the deployment secrets
+# the config.vdf file from the .result.deploy_steam.error/steamcontentbuilder/ in
+# among the deployment secrets.
 #/home/steam/steamcmd/steamcmd.sh +set_steam_guard_code ... "+login ${STEAM_USER} ${STEAM_PASSWORD}" +quit
-# cp /home/steam/Steam/ssfn* ../
+#cp /home/steam/Steam/config/* ../
+#exit 1
+#  you can test whether that was successful by running
+#/home/steam/steamcmd/steamcmd.sh "+login ${STEAM_USER} ${STEAM_PASSWORD}" +quit
+
 
 set -x
 

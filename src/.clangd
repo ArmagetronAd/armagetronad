@@ -1,0 +1,16 @@
+CompileFlags:                     # Tweak the parse settings
+  Add: [
+    -std=c++11,
+    -I../dummy,
+    -I../render,
+    -I../tools,
+    -I../ui,
+    -I../tron,
+    -I../network,
+    -I../engine/,
+    -I../, -I/usr/include,
+    -I/usr/local/include,
+    -I/usr/include/SDL,
+    -I/usr/local/include/SDL]
+  # include directories. Add win32 so a dummy config.h can be found
+

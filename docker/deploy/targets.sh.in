@@ -203,7 +203,7 @@ UPLOAD_SCP=${UPLOAD_SCP_BASE}${SF_DIR}/
 # STEAM_USER=<steam username authorized to upload packages>
 # STEAM_PASSWORD=<their password>
 # 
-# file ssfn<id> optained after the first failed login due to Steam Guard
+# file config.vdf optained after the first failed login due to Steam Guard, see deploy_steam.sh script
 
 # **********************************************************************
 

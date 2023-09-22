@@ -7,3 +7,5 @@ We now support installation via Flatpak for the 64-bit Linux client. Get the sta
 We started to integrate builds for [macOS](https://wiki.armagetronad.org/index.php?title=MacOS).
 Consider them alpha for now, testing and patches very welcome. The current macOS specific issues
 can be viewed [on our tracker](https://gitlab.com/armagetronad/armagetronad/-/issues?label_name%5B%5D=macOS).
+
+0.2.9.1.1 worked around a crash bug in the (otherwise splendid) sdl12-compat library.
