@@ -926,25 +926,38 @@ fi
 
 AC_LANG([C++])
 
-dnl check for library
-AC_CHECK_LIB([protobuf],_ZN6google8protobuf14FatalExceptionD2Ev,,
-[
-	AC_CHECK_LIB([protobuf],_ZN6google8protobuf7ClosureD2Ev,
-		AC_MSG_WARN([[The library protobuf (Google Protobuf Buffers) has a broken dependency on library pthread on your system.]])
-		AC_DEFINE_UNQUOTED(HAVE_LIBPROTOBUF)
-		LIBS="-lprotobuf -lpthread $LIBS"
-	,
-AC_MSG_ERROR([[The library protobuf (Google Protocol Buffers, http://code.google.com/p/protobuf/) is required, but was not found.]])
-	,[-lpthread]
-	)
-]
+dnl check for library with PKG_CONFIG
+PKG_CHECK_MODULES(PROTOBUF, protobuf >= 2.4.0,,
+	# the old detection, not sure if we still need this
+	[AC_CHECK_LIB([protobuf],_ZN6google8protobuf14FatalExceptionD2Ev,,
+		[AC_CHECK_LIB([protobuf],_ZN6google8protobuf7ClosureD2Ev,
+               AC_MSG_WARN([[The library protobuf (Google Protobuf Buffers) has a broken dependency on library pthread on your system.]])
+               AC_DEFINE_UNQUOTED(HAVE_LIBPROTOBUF)
+               LIBS="-lprotobuf -lpthread $LIBS"
+			,
+               AC_MSG_ERROR([[The library protobuf (Google Protocol Buffers, http://code.google.com/p/protobuf/) is required, but was not found.]])
+       ,[-lpthread]
+       )]
+	)]
 )
+
+
+# just adding all flags would work, but on macOS with brew, there are
+# a ton of duplicate flags that would slow the compilation output down.
+# Only add each option once.
+for flag in ${PROTOBUF_CFLAGS}; do
+	if [[[ "${CXXFLAGS}" != *"${flag}"* ]]]; then
+		# echo ${flag}
+		CXXFLAGS="${CXXFLAGS} ${flag}"
+	fi
+done
+LIBS="${LIBS} ${PROTOBUF_LIBS}"
 
 AC_LANG([C++])
 
 dnl check for header
 AC_CHECK_HEADERS([google/protobuf/message.h],,
-AC_MSG_ERROR([[The library protobuf (Google Protocol Buffers, http://code.google.com/p/protobuf/) is required with all development files, but was not found.]])
+AC_MSG_ERROR([[The header for protobuf (Google Protocol Buffers, http://code.google.com/p/protobuf/) is required with all development files, but was not found.]])
 )
 
 dnl AC_LANG([C])
