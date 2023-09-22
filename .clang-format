@@ -13,6 +13,12 @@ AccessModifierOffset: -4
 TabWidth: 4
 UseTab: Never
 
+# leave line breaks alone
+ColumnLimit: 0
+# note: it is still recommended to leave lines short, ideally below 80; but
+# letting clang-format handle that does not work well enough and one needs
+# to use tricks, like empty trailing comments.
+
 # do not mess with includes
 SortIncludes: false
 
