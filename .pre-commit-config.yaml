@@ -1,0 +1,24 @@
+# install pre-commit to activate this hook:
+# https://pre-commit.com/
+# > pip install pre-commit
+# or
+# > brew install pre-commit
+# or
+# > pacman -S python-pre-commit
+#
+# activate with
+# > pre-commit install
+# remove with
+# > pre-commit uninstall
+
+# PURPOSE:
+# do a clang-format locally on all the source code changes in the 
+# current commit. No global reformatting!
+
+repos:
+- repo: https://github.com/vmudrykPersonal/pre-commit-git-clang-format
+  rev: 1.0.0
+  hooks:
+  - id: git-clang-format
+    args: []
+
