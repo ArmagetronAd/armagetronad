@@ -245,8 +245,7 @@ std::string sn_FilterString( std::string const & s, FieldDescriptor const * fiel
     else if ( sn_filterDarkColorStrings )
         filtered = tColoredString::RemoveColors( filtered, true );
 
-    // return type differs from filtered; RVO does not work, move is better
-    return std::move(filtered);
+    return filtered;
 }
 
 // filter incoming messages for odd stuff. Strings, mostly.
