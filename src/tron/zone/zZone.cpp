@@ -54,7 +54,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #endif
 
 #include "nProtoBuf.h"
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 #include "zZone.pb.h"
+#pragma GCC diagnostic pop
 
 #include "zone/zZone.h"
 

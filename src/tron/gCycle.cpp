@@ -73,8 +73,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 // TODO: get rid of this
 #include "tDirectories.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+
 #include "gCycle.pb.h"
+
+#pragma GCC diagnostic pop
+
 #include "nProtoBuf.h"
+
+
 
 // also used in gWall.cpp
 bool sg_gnuplotDebug = false;

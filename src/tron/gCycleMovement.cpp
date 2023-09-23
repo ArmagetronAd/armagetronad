@@ -77,7 +77,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 static int sg_cycleDebugPrintLevel = 0;
 #endif
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+
 #include "gCycle.pb.h"
+
+#pragma GCC diagnostic pop
 
 eCoord   gCycleMovement::deathPosition_;                     //!< the position the last move let a cylce die on
 bool     gCycleMovement::stoppedMovement_ = false;           //!< true if (extrapolating) movement should be stopped

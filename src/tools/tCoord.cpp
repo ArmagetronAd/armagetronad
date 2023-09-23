@@ -27,7 +27,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 #include "tCoord.h"
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 #include "tCoord.pb.h"
+#pragma GCC diagnostic pop
 
 void tCoord::WriteSync( Tools::Position       & position  ) const
 {

@@ -50,7 +50,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include <fstream>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+
 #include "gWall.pb.h"
+
+#pragma GCC diagnostic pop
 
 /* **********************************************
    Wall

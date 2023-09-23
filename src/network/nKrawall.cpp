@@ -50,7 +50,10 @@ the executable is not distributed).
 
 #include "nStreamMessage.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 #include "nAuthentication.pb.h"
+#pragma GCC diagnostic pop
 
 #ifndef DEDICATED
 // on the client, we want to disable the broken bmd5 by default.

@@ -102,7 +102,10 @@ gArena Arena;
 
 static gTutorialBase * sg_tutorial = NULL;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 #include "gGame.pb.h"
+#pragma GCC diagnostic pop
 
 #ifdef KRAWALL_SERVER
 #include "nKrawall.h"

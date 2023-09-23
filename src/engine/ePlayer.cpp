@@ -65,7 +65,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "eLadderLog.h"
 #include <climits>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+
 #include "ePlayer.pb.h"
+
+#pragma GCC diagnostic pop
 
 int se_lastSaidMaxEntries = 8;
 static void se_SaveToChatLog( const ePlayerNetID *player, const tString & message );

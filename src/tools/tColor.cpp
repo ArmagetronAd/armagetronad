@@ -30,7 +30,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "tColor.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 #include "tColor.pb.h"
+#pragma GCC diagnostic pop
 
 static REAL CTR(int x){
     return x/255.0;

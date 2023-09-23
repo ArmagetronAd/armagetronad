@@ -33,7 +33,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <set>
 #include <string.h>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 #include "nConfig.pb.h"
+#pragma GCC diagnostic pop
 
 nConfItemBase::nConfItemBase()
         :tConfItemBase(""), lastChangeTime_(-10000), lastChangeMessage_(0), watcher_(0){}

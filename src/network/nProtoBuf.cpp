@@ -33,10 +33,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "nNetObject.h"
 #include "nBinary.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 #include "google/protobuf/message.h"
 #include "google/protobuf/descriptor.h"
 
 #include "nNetObject.pb.h"
+#pragma GCC diagnostic pop
 
 #include "nStreamMessage.h"
 #include "tLocale.h"

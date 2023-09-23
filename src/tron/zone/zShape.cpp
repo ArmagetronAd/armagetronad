@@ -5,7 +5,12 @@
 #include "gParser.h"
 #include "zZone.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 #include "zShape.pb.h"
+#include "gZone.pb.h"
+#pragma GCC diagnostic pop
+
 #include "nConfig.h"
 #include "nProtoBuf.h"
 
@@ -983,7 +988,6 @@ nNetObjectDescriptorBase const & zShapePolygon::DoGetDescriptor() const
     return zonePolygon_init;
 }
 
-#include "gZone.pb.h"
 
 #ifndef ENABLE_ZONESV1
 static nNetObjectDescriptor< zShapeCircleZoneV1, Game::ZoneV1Sync > zone_init( 340 );

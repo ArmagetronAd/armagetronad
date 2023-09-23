@@ -36,7 +36,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "eLagCompensation.h"
 #include "rSysdep.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 #include "eTimer.pb.h"
+#pragma GCC diagnostic pop
 
 #ifdef DEBUG
 // #define DEBUG_X

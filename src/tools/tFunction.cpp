@@ -1,7 +1,10 @@
 
 #include "tFunction.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 #include "tFunction.pb.h"
+#pragma GCC diagnostic pop
 
 // *******************************************************************************
 // *

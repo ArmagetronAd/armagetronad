@@ -47,7 +47,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <memory>
 
 #include "nProtoBuf.h"
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+
 #include "gAIBase.pb.h"
+
+#pragma GCC diagnostic pop
 
 #define AI_REACTION          0 
 #define AI_EMERGENCY         1 

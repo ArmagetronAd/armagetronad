@@ -44,7 +44,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "ePlayer.h"
 #include "eGrid.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 #include "eVoter.pb.h"
+#pragma GCC diagnostic pop
 
 #ifndef DEDICATED
 // use server controlled votes (just for the client, to avoid UPGRADE messages)

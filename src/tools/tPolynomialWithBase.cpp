@@ -28,7 +28,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "tPolynomialWithBase.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 #include "tPolynomial.pb.h"
+#pragma GCC diagnostic pop
 
 tPolynomialWithBase::tPolynomialWithBase()  //!< constructor
 : tPolynomial(),

@@ -43,8 +43,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "nProtoBuf.h"
 #include "nBinary.h"
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 #include "nNetObject.pb.h"
 #include "nNetObjectPrivate.pb.h"
+#pragma GCC diagnostic pop
 
 // #define DEBUG
 
