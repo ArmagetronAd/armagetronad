@@ -348,6 +348,8 @@ build_docker:
    - build_debtest
   dependencies:
    - build_prepare
+  tags:
+   - docker
   after_script:
     - rm -f ~/.docker/config.json
   script:
@@ -361,6 +363,8 @@ stage_docker:
    - build_docker
   dependencies:
    - build_prepare
+  tags:
+   - docker
   rules:
    - if: $CI_MERGE_REQUEST_ID
      when: never
@@ -381,6 +385,8 @@ deploy_docker:
    - delay_release
   dependencies:
    - build_prepare
+  tags:
+   - docker
   rules:
    - if: $CI_MERGE_REQUEST_ID
      when: never
