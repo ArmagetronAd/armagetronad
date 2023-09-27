@@ -1854,23 +1854,34 @@ void tDirectoriesCommandLineAnalyzer::DoInitialize( tCommandLineParser & parser 
     }
     catch( tRunningInBuildDirectory )
     {
-        // last fallback for debugging (activated only if there is data in the current directory)
-        if ( TestPath( ".", "language/languages.txt") && TestDataPath(s_topSourceDir) && TestConfigurationPath(st_DataDir + "/config") )
+        for ( int depth = 1; depth <= 2; ++depth )
         {
-            // we must be running the game in debug mode; set user data dir to current directory.
-            st_UserDataDir = ".";
-            st_UserConfigDir = "./userconfig";
+            tString buildDirectory = GenerateParentOfExecutable( depth );
 
-            // the included resources are scrambled and put into the current directory as well.
-            st_IncludedResourceDir = "./resource/included";
+            if ( buildDirectory.Len() <= 1 )
+                buildDirectory = ".";
+#ifdef DEBUG
+            std::cout << "BuildDirectory = " << buildDirectory << "\n";
+#endif
+
+            // last fallback for debugging (activated only if there is data in the assumed build directory)
+            if ( TestPath( buildDirectory, "language/languages.txt" ) && TestDataPath( s_topSourceDir ) && TestConfigurationPath( st_DataDir + "/config" ) )
+            {
+                // we must be running the game in debug mode; set user data dir to current directory.
+                st_UserDataDir = buildDirectory;
+                st_UserConfigDir = buildDirectory + "/userconfig";
+
+                // the included resources are scrambled and put into the current directory as well.
+                st_IncludedResourceDir = buildDirectory + "/resource/included";
 
 #ifdef LEGACY_USER_DATA_DIR
-            st_LegacyUserDataDir = "";
+                st_LegacyUserDataDir = "";
 #endif
 #ifdef LEGACY_USER_DATA_DIR2
-            st_LegacyUserDataDir2 = "";
+                st_LegacyUserDataDir2 = "";
 #endif
-            return;
+                return;
+            }
         }
     }
 }

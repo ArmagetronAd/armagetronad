@@ -349,6 +349,15 @@ build_docker:
    - build_debtest
   dependencies:
    - build_prepare
+  tags:
+   - docker
+   - armagetronad
+  rules:
+   - if: $CI_MERGE_REQUEST_ID
+     when: never
+   - if: $CI_COMMIT_REF_PROTECTED == "true"
+     when: on_success
+   - when: never
   after_script:
     - rm -f ~/.docker/config.json
   script:
@@ -362,6 +371,9 @@ stage_docker:
    - build_docker
   dependencies:
    - build_prepare
+  tags:
+   - docker
+   - armagetronad
   rules:
    - if: $CI_MERGE_REQUEST_ID
      when: never
@@ -382,6 +394,9 @@ deploy_docker:
    - delay_release
   dependencies:
    - build_prepare
+  tags:
+   - docker
+   - armagetronad
   rules:
    - if: $CI_MERGE_REQUEST_ID
      when: never
@@ -417,15 +432,12 @@ deploy_gitlab:
     # deploy
     - make -C gitlab_build/docker/build unstaged_deploy_gitlab || exit $?
 
-# post-build tests
+# post-build tests that require our own runners (or a docker upgrade on GitLab)
 post_test:
   stage: build_collect
-  script:
-    - make -C gitlab_build/docker/build appimagetests_ci || exit $?
-
-# post-build tests that require our own runners (or a docker upgrade on GitLab)
-post_test_extra:
-  stage: build_collect
+  tags:
+  - docker
+  - armagetronad
   rules: 
   - if: $CI_MERGE_REQUEST_ID
     when: never
@@ -433,7 +445,7 @@ post_test_extra:
     when: on_success
   - when: never
   script:
-    - make -C gitlab_build/docker/build appimagetests_extra || exit $?
+    - make -C gitlab_build/docker/build appimagetests_ci appimagetests_extra || exit $?
 
 # pack up the downloadable build files in one handy artifact
 pack:
