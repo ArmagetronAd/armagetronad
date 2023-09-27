@@ -350,6 +350,7 @@ build_docker:
    - build_prepare
   tags:
    - docker
+   - armagetronad
   after_script:
     - rm -f ~/.docker/config.json
   script:
@@ -365,6 +366,7 @@ stage_docker:
    - build_prepare
   tags:
    - docker
+   - armagetronad
   rules:
    - if: $CI_MERGE_REQUEST_ID
      when: never
@@ -387,6 +389,7 @@ deploy_docker:
    - build_prepare
   tags:
    - docker
+   - armagetronad
   rules:
    - if: $CI_MERGE_REQUEST_ID
      when: never
