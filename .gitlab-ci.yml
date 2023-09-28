@@ -63,12 +63,9 @@ default:
     when: on_success
   - when: never
 
-# template rule for job to run on merge requests and non-protected branches,
-# especially those in forks
+# template rule for job to always run, maybe on shared runners
 .merge_request:
   rules:
-  - if: $CI_MERGE_REQUEST_ID
-    when: on_success
   - when: on_success
 
 # only run on protected branches or merge requests
