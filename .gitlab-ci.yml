@@ -71,10 +71,14 @@ default:
     when: on_success
   - when: on_success
 
-# dummy workflow rules to silence spammy gitlab warnings
+# only run on protected branches or merge requests
 workflow:
   rules:
-    - when: always
+  - if: $CI_MERGE_REQUEST_ID
+    when: always
+  - if: $CI_COMMIT_REF_PROTECTED == "true"
+    when: always
+  - when: never
 
 # very basic build
 build_prepare:
