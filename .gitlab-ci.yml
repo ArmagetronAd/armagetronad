@@ -131,6 +131,8 @@ build_debtest:
 
 build_client_64:
   extends: .merge_request
+  needs:
+  - build_prepare
   dependencies:
   - build_prepare
   stage: build_main
