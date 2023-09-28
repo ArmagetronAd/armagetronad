@@ -27,6 +27,12 @@ stages:
 default:
   image: registry.gitlab.com/armagetronad/armagetronad/armaroot_64@sha256:c45680095075ba85cc33a4dae7034738a3e7f828d6eb9d3613c6e6091987e481
   interruptible: true
+  retry:
+    max: 1
+    when:
+      - runner_system_failure
+      - stuck_or_timeout_failure
+      - unknown_failure
   # common before script: bootstrap, configure, make dist, prepare docker builds
   before_script:
     - if ! test -d gitlab_build; then
@@ -199,6 +205,11 @@ build_server_32:
 build_macos:
   needs: []
   dependencies: []
+  # the mac runner is not always available and may go down while on the job,
+  # be extra tolerant
+  retry:
+    max: 2
+    when: always
   tags:
   - macos
   - $PROJECT_TAG
