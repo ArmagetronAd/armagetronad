@@ -211,7 +211,7 @@ build_macos:
     when: always
   tags:
   - macos
-  - $PROJECT_TAG
+  - armagetronad
   stage: build_main
   rules:
   - if: $CI_MERGE_REQUEST_ID
