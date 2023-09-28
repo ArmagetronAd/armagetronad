@@ -92,8 +92,8 @@ workflow:
   - if: '$CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_BRANCH'
     when: always
     variables:
-      STAGING_ENVIRONMENT : "staging_$CI_COMMIT_BRANCH"
-      FINAL_ENVIRONMENT : "production_$CI_COMMIT_BRANCH"
+      STAGING_ENVIRONMENT : "testing_$CI_COMMIT_BRANCH"
+      FINAL_ENVIRONMENT : "testing_$CI_COMMIT_BRANCH"
   - when: never
 
 # very basic build
