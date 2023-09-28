@@ -2,7 +2,6 @@ variables:
   # https://docs.gitlab.com/ee/ci/docker/using_docker_build.html
   #DOCKER_TLS_CERTDIR: "/certs"
   #DOCKER_HOST: ""
-  PROJECT_TAG: "armagetronad"
   STAGING_ENVIRONMENT: "invalid"
   FINAL_ENVIRONMENT: "invalid"
 
@@ -63,7 +62,7 @@ default:
 # only run on protected branches
 .project_runner:
   tags:
-  - $PROJECT_TAG
+  - armagetronad
   rules:
   - if: $CI_MERGE_REQUEST_ID
     when: never
