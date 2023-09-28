@@ -3,6 +3,8 @@ variables:
   #DOCKER_TLS_CERTDIR: "/certs"
   #DOCKER_HOST: ""
   PROJECT_TAG: "armagetronad"
+  STAGING_ENVIRONMENT: "invalid"
+  FINAL_ENVIRONMENT: "invalid"
 
 services:
   # required for shared runners, does not hurt for our runner (just some diagnostic complaints)
@@ -73,7 +75,19 @@ workflow:
   rules:
   - if: $CI_MERGE_REQUEST_ID
     when: always
-  - if: $CI_COMMIT_REF_PROTECTED == "true"
+  - if: '$CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_TAG'
+    variables:
+      STAGING_ENVIRONMENT : "staging_$CI_COMMIT_BRANCH"
+      FINAL_ENVIRONMENT : "production_$CI_COMMIT_BRANCH"
+    when: always
+  - if: '$CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_BRANCH'
+    variables:
+    # NOTE these two below will vary with our main branches
+    # these guard lines are there to prevent spurious merge conflicts
+      STAGING_ENVIRONMENT : "staging_lts"
+      FINAL_ENVIRONMENT : "production_lts"
+    # NOTE these two above will vary with our main branches
+    # these guard lines are there to prevent spurious merge conflicts
     when: always
   - when: never
 
@@ -218,6 +232,7 @@ build_collect:
 # deploy to staged environment
 deploy-staged:
   interruptible: false
+  environment: $STAGING_ENVIRONMENT
   dependencies:
    - build_prepare
    - build_collect
@@ -259,6 +274,7 @@ delay-release:
 # do the actual release; manually for final releases, delayed to avoid spam for everyone else
 deploy-release:
   interruptible: false
+  environment: $FINAL_ENVIRONMENT
   dependencies:
    - build_prepare
    - build_collect
