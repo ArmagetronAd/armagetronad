@@ -103,8 +103,8 @@ workflow:
     variables:
     # NOTE these two below will vary with our main branches
     # these guard lines are there to prevent spurious merge conflicts
-      STAGING_ENVIRONMENT : "staging"
-      FINAL_ENVIRONMENT : "production"
+      STAGING_ENVIRONMENT : "staging_experimental" # <- "staging"
+      FINAL_ENVIRONMENT : "experimental"           # <- "production"
     # NOTE these two above will vary with our main branches
     # these guard lines are there to prevent spurious merge conflicts
   - if: '$CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_BRANCH'
