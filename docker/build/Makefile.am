@@ -760,6 +760,25 @@ context.deploy_steam: context.deploy_base_steam ${srcdir}/../deploy/steamcontent
 	echo "steamcmd" > $@.dir/image
 	echo > $@
 
+# special case steam: obtain steam guard unlock data
+context.steam_guard: rootcontext.64 ${srcdir}/prepare_context.sh ${srcdir}/../deploy/steamcontentbuilder/*/* ${srcdir}/../deploy/*steam_guard*.sh CI_INFO Makefile
+	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' ../deploy/'*' ${srcdir}/../deploy/steamcontentbuilder ${srcdir}/../deploy/*steam_guard*.sh CI_INFO
+	mkdir -p $@.dir/steamcontentbuilder/content $@.dir/steamcontentbuilder/output
+	rm -rf $@.dir/upload
+	rm -f $@.dir/image
+	echo "steamcmd" > $@.dir/image
+	echo > $@
+
+result.steam_guard: context.steam_guard
+	$(srcdir)/context_to_result.sh $@.dir ./obtain_steam_guard_1.sh
+	echo "Enter Steam Guard Code : " && read STEAM_GUARD_CODE && echo "STEAM_GUARD_CODE=$${STEAM_GUARD_CODE}" > ./context.steam_guard.dir/secrets/steamguard.sh
+	$(srcdir)/context_to_result.sh $@.dir ./obtain_steam_guard_2.sh
+	echo > $@
+
+steam_guard: result.steam_guard
+	scp result.steam_guard.dir/output/config.vdf armadeploy@builder.armagetronad.org:~/secrets/
+	echo > $@
+
 context.deploy_gitlab: rootcontext.64 deploy_base.tag ../deploy/* ${srcdir}/../deploy/deploy_gitlab.sh CI_INFO
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' upload ../deploy/'*' ${srcdir}/../deploy/deploy_gitlab.sh CI_INFO
 	echo "#/bin/bash" > $@.dir/CI_INFO_DEPLOY_GITLAB

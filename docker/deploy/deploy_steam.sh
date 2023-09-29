@@ -48,6 +48,12 @@ set +x
 
 /home/steam/steamcmd/steamcmd.sh +login "${STEAM_USER}" "${STEAM_PASSWORD}" +run_app_build_http ${script_dir}/app_build_1306180.vdf +quit || exit $?
 
+# If the above command fails, you need to activate steam guard on the deployment machine.
+# Run "make steam_guard" in the docker/build directory. Enter the received steam guard
+# code when promtped.
+#
+# Old, manual instructions:
+#
 # the login above will fail the first time, prompting for a steam guard code.
 # comment the line above, uncomment the lines below and store
 # the config.vdf file from the .result.deploy_steam.error/steamcontentbuilder/ in
