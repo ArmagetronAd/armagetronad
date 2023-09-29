@@ -136,10 +136,7 @@ build_server_32_raw:
 
 build_server_steam_raw:
   stage: build_base
-  rules:
-  - if: $CI_MERGE_REQUEST_ID
-    when: never
-  - when: on_success
+  extends: .project_runner
   script:
     - gitlab_build/docker/build/make_ci.sh -k result.build_server_steam
   artifacts:
@@ -163,15 +160,10 @@ build_windows:
     expire_in: 1 day
 
 build_windows_steam:
+  extends: .project_runner
   needs:
   - build_server_steam_raw
-  dependencies:
-  - build_server_steam_raw
   stage: build_main
-  rules:
-  - if: $CI_MERGE_REQUEST_ID
-    when: never
-  - when: on_success
   script:
     - gitlab_build/docker/build/make_ci.sh CI_windows_steam
   artifacts:
@@ -194,13 +186,10 @@ build_debtest:
 
 # steam builds server and client in one go (the server is already pre-built), they are packed together
 build_linux_steam:
+  extends: .project_runner
   dependencies:
   - build_server_steam_raw
   stage: build_main
-  rules:
-  - if: $CI_MERGE_REQUEST_ID
-    when: never
-  - when: on_success
   script:
     - gitlab_build/docker/build/make_ci.sh CI_linux_steam
   artifacts:
@@ -349,21 +338,12 @@ deploy_release:
 # test build docker image (hopefully also initiating the cache for later deployment)
 # does not really need debtest, but we want to let the Windows builds go first
 build_docker:
+  extends: .project_runner
   stage: build_collect
   needs:
-   - build_prepare
-   - build_debtest
-  dependencies:
-   - build_prepare
-  tags:
-   - docker
-   - armagetronad
-  rules:
-   - if: $CI_MERGE_REQUEST_ID
-     when: never
-   - if: $CI_COMMIT_REF_PROTECTED == "true"
-     when: on_success
-   - when: never
+  - job: build_prepare
+  - job: build_debtest
+    artifacts: false
   after_script:
     - rm -f ~/.docker/config.json
   script:
@@ -371,21 +351,12 @@ build_docker:
 
 # deploy docker image to staging
 stage_docker:
+  extends: .project_runner
   stage: stage
   needs:
-   - build_prepare
-   - build_docker
-  dependencies:
-   - build_prepare
-  tags:
-   - docker
-   - armagetronad
-  rules:
-   - if: $CI_MERGE_REQUEST_ID
-     when: never
-   - if: $CI_COMMIT_REF_PROTECTED == "true"
-     when: on_success
-   - when: never
+  - job: build_prepare
+  - job: build_docker
+    artifacts: false
   after_script:
     - rm -f ~/.docker/config.json
   script:
@@ -393,22 +364,15 @@ stage_docker:
 
 # deploy docker image
 deploy_docker:
+  extends: .project_runner
+  environment: $FINAL_ENVIRONMENT
   stage: deploy
   needs:
-   - build_prepare
-   - stage_docker
-   - delay_release
-  dependencies:
-   - build_prepare
-  tags:
-   - docker
-   - armagetronad
-  rules:
-   - if: $CI_MERGE_REQUEST_ID
-     when: never
-   - if: $CI_COMMIT_REF_PROTECTED == "true"
-     when: on_success
-   - when: never
+  - job: build_prepare
+  - job: stage_docker
+    artifacts: false
+  - job: delay_release
+    artifacts: false
   after_script:
     - rm -f ~/.docker/config.json
   script:
@@ -421,16 +385,12 @@ deploy_docker:
 
 # deploy build to Gitlab
 deploy_gitlab:
+  extends: .project_runner
+  environment: $FINAL_ENVIRONMENT
   stage: deploy
   dependencies:
    - build_prepare
    - build_collect
-  rules:
-   - if: $CI_MERGE_REQUEST_ID
-     when: never
-   - if: $CI_COMMIT_REF_PROTECTED == "true"
-     when: on_success
-   - when: never
   script:
     # test whether we're current
     - docker/scripts/obsolete.sh || exit 0
@@ -473,6 +433,7 @@ pack:
 
 
 testbuild:
+  extends: .project_runner
   stage: test
   rules:
    - when: never
@@ -484,6 +445,7 @@ testbuild:
 
 # for local testing
 complete_build:
+  extends: .project_runner
   stage: build_main
   rules:
   - when: never
