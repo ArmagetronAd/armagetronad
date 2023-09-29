@@ -251,7 +251,7 @@ build_collect:
     expire_in: 1 day
 
 # deploy to staged environment
-deploy-staged:
+deploy_staged:
   extends: .deploy
   environment: $STAGING_ENVIRONMENT
   dependencies:
@@ -268,7 +268,7 @@ deploy-staged:
     - make staged_deploy -O -j$(nproc) -k
 
 # delay full deployment
-delay-release:
+delay_release:
   dependencies: []
   stage: stage
   rules: 
@@ -280,7 +280,7 @@ delay-release:
   script: [""]
 
 # do the actual release; manually for final releases, delayed to avoid spam for everyone else
-deploy-release:
+deploy_release:
   extends: .deploy
   environment: $FINAL_ENVIRONMENT
   dependencies:
