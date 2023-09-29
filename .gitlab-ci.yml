@@ -73,6 +73,9 @@ default:
 
 # template rule for job to always run, maybe on shared runners
 .merge_request:
+  tags:
+  - docker
+  - linux
   rules:
   - when: on_success
 
