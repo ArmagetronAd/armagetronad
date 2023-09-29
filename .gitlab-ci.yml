@@ -63,6 +63,7 @@ default:
 .project_runner:
   tags:
   - armagetronad
+  - linux
   rules:
   - if: $CI_MERGE_REQUEST_ID
     when: never
