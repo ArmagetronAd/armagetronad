@@ -79,6 +79,18 @@ default:
   rules:
   - when: on_success
 
+# template rule for deployment jobs
+.deploy:
+  interruptible: false
+  tags:
+   - armagetronad_deploy
+  rules:
+   - if: $CI_MERGE_REQUEST_ID
+     when: never
+   - if: $CI_COMMIT_REF_PROTECTED == "true"
+     when: on_success
+   - when: never
+
 # only run on protected branches or merge requests
 workflow:
   rules:
@@ -129,8 +141,6 @@ build_windows:
   extends: .project_runner
   needs:
   - build_server_32_raw
-  dependencies:
-  - build_server_32_raw
   stage: build_main
   script:
     - gitlab_build/docker/build/make_ci.sh CI_windows
@@ -155,8 +165,6 @@ build_debtest:
 build_client_64:
   extends: .merge_request
   needs:
-  - build_prepare
-  dependencies:
   - build_prepare
   stage: build_main
   script:
@@ -207,7 +215,6 @@ build_server_32:
 # it should build directly from git content, the prepared linux source directories have soft links that won't work.
 build_macos:
   needs: []
-  dependencies: []
   # the mac runner is not always available and may go down while on the job,
   # be extra tolerant
   retry:
@@ -245,20 +252,12 @@ build_collect:
 
 # deploy to staged environment
 deploy-staged:
-  interruptible: false
+  extends: .deploy
   environment: $STAGING_ENVIRONMENT
   dependencies:
    - build_prepare
    - build_collect
   stage: stage
-  tags:
-   - armagetronad_deploy
-  rules:
-  - if: $CI_MERGE_REQUEST_ID
-    when: never
-  - if: '$CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_BRANCH'
-    when: on_success
-  - when: never
   before_script:
     - ./docker/scripts/fix_gits.sh || exit $?
     - ./docker/deploy/prepare_deploy.sh || exit $?
@@ -268,41 +267,26 @@ deploy-staged:
     - cd gitlab_build/docker/build
     - make staged_deploy -O -j$(nproc) -k
 
-
-# do the actual release; manually for final releases, delayed to avoid spam for everyone else
+# delay full deployment
 delay-release:
   dependencies: []
   stage: stage
   rules: 
-  - if: $CI_MERGE_REQUEST_ID
-    when: never
-  - if: '$CI_COMMIT_REF_PROTECTED == "false"'
-    when: never
   - if: '$CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_BRANCH'
     when: delayed
     start_in: '16 hours'
-  - when: on_success
+  - when: never
   before_script: [""]
   script: [""]
 
 # do the actual release; manually for final releases, delayed to avoid spam for everyone else
 deploy-release:
-  interruptible: false
+  extends: .deploy
   environment: $FINAL_ENVIRONMENT
   dependencies:
    - build_prepare
    - build_collect
   stage: deploy
-  tags:
-   - armagetronad_deploy
-  rules:
-   - if: $CI_MERGE_REQUEST_ID
-     when: never
-   - if: '$CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_TAG'
-     when: manual
-   - if: '$CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_BRANCH'
-     when: on_success
-   - when: never
   before_script:
     - ./docker/scripts/fix_gits.sh || exit $?
     - ./docker/deploy/prepare_deploy.sh || exit $?
@@ -325,8 +309,6 @@ pack:
   extends: .project_runner
   stage: stage
   needs:
-   - build_collect
-  dependencies:
    - build_collect
   script: [""]
   before_script:
