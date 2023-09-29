@@ -141,8 +141,6 @@ build_windows:
   extends: .project_runner
   needs:
   - build_server_32_raw
-  dependencies:
-  - build_server_32_raw
   stage: build_main
   script:
     - gitlab_build/docker/build/make_ci.sh CI_windows
@@ -167,8 +165,6 @@ build_debtest:
 build_client_64:
   extends: .merge_request
   needs:
-  - build_prepare
-  dependencies:
   - build_prepare
   stage: build_main
   script:
@@ -219,7 +215,6 @@ build_server_32:
 # it should build directly from git content, the prepared linux source directories have soft links that won't work.
 build_macos:
   needs: []
-  dependencies: []
   # the mac runner is not always available and may go down while on the job,
   # be extra tolerant
   retry:
@@ -314,8 +309,6 @@ pack:
   extends: .project_runner
   stage: stage
   needs:
-   - build_collect
-  dependencies:
    - build_collect
   script: [""]
   before_script:
