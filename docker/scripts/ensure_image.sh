@@ -17,6 +17,7 @@ else
 fi
 id=${wd}/images
 
+. ${wd}/images/prefer_podman.sh || exit $?
 . ${id}/digest.sh "${image}" || exit $?
 
 lock=${sd}/.lock.`echo ${image} | sed -e s,/,_,`

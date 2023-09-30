@@ -3,6 +3,7 @@
 # uploads all images
 
 wd="`dirname $0`"
+. ${wd}/prefer_podman.sh || exit $?
 . ${wd}/epoch.sh || exit $?
 
 #set -x

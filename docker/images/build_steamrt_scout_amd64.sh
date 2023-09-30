@@ -11,7 +11,8 @@ sd="${wd}/../scripts"
 rm -rf ${bd}
 mkdir -p ${bd}
 
-. ${wd}/epoch.sh
+. ${wd}/epoch.sh || exit $?
+. ${wd}/prefer_podman.sh || exit $?
 
 sdk=com.valvesoftware.SteamRuntime.Sdk-amd64,i386-scout-sysroot.tar.gz
 dockerfile=com.valvesoftware.SteamRuntime.Sdk-amd64,i386-scout-sysroot.Dockerfile
