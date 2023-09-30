@@ -20,18 +20,12 @@ ${sd}/download.sh ${bd}/download/codeblocks-setup1312.exe https://sourceforge.ne
 ${sd}/download.sh ${bd}/download/nsis-setup304.exe https://sourceforge.net/projects/nsis/files/NSIS%203/3.04/nsis-3.04-setup.exe/download || exit 1
 ${sd}/download.sh ${bd}/download/winetricks https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks || exit 1
 chmod +x ${bd}/download/winetricks || exit 1
-${sd}/build_image.sh ${BASE_32} armabuild_wine_1 "${bd}" || exit 1
 
-# interactive setup: wine and nsis
-docker rm armadev
-x11docker --name armadev --keepcache --user=RETAIN ${REGISTRY}armabuild_wine_1:${EPOCH} ./install.sh || exit 1
-docker commit armadev ${REGISTRY}armawineblocks:${EPOCH} || exit
-touch ${wd}/armawineblocks.digest.local
-docker rm armadev
+# start X server suitable for docker (https://github.com/mviereck/x11docker/wiki/docker-build-with-interactive-GUI)
+x11docker --xephyr --printenv --xoverip --no-auth --display=30 | grep --line-buffered DISPLAY > ${sd}/.cache/display.txt &
+sleep 2
+#cat ${sd}/.cache/display.txt
+# have the build process connect to it
+${sd}/build_image.sh ${BASE_32} armawineblocks "${bd}" --network=host --build-arg `sed < ${sd}/.cache/display.txt -e "s/ / --build-arg /g"` || exit 1
 
-#echo TEST installation:
-#docker run -it -e DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:ro -u docker --name="armadev4" armabuild_wine_3 bash
-#docker rm armadev4
-
-docker rmi -f ${REGISTRY}armabuild_wine_1:${EPOCH}
-
+#${REGISTRY}armawineblocks:${EPOCH}

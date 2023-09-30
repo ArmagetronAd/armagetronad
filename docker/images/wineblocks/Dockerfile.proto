@@ -15,4 +15,7 @@ USER docker
 
 COPY --chown=docker . /home/docker/
 
+ARG DISPLAY
+RUN echo DISPLAY=${DISPLAY}
+RUN ./install.sh
 
