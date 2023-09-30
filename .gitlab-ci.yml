@@ -82,6 +82,7 @@ default:
 # template rule for deployment jobs
 .deploy:
   interruptible: false
+  resource_group: deployment # only ever run one deployment job at a time
   tags:
    - armagetronad_deploy
   rules:
