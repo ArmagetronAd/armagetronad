@@ -190,8 +190,8 @@ WORKDIR /home/builder
 USER builder
 # pre-load 0publish and feedlint
 RUN export TERM=linux && \
-0launch -c 'http://0install.net/2006/interfaces/0publish' --version && \
-0launch -c 'http://0install.net/2007/interfaces/FeedLint.xml' --version && \
+yes Y | 0launch -c 'http://0install.net/2006/interfaces/0publish' --version && \
+yes Y | 0launch -c 'http://0install.net/2007/interfaces/FeedLint.xml' --version && \
 git config --global push.default simple
 
 # ###########################
