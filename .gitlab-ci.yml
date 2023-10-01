@@ -24,7 +24,7 @@ stages:
   - deploy
 
 default:
-  image: registry.gitlab.com/armagetronad/armagetronad/armaroot_64@sha256:c45680095075ba85cc33a4dae7034738a3e7f828d6eb9d3613c6e6091987e481
+  image: $CI_REGISTRY_IMAGE/armaroot_64@sha256:c45680095075ba85cc33a4dae7034738a3e7f828d6eb9d3613c6e6091987e481
   interruptible: true
   retry:
     max: 1
@@ -164,6 +164,7 @@ build_debtest:
     expire_in: 1 day
 
 build_client_64:
+  image: $CI_REGISTRY_IMAGE/armabuild_64@sha256:b99d5354f16276bb110dd92f8ca76fb0607be85234c5958d0562bae4f43b497a
   extends: .merge_request
   needs:
   - build_prepare
