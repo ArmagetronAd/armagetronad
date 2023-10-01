@@ -20,6 +20,7 @@ set -x
 wd=`dirname $0`
 ${wd}/../scripts/ensure_image.sh "${base}" -d
 . ${wd}/../images/digest.sh "${base}" || exit $?
+. ${wd}/../images/prefer_podman.sh || exit $?
 
 dockeruser=`docker inspect --format '{{.Config.User}}' ${REGISTRY}${base}${REFERENCE}` || exit $?
 home=/home/${dockeruser}
