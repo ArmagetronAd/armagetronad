@@ -26,6 +26,12 @@ x11docker --xephyr --printenv --xoverip --no-auth --display=30 | grep --line-buf
 sleep 2
 #cat ${sd}/.cache/display.txt
 # have the build process connect to it
-${sd}/build_image.sh ${BASE_32} armawineblocks "${bd}" --network=host --build-arg `sed < ${sd}/.cache/display.txt -e "s/ / --build-arg /g"` || exit 1
+${sd}/build_image.sh ${BASE_32} armawineblocks${EPIC} "${bd}" --network=host --build-arg `sed < ${sd}/.cache/display.txt -e "s/ / --build-arg /g"` || exit 1
+
+wait
+
+#echo TEST installation:
+#docker run -it -e DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:ro -u docker --name="armadev4" armawineblocks:${EPIC} bash
+#docker rm armadev4
 
 #${REGISTRY}armawineblocks:${EPOCH}
