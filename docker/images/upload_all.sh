@@ -10,10 +10,15 @@ wd="`dirname $0`"
 
 function store(){
     logfile=`tempfile 2>/dev/null` || logfile=`mktemp` || exit $?
-    docker push ${REGISTRY}$1:${EPOCH} | tee ${logfile}
-    grep "digest:" ${logfile} || exit 0
-    grep "digest:" ${logfile} | sed -e "s/.*digest: //" -e "s/ .*//" > ${wd}/$1.digest
+    if ! docker push ${REGISTRY}$1:${EPOCH} --digestfile ${wd}/$1.digest; then
+        docker push ${REGISTRY}$1:${EPOCH} | tee ${logfile} || exit $?
+        grep "digest:" ${logfile} || exit 0
+        grep "digest:" ${logfile} | sed -e "s/.*digest: //" -e "s/ .*//" > ${wd}/$1.digest
+    fi
     rm -f ${wd}/$1.digest.local ${logfile}
+
+    # bake digest into .gitlab-ci.yml
+    sed -i ${wd}/../../.gitlab-ci.yml -e "s,image: \$CI_REGISTRY_IMAGE/$1.*,image: \$CI_REGISTRY_IMAGE/$1@`cat ${wd}/$1.digest`,"
 }
 
 function upload_image(){
@@ -33,6 +38,4 @@ upload_image armalpine_32
 upload_image steamcmd
 wait
 
-# bake digest into .gitlab-ci.yml
-sed -i ${wd}/../../.gitlab-ci.yml -e "s,^image: ${REGISTRY}armaroot_64.*,image: ${REGISTRY}armaroot_64@`cat ${wd}/armaroot_64.digest`," -e "s,image: ${REGISTRY}armadeploy_64.*,image: ${REGISTRY}armadeploy_64@`cat ${wd}/armadeploy_64.digest`,"
 
