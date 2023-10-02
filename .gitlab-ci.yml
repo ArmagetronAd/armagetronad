@@ -74,6 +74,7 @@ default:
 # template rule for job to always run, maybe on shared runners
 .merge_request:
   tags:
+  - armagetronad
   - docker
   - linux
   rules:
