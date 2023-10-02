@@ -16,6 +16,22 @@ fi
 
 set -x
 
+# shortcut: in CI mode, assume we already are running inside the image,
+# just run script directly
+if test x$CI == xtrue; then
+    cp -arl . ${result}
+    pushd ${result}
+    EXITCODE=0
+    "$@" || EXITCODE=$?
+    if test ${EXITCODE}  != 0; then
+        popd
+        rm -rf ${tmp}
+        rm -rf ${result}.error
+        mv ${result} ${result}.error
+    fi
+    exit ${EXITCODE}
+fi
+
 # make sure base image exists
 wd=`dirname $0`
 ${wd}/../scripts/ensure_image.sh "${base}" -d
