@@ -92,7 +92,7 @@ default:
 
 .project_runner_wine:
   extends: .project_runner
-  image: $CI_REGISTRY_IMAGE/armawineblocks@sha256:ea2654e8675d79935b1033080e0eb34d4efcaee4e57e698abbba9620287578aa
+  image: $CI_REGISTRY_IMAGE/armawineblocks@sha256:7e5e74aaee4fc7f92b43e720fb2c410d8a70d0aae42865d1b55e3e72d6346828
 
 .project_runner_debian:
   extends: .project_runner
