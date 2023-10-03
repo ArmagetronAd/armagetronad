@@ -110,6 +110,9 @@ default:
    - if: $CI_COMMIT_REF_PROTECTED == "true"
      when: on_success
    - when: never
+  before_script:
+    - ./docker/scripts/fix_gits.sh || exit $?
+    - ./docker/deploy/prepare_deploy.sh || exit $?
 
 # only run on protected branches or merge requests
 workflow:
@@ -278,9 +281,6 @@ deploy_staged:
    - build_prepare
    - build_collect
   stage: stage
-  before_script:
-    - ./docker/scripts/fix_gits.sh || exit $?
-    - ./docker/deploy/prepare_deploy.sh || exit $?
 
   script:
     # now enter the docker build directory and just invoke make there
@@ -307,9 +307,6 @@ deploy_release:
    - build_prepare
    - build_collect
   stage: deploy
-  before_script:
-    - ./docker/scripts/fix_gits.sh || exit $?
-    - ./docker/deploy/prepare_deploy.sh || exit $?
   script:
     - docker/scripts/obsolete.sh || exit 0
 
