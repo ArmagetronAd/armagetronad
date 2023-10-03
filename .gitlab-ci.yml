@@ -61,7 +61,8 @@ default:
   - linux
   rules:
   - if: $CI_MERGE_REQUEST_ID
-    when: never
+    when: on_success
+    # when: never
   - if: $CI_COMMIT_REF_PROTECTED == "true"
     when: on_success
   - when: never
@@ -75,8 +76,35 @@ default:
   rules:
   - when: on_success
 
+# keep image dependencies here
+.merge_request_64:
+  extends: .merge_request
+  image: $CI_REGISTRY_IMAGE/armabuild_64@sha256:d7b9ff2e17765f89f0e3ad4dd4e1df9ab477d2435ca61f95724a9119b605ff79
+
+.merge_request_32:
+  extends: .merge_request
+  image: $CI_REGISTRY_IMAGE/armabuild_32@sha256:158d954c5226a6a9e7a9da2f4ab48d9c83df8bf624b2cf3c6bb2b10fa547dcd4
+
+.project_runner_64:
+  extends: .project_runner
+  image: $CI_REGISTRY_IMAGE/armabuild_64@sha256:d7b9ff2e17765f89f0e3ad4dd4e1df9ab477d2435ca61f95724a9119b605ff79
+
+.project_runner_32:
+  extends: .project_runner
+  image: $CI_REGISTRY_IMAGE/armabuild_32@sha256:158d954c5226a6a9e7a9da2f4ab48d9c83df8bf624b2cf3c6bb2b10fa547dcd4
+
+.project_runner_wine:
+  extends: .project_runner
+  image: $CI_REGISTRY_IMAGE/armawineblocks@sha256:e8b60f7c4036f0e1970c06aa59c89d0ec8520e42d0a7e0732c74d5c3fba26532
+
+.project_runner_debian:
+  extends: .project_runner
+  image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:9739d570f63ab5ad1b6aff631089405da4d78c94ff1cfc5d09d2228d67661961
+
+
 # template rule for deployment jobs
 .deploy:
+  image: $CI_REGISTRY_IMAGE/armadeploy_64@sha256:4dc3e2088ef2fe4afd4df74faf23f722b58a5b6a1db9863afebb1aab9ffac02e
   interruptible: false
   resource_group: deployment # only ever run one deployment job at a time
   tags:
@@ -120,9 +148,8 @@ build_prepare:
 
 
 build_server_32_raw:
-  image: $CI_REGISTRY_IMAGE/armabuild_32@sha256:158d954c5226a6a9e7a9da2f4ab48d9c83df8bf624b2cf3c6bb2b10fa547dcd4
   stage: build_base
-  extends: .merge_request
+  extends: .merge_request_32
   script:
     - gitlab_build/docker/build/make_ci.sh -k result.build_server_32
   after_script:
@@ -136,7 +163,7 @@ build_server_32_raw:
 # Windows builds are worst because they have an additional layer of emulation,
 # are not parallelized and are client and server build in one.
 build_windows:
-  extends: .project_runner
+  extends: .project_runner_wine
   needs:
   - build_server_32_raw
   stage: build_main
@@ -149,7 +176,7 @@ build_windows:
 
 # debtest is faster, but also not paralellized
 build_debtest:
-  extends: .project_runner
+  extends: .project_runner_debian
   dependencies:
   - build_prepare
   stage: build_main
@@ -161,8 +188,7 @@ build_debtest:
     expire_in: 1 day
 
 build_client_64:
-  image: $CI_REGISTRY_IMAGE/armabuild_64@sha256:d7b9ff2e17765f89f0e3ad4dd4e1df9ab477d2435ca61f95724a9119b605ff79
-  extends: .merge_request
+  extends: .merge_request_64
   needs:
   - build_prepare
   stage: build_main
@@ -174,7 +200,7 @@ build_client_64:
     expire_in: 1 day
 
 build_client_32:
-  extends: .project_runner
+  extends: .project_runner_32
   dependencies:
   - build_prepare
   stage: build_main
@@ -186,7 +212,7 @@ build_client_32:
     expire_in: 1 day
 
 build_server_64:
-  extends: .project_runner
+  extends: .project_runner_64
   dependencies:
   - build_prepare
   stage: build_main
@@ -199,7 +225,7 @@ build_server_64:
 
 # this one is special, it can rely on previous build work
 build_server_32:
-  extends: .project_runner
+  extends: .project_runner_32
   dependencies:
   - build_server_32_raw
   stage: build_main
