@@ -98,7 +98,7 @@ default:
 
 
 # template rule for deployment jobs
-.deploy:
+.deploy_base:
   image: $CI_REGISTRY_IMAGE/armadeploy_64@sha256:8acfad00cdaca7979b10db894335353323c312ff7b18c78bb55bf6b9fb4d3fe8
   interruptible: false
   resource_group: deployment # only ever run one deployment job at a time
@@ -114,8 +114,39 @@ default:
     - ./docker/scripts/fix_gits.sh || exit $?
     - ./docker/deploy/prepare_deploy.sh || exit $?
 
-.deploy_ppa:
+.deploy_staged:
   extends: .deploy
+  environment: $STAGING_ENVIRONMENT
+  dependencies:
+   - build_prepare
+   - build_collect
+  stage: stage
+  script:
+    # now enter the docker build directory and just invoke make there
+    - cd gitlab_build/docker/build
+    - make staged_${TARGET} -O -j$(nproc) -k
+
+.deploy_ppa_staged:
+  extends: .deploy_staged
+  image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:9739d570f63ab5ad1b6aff631089405da4d78c94ff1cfc5d09d2228d67661961
+
+.deploy_final:
+  extends: .deploy
+  environment: $FINAL_ENVIRONMENT
+  dependencies:
+   - build_prepare
+   - build_collect
+  stage: deploy
+  script:
+    # check that no later pipeline already started
+    - docker/scripts/obsolete.sh || exit 0
+
+    # now enter the docker build directory and just invoke make there
+    - cd gitlab_build/docker/build
+    - make unstaged_${TARGET} -O -j$(nproc) -k
+
+.deploy_ppa_final:
+  extends: .deploy_final
   image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:9739d570f63ab5ad1b6aff631089405da4d78c94ff1cfc5d09d2228d67661961
 
 
@@ -280,29 +311,14 @@ build_collect:
 
 # deploy to staged environment
 deploy_staged:
-  extends: .deploy
-  environment: $STAGING_ENVIRONMENT
-  dependencies:
-   - build_prepare
-   - build_collect
-  stage: stage
-  script:
-    # now enter the docker build directory and just invoke make there
-    - cd gitlab_build/docker/build
-    - make staged_deploy -O -j$(nproc) -k
+  extends: .deploy_staged
+  variables:
+    TARGET: "deploy"
 
 deploy_staged_ppa:
-  extends: .deploy_ppa
-  environment: $STAGING_ENVIRONMENT
-  dependencies:
-   - build_prepare
-   - build_collect
-  stage: stage
-  script:
-    # now enter the docker build directory and just invoke make there
-    - cd gitlab_build/docker/build
-    - make staged_deploy_ppa -O -j$(nproc) -k
-
+  extends: .deploy_ppa_staged
+  variables:
+    TARGET: "deploy_ppa"
 
 # delay full deployment
 delay_release:
@@ -317,35 +333,19 @@ delay_release:
   script: [""]
 
 # do the actual release; manually for final releases, delayed to avoid spam for everyone else
-deploy_release:
-  extends: .deploy
-  environment: $FINAL_ENVIRONMENT
-  dependencies:
-   - build_prepare
-   - build_collect
-  stage: deploy
-  script:
-    - docker/scripts/obsolete.sh || exit 0
-    # now enter the docker build directory and just invoke make there
-    - cd gitlab_build/docker/build
-    - make unstaged_deploy -O -j$(nproc) -k
+deploy_final:
+  extends: .deploy_final
+  variables:
+    TARGET: "deploy"
 
-deploy_release_ppa:
-  extends: .deploy_ppa
-  environment: $FINAL_ENVIRONMENT
-  dependencies:
-   - build_prepare
-   - build_collect
-  stage: deploy
-  script:
-    - docker/scripts/obsolete.sh || exit 0
-    # now enter the docker build directory and just invoke make there
-    - cd gitlab_build/docker/build
-    - make unstaged_deploy_ppa -O -j$(nproc) -k
-
+deploy_final_ppa:
+  extends: .deploy_ppa_final
+  variables:
+    TARGET: "deploy_ppa"
 
 # post-build tests that require our own runners (or a docker upgrade on GitLab)
 post_test:
+  retry: 2 # some tests fail spuriously for download failures, always rerun
   extends: .project_runner
   stage: build_collect
   services:
