@@ -7,9 +7,11 @@ function fix_git(){
     rev=$2    
 
     dir=${download_dir}/${name}
-    if ! git -C ${dir} reset ${rev} --hard; then
-        git -C ${dir} fetch
-	git -C ${dir} reset ${rev} --hard || return $?
+    pushd ${dir} || return $?
+    if ! git reset ${rev} --hard; then
+        git fetch
+    git reset ${rev} --hard || return $?
+    popd
     fi
 }
 
