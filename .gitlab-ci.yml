@@ -115,6 +115,14 @@ default:
    - if: $CI_COMMIT_REF_PROTECTED == "true"
      when: on_success
    - when: never
+  before_script:
+    - ./docker/scripts/fix_gits.sh || exit $?
+    - ./docker/deploy/prepare_deploy.sh || exit $?
+
+.deploy_ppa:
+  extends: .deploy
+  image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:9739d570f63ab5ad1b6aff631089405da4d78c94ff1cfc5d09d2228d67661961
+
 
 # only run on protected branches or merge requests
 workflow:
@@ -319,13 +327,23 @@ deploy_staged:
    - build_prepare
    - build_collect
   stage: stage
-  before_script:
-    - ./docker/scripts/fix_gits.sh || exit $?
-    - ./docker/deploy/prepare_deploy.sh || exit $?
   script:
     # now enter the docker build directory and just invoke make there
     - cd gitlab_build/docker/build
     - make staged_deploy -O -j$(nproc) -k
+
+deploy_staged_ppa:
+  extends: .deploy_ppa
+  environment: $STAGING_ENVIRONMENT
+  dependencies:
+   - build_prepare
+   - build_collect
+  stage: stage
+  script:
+    # now enter the docker build directory and just invoke make there
+    - cd gitlab_build/docker/build
+    - make staged_deploy_ppa -O -j$(nproc) -k
+
 
 # delay full deployment
 delay_release:
@@ -347,17 +365,26 @@ deploy_release:
    - build_prepare
    - build_collect
   stage: deploy
-  before_script:
-    - ./docker/scripts/fix_gits.sh || exit $?
-    - ./docker/deploy/prepare_deploy.sh || exit $?
   script:
     # test whether we're current
     - docker/scripts/obsolete.sh || exit 0
-
-    # build
+    # now enter the docker build directory and just invoke make there
     - cd gitlab_build/docker/build
     - rm -rf result.appimage_* context.appimage_* # remake appimages, now we can sign them
     - make unstaged_deploy -O -j$(nproc) -k
+
+deploy_release_ppa:
+  extends: .deploy_ppa
+  environment: $FINAL_ENVIRONMENT
+  dependencies:
+   - build_prepare
+   - build_collect
+  stage: deploy
+  script:
+    - docker/scripts/obsolete.sh || exit 0
+    # now enter the docker build directory and just invoke make there
+    - cd gitlab_build/docker/build
+    - make unstaged_deploy_ppa -O -j$(nproc) -k
 
 # test build docker image (hopefully also initiating the cache for later deployment)
 # does not really need debtest, but we want to let the Windows builds go first
@@ -421,6 +448,7 @@ deploy_gitlab:
 
     # deploy
     - make -C gitlab_build/docker/build unstaged_deploy_gitlab || exit $?
+
 
 # post-build tests that require our own runners (or a docker upgrade on GitLab)
 post_test:

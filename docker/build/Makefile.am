@@ -866,7 +866,7 @@ deploy_ppa_trusty
 deploy_ppa_%: result.deploy_ppa_%
 	@echo Deployed $*
 
-deploy: deploy_lp deploy_scp deploy_ppa deploy_zi deploy_fp deploy_steam deploy_download deploy_itch
+deploy: deploy_lp deploy_scp deploy_zi deploy_fp deploy_steam deploy_download deploy_itch
 #deploy: deploy_scp
 #deploy: deploy_zi
 #deploy: deploy_ppa

@@ -14,7 +14,7 @@ function bake(){
 }
 
 for f in `ls ${wd}/*.digest`; do
-    bake `echo $f | sed -e s,.*/,,g -e s,/\.digest,,`
+    bake `echo $f | sed -e s,.*/,,g -e s,\.digest,,`
 done
 
 
