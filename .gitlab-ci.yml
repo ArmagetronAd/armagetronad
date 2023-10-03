@@ -74,19 +74,19 @@ default:
 # keep image dependencies here
 .merge_request_64:
   extends: .merge_request
-  image: $CI_REGISTRY_IMAGE/armabuild_64@sha256:25b02594c0e824af4d5d49a10aef0bcab4a4bf5944e1ca1cad02e8867acdd5a2
+  image: $CI_REGISTRY_IMAGE/armabuild_64@sha256:30048b1e7060b56f32e5b80f8a1578745f2745125f03893cfd5048d34801c743
 
 .merge_request_32:
   extends: .merge_request
-  image: $CI_REGISTRY_IMAGE/armabuild_32@sha256:6652c15a1a9a0bcbda60e6f7d6048a6fc74bb60cef4ab486ba0ce81e4b1d3e68
+  image: $CI_REGISTRY_IMAGE/armabuild_32@sha256:d6c535dd6a3276aaa8d89b2c10b4e707fe692d3e93adbbbadaad25b55fcfef9e
 
 .project_runner_64:
   extends: .project_runner
-  image: $CI_REGISTRY_IMAGE/armabuild_64@sha256:25b02594c0e824af4d5d49a10aef0bcab4a4bf5944e1ca1cad02e8867acdd5a2
+  image: $CI_REGISTRY_IMAGE/armabuild_64@sha256:30048b1e7060b56f32e5b80f8a1578745f2745125f03893cfd5048d34801c743
 
 .project_runner_32:
   extends: .project_runner
-  image: $CI_REGISTRY_IMAGE/armabuild_32@sha256:6652c15a1a9a0bcbda60e6f7d6048a6fc74bb60cef4ab486ba0ce81e4b1d3e68
+  image: $CI_REGISTRY_IMAGE/armabuild_32@sha256:d6c535dd6a3276aaa8d89b2c10b4e707fe692d3e93adbbbadaad25b55fcfef9e
 
 .project_runner_wine:
   extends: .project_runner
@@ -94,12 +94,13 @@ default:
 
 .project_runner_debian:
   extends: .project_runner
-  image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:9739d570f63ab5ad1b6aff631089405da4d78c94ff1cfc5d09d2228d67661961
+  image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:a4767257deab037d739ac2c56057029b2aa125bb10acde474a97d2277aa6d3de
 
 
 # template rule for deployment jobs
 .deploy_base:
-  image: $CI_REGISTRY_IMAGE/armadeploy_64@sha256:8acfad00cdaca7979b10db894335353323c312ff7b18c78bb55bf6b9fb4d3fe8
+  retry: 2 # deployments can fail temporarily for a million reasons
+  image: $CI_REGISTRY_IMAGE/armadeploy_64@sha256:275ff36cd9b6bcba966d582645ee19b057792480fa701cf193f0de29f1a0cc3e
   interruptible: false
   resource_group: deployment # only ever run one deployment job at a time
   tags:
@@ -128,7 +129,7 @@ default:
 
 .deploy_ppa_staged:
   extends: .deploy_staged
-  image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:9739d570f63ab5ad1b6aff631089405da4d78c94ff1cfc5d09d2228d67661961
+  image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:a4767257deab037d739ac2c56057029b2aa125bb10acde474a97d2277aa6d3de
 
 .deploy_final:
   extends: .deploy_base
@@ -147,7 +148,7 @@ default:
 
 .deploy_ppa_final:
   extends: .deploy_final
-  image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:9739d570f63ab5ad1b6aff631089405da4d78c94ff1cfc5d09d2228d67661961
+  image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:a4767257deab037d739ac2c56057029b2aa125bb10acde474a97d2277aa6d3de
 
 
 # only run on protected branches or merge requests
