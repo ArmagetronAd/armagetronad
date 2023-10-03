@@ -49,7 +49,7 @@ CI_windows.tag: CI_base.tag closed_regular.tag # steam_windows.tag
 	touch $@
 
 # all free linux builds (so, no steam)
-CI_free.tag: CI_base.tag free.tag reformat.tag
+CI_free.tag: CI_base.tag free.tag
 	touch $@
 
 # (OBSOLETE) targets for CI merge tests, a bit leaner than a full build
