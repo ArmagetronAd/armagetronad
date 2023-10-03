@@ -103,6 +103,9 @@ RUN ./build_libxml2.sh libxml2-2.9.10 && rm ./build_libxml2.sh && \
 #WORKDIR /home/builder
 #USER builder
 
+# test new dependencies here
+RUN apt-get -y update && apt-get install python3 -y || true
+
 # ###########################
 # hack in zthread-config
 # ###########################

@@ -16,7 +16,7 @@ stages:
   - deploy
 
 default:
-  image: $CI_REGISTRY_IMAGE/armabuild_64@sha256:31bcc94fd6429ccd30cec6bc7eff7cc0b80f4c3a7b749c6da4fbe88c9211f69a
+  image: $CI_REGISTRY_IMAGE/armabuild_64@sha256:2ec003c2ee49ecbff5a73f123d3b3336abfa687d58d6b0f0391d8fa035910cbb
   interruptible: true
   retry:
     max: 1
@@ -160,7 +160,7 @@ build_debtest:
     expire_in: 1 day
 
 build_client_64:
-  image: $CI_REGISTRY_IMAGE/armabuild_64@sha256:31bcc94fd6429ccd30cec6bc7eff7cc0b80f4c3a7b749c6da4fbe88c9211f69a
+  image: $CI_REGISTRY_IMAGE/armabuild_64@sha256:2ec003c2ee49ecbff5a73f123d3b3336abfa687d58d6b0f0391d8fa035910cbb
   extends: .merge_request
   needs:
   - build_prepare
