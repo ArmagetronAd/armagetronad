@@ -317,13 +317,13 @@ deploy_staged_external:
     TARGET: "deploy_external"
 
 deploy_staged_ours:
-  needs: deploy_final_external
+  needs: ["deploy_final_external"]
   extends: .deploy_staged
   variables:
     TARGET: "deploy_ours"
 
 deploy_staged_ppa:
-  needs: deploy_final_external
+  needs: ["deploy_final_external"]
   extends: .deploy_staged_ppa
   variables:
     TARGET: "deploy_ppa"
@@ -347,14 +347,14 @@ deploy_final_external:
     TARGET: "deploy"
 
 deploy_final_ours:
-  needs: deploy_final_external
+  needs: ["deploy_final_external"]
   extends: .deploy_final
   variables:
     TARGET: "deploy_ours"
 
 
 deploy_final_ppa:
-  needs: deploy_final_external
+  needs: ["deploy_final_external"]
   extends: .deploy_ppa_final
   variables:
     TARGET: "deploy_ppa"
