@@ -62,6 +62,8 @@ libx11-dev \
 #x11proto-core-dev \
 libzthread-dev \
 pkg-config \
+autoconf \
+automake \
 recode \
 #zlib1g-dev \
 -y
