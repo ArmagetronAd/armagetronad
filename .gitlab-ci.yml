@@ -305,7 +305,7 @@ build_macos:
     expire_in: 1 day
     
 build_collect:
-  extends: .project_runner
+  extends: .project_runner_64
   stage: build_collect
   script:
     - gitlab_build/docker/build/make_ci.sh debtest.tag CI reformat.tag || exit $?
