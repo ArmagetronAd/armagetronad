@@ -16,7 +16,7 @@ stages:
   - deploy
 
 default:
-  image: $CI_REGISTRY_IMAGE/armabuild_64@sha256:d7b9ff2e17765f89f0e3ad4dd4e1df9ab477d2435ca61f95724a9119b605ff79
+  image: $CI_REGISTRY_IMAGE/armabuild_64@sha256:25b02594c0e824af4d5d49a10aef0bcab4a4bf5944e1ca1cad02e8867acdd5a2
   interruptible: true
   retry:
     max: 1
@@ -79,23 +79,23 @@ default:
 # keep image dependencies here
 .merge_request_64:
   extends: .merge_request
-  image: $CI_REGISTRY_IMAGE/armabuild_64@sha256:d7b9ff2e17765f89f0e3ad4dd4e1df9ab477d2435ca61f95724a9119b605ff79
+  image: $CI_REGISTRY_IMAGE/armabuild_64@sha256:25b02594c0e824af4d5d49a10aef0bcab4a4bf5944e1ca1cad02e8867acdd5a2
 
 .merge_request_32:
   extends: .merge_request
-  image: $CI_REGISTRY_IMAGE/armabuild_32@sha256:158d954c5226a6a9e7a9da2f4ab48d9c83df8bf624b2cf3c6bb2b10fa547dcd4
+  image: $CI_REGISTRY_IMAGE/armabuild_32@sha256:6652c15a1a9a0bcbda60e6f7d6048a6fc74bb60cef4ab486ba0ce81e4b1d3e68
 
 .project_runner_64:
   extends: .project_runner
-  image: $CI_REGISTRY_IMAGE/armabuild_64@sha256:d7b9ff2e17765f89f0e3ad4dd4e1df9ab477d2435ca61f95724a9119b605ff79
+  image: $CI_REGISTRY_IMAGE/armabuild_64@sha256:25b02594c0e824af4d5d49a10aef0bcab4a4bf5944e1ca1cad02e8867acdd5a2
 
 .project_runner_32:
   extends: .project_runner
-  image: $CI_REGISTRY_IMAGE/armabuild_32@sha256:158d954c5226a6a9e7a9da2f4ab48d9c83df8bf624b2cf3c6bb2b10fa547dcd4
+  image: $CI_REGISTRY_IMAGE/armabuild_32@sha256:6652c15a1a9a0bcbda60e6f7d6048a6fc74bb60cef4ab486ba0ce81e4b1d3e68
 
 .project_runner_wine:
   extends: .project_runner
-  image: $CI_REGISTRY_IMAGE/armawineblocks@sha256:e8b60f7c4036f0e1970c06aa59c89d0ec8520e42d0a7e0732c74d5c3fba26532
+  image: $CI_REGISTRY_IMAGE/armawineblocks@sha256:4ed9ed9d5c0f49b7b480daad96b831b5f085109c311a8b89f6a77778f2f98e4b
 
 .project_runner_debian:
   extends: .project_runner
@@ -104,7 +104,7 @@ default:
 
 # template rule for deployment jobs
 .deploy:
-  image: $CI_REGISTRY_IMAGE/armadeploy_64@sha256:4dc3e2088ef2fe4afd4df74faf23f722b58a5b6a1db9863afebb1aab9ffac02e
+  image: $CI_REGISTRY_IMAGE/armadeploy_64@sha256:8acfad00cdaca7979b10db894335353323c312ff7b18c78bb55bf6b9fb4d3fe8
   interruptible: false
   resource_group: deployment # only ever run one deployment job at a time
   tags:

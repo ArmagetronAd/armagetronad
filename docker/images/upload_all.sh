@@ -31,15 +31,15 @@ function upload_image(){
     store ${image} &
 }
 
-upload_image armabuild_64 "$@"
-upload_image armabuild_32 "$@"
-# upload_image armaroot_64 "$@"
-upload_image armawineblocks
-upload_image armasteam_64 "$@"
-upload_image armadeb_64 "$@"
-upload_image armadeploy_64 "$@"
-upload_image armalpine_32 "$@"
-upload_image steamcmd "$@"
+upload_image armabuild_64 $@
+upload_image armabuild_32 $@
+# upload_image armaroot_64 $@
+upload_image armawineblocks $@
+#upload_image armasteam_64 $@
+upload_image armadeb_64 $@
+upload_image armadeploy_64 $@
+#upload_image armalpine_32 $@
+#upload_image steamcmd $@
 wait
 
 
