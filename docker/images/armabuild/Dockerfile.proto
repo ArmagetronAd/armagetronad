@@ -100,8 +100,8 @@ RUN ./build_libxml2.sh libxml2-2.9.10 && rm ./build_libxml2.sh && \
     useradd builder && mkdir -p /home/builder && chown builder:builder /home/builder # && chmod 777 /home/builder
 
 # set up rest of builder user
-WORKDIR /home/builder
-USER builder
+#WORKDIR /home/builder
+#USER builder
 
 # ###########################
 # hack in zthread-config
@@ -139,9 +139,9 @@ lptools \
 
 FROM armadeb_base as armadeb
 # set up builder user
-RUN useradd builder && mkdir -p /home/builder && chown builder:builder /home/builder # && chmod 777 /home/builder
-WORKDIR /home/builder
-USER builder
+#RUN useradd builder && mkdir -p /home/builder && chown builder:builder /home/builder # && chmod 777 /home/builder
+#WORKDIR /home/builder
+#USER builder
 
 # ###########################
 # bootstrap dependencies (ubuntu base)
