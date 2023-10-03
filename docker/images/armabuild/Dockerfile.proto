@@ -65,6 +65,7 @@ pkg-config \
 autoconf \
 automake \
 python3 \
+python3-packaging \
 recode \
 pandoc \
 #zlib1g-dev \
