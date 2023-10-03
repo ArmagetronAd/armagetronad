@@ -8,12 +8,13 @@ wine \
 xvfb \
 --no-cache
 
-RUN adduser docker -D
+#RUN adduser docker -D
 RUN chmod 6755 /usr/bin/Xvfb
-WORKDIR /home/docker
-USER docker
+#WORKDIR /home/docker
+#USER docker
 
-COPY --chown=docker . /home/docker/
+#COPY --chown=docker . /home/docker/
+COPY . .
 
 ARG DISPLAY
 RUN echo DISPLAY=${DISPLAY} && ./install.sh && rm ./install.sh
