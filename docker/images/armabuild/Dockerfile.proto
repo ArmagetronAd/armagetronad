@@ -191,9 +191,9 @@ pandoc \
 
 FROM armadeploy_base as armadeploy
 # set up builder user
-RUN useradd builder && mkdir -p /home/builder && chown builder:builder /home/builder # && chmod 777 /home/builder
-WORKDIR /home/builder
-USER builder
+#RUN useradd builder && mkdir -p /home/builder && chown builder:builder /home/builder # && chmod 777 /home/builder
+#WORKDIR /home/builder
+#USER builder
 # pre-load 0publish and feedlint
 RUN export TERM=linux && \
 yes Y | 0launch -c 'http://0install.net/2006/interfaces/0publish' --version && \
