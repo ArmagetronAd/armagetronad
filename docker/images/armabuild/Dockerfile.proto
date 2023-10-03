@@ -115,10 +115,10 @@ RUN apt-get -y update && apt-get install podman -y || true
 FROM amd64/ubuntu:16.04 as zthreadsource
 RUN apt-get -y update && apt-get install libzthread-dev -y
 
-FROM armabuild_base as zthreaddest
+FROM armabuild_base as armabuild_zthreadconfig
 COPY --from=zthreadsource /usr/bin/zthread-config /usr/bin/
 
-FROM zthreaddest as armabuild_zthreadconfig
+FROM zthreaddest as armabuild_zthreadconfig_obsolete
 # set up builder user
 RUN useradd builder && mkdir -p /home/builder && chown builder:builder /home/builder # && chmod 777 /home/builder
 WORKDIR /home/builder
