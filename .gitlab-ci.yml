@@ -323,6 +323,13 @@ deploy_release:
 post_test:
   extends: .project_runner
   stage: build_collect
+  services:
+    # required for shared runners, does not hurt for our runner (just some diagnostic complaints)
+    - name: docker:19.03.0-dind
+      alias: docker
+  variables:
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
   script:
     - make -C gitlab_build/docker/build appimagetests_ci appimagetests_extra || exit $?
 
