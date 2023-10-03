@@ -10,7 +10,7 @@ FROM base as commonground
 RUN ls /usr/lib/*.so* /usr/lib/x86_64-linux-gnu/*.so* /usr/lib/i386-linux-gnu/*.so* \
            /lib/*.so*     /lib/x86_64-linux-gnu/*.so*     /lib/i386-linux-gnu/*.so* \ 
     2>/dev/null | sed -e s,.*/,, > /usr/base_library_list && \
-apt-get -y update && apt-get install \
+apt-get -y update && DEBIAN_FRONTEND=noninteractive apt-get install \
 curl \
 g++ \
 git \
@@ -29,7 +29,7 @@ recode \
 
 FROM commonground as armabuild_base
 # full build dependencies
-RUN apt-get -y update && apt-get install \
+RUN apt-get -y update && DEBIAN_FRONTEND=noninteractive apt-get install \
 curl \
 desktop-file-utils \
 file \
@@ -73,7 +73,7 @@ recode \
 COPY appimage/* /usr/bin/
 
 # optional: appstream
-RUN apt-get -y update && apt-get install \
+RUN apt-get -y update && DEBIAN_FRONTEND=noninteractive apt-get install \
 appstream \
 -y || true
 
@@ -105,7 +105,7 @@ RUN ./build_libxml2.sh libxml2-2.9.10 && rm ./build_libxml2.sh && \
 #USER builder
 
 # test new dependencies here
-RUN apt-get -y update && apt-get install podman -y || true
+RUN apt-get -y update && DEBIAN_FRONTEND=noninteractive apt-get install podman -y || true
 
 # ###########################
 # hack in zthread-config
@@ -113,7 +113,7 @@ RUN apt-get -y update && apt-get install podman -y || true
 
 # the source image here must match the steam one
 FROM amd64/ubuntu:16.04 as zthreadsource
-RUN apt-get -y update && apt-get install libzthread-dev -y
+RUN apt-get -y update && DEBIAN_FRONTEND=noninteractive apt-get install libzthread-dev -y
 
 FROM armabuild_base as zthreaddest
 COPY --from=zthreadsource /usr/bin/zthread-config /usr/bin/
@@ -130,7 +130,7 @@ USER builder
 
 FROM armabuild_base as armadeb_base
 # more build dependencies
-RUN apt-get -y update && apt-get install \
+RUN apt-get -y update && DEBIAN_FRONTEND=noninteractive apt-get install \
 debhelper \
 dh-systemd \
 devscripts \
@@ -187,7 +187,7 @@ zip \
 # ###########################
 
 FROM armabuild_base as armadeploy_base
-RUN apt-get -y update && apt-get install \
+RUN apt-get -y update && DEBIAN_FRONTEND=noninteractive apt-get install \
 0install-core \
 pandoc \
 -y
@@ -208,7 +208,7 @@ git config --global push.default simple
 # ###########################
 
 FROM commonground as bootstrap_ubuntu_base
-RUN apt-get -y update && apt-get install \
+RUN apt-get -y update && DEBIAN_FRONTEND=noninteractive apt-get install \
 autoconf \
 automake \
 #bison \
@@ -240,7 +240,7 @@ FROM bootstrap_ubuntu_base as armaroot_ubuntu_base
 
 # prepare for repository
 RUN apt-get -y update && \
-    apt-get install \
+    DEBIAN_FRONTEND=noninteractive apt-get install \
       apt-transport-https \
       ca-certificates \
       curl \
@@ -262,7 +262,7 @@ RUN	apt-get update -y && \
 
 # full install would be
 #RUN	apt-get update -y && \
-#	apt-get install -y docker-ce docker-ce-cli containerd.io
+#	DEBIAN_FRONTEND=noninteractive apt-get install -y docker-ce docker-ce-cli containerd.io
 
 FROM armaroot_ubuntu_base AS armaroot_ubuntu
 RUN mkdir -p /home/builder
