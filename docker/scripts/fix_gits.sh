@@ -8,11 +8,13 @@ function fix_git(){
 
     dir=${download_dir}/${name}
     pushd ${dir} || return $?
+    RETURN=0
     if ! git reset ${rev} --hard; then
         git fetch
-    git reset ${rev} --hard || return $?
-    popd
+        git reset ${rev} --hard || RETURN=$?
     fi
+    popd
+    return ${RETURN}
 }
 
 function fix_gits(){
