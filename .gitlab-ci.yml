@@ -58,8 +58,7 @@ default:
   - linux
   rules:
   - if: $CI_MERGE_REQUEST_ID
-    when: on_success
-    # when: never
+    when: never
   - if: $CI_COMMIT_REF_PROTECTED == "true"
     when: on_success
   - when: never
@@ -67,7 +66,6 @@ default:
 # template rule for job to always run, maybe on shared runners
 .merge_request:
   tags:
-  - armagetronad
   - docker
   - linux
   rules:
