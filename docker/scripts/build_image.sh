@@ -11,11 +11,12 @@ id="${sd}/../images"
 ${sd}/ensure_image.sh "$1" -d || exit $?
 
 . ${id}/digest.sh "$1" || exit $?
+. ${id}/prefer_podman.sh "$1" || exit $?
 
 touch ${id}/$2.digest.local || exit $?
 
 BASE=$1
-echo ${BASE} | grep ':' > /dev/null || BASE=${REGISTRY}$1${REFERENCE}
+echo ${BASE} | grep ':\|/' > /dev/null || BASE=${REGISTRY}$1${REFERENCE}
 
 IMAGE=$2
 

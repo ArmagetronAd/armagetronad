@@ -3,6 +3,7 @@
 # builds the root environment with docker and selected tools
 
 wd="`dirname $0`"
+. ${wd}/prefer_podman.sh || exit $?
 ${wd}/build_armabuild.sh amd64/ubuntu:16.04 armaroot_64 --target armaroot_alpine
 exit $?
 
