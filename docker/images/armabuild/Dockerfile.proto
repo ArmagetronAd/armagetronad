@@ -105,7 +105,7 @@ RUN ./build_libxml2.sh libxml2-2.9.10 && rm ./build_libxml2.sh && \
 #USER builder
 
 # test new dependencies here
-RUN apt-get -y update && DEBIAN_FRONTEND=noninteractive apt-get install podman -y || true
+RUN apt-get -y update && DEBIAN_FRONTEND=noninteractive apt-get install podman pandoc -y || true
 
 # ###########################
 # hack in zthread-config
@@ -189,7 +189,6 @@ zip \
 FROM armabuild_base as armadeploy_base
 RUN apt-get -y update && DEBIAN_FRONTEND=noninteractive apt-get install \
 0install-core \
-pandoc \
 -y
 
 FROM armadeploy_base as armadeploy
