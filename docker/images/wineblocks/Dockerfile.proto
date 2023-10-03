@@ -4,12 +4,15 @@ FROM base AS wine
 # build dependencies
 RUN apk add \
 bash \
+git \
+make \
+zip \
 wine \
 xvfb \
 --no-cache
 
 # add experimental packages here
-RUN apk add --no-cache git make zip
+#RUN apk add --no-cache
 
 #RUN adduser docker -D
 RUN chmod 6755 /usr/bin/Xvfb
