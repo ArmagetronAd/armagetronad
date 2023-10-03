@@ -9,7 +9,7 @@ xvfb \
 --no-cache
 
 # add experimental packages here
-RUN apk add --no-cache git make
+RUN apk add --no-cache git make zip
 
 #RUN adduser docker -D
 RUN chmod 6755 /usr/bin/Xvfb
