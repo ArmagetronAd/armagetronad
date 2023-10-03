@@ -22,7 +22,7 @@ if test x$CI == xtrue; then
     cp -arl . ${result}
     pushd ${result}
     EXITCODE=0
-    "$@" || EXITCODE=$?
+    $@ || EXITCODE=$?
     if test ${EXITCODE}  != 0; then
         popd
         rm -rf ${tmp}
