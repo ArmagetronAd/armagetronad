@@ -51,7 +51,7 @@ CI_windows.tag: CI_base.tag steam_windows.tag closed_regular.tag
 	touch $@
 
 # all free linux builds (so, no steam)
-CI_free.tag: CI_base.tag free.tag reformat.tag
+CI_free.tag: CI_base.tag free.tag
 	touch $@
 
 # (OBSOLETE) targets for CI merge tests, a bit leaner than a full build
@@ -878,7 +878,7 @@ deploy_ppa_trusty
 deploy_ppa_%: result.deploy_ppa_%
 	@echo Deployed $*
 
-deploy: deploy_lp deploy_scp deploy_ppa deploy_zi deploy_fp deploy_steam deploy_download deploy_itch
+deploy: deploy_lp deploy_scp deploy_zi deploy_fp deploy_steam deploy_download deploy_itch
 #deploy: deploy_scp
 #deploy: deploy_zi
 #deploy: deploy_ppa

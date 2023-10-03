@@ -7,7 +7,8 @@
 wd="`dirname $0`"
 sd="${wd}/../scripts"
 
-. ${wd}/epoch.sh
+. ${wd}/prefer_podman.sh || exit $?
+. ${wd}/epoch.sh || exit $?
 
 for E in ${EPOCH}; do
     for A in _64 _32 ""; do

@@ -4,7 +4,7 @@
 set -x
 
 Xvfb :99 -screen 1 640x480x8 -nolisten tcp &
-DISPLAY=:99
+export DISPLAY=:99
 sleep 1
 cd winsource/win32
 ./fromunix.sh || exit $?

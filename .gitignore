@@ -116,3 +116,4 @@ docker/deploy/targets.sh
 src/nTrueVersion.h
 .changetag
 fingerprint
+wget-log*

@@ -9,12 +9,14 @@ set -x
 sd=`dirname "$0"`
 id="${sd}/../images"
 
-. ${id}/epoch.sh
+. ${id}/epoch.sh || exit $?
+. ${id}/digest.sh "$1" || exit $?
+. ${id}/prefer_podman.sh "$1" || exit $?
 
 touch ${id}/$2.digest.local || exit $?
 
 BASE=$1
-if ! echo ${BASE} | grep ':' > /dev/null; then
+if ! echo ${BASE} | grep ':i\|/' > /dev/null; then
     ${sd}/ensure_image.sh "$1" -d || exit $?
     . ${id}/digest.sh "$1" || exit $?
 
