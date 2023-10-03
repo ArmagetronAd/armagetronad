@@ -16,7 +16,7 @@ EXIT=0
 gpg --import secrets/pub.gpg || EXIT=$?
 gpg --allow-secret-key-import --import secrets/sec.gpg || EXIT=$?
 rm -rf secrets/*
-test ${EXIT} = 0 || exit ${EXIT}
+test ${EXIT} = 0 || test ${EXIT} = 2 || exit ${EXIT}
 
 dd=`dirname $0`
 
