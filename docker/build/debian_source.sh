@@ -15,7 +15,7 @@ set -x
 # determine email of key owner
 #grep "public key .* imported" importlog
 #grep "public key .* imported" importlog | sed -e 's/>".*$/>/' -e 's/^.*"//' 
-MAIL=`grep "public key .* imported" importlog | sed -e 's/>".*$/>/' -e 's/^.*"//'`
+MAIL=`grep "key .* \".*<.*>.*\"" importlog | sed -e 's/>".*$/>/' -e 's/^.*"//'`
 
 SERIES=$1
 test -z ${SERIES} && SERIES=unstable
