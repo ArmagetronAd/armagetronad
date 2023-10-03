@@ -85,6 +85,10 @@ default:
   extends: .project_runner
   image: $CI_REGISTRY_IMAGE/armabuild_64@sha256:9d42acdcd065fcb65af3e21b568c1371b294434301619c31dc33bfb5563460e8
 
+.project_runner_steam_64:
+  extends: .project_runner
+  image: $CI_REGISTRY_IMAGE/armasteam_64@sha256:cfabf4dc429da47925b2b73416760434d0b0a0c1c15753207302d22b5304a7f5
+
 .project_runner_32:
   extends: .project_runner
   image: $CI_REGISTRY_IMAGE/armabuild_32@sha256:3bde444c89c6e7096c64d5fa3c5cccfbbca73145432e02f50a9139fde067539d
@@ -180,7 +184,7 @@ build_windows:
     expire_in: 1 day
 
 build_windows_steam:
-  extends: .project_runner
+  extends: .project_runner_wine
   needs:
   - build_server_steam_raw
   stage: build_main
@@ -206,7 +210,7 @@ build_debtest:
 
 # steam builds server and client in one go (the server is already pre-built), they are packed together
 build_linux_steam:
-  extends: .project_runner
+  extends: .project_runner_steam_64
   dependencies:
   - build_server_steam_raw
   stage: build_main
