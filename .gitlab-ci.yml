@@ -115,7 +115,7 @@ default:
     - ./docker/deploy/prepare_deploy.sh || exit $?
 
 .deploy_staged:
-  extends: .deploy
+  extends: .deploy_base
   environment: $STAGING_ENVIRONMENT
   dependencies:
    - build_prepare
@@ -131,7 +131,7 @@ default:
   image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:9739d570f63ab5ad1b6aff631089405da4d78c94ff1cfc5d09d2228d67661961
 
 .deploy_final:
-  extends: .deploy
+  extends: .deploy_base
   environment: $FINAL_ENVIRONMENT
   dependencies:
    - build_prepare
