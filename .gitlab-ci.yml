@@ -306,7 +306,7 @@ build_collect:
   extends: .project_runner
   stage: build_collect
   script:
-    - gitlab_build/docker/build/make_ci.sh debtest.tag CI || exit $?
+    - gitlab_build/docker/build/make_ci.sh debtest.tag CI reformat.tag || exit $?
     - rm -rf src
   artifacts:
     untracked: true
