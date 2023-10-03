@@ -114,6 +114,11 @@ default:
     - ./docker/scripts/fix_gits.sh || exit $?
     - ./docker/deploy/prepare_deploy.sh || exit $?
 
+.deploy_ppa:
+  extends: .deploy
+  image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:9739d570f63ab5ad1b6aff631089405da4d78c94ff1cfc5d09d2228d67661961
+
+
 # only run on protected branches or merge requests
 workflow:
   rules:
@@ -281,11 +286,23 @@ deploy_staged:
    - build_prepare
    - build_collect
   stage: stage
-
   script:
     # now enter the docker build directory and just invoke make there
     - cd gitlab_build/docker/build
     - make staged_deploy -O -j$(nproc) -k
+
+deploy_staged_ppa:
+  extends: .deploy_ppa
+  environment: $STAGING_ENVIRONMENT
+  dependencies:
+   - build_prepare
+   - build_collect
+  stage: stage
+  script:
+    # now enter the docker build directory and just invoke make there
+    - cd gitlab_build/docker/build
+    - make staged_deploy_ppa -O -j$(nproc) -k
+
 
 # delay full deployment
 delay_release:
@@ -309,10 +326,23 @@ deploy_release:
   stage: deploy
   script:
     - docker/scripts/obsolete.sh || exit 0
-
     # now enter the docker build directory and just invoke make there
     - cd gitlab_build/docker/build
     - make unstaged_deploy -O -j$(nproc) -k
+
+deploy_release_ppa:
+  extends: .deploy_ppa
+  environment: $FINAL_ENVIRONMENT
+  dependencies:
+   - build_prepare
+   - build_collect
+  stage: deploy
+  script:
+    - docker/scripts/obsolete.sh || exit 0
+    # now enter the docker build directory and just invoke make there
+    - cd gitlab_build/docker/build
+    - make unstaged_deploy_ppa -O -j$(nproc) -k
+
 
 # post-build tests that require our own runners (or a docker upgrade on GitLab)
 post_test:
