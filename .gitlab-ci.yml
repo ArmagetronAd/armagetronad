@@ -314,7 +314,7 @@ build_collect:
 
 # deploy to staged environment
 deploy_staged_external:
-  stage: stage
+  stage: pre_stage
   extends: .deploy_staged
   variables:
     TARGET: "deploy_external"
