@@ -10,7 +10,9 @@ wd="`dirname $0`"
 
 function store(){
     logfile=`tempfile 2>/dev/null` || logfile=`mktemp` || exit $?
-    if ! docker push ${REGISTRY}$1:${EPOCH} --digestfile ${wd}/$1.digest; then
+    if docker push --help | grep digestfile > /dev/null; then
+        docker push ${REGISTRY}$1:${EPOCH} --digestfile ${wd}/$1.digest
+    else
         docker push ${REGISTRY}$1:${EPOCH} | tee ${logfile} || exit $?
         grep "digest:" ${logfile} || exit 0
         grep "digest:" ${logfile} | sed -e "s/.*digest: //" -e "s/ .*//" > ${wd}/$1.digest
@@ -22,20 +24,22 @@ function store(){
 }
 
 function upload_image(){
-    ${wd}/../scripts/ensure_image.sh $1
+    image=$1
+    shift
+    ${wd}/../scripts/ensure_image.sh ${image} "$@"
     wait
-    store $1 &
+    store ${image} &
 }
 
-upload_image armaroot_64
+upload_image armabuild_64 "$@"
+upload_image armabuild_32 "$@"
+# upload_image armaroot_64 "$@"
 upload_image armawineblocks
-upload_image armasteam_64
-upload_image armabuild_64
-upload_image armabuild_32
-upload_image armadeb_64
-upload_image armadeploy_64
-upload_image armalpine_32
-upload_image steamcmd
+upload_image armasteam_64 "$@"
+upload_image armadeb_64 "$@"
+upload_image armadeploy_64 "$@"
+upload_image armalpine_32 "$@"
+upload_image steamcmd "$@"
 wait
 
 
