@@ -4,6 +4,7 @@ variables:
   #DOCKER_HOST: ""
   STAGING_ENVIRONMENT: "invalid"
   FINAL_ENVIRONMENT: "invalid"
+  PYTHONIOENCODING: "UTF-8"
 
 stages:
   - minimal_build
