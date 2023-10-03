@@ -10,13 +10,9 @@ EXIT=0
 
 # first make run
 if ! ${MAKE} $*; then
-    # deployment occasionally fails due to network problems, wait a bit and try again
-    sleep 300
-    if ! ${MAKE} $*; then
-	sleep 900
+    # deployment occasionally fails due to network problems, try right again 
 	# last run without fancy arguments
 	make $* || EXIT=$?
-    fi
 fi
 
 # reset deployment targets
