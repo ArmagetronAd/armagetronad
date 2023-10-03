@@ -127,7 +127,7 @@ default:
     - cd gitlab_build/docker/build
     - make staged_${TARGET} -O -j$(nproc) -k
 
-.deploy_ppa_staged:
+.deploy_staged_ppa:
   extends: .deploy_staged
   image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:a4767257deab037d739ac2c56057029b2aa125bb10acde474a97d2277aa6d3de
 
@@ -311,13 +311,20 @@ build_collect:
     expire_in: 1 day
 
 # deploy to staged environment
-deploy_staged:
+deploy_staged_external:
   extends: .deploy_staged
   variables:
-    TARGET: "deploy"
+    TARGET: "deploy_external"
+
+deploy_staged_ours:
+  needs: deploy_final_external
+  extends: .deploy_staged
+  variables:
+    TARGET: "deploy_ours"
 
 deploy_staged_ppa:
-  extends: .deploy_ppa_staged
+  needs: deploy_final_external
+  extends: .deploy_staged_ppa
   variables:
     TARGET: "deploy_ppa"
 
@@ -334,12 +341,20 @@ delay_release:
   script: [""]
 
 # do the actual release; manually for final releases, delayed to avoid spam for everyone else
-deploy_final:
+deploy_final_external:
   extends: .deploy_final
   variables:
     TARGET: "deploy"
 
+deploy_final_ours:
+  needs: deploy_final_external
+  extends: .deploy_final
+  variables:
+    TARGET: "deploy_ours"
+
+
 deploy_final_ppa:
+  needs: deploy_final_external
   extends: .deploy_ppa_final
   variables:
     TARGET: "deploy_ppa"
