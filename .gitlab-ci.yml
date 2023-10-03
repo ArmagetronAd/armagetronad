@@ -314,12 +314,12 @@ build_collect:
 
 # deploy to staged environment
 deploy_staged_external:
+  stage: stage
   extends: .deploy_staged
   variables:
     TARGET: "deploy_external"
 
 deploy_staged_ours:
-  stage: pre_stage
   extends: .deploy_staged
   variables:
     TARGET: "deploy_ours"
@@ -377,7 +377,7 @@ post_test:
 # pack up the downloadable build files in one handy artifact
 pack:
   extends: .project_runner
-  stage: stage
+  stage: pre_stage
   needs:
    - build_collect
   script: [""]
