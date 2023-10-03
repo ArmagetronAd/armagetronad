@@ -173,6 +173,9 @@ recode \
 zip \
 --no-cache
 
+# experimental new packages go here
+# RUN apk add --no-cache pandoc
+
 #FROM armaroot_alpine_base AS armaroot_alpine
 # set up builder user
 #RUN useradd builder; mkdir -p /home/builder; chown builder:builder /home/builder # && chmod 777 /home/builder

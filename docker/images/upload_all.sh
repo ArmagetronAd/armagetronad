@@ -26,20 +26,20 @@ function store(){
 function upload_image(){
     image=$1
     shift
-    ${wd}/../scripts/ensure_image.sh ${image} "$@"
+    ${wd}/../scripts/ensure_image.sh ${image} "$@" || exit $?
     wait
     store ${image} &
 }
 
-upload_image armabuild_64 $@
-upload_image armabuild_32 $@
-upload_image armaroot_64 $@
-upload_image armawineblocks $@
-#upload_image armasteam_64 $@
-upload_image armadeb_64 $@
-upload_image armadeploy_64 $@
-#upload_image armalpine_32 $@
-#upload_image steamcmd $@
+upload_image armabuild_64 $@ || exit $?
+upload_image armabuild_32 $@ || exit $?
+upload_image armaroot_64 $@ || exit $?
+upload_image armawineblocks $@ || exit $?
+#upload_image armasteam_64 $@ || exit $?
+upload_image armadeb_64 $@ || exit $?
+upload_image armadeploy_64 $@ || exit $?
+#upload_image armalpine_32 $@ || exit $?
+#upload_image steamcmd $@ || exit $?
 wait
 
 
