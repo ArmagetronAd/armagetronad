@@ -6,14 +6,6 @@ variables:
   STAGING_ENVIRONMENT: "invalid"
   FINAL_ENVIRONMENT: "invalid"
 
-services:
-  # required for shared runners, does not hurt for our runner (just some diagnostic complaints)
-  - name: docker:19.03.0-dind
-    alias: docker
-variables:
-  DOCKER_DRIVER: overlay2
-  DOCKER_TLS_CERTDIR: ""
-
 stages:
   - minimal_build
   - build_prepare
@@ -25,7 +17,7 @@ stages:
   - deploy
 
 default:
-  image: registry.gitlab.com/armagetronad/armagetronad/armaroot_64@sha256:c45680095075ba85cc33a4dae7034738a3e7f828d6eb9d3613c6e6091987e481
+  image: $CI_REGISTRY_IMAGE/armaroot_64@sha256:87bde9b9410b26f04d305290cff9484dbc07b26b12c9c0c92995bf9886a5b9f3
   interruptible: true
   retry:
     max: 1
@@ -80,9 +72,37 @@ default:
   rules:
   - when: on_success
 
+# keep image dependencies here
+.merge_request_64:
+  extends: .merge_request
+  image: $CI_REGISTRY_IMAGE/armabuild_64@sha256:25b02594c0e824af4d5d49a10aef0bcab4a4bf5944e1ca1cad02e8867acdd5a2
+
+.merge_request_32:
+  extends: .merge_request
+  image: $CI_REGISTRY_IMAGE/armabuild_32@sha256:6652c15a1a9a0bcbda60e6f7d6048a6fc74bb60cef4ab486ba0ce81e4b1d3e68
+
+.project_runner_64:
+  extends: .project_runner
+  image: $CI_REGISTRY_IMAGE/armabuild_64@sha256:25b02594c0e824af4d5d49a10aef0bcab4a4bf5944e1ca1cad02e8867acdd5a2
+
+.project_runner_32:
+  extends: .project_runner
+  image: $CI_REGISTRY_IMAGE/armabuild_32@sha256:6652c15a1a9a0bcbda60e6f7d6048a6fc74bb60cef4ab486ba0ce81e4b1d3e68
+
+.project_runner_wine:
+  extends: .project_runner
+  image: $CI_REGISTRY_IMAGE/armawineblocks@sha256:57c655e9eb43b283f426eac7227cd6664d9d497e2c52ef731fdbab01ac4d2cbe
+
+.project_runner_debian:
+  extends: .project_runner
+  image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:9739d570f63ab5ad1b6aff631089405da4d78c94ff1cfc5d09d2228d67661961
+
+
 # template rule for deployment jobs
 .deploy:
+  image: $CI_REGISTRY_IMAGE/armadeploy_64@sha256:8acfad00cdaca7979b10db894335353323c312ff7b18c78bb55bf6b9fb4d3fe8
   interruptible: false
+  resource_group: deployment # only ever run one deployment job at a time
   tags:
    - armagetronad_deploy
   rules:
@@ -125,7 +145,7 @@ build_prepare:
 
 build_server_32_raw:
   stage: build_base
-  extends: .merge_request
+  extends: .merge_request_32
   script:
     - gitlab_build/docker/build/make_ci.sh -k result.build_server_32
   after_script:
@@ -148,7 +168,7 @@ build_server_steam_raw:
 # Windows builds are worst because they have an additional layer of emulation,
 # are not parallelized and are client and server build in one.
 build_windows:
-  extends: .project_runner
+  extends: .project_runner_wine
   needs:
   - build_server_32_raw
   stage: build_main
@@ -173,7 +193,7 @@ build_windows_steam:
 
 # debtest is faster, but also not paralellized
 build_debtest:
-  extends: .project_runner
+  extends: .project_runner_debian
   dependencies:
   - build_prepare
   stage: build_main
@@ -198,7 +218,7 @@ build_linux_steam:
     expire_in: 1 day
 
 build_client_64:
-  extends: .merge_request
+  extends: .merge_request_64
   needs:
   - build_prepare
   stage: build_main
@@ -210,7 +230,7 @@ build_client_64:
     expire_in: 1 day
 
 build_client_32:
-  extends: .project_runner
+  extends: .project_runner_32
   dependencies:
   - build_prepare
   stage: build_main
@@ -222,7 +242,7 @@ build_client_32:
     expire_in: 1 day
 
 build_server_64:
-  extends: .project_runner
+  extends: .project_runner_64
   dependencies:
   - build_prepare
   stage: build_main
@@ -235,7 +255,7 @@ build_server_64:
 
 # this one is special, it can rely on previous build work
 build_server_32:
-  extends: .project_runner
+  extends: .project_runner_32
   dependencies:
   - build_server_32_raw
   stage: build_main
@@ -402,6 +422,13 @@ deploy_gitlab:
 post_test:
   extends: .project_runner
   stage: build_collect
+  services:
+    # required for shared runners, does not hurt for our runner (just some diagnostic complaints)
+    - name: docker:19.03.0-dind
+      alias: docker
+  variables:
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
   script:
     - make -C gitlab_build/docker/build appimagetests_ci appimagetests_extra || exit $?
 

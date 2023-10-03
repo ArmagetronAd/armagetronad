@@ -17,6 +17,7 @@ else
 fi
 id=${wd}/images
 
+. ${wd}/images/prefer_podman.sh || exit $?
 . ${id}/digest.sh "${image}" || exit $?
 . ${id}/epoch.sh || exit $?
 

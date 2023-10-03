@@ -62,6 +62,9 @@ libx11-dev \
 #x11proto-core-dev \
 libzthread-dev \
 pkg-config \
+autoconf \
+automake \
+python3 \
 recode \
 #zlib1g-dev \
 -y
@@ -98,8 +101,11 @@ RUN ./build_libxml2.sh libxml2-2.9.10 && rm ./build_libxml2.sh && \
     useradd builder && mkdir -p /home/builder && chown builder:builder /home/builder # && chmod 777 /home/builder
 
 # set up rest of builder user
-WORKDIR /home/builder
-USER builder
+#WORKDIR /home/builder
+#USER builder
+
+# test new dependencies here
+RUN apt-get -y update && apt-get install podman -y || true
 
 # ###########################
 # hack in zthread-config
@@ -137,9 +143,9 @@ lptools \
 
 FROM armadeb_base as armadeb
 # set up builder user
-RUN useradd builder && mkdir -p /home/builder && chown builder:builder /home/builder # && chmod 777 /home/builder
-WORKDIR /home/builder
-USER builder
+#RUN useradd builder && mkdir -p /home/builder && chown builder:builder /home/builder # && chmod 777 /home/builder
+#WORKDIR /home/builder
+#USER builder
 
 # ###########################
 # bootstrap dependencies (ubuntu base)
@@ -167,6 +173,9 @@ recode \
 zip \
 --no-cache
 
+# experimental new packages go here
+# RUN apk add --no-cache pandoc
+
 #FROM armaroot_alpine_base AS armaroot_alpine
 # set up builder user
 #RUN useradd builder; mkdir -p /home/builder; chown builder:builder /home/builder # && chmod 777 /home/builder
@@ -185,13 +194,13 @@ pandoc \
 
 FROM armadeploy_base as armadeploy
 # set up builder user
-RUN useradd builder && mkdir -p /home/builder && chown builder:builder /home/builder # && chmod 777 /home/builder
-WORKDIR /home/builder
-USER builder
+#RUN useradd builder && mkdir -p /home/builder && chown builder:builder /home/builder # && chmod 777 /home/builder
+#WORKDIR /home/builder
+#USER builder
 # pre-load 0publish and feedlint
 RUN export TERM=linux && \
-0launch -c 'http://0install.net/2006/interfaces/0publish' --version && \
-0launch -c 'http://0install.net/2007/interfaces/FeedLint.xml' --version && \
+yes Y | 0launch -c 'http://0install.net/2006/interfaces/0publish' --version && \
+yes Y | 0launch -c 'http://0install.net/2007/interfaces/FeedLint.xml' --version && \
 git config --global push.default simple
 
 # ###########################
