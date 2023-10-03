@@ -75,32 +75,32 @@ default:
 # keep image dependencies here
 .merge_request_64:
   extends: .merge_request
-  image: $CI_REGISTRY_IMAGE/armabuild_64@sha256:25b02594c0e824af4d5d49a10aef0bcab4a4bf5944e1ca1cad02e8867acdd5a2
+  image: $CI_REGISTRY_IMAGE/armabuild_64@sha256:9d42acdcd065fcb65af3e21b568c1371b294434301619c31dc33bfb5563460e8
 
 .merge_request_32:
   extends: .merge_request
-  image: $CI_REGISTRY_IMAGE/armabuild_32@sha256:6652c15a1a9a0bcbda60e6f7d6048a6fc74bb60cef4ab486ba0ce81e4b1d3e68
+  image: $CI_REGISTRY_IMAGE/armabuild_32@sha256:3bde444c89c6e7096c64d5fa3c5cccfbbca73145432e02f50a9139fde067539d
 
 .project_runner_64:
   extends: .project_runner
-  image: $CI_REGISTRY_IMAGE/armabuild_64@sha256:25b02594c0e824af4d5d49a10aef0bcab4a4bf5944e1ca1cad02e8867acdd5a2
+  image: $CI_REGISTRY_IMAGE/armabuild_64@sha256:9d42acdcd065fcb65af3e21b568c1371b294434301619c31dc33bfb5563460e8
 
 .project_runner_32:
   extends: .project_runner
-  image: $CI_REGISTRY_IMAGE/armabuild_32@sha256:6652c15a1a9a0bcbda60e6f7d6048a6fc74bb60cef4ab486ba0ce81e4b1d3e68
+  image: $CI_REGISTRY_IMAGE/armabuild_32@sha256:3bde444c89c6e7096c64d5fa3c5cccfbbca73145432e02f50a9139fde067539d
 
 .project_runner_wine:
   extends: .project_runner
-  image: $CI_REGISTRY_IMAGE/armawineblocks@sha256:57c655e9eb43b283f426eac7227cd6664d9d497e2c52ef731fdbab01ac4d2cbe
+  image: $CI_REGISTRY_IMAGE/armawineblocks@sha256:f70849ff0ae55d2da655a0f2adacbe69df3743ae2b04d38a1b902bf23fa98a7d
 
 .project_runner_debian:
   extends: .project_runner
-  image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:9739d570f63ab5ad1b6aff631089405da4d78c94ff1cfc5d09d2228d67661961
+  image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:c028868f96d7a90b95885d1248be4cfbd2f104dcec793292aeee135c551c46cc
 
 
 # template rule for deployment jobs
 .deploy:
-  image: $CI_REGISTRY_IMAGE/armadeploy_64@sha256:8acfad00cdaca7979b10db894335353323c312ff7b18c78bb55bf6b9fb4d3fe8
+  image: $CI_REGISTRY_IMAGE/armadeploy_64@sha256:665a2c30affbf7c22bb7571171a085796e85c6386ca5c30a80597bc3cc88433f
   interruptible: false
   resource_group: deployment # only ever run one deployment job at a time
   tags:
