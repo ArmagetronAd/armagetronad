@@ -16,7 +16,7 @@ stages:
   - deploy
 
 default:
-  image: $CI_REGISTRY_IMAGE/armabuild_64@sha256:25b02594c0e824af4d5d49a10aef0bcab4a4bf5944e1ca1cad02e8867acdd5a2
+  image: $CI_REGISTRY_IMAGE/armaroot_64@sha256:87bde9b9410b26f04d305290cff9484dbc07b26b12c9c0c92995bf9886a5b9f3
   interruptible: true
   retry:
     max: 1
