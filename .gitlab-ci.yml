@@ -27,8 +27,11 @@ default:
   # common before script: bootstrap, configure, make dist, prepare docker builds
   before_script:
     - if ! test -d gitlab_build; then
+    -  set
+    -  pwd
     -  which docker && docker help > /dev/null
     -  touch timestamp.tag
+    -  ls -al
     -  test "x${ARMAGETRONAD_FAKERELEASE}" == "x" && export ARMAGETRONAD_FAKERELEASE=false
     -  test -r configure || ./bootstrap.sh
     -  cat version.m4
