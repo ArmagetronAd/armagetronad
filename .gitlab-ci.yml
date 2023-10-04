@@ -206,7 +206,7 @@ build_server_32_raw:
 
 build_server_steam_raw:
   stage: build_base
-  extends: .project_runner
+  extends: .project_runner_steam_64
   script:
     - gitlab_build/docker/build/make_ci.sh -k result.build_server_steam
   artifacts:
