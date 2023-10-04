@@ -32,7 +32,6 @@ function upload_image(){
 }
 
 upload_image armabuild_64 $@ || exit $?
-upload_image armabuild_32 $@ || exit $?
 upload_image armaroot_64 $@ || exit $?
 upload_image armawineblocks $@ || exit $?
 upload_image armadeb_64 $@ || exit $?
@@ -40,6 +39,8 @@ upload_image armadeploy_64 $@ || exit $?
 
 ${wd}/../scripts/ensure_image.sh armasteam_64 $@ || exit $?
 ${wd}/../scripts/ensure_image.sh steamcmd $@ || exit $?
+
+upload_image armabuild_32 $@ || exit $?
 
 #upload_image armalpine_32 $@ || exit $?
 wait
