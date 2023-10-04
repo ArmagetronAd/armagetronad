@@ -694,7 +694,8 @@ steam_windows.tag: steamdirs/steam_windows result.winbuild_steam
 steam_macos.tag: steamdirs/steam_macos
 	echo > $@
 
-steam.tag: steam_windows.tag steam_linux.tag steam_macos.tag
+# TEMP REMOVE DEPENDENCY: steam_macos.tag
+steam.tag: steam_windows.tag steam_linux.tag
 	echo > $@
 .PHONY: steam steam_windows steam_linux
 
