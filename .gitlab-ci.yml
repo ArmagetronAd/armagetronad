@@ -139,6 +139,10 @@ default:
   extends: .deploy_staged
   image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:c0d45ff7bf90a89a0bd10006ba9e40b5aff2f1173842cfcdc6a97f4cad8b8267
 
+.deploy_staged_steam:
+  extends: .deploy_staged
+  image: $CI_REGISTRY_IMAGE/steamcmd@sha256:cae74441f7c14baeb1168b01cb68f76e37eaefe3d278b32f0c1eb563d7ab82d0
+
 .deploy_final:
   extends: .deploy_base
   environment: $FINAL_ENVIRONMENT
@@ -158,6 +162,9 @@ default:
   extends: .deploy_final
   image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:c0d45ff7bf90a89a0bd10006ba9e40b5aff2f1173842cfcdc6a97f4cad8b8267
 
+.deploy_final_steam:
+  extends: .deploy_final
+  image: $CI_REGISTRY_IMAGE/steamcmd@sha256:cae74441f7c14baeb1168b01cb68f76e37eaefe3d278b32f0c1eb563d7ab82d0
 
 # only run on protected branches or merge requests
 workflow:
@@ -402,6 +409,17 @@ deploy_final_ppa:
   variables:
     TARGET: "deploy_ppa"
 
+deploy_gitlab:
+  extends: .deploy_final
+  variables:
+    TARGET: "deploy_gitlab"
+
+deploy_steam:
+  extends: .deploy_final_steam
+  variables:
+    TARGET: "deploy_steam"
+
+#
 #
 # test build docker image (hopefully also initiating the cache for later deployment)
 # does not really need debtest, but we want to let the Windows builds go first
@@ -450,27 +468,6 @@ deploy_docker:
     # build
     - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY 2>&1 | grep -v WARNING\|credential || exit $?
     - make -C gitlab_build/docker/build unstaged_deploy_docker.tag || exit $?
-
-# deploy build to Gitlab
-deploy_gitlab:
-  extends: .project_runner
-  environment: $FINAL_ENVIRONMENT
-  stage: deploy
-  dependencies:
-   - build_prepare
-   - build_collect
-  script:
-    # test whether we're current
-    - docker/scripts/obsolete.sh || exit 0
-
-    # deploy
-    - make -C gitlab_build/docker/build unstaged_deploy_gitlab || exit $?
-
-
-deploy_final_ppa:
-  extends: .deploy_final_ppa
-  variables:
-    TARGET: "deploy_ppa"
 
 # post-build tests that require our own runners (or a docker upgrade on GitLab)
 post_test:
