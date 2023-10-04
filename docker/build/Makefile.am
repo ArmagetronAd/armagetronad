@@ -435,9 +435,7 @@ test.appimage_client_64_fedora_latest: upload/$(APPIMAGE_CLIENT_64)
 test.appimage_client_64_fedora_oldest: upload/$(APPIMAGE_CLIENT_64)
 
 test.appimage_server_64_centos_latest: upload/$(APPIMAGE_SERVER_64)
-test.appimage_server_64_centos_oldest: upload/$(APPIMAGE_SERVER_64)
 test.appimage_client_64_centos_latest: upload/$(APPIMAGE_CLIENT_64)
-test.appimage_client_64_centos_oldest: upload/$(APPIMAGE_CLIENT_64)
 
 test.appimage_server_32_debian_latest: upload/$(APPIMAGE_SERVER_32)
 test.appimage_server_32_debian_oldest: upload/$(APPIMAGE_SERVER_32)
