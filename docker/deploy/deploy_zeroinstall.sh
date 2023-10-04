@@ -12,6 +12,7 @@ gpg --import secrets/pub.gpg || EXIT=$?
 gpg --allow-secret-key-import --import secrets/sec.gpg || EXIT=$?
 rm -rf secrets/*
 test ${EXIT} = 0 || test ${EXIT} = 2 || exit ${EXIT}
+EXIT=0
 
 set -x
 

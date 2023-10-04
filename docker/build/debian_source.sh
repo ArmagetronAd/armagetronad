@@ -9,6 +9,7 @@ gpg --import pub.gpg 2>&1 | tee importlog || EXIT=$?
 gpg --allow-secret-key-import --import sec.gpg || EXIT=$?
 rm -rf *.gpg
 test ${EXIT} = 0 || test ${EXIT} = 2 || exit ${EXIT}
+EXIT=0
 
 set -x
 
