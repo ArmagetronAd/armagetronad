@@ -206,7 +206,7 @@ build_server_32_raw:
 
 build_server_steam_raw:
   stage: build_base
-  extends: .project_runner
+  extends: .project_runner_steam_64
   script:
     - gitlab_build/docker/build/make_ci.sh -k result.build_server_steam
   artifacts:
@@ -331,8 +331,6 @@ build_macos:
   stage: build_main
   rules:
   - if: $CI_MERGE_REQUEST_ID
-    when: never
-  - if: '$CI_COMMIT_BRANCH =~ /legacy.*/'
     when: never
   - if: $CI_COMMIT_REF_PROTECTED == "true"
     when: on_success
