@@ -744,7 +744,7 @@ result.deploy_%: context.deploy_%
 	echo > $@
 
 # special case steam: run in steamcmd image
-context.deploy_steam: context.deploy_base_steam ${srcdir}/../deploy/steamcontentbuilder/*/* steam.tag deploy_essential
+context.deploy_steam: context.deploy_base_steam ${srcdir}/../deploy/steamcontentbuilder/*/* steam.tag
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' ${srcdir}/../deploy/steamcontentbuilder
 	sed -i $@.dir/steamcontentbuilder/scripts/app_build_1306180.vdf -e "s/BUILD_DESCRIPTION/$(STEAM_PACKAGE_TITLE)$(PACKAGE_TITLE_SUFFIX) $(PACKAGE_VERSION)/"
 	mkdir -p $@.dir/steamcontentbuilder/content $@.dir/steamcontentbuilder/output
