@@ -5,6 +5,7 @@ variables:
   HAS_ARMADEPLOY: "false"
   STAGING_ENVIRONMENT: "invalid"
   FINAL_ENVIRONMENT: "invalid"
+  PYTHONIOENCODING: "UTF-8"
 
 stages:
   - minimal_build
@@ -13,7 +14,9 @@ stages:
   - build_main
   - build_collect
   - test
+  - pre_stage
   - stage
+  - pre_deploy
   - deploy
 
 default:
@@ -75,15 +78,15 @@ default:
 # keep image dependencies here
 .merge_request_64:
   extends: .merge_request
-  image: $CI_REGISTRY_IMAGE/armabuild_64@sha256:9d42acdcd065fcb65af3e21b568c1371b294434301619c31dc33bfb5563460e8
+  image: $CI_REGISTRY_IMAGE/armabuild_64@sha256:9ad315df60923db7527a33019c5e9dc069b69666440c028bc165d12b811a69e5
 
 .merge_request_32:
   extends: .merge_request
-  image: $CI_REGISTRY_IMAGE/armabuild_32@sha256:3bde444c89c6e7096c64d5fa3c5cccfbbca73145432e02f50a9139fde067539d
+  image: $CI_REGISTRY_IMAGE/armabuild_32@sha256:cc7ad35de62d6f80e2c6864d2557e45afc46f0847e2e9d1e7766944ecb97de0b
 
 .project_runner_64:
   extends: .project_runner
-  image: $CI_REGISTRY_IMAGE/armabuild_64@sha256:9d42acdcd065fcb65af3e21b568c1371b294434301619c31dc33bfb5563460e8
+  image: $CI_REGISTRY_IMAGE/armabuild_64@sha256:9ad315df60923db7527a33019c5e9dc069b69666440c028bc165d12b811a69e5
 
 .project_runner_steam_64:
   extends: .project_runner
@@ -91,7 +94,7 @@ default:
 
 .project_runner_32:
   extends: .project_runner
-  image: $CI_REGISTRY_IMAGE/armabuild_32@sha256:3bde444c89c6e7096c64d5fa3c5cccfbbca73145432e02f50a9139fde067539d
+  image: $CI_REGISTRY_IMAGE/armabuild_32@sha256:cc7ad35de62d6f80e2c6864d2557e45afc46f0847e2e9d1e7766944ecb97de0b
 
 .project_runner_wine:
   extends: .project_runner
@@ -99,12 +102,13 @@ default:
 
 .project_runner_debian:
   extends: .project_runner
-  image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:c028868f96d7a90b95885d1248be4cfbd2f104dcec793292aeee135c551c46cc
+  image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:c0d45ff7bf90a89a0bd10006ba9e40b5aff2f1173842cfcdc6a97f4cad8b8267
 
 
 # template rule for deployment jobs
-.deploy:
-  image: $CI_REGISTRY_IMAGE/armadeploy_64@sha256:665a2c30affbf7c22bb7571171a085796e85c6386ca5c30a80597bc3cc88433f
+.deploy_base:
+  retry: 2 # deployments can fail temporarily for a million reasons
+  image: $CI_REGISTRY_IMAGE/armadeploy_64@sha256:e7a24cdec809941e2fae935f1039b9c0dc4bce0bb3288c28dc62bb5e72b4aee8
   interruptible: false
   resource_group: deployment # only ever run one deployment job at a time
   tags:
@@ -119,10 +123,44 @@ default:
     - ./docker/scripts/fix_gits.sh || exit $?
     - ./docker/deploy/prepare_deploy.sh || exit $?
 
-.deploy_ppa:
-  extends: .deploy
-  image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:9739d570f63ab5ad1b6aff631089405da4d78c94ff1cfc5d09d2228d67661961
+.deploy_staged:
+  extends: .deploy_base
+  environment: $STAGING_ENVIRONMENT
+  dependencies:
+   - build_prepare
+   - build_collect
+  stage: stage
+  script:
+    # now enter the docker build directory and just invoke make there
+    - cd gitlab_build/docker/build
+    - make staged_${TARGET} -O -j$(nproc) -k
 
+.deploy_staged_ppa:
+  extends: .deploy_staged
+  image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:c0d45ff7bf90a89a0bd10006ba9e40b5aff2f1173842cfcdc6a97f4cad8b8267
+
+.deploy_final:
+  extends: .deploy_base
+  environment: $FINAL_ENVIRONMENT
+  dependencies:
+   - build_prepare
+   - build_collect
+  stage: deploy
+  script:
+    # check that no later pipeline already started
+    - docker/scripts/obsolete.sh || exit 0
+
+    # now enter the docker build directory and just invoke make there
+    - cd gitlab_build/docker/build
+    - make unstaged_${TARGET} -O -j$(nproc) -k
+
+.deploy_final_ppa:
+  extends: .deploy_final
+  image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:c0d45ff7bf90a89a0bd10006ba9e40b5aff2f1173842cfcdc6a97f4cad8b8267
+
+.deploy_final_steam:
+  extends: .deploy_final
+  image: $CI_REGISTRY_IMAGE/steamcmd@sha256:68a7bedb886d9b35c0caac70f42cd94ac3aaa8af5513fab41fca18b41a05f00a
 
 # only run on protected branches or merge requests
 workflow:
@@ -294,6 +332,8 @@ build_macos:
   rules:
   - if: $CI_MERGE_REQUEST_ID
     when: never
+  - if: '$CI_COMMIT_BRANCH =~ /legacy.*/'
+    when: never
   - if: $CI_COMMIT_REF_PROTECTED == "true"
     when: on_success
   - when: never
@@ -308,10 +348,10 @@ build_macos:
     expire_in: 1 day
     
 build_collect:
-  extends: .project_runner
+  extends: .project_runner_64
   stage: build_collect
   script:
-    - gitlab_build/docker/build/make_ci.sh debtest.tag CI || exit $?
+    - gitlab_build/docker/build/make_ci.sh debtest.tag CI reformat.tag || exit $?
     - rm -rf src
      # consider mac builds newer than anything else, they must not be redone
     - if test -d gitlab_build/docker/build/macOS; then touch gitlab_build/docker/build/macOS/*; fi
@@ -320,34 +360,25 @@ build_collect:
     expire_in: 1 day
 
 # deploy to staged environment
-deploy_staged:
-  extends: .deploy
-  environment: $STAGING_ENVIRONMENT
-  dependencies:
-   - build_prepare
-   - build_collect
-  stage: stage
-  script:
-    # now enter the docker build directory and just invoke make there
-    - cd gitlab_build/docker/build
-    - make staged_deploy -O -j$(nproc) -k
+deploy_staged_external:
+  stage: pre_stage
+  extends: .deploy_staged
+  variables:
+    TARGET: "deploy_external"
+
+deploy_staged_ours:
+  extends: .deploy_staged
+  variables:
+    TARGET: "deploy_ours"
 
 deploy_staged_ppa:
-  extends: .deploy_ppa
-  environment: $STAGING_ENVIRONMENT
-  dependencies:
-   - build_prepare
-   - build_collect
-  stage: stage
-  script:
-    # now enter the docker build directory and just invoke make there
-    - cd gitlab_build/docker/build
-    - make staged_deploy_ppa -O -j$(nproc) -k
-
+  extends: .deploy_staged_ppa
+  variables:
+    TARGET: "deploy_ppa"
 
 # delay full deployment
 delay_release:
-  dependencies: []
+  needs: []
   stage: stage
   rules:
   - if: '$CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_BRANCH'
@@ -358,34 +389,36 @@ delay_release:
   script: [""]
 
 # do the actual release; manually for final releases, delayed to avoid spam for everyone else
-deploy_release:
-  extends: .deploy
-  environment: $FINAL_ENVIRONMENT
-  dependencies:
-   - build_prepare
-   - build_collect
-  stage: deploy
-  script:
-    # test whether we're current
-    - docker/scripts/obsolete.sh || exit 0
-    # now enter the docker build directory and just invoke make there
-    - cd gitlab_build/docker/build
-    - rm -rf result.appimage_* context.appimage_* # remake appimages, now we can sign them
-    - make unstaged_deploy -O -j$(nproc) -k
+deploy_final_external:
+  stage: pre_deploy
+  extends: .deploy_final
+  variables:
+    TARGET: "deploy_external"
 
-deploy_release_ppa:
-  extends: .deploy_ppa
-  environment: $FINAL_ENVIRONMENT
-  dependencies:
-   - build_prepare
-   - build_collect
-  stage: deploy
-  script:
-    - docker/scripts/obsolete.sh || exit 0
-    # now enter the docker build directory and just invoke make there
-    - cd gitlab_build/docker/build
-    - make unstaged_deploy_ppa -O -j$(nproc) -k
+deploy_steam:
+  # temp: deploy earlier (REMOVE LATER)
+  stage: pre_stage
+  extends: .deploy_final_steam
+  variables:
+    TARGET: "deploy_steam"
 
+deploy_final_ours:
+  extends: .deploy_final
+  variables:
+    TARGET: "deploy_ours"
+
+deploy_final_ppa:
+  extends: .deploy_final_ppa
+  variables:
+    TARGET: "deploy_ppa"
+
+deploy_gitlab:
+  extends: .deploy_final
+  variables:
+    TARGET: "deploy_gitlab"
+
+#
+#
 # test build docker image (hopefully also initiating the cache for later deployment)
 # does not really need debtest, but we want to let the Windows builds go first
 build_docker:
@@ -434,24 +467,9 @@ deploy_docker:
     - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY 2>&1 | grep -v WARNING\|credential || exit $?
     - make -C gitlab_build/docker/build unstaged_deploy_docker.tag || exit $?
 
-# deploy build to Gitlab
-deploy_gitlab:
-  extends: .project_runner
-  environment: $FINAL_ENVIRONMENT
-  stage: deploy
-  dependencies:
-   - build_prepare
-   - build_collect
-  script:
-    # test whether we're current
-    - docker/scripts/obsolete.sh || exit 0
-
-    # deploy
-    - make -C gitlab_build/docker/build unstaged_deploy_gitlab || exit $?
-
-
 # post-build tests that require our own runners (or a docker upgrade on GitLab)
 post_test:
+  retry: 2 # some tests fail spuriously for download failures, always rerun
   extends: .project_runner
   stage: build_collect
   services:
@@ -467,7 +485,7 @@ post_test:
 # pack up the downloadable build files in one handy artifact
 pack:
   extends: .project_runner
-  stage: stage
+  stage: pre_stage
   needs:
    - build_collect
   script: [""]

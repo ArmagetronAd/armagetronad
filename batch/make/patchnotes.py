@@ -218,7 +218,7 @@ def GetMarkupLine(team, project, issue):
 
 # parse given frozen changelog, look for last 'changes since' note, extract tag name
 def GetLastFrozenTag(frozen):
-	file = open(frozen, 'r')
+	file = open(frozen, 'r', encoding="utf-8")
 	begin = '#### Changes since '
 	for line in file:
 		if line.startswith(begin):
@@ -304,5 +304,5 @@ for tag in reversed(tags):
 			exit(0)
 		print()
 
-file = open(frozen, 'r')
+file = open(frozen, 'r', encoding="utf-8")
 print(file.read())

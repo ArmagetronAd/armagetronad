@@ -2,7 +2,7 @@ FROM ubuntu:latest
 # latest = latest LTS
 
 # skewed installation: add some of our dependencies, most indirect ones
-RUN apt-get -y update && apt-get install \
+RUN apt-get -y update && DEBIAN_FRONTEND=noninteractive apt-get install \
 mesa-utils \
 #libsdl2-dev \
 libsdl2-2.0-0 \

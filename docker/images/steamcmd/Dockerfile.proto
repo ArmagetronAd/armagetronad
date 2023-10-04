@@ -1,14 +1,14 @@
-#LABEL maintainer="Manuel Moos <z-man@users.sf.net>"
+LABEL maintainer="Manuel Moos <z-man@users.sf.net>"
 
 USER root
 
 # more build dependencies
-RUN apt-get -y update && apt-get install \
+RUN apt-get -y update && DEBIAN_FRONTEND=noninteractive apt-get install \
 curl \
-#debhelper \
-#dh-systemd \
-#devscripts \
-#0install \
+git \
+make \
+rsync \
+gpg \
 -y
 
-USER steam
+#USER steam
