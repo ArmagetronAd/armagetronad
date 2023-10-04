@@ -728,7 +728,7 @@ deploy_base: deploy_base.tag
 
 # out of our control deploy targets that break from time to time; the whole deploy process needs to be delayed if they fail
 deploy_essential: result.deploy_lp result.deploy_scp
-deploy_external: deploy_essential deploy_steam
+deploy_external: deploy_essential
 
 # targets in our control
 deploy_ours: result.deploy_zi result.deploy_download
