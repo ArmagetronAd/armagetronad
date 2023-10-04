@@ -78,7 +78,6 @@ default:
 # keep image dependencies here
 .merge_request_64:
   extends: .merge_request
-<<<<<<< HEAD
   image: $CI_REGISTRY_IMAGE/armabuild_64@sha256:9d42acdcd065fcb65af3e21b568c1371b294434301619c31dc33bfb5563460e8
 
 .merge_request_32:
@@ -96,21 +95,6 @@ default:
 .project_runner_32:
   extends: .project_runner
   image: $CI_REGISTRY_IMAGE/armabuild_32@sha256:3bde444c89c6e7096c64d5fa3c5cccfbbca73145432e02f50a9139fde067539d
-=======
-  image: $CI_REGISTRY_IMAGE/armabuild_64@sha256:9d42acdcd065fcb65af3e21b568c1371b294434301619c31dc33bfb5563460e8
-
-.merge_request_32:
-  extends: .merge_request
-  image: $CI_REGISTRY_IMAGE/armabuild_32@sha256:3bde444c89c6e7096c64d5fa3c5cccfbbca73145432e02f50a9139fde067539d
-
-.project_runner_64:
-  extends: .project_runner
-  image: $CI_REGISTRY_IMAGE/armabuild_64@sha256:9d42acdcd065fcb65af3e21b568c1371b294434301619c31dc33bfb5563460e8
-
-.project_runner_32:
-  extends: .project_runner
-  image: $CI_REGISTRY_IMAGE/armabuild_32@sha256:3bde444c89c6e7096c64d5fa3c5cccfbbca73145432e02f50a9139fde067539d
->>>>>>> origin/legacy_0.2.8.3
 
 .project_runner_wine:
   extends: .project_runner
@@ -118,22 +102,13 @@ default:
 
 .project_runner_debian:
   extends: .project_runner
-<<<<<<< HEAD
   image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:c028868f96d7a90b95885d1248be4cfbd2f104dcec793292aeee135c551c46cc
-
-
-# template rule for deployment jobs
-.deploy:
-  image: $CI_REGISTRY_IMAGE/armadeploy_64@sha256:665a2c30affbf7c22bb7571171a085796e85c6386ca5c30a80597bc3cc88433f
-=======
-  image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:5bd1313e946fa6d2b8a525f5d3efed6dca411e878d47bc505b42c707392f08e2
 
 
 # template rule for deployment jobs
 .deploy_base:
   retry: 2 # deployments can fail temporarily for a million reasons
-  image: $CI_REGISTRY_IMAGE/armadeploy_64@sha256:ccd2c2bfc39f7c67f90b34ad04f4afccc16e8bb23995d21f8752c8f5d711aa83
->>>>>>> origin/legacy_0.2.8.3
+  image: $CI_REGISTRY_IMAGE/armadeploy_64@sha256:665a2c30affbf7c22bb7571171a085796e85c6386ca5c30a80597bc3cc88433f
   interruptible: false
   resource_group: deployment # only ever run one deployment job at a time
   tags:
@@ -162,7 +137,7 @@ default:
 
 .deploy_staged_ppa:
   extends: .deploy_staged
-  image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:5bd1313e946fa6d2b8a525f5d3efed6dca411e878d47bc505b42c707392f08e2
+  image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:c028868f96d7a90b95885d1248be4cfbd2f104dcec793292aeee135c551c46cc
 
 .deploy_final:
   extends: .deploy_base
@@ -181,7 +156,7 @@ default:
 
 .deploy_ppa_final:
   extends: .deploy_final
-  image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:5bd1313e946fa6d2b8a525f5d3efed6dca411e878d47bc505b42c707392f08e2
+  image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:c028868f96d7a90b95885d1248be4cfbd2f104dcec793292aeee135c551c46cc
 
 
 # only run on protected branches or merge requests
@@ -411,34 +386,23 @@ delay_release:
   script: [""]
 
 # do the actual release; manually for final releases, delayed to avoid spam for everyone else
-<<<<<<< HEAD
-deploy_release:
-  extends: .deploy
-  environment: $FINAL_ENVIRONMENT
-  dependencies:
-   - build_prepare
-   - build_collect
-  stage: deploy
-  script:
-    # test whether we're current
-    - docker/scripts/obsolete.sh || exit 0
-    # now enter the docker build directory and just invoke make there
-    - cd gitlab_build/docker/build
-    - rm -rf result.appimage_* context.appimage_* # remake appimages, now we can sign them
-    - make unstaged_deploy -O -j$(nproc) -k
-=======
 deploy_final_external:
   stage: pre_deploy
   extends: .deploy_final
   variables:
     TARGET: "deploy"
->>>>>>> origin/legacy_0.2.8.3
 
 deploy_final_ours:
   extends: .deploy_final
   variables:
     TARGET: "deploy_ours"
 
+deploy_final_ppa:
+  extends: .deploy_final_ppa
+  variables:
+    TARGET: "deploy_ppa"
+
+#
 # test build docker image (hopefully also initiating the cache for later deployment)
 # does not really need debtest, but we want to let the Windows builds go first
 build_docker:
