@@ -691,7 +691,7 @@ context.deploy_steam: context.deploy_base_steam ${srcdir}/../deploy/steamcontent
 context.deploy_ppa_%: result.debsrc_% ${srcdir}/../deploy/deploy_ppa.sh ../deploy/targets.sh CI_INFO
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' ${srcdir}/../deploy/deploy_ppa.sh ../deploy/targets.sh ../deploy/secrets/*.gpg CI_INFO
 	echo > $@
-result.deploy_ppa_%: context.deploy_ppa_% deploy_ours
+result.deploy_ppa_%: context.deploy_ppa_%
 	+$(srcdir)/context_to_result.sh $@.dir ./deploy_ppa.sh $*
 	echo > $@
 
