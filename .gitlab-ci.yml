@@ -139,10 +139,6 @@ default:
   extends: .deploy_staged
   image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:c0d45ff7bf90a89a0bd10006ba9e40b5aff2f1173842cfcdc6a97f4cad8b8267
 
-.deploy_staged_steam:
-  extends: .deploy_staged
-  image: $CI_REGISTRY_IMAGE/steamcmd@sha256:cae74441f7c14baeb1168b01cb68f76e37eaefe3d278b32f0c1eb563d7ab82d0
-
 .deploy_final:
   extends: .deploy_base
   environment: $FINAL_ENVIRONMENT
@@ -164,7 +160,7 @@ default:
 
 .deploy_final_steam:
   extends: .deploy_final
-  image: $CI_REGISTRY_IMAGE/steamcmd@sha256:cae74441f7c14baeb1168b01cb68f76e37eaefe3d278b32f0c1eb563d7ab82d0
+  image: cm2network/steamcmd:latest
 
 # only run on protected branches or merge requests
 workflow:
