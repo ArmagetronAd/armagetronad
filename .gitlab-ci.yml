@@ -395,6 +395,11 @@ deploy_final_external:
   variables:
     TARGET: "deploy_external"
 
+deploy_steam:
+  extends: .deploy_final_steam
+  variables:
+    TARGET: "deploy_steam"
+
 deploy_final_ours:
   extends: .deploy_final
   variables:
@@ -409,11 +414,6 @@ deploy_gitlab:
   extends: .deploy_final
   variables:
     TARGET: "deploy_gitlab"
-
-deploy_steam:
-  extends: .deploy_final_steam
-  variables:
-    TARGET: "deploy_steam"
 
 #
 #
