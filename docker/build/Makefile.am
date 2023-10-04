@@ -227,7 +227,7 @@ context.steam: context.64 gits_artifacts.tag
 		rm -f $@.dir/$$f; \
 		sed < $<.dir/$$f > $@.dir/$$f -e "s,textures/title.jpg,textures/title.png,"; \
 	done
-	cd $@.dir/source; automake
+	cd $@.dir/source; ./bootstrap.sh
 #   done
 	echo > $@
 
