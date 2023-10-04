@@ -97,19 +97,19 @@ default:
   extends: .project_runner
   image: $CI_REGISTRY_IMAGE/armabuild_32@sha256:3bde444c89c6e7096c64d5fa3c5cccfbbca73145432e02f50a9139fde067539d
 =======
-  image: $CI_REGISTRY_IMAGE/armabuild_64@sha256:28954f4596075fef83c2c788f5d70aefc40810efb45d66e178087479b632bc80
+  image: $CI_REGISTRY_IMAGE/armabuild_64@sha256:9d42acdcd065fcb65af3e21b568c1371b294434301619c31dc33bfb5563460e8
 
 .merge_request_32:
   extends: .merge_request
-  image: $CI_REGISTRY_IMAGE/armabuild_32@sha256:29a1a046fbfaca076d041a548b24615a33b6e1af874691dab8b59ba24c45bcca
+  image: $CI_REGISTRY_IMAGE/armabuild_32@sha256:3bde444c89c6e7096c64d5fa3c5cccfbbca73145432e02f50a9139fde067539d
 
 .project_runner_64:
   extends: .project_runner
-  image: $CI_REGISTRY_IMAGE/armabuild_64@sha256:28954f4596075fef83c2c788f5d70aefc40810efb45d66e178087479b632bc80
+  image: $CI_REGISTRY_IMAGE/armabuild_64@sha256:9d42acdcd065fcb65af3e21b568c1371b294434301619c31dc33bfb5563460e8
 
 .project_runner_32:
   extends: .project_runner
-  image: $CI_REGISTRY_IMAGE/armabuild_32@sha256:29a1a046fbfaca076d041a548b24615a33b6e1af874691dab8b59ba24c45bcca
+  image: $CI_REGISTRY_IMAGE/armabuild_32@sha256:3bde444c89c6e7096c64d5fa3c5cccfbbca73145432e02f50a9139fde067539d
 >>>>>>> origin/legacy_0.2.8.3
 
 .project_runner_wine:
