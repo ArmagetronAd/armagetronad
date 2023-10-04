@@ -1,6 +1,6 @@
 FROM i386/debian:latest
 
-RUN apt-get -y update && apt-get install \
+RUN apt-get -y update && DEBIAN_FRONTEND=noninteractive apt-get install \
 mesa-utils \
 -y
 

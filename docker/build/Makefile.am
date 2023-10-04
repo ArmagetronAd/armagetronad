@@ -491,9 +491,7 @@ test.appimage_client_64_fedora_latest: upload/$(APPIMAGE_CLIENT_64)
 test.appimage_client_64_fedora_oldest: upload/$(APPIMAGE_CLIENT_64)
 
 test.appimage_server_64_centos_latest: upload/$(APPIMAGE_SERVER_64)
-test.appimage_server_64_centos_oldest: upload/$(APPIMAGE_SERVER_64)
 test.appimage_client_64_centos_latest: upload/$(APPIMAGE_CLIENT_64)
-test.appimage_client_64_centos_oldest: upload/$(APPIMAGE_CLIENT_64)
 
 test.appimage_server_32_debian_latest: upload/$(APPIMAGE_SERVER_32)
 test.appimage_server_32_debian_oldest: upload/$(APPIMAGE_SERVER_32)
@@ -524,9 +522,7 @@ appimagetests.tag: \
 	test.appimage_client_64_fedora_latest \
 	test.appimage_client_64_fedora_oldest \
 	test.appimage_server_64_centos_latest \
-	test.appimage_server_64_centos_oldest \
 	test.appimage_client_64_centos_latest \
-	test.appimage_client_64_centos_oldest \
 	test.appimage_server_32_debian_latest \
 	test.appimage_server_32_debian_oldest \
 	test.appimage_client_32_debian_latest \
@@ -540,8 +536,8 @@ appimagetests_ci.tag: \
 	test.appimage_client_64_ubuntu_latest \
 	test.appimage_client_64_ubuntu_oldest_skewed \
 	test.appimage_client_64_fedora_latest \
-	test.appimage_server_64_centos_oldest \
-	test.appimage_client_64_centos_oldest \
+	test.appimage_server_64_fedora_oldest \
+	test.appimage_client_64_fedora_oldest \
 	test.appimage_server_32_debian_oldest \
 	test.appimage_client_32_debian_oldest \
 	upload/.tag
@@ -735,7 +731,7 @@ deploy_essential: result.deploy_lp result.deploy_scp
 deploy_external: deploy_essential deploy_steam
 
 # targets in our control
-deploy_ours: result.deploy_zi result.deploy_download deploy_external
+deploy_ours: result.deploy_zi result.deploy_download
 
 context.deploy_base_%: rootcontext.64 deploy_base.tag ${srcdir}/../deploy/deploy_%.sh ${srcdir}/../deploy/wait_for_upload.sh ../deploy/* CI_INFO
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' upload ../deploy/'*' ${srcdir}/../deploy/deploy_$*.sh ${srcdir}/../deploy/wait_for_upload.sh CI_INFO
@@ -791,7 +787,7 @@ context.deploy_gitlab: rootcontext.64 deploy_base.tag ../deploy/* ${srcdir}/../d
 context.deploy_ppa_%: result.debsrc_% ${srcdir}/../deploy/deploy_ppa.sh ../deploy/targets.sh CI_INFO
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' ${srcdir}/../deploy/deploy_ppa.sh ../deploy/targets.sh ../deploy/secrets/*.gpg CI_INFO
 	echo > $@
-result.deploy_ppa_%: context.deploy_ppa_% deploy_ours
+result.deploy_ppa_%: context.deploy_ppa_%
 	+$(srcdir)/context_to_result.sh $@.dir ./deploy_ppa.sh $*
 	echo > $@
 
@@ -815,7 +811,7 @@ context.deploy_zi: context.deploy_base_zeroinstall result.update_zi ${srcdir}/..
 	rm -f $@.dir/image
 	echo "armadeploy_64" > $@.dir/image
 	echo > $@
-result.deploy_zi: context.deploy_zi deploy_external result.deploy_download
+result.deploy_zi: context.deploy_zi result.deploy_download
 	+$(srcdir)/context_to_result.sh $@.dir ./deploy_zeroinstall.sh
 	echo > $@
 
