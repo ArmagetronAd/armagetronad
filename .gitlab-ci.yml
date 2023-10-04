@@ -208,6 +208,7 @@ build_server_steam_raw:
   stage: build_base
   extends: .project_runner_steam_64
   script:
+    - ./bootstrap.sh
     - gitlab_build/docker/build/make_ci.sh -k result.build_server_steam
   artifacts:
     untracked: true
