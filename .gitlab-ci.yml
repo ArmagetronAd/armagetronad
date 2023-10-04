@@ -154,7 +154,7 @@ default:
     - cd gitlab_build/docker/build
     - make unstaged_${TARGET} -O -j$(nproc) -k
 
-.deploy_ppa_final:
+.deploy_final_ppa:
   extends: .deploy_final
   image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:c028868f96d7a90b95885d1248be4cfbd2f104dcec793292aeee135c551c46cc
 
@@ -468,7 +468,7 @@ deploy_gitlab:
 
 
 deploy_final_ppa:
-  extends: .deploy_ppa_final
+  extends: .deploy_final_ppa
   variables:
     TARGET: "deploy_ppa"
 

@@ -65,7 +65,6 @@ pkg-config \
 autoconf \
 automake \
 python3 \
-python3-packaging \
 recode \
 pandoc \
 #zlib1g-dev \
@@ -74,9 +73,10 @@ pandoc \
 # copy appimage tools
 COPY appimage/* /usr/bin/
 
-# optional: appstream
+# optional (will fail for ancient steam builds)
 RUN apt-get -y update && DEBIAN_FRONTEND=noninteractive apt-get install \
 appstream \
+python3-packaging \
 -y || true
 
 FROM armabuild_base as armabuild
