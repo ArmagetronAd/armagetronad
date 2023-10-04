@@ -397,7 +397,7 @@ deploy_final_external:
   stage: pre_deploy
   extends: .deploy_final
   variables:
-    TARGET: "deploy"
+    TARGET: "deploy_external"
 
 deploy_final_ours:
   extends: .deploy_final
