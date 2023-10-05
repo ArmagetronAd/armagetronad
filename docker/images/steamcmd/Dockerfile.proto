@@ -9,6 +9,6 @@ git \
 make \
 rsync \
 gpg \
+zip \
 -y
 
-#USER steam
