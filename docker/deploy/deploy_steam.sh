@@ -72,7 +72,5 @@ set +x
 set -x
 
 # cleanup
-mv ../output /home/steam/ || exit $?
-cd ../../ || exit $?
 rm -rf * || exit $?
-mv ../output . || exit $?
+rm -rf /home/steam/Steam || exit $?
