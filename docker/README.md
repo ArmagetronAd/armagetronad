@@ -2,13 +2,12 @@
 
 ## You Need to Have Installed
  * Everything needed for a dedicated server build, plus python packaging
- * [docker in rootless mode](https://docs.docker.com/engine/security/rootless/)
- * Optional: [docker in reglar mode](https://docs.docker.com/engine/install/ubuntu/) for steam SDK creation
+ * preferably podman, but [docker in rootless mode](https://docs.docker.com/engine/security/rootless/) also works
  * Optional: [x11docker](https://github.com/mviereck/x11docker) for Windows build system creation
 
-Ubuntu is recommended, as rootless docker supports the overlay2 driver there;
+Ubuntu is recommended for docker, as rootless docker supports the overlay2 driver there;
 pretty much everyone else only gets the vfs driver that always copies the whole
-image contents.
+image contents. But podman should work fine for everyone.
 
 For Ubuntu, to be on the safe side:
 
@@ -67,7 +66,7 @@ Assuming the source is in armagetronad, do
 target can be
 
    * *free*: Build everything relevant for free open source systems
-   * *closed*: Build steam and windows binaries
+   * *closed*: Build windows (and maybe Steam) binaries
    * *full*: Build all
    * *clean*: Remove build results
 
