@@ -110,7 +110,7 @@ default:
   retry: 2 # deployments can fail temporarily for a million reasons
   image: $CI_REGISTRY_IMAGE/armadeploy_64@sha256:e619966c58bf0c5a36b3850d1253c1f30ba56fbba27d1a2a205792aa142e560a
   interruptible: false
-  resource_group: deployment # only ever run one deployment job at a time
+  # resource_group: deployment # only ever run one deployment job at a time
   tags:
    - armagetronad_deploy
   rules:
