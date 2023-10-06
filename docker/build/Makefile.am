@@ -820,7 +820,7 @@ context.deploy_fp: context.deploy_base_flatpak ${srcdir}/../deploy/*_flatpak.sh
 	rm -f $@.dir/image
 	echo "armadeploy_64" > $@.dir/image
 	echo > $@
-result.deploy_fp: context.deploy_fp deploy_external result.deploy_download
+result.deploy_fp: context.deploy_fp
 	+$(srcdir)/context_to_result.sh $@.dir ./deploy_flatpak.sh
 	echo > $@
 
@@ -836,9 +836,6 @@ context.deploy_itch: context.deploy_base_itch ${srcdir}/../deploy/*_itch.sh uplo
 result.deploy_itch: context.deploy_itch
 	+$(srcdir)/context_to_result.sh $@.dir ./deploy_itch.sh
 	echo > $@
-
-# deploy to download site (additional dependency here only, standard rules apply)
-result.deploy_download: deploy_external
 
 # individual deploy targets
 deploy_lp: result.deploy_lp
