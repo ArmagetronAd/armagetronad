@@ -375,6 +375,12 @@ deploy_staged_ppa:
   variables:
     TARGET: "deploy_ppa"
 
+# does not actually deploy, but tests deployment up to the final 'git push'
+deploy_staged_flatpak:
+  extends: .deploy_staged
+  variables:
+    TARGET: "deploy_fp"
+
 # delay full deployment
 delay_release:
   needs: []
@@ -415,13 +421,11 @@ deploy_gitlab:
     TARGET: "deploy_gitlab"
 
 deploy_itch:
-  stage: pre_stage
   extends: .deploy_final
   variables:
     TARGET: "deploy_itch"
 
-deploy_flatpak:
-  stage: pre_stage
+deploy_final_flatpak:
   extends: .deploy_final
   variables:
     TARGET: "deploy_fp"
