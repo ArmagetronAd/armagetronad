@@ -206,17 +206,6 @@ context.32: context.64
 	echo "armabuild_32" > $@.dir/image
 	echo > $@
 
-# switch container to use to steam SDK, rebrand
-context.steam: context.64
-	${srcdir}/prepare_context.sh $@.dir $<.dir/'*'
-	rm $@.dir/image
-	echo "armasteam_64" > $@.dir/image
-#	echo "steamrt_scout_amd64" > $@/image
-	sed < $<.dir/version.sh > $@.dir/version.sh -e s/PACKAGE_NAME=armagetronad/PACKAGE_NAME=$(STEAM_PACKAGE_TITLE)/ -e s/PACKAGE_TITLE=\"Armagetron\ Advanced/PACKAGE_TITLE=\"$(STEAM_PACKAGE_TITLE)/ -e s/PACKAGE_TITLE=\"Armagetron/PACKAGE_TITLE=\"$(STEAM_PACKAGE_TITLE)/
-# 	no remotely adult stuff
-	sed < $<.dir/source/src/engine/ePlayer.cpp > $@.dir/source/src/engine/ePlayer.cpp -e "s/pr0n/cat videos/"
-	echo > $@
-
 # add debian/ubuntu build info for release %. Requires GPG key from ~/.gnupg
 context.debsrc_%: rootcontext.64 ${srcdir}/rebrand_debian_core.sh ${srcdir}/debian_source.sh gits_artifacts.tag $(TARBALL)
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' $(TARBALL) ${srcdir}/rebrand_debian_core.sh ${srcdir}/debian_source.sh ${srcdir}/context/debian
@@ -283,17 +272,6 @@ macOS/server.tag: macOS/server_build.tag macOS/client.tag upload/.tag #Makefile
 	cp macOS/server/*.dmg macOS/server/*.macOS.zip upload/
 	echo > $@
 
-macOS/steam_build.tag: context.steam macOS/client_build.tag #Makefile
-	mkdir -p macOS/steam
-	cd macOS/steam && ../../$<.dir/source/src/macosx/configure_for_bundle.sh progname="${STEAM_PACKAGE_NAME}" progtitle="${STEAM_PACKAGE_TITLE}" && ${MAKE}
-	echo > $@
-
-macOS/steam.tag: macOS/steam_build.tag macOS/server.tag upload/.tag #Makefile
-	rm -rf macOS/steam/*.app macOS/steam/*.zip macOS/steam/*.dmg
-	cd macOS/steam && bash ${MACOS_BUILD_BUNDLE}
-	cp macOS/steam/*.dmg macOS/steam/*.macOS.zip upload/
-	echo > $@
-
 macOS_build: macOS/client_build.tag macOS/server_build.tag #macOS/steam_build.tag
 macOS: macOS/client.tag macOS/server.tag #macOS/steam.tag
 
@@ -334,11 +312,6 @@ context.appdir_%: result.build_% ${srcdir}/context/portable/* ${srcdir}/context/
 
 result.appdir_%: context.appdir_%
 	+$(srcdir)/context_to_result.sh $@.dir ./appdir.sh
-	echo > $@
-
-# use different script for steam builds, rearranging some things
-result.appdir_%_steam: context.appdir_%_steam
-	+$(srcdir)/context_to_result.sh $@.dir ./steam.sh
 	echo > $@
 
 # tarball of appdir
@@ -599,36 +572,6 @@ zeroinstall: zeroinstall.tag
 
 #***************************************************************
 
-steamdirs/.tag:
-	mkdir -p steamdirs
-	echo > $@
-
-# steam packaging
-steamdirs/steam_linux: result.appdir_server_steam result.appdir_client_steam steamdirs/.tag
-	rm -rf $@.dir
-	cp -al $<.dir/appdir $@.dir
-	cp -al result.appdir_client_steam.dir/appdir/* $@.dir/
-	echo > $@
-
-steamdirs/steam_windows: result.winbuild_steam steamdirs/.tag
-	rm -rf $@.dir
-	cp -al $<.dir/dist $@.dir
-	mv $@.dir/*dedicated.exe $@.dir/DEDICATED.hex
-	mv $@.dir/*.exe $@.dir/CLIENT.hex
-	mv $@.dir/CLIENT.hex $@.dir/$(STEAM_PACKAGE_TITLE).exe
-	mv $@.dir/DEDICATED.hex $@.dir/$(STEAM_PACKAGE_TITLE)_Dedicated.exe
-	rm -rf $@.dir/*.nsi
-	rm -rf $@.dir/*.url
-	rm -rf $@.dir/banner*
-	echo > $@
-
-steam_linux.tag: #steamdirs/steam_linux result.appdir_client_steam result.appdir_server_steam
-	echo > $@
-steam_windows.tag: #steamdirs/steam_windows result.winbuild_steam
-	echo > $@
-
-steam.tag: steam_windows.tag steam_linux.tag
-	echo > $@
 .PHONY: steam steam_windows steam_linux
 
 .PRECIOUS:  context.build_client_steam result.build_client_steam context.appdir_client_steam result.build_server_steam context.build_server_steam context.appdir_server_steam context.winbuild_steam context.winsource_steam
@@ -674,18 +617,6 @@ context.deploy_%: context.deploy_base_%
 	echo > $@
 result.deploy_%: context.deploy_%
 	+$(srcdir)/context_to_result.sh $@.dir ./deploy_$*.sh
-	echo > $@
-
-# special case steam: run in steamcmd image
-context.deploy_steam: context.deploy_base_steam ${srcdir}/../deploy/steamcontentbuilder/*/* steamdirs/* deploy_essential
-	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' ${srcdir}/../deploy/steamcontentbuilder
-	sed -i $@.dir/steamcontentbuilder/scripts/app_build_1306180.vdf -e "s/BUILD_DESCRIPTION/$(STEAM_PACKAGE_TITLE)$(PACKAGE_TITLE_SUFFIX) $(PACKAGE_VERSION)/"
-	mkdir -p $@.dir/steamcontentbuilder/content $@.dir/steamcontentbuilder/output
-	cp -al steamdirs/steam_windows.dir $@.dir/steamcontentbuilder/content/steam_windows
-	cp -al steamdirs/steam_linux.dir $@.dir/steamcontentbuilder/content/steam_linux
-	rm -rf $@.dir/upload
-	rm -f $@.dir/image
-	echo "steamcmd" > $@.dir/image
 	echo > $@
 
 context.deploy_ppa_%: result.debsrc_% ${srcdir}/../deploy/deploy_ppa.sh ../deploy/targets.sh CI_INFO

@@ -19,14 +19,12 @@ wd="`dirname $0`"
 
 for image in \
     armawineblocks \
-    armasteam_64 \
     armabuild_32 \
     armadeb_64 \
     armabuild_64 \
     armalpine_32 \
     armaroot_64 \
     armadeploy_64 \
-    steamcmd \
     ; do
     docker tag ${REGISTRY}${image}:${source} ${REGISTRY}${image}:${target}
 done
