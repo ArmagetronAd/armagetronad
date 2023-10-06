@@ -43,6 +43,10 @@ cd steamcontentbuilder/scripts || exit $?
 # switch to configured steam branch
 sed -i app_build_1306180.vdf -e "s/^.*setlive.*$/	\"setlive\" \"${STEAM_BRANCH}\"/"
 
+# pretend to be regular user, enough to make steamcmd use a config directory
+export USER=steam
+export HOME=/home/steam
+
 script_dir=`pwd`
 set +x
 
