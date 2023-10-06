@@ -160,7 +160,7 @@ default:
 
 .deploy_final_steam:
   extends: .deploy_final
-  image: $CI_REGISTRY_IMAGE/steamcmd@sha256:68a7bedb886d9b35c0caac70f42cd94ac3aaa8af5513fab41fca18b41a05f00a
+  image: $CI_REGISTRY_IMAGE/steamcmd@sha256:a902aefc0718d2fc32101c09d6fca5202d882e68e821ae232423014abba6bc3d
 
 # only run on protected branches or merge requests
 workflow:
@@ -395,8 +395,6 @@ deploy_final_external:
     TARGET: "deploy_external"
 
 deploy_steam:
-  # temp: deploy earlier (REMOVE LATER)
-  stage: pre_stage
   extends: .deploy_final_steam
   variables:
     TARGET: "deploy_steam"

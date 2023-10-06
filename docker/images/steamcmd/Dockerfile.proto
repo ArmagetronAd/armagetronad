@@ -9,6 +9,9 @@ git \
 make \
 rsync \
 gpg \
+zip \
 -y
 
+
+# no longer works if used directly as gitlab runner image
 #USER steam
