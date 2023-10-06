@@ -395,8 +395,6 @@ deploy_final_external:
     TARGET: "deploy_external"
 
 deploy_steam:
-  # temp: deploy earlier (REMOVE LATER)
-  stage: pre_stage
   extends: .deploy_final_steam
   variables:
     TARGET: "deploy_steam"
