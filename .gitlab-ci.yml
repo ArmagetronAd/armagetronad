@@ -414,6 +414,12 @@ deploy_gitlab:
   variables:
     TARGET: "deploy_gitlab"
 
+deploy_itch:
+  stage: pre_stage
+  extends: .deploy_final
+  variables:
+    TARGET: "deploy_itch"
+
 #
 #
 # test build docker image (hopefully also initiating the cache for later deployment)
