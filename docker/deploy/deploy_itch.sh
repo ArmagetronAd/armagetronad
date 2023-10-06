@@ -2,7 +2,7 @@
 
 # put API key into the right place
 mkdir -p ~/.config/itch || exit $?
-mv secrets/butler_creds ~/.config/itch/ || exit $?
+export BUTLER_API_KEY=`cat secrets/butler_creds` || exit $?
 rm -rf secrets || exit $?
 
 . version.sh || exit $?
