@@ -420,8 +420,14 @@ deploy_itch:
   variables:
     TARGET: "deploy_itch"
 
-#
-#
+deploy_flatpak:
+  stage: pre_stage
+  extends: .deploy_final
+  variables:
+    TARGET: "deploy_fp"
+
+
+
 # test build docker image (hopefully also initiating the cache for later deployment)
 # does not really need debtest, but we want to let the Windows builds go first
 build_docker:
