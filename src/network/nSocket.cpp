@@ -1542,6 +1542,9 @@ int nSocket::Create( void )
     // Even higher priorities would be available, but they seem like an overstep.
     // Doku of the bits: https://blogs.manageengine.com/network/netflowanalyzer/2012/04/24/understanding-ip-precedence-tos-dscp.html
     // For values, just see the headers.
+#ifndef IPTOS_DSCP_AF32
+    constexpr char IPTOS_DSCP_AF32 = 0x70;
+#endif
     char dscp = IPTOS_DSCP_AF32;
 
     setsockopt( socket_, IPPROTO_IP, IP_TOS, &dscp, sizeof( dscp ) );
