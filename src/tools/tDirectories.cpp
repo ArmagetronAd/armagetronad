@@ -156,11 +156,15 @@ static tString st_DataDir(".");    // directory for game data
 static tString st_UserDataDir(expand_home_c(USER_DATA_DIR));    // directory for game data
 #else
 #ifdef __APPLE__
-static tString st_UserDataDir(expand_home_c("~/Library/Application Support/" PROGTITLE
+
 #ifdef DEDICATED
-" Server"
+#define LIBSUPPORTDIR PROGTITLE " Server"
+#else
+#define LIBSUPPORTDIR PROGTITLE
 #endif
-));    // directory for game data
+
+// directory for game data
+static tString st_UserDataDir( expand_home_c( "~/Library/Application Support/" LIBSUPPORTDIR ) );
 #else
 static tString st_UserDataDir(expand_home_c("~/." PROGDIR));    // directory for game data
 #endif

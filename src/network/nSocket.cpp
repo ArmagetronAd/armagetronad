@@ -234,6 +234,7 @@ static inline void Con_Printf(const char *x){
     con << x;
 }
 
+/*
 static inline void Con_SafePrintf(const char *x){
     con << x;
 }
@@ -241,6 +242,7 @@ static inline void Con_SafePrintf(const char *x){
 static inline void Con_DPrintf(const char *x){
     con << x;
 }
+*/
 
 #ifdef HAVE_SOCKLEN_T
 typedef socklen_t NET_SIZE;
@@ -798,8 +800,8 @@ static int PartialIPAddress (const char *in, struct sockaddr *hostaddr, int defa
         port = default_port;
 
     hostaddr->sa_family = AF_INET;
-    ((struct sockaddr_in *)hostaddr)->sin_port = htons((short)port);
-    ((struct sockaddr_in *)hostaddr)->sin_addr.s_addr = (default_addr & htonl(mask)) | htonl(addr);
+    ( reinterpret_cast<struct sockaddr_in*>( hostaddr ) )->sin_port = htons( (short)port );
+    ( reinterpret_cast<struct sockaddr_in*>( hostaddr ) )->sin_addr.s_addr = ( default_addr & htonl( mask ) ) | htonl( addr );
 
     return 0;
 }
@@ -811,8 +813,8 @@ char *ANET_AddrToString (const struct sockaddr *addr)
     static char buffer[23];
     int haddr;
 
-    haddr = ntohl(((struct sockaddr_in const *)addr)->sin_addr.s_addr);
-    snprintf(buffer,22, "%d.%d.%d.%d:%d", (haddr >> 24) & 0xff, (haddr >> 16) & 0xff, (haddr >> 8) & 0xff, haddr & 0xff, ntohs(((struct sockaddr_in const *)addr)->sin_port));
+    haddr = ntohl( reinterpret_cast<struct sockaddr_in const*>( addr )->sin_addr.s_addr );
+    snprintf( buffer, 22, "%d.%d.%d.%d:%d", ( haddr >> 24 ) & 0xff, ( haddr >> 16 ) & 0xff, ( haddr >> 8 ) & 0xff, haddr & 0xff, ntohs( reinterpret_cast<struct sockaddr_in const*>( addr )->sin_port ) );
     return buffer;
 }
 
@@ -1277,7 +1279,7 @@ nAddress & nAddress::SetHostname( const char * hostname )
         {
             // store values
             addr_.addr   .sa_family = AF_INET;
-            addr_.addr_in.sin_addr.s_addr = *(int *)hostentry->h_addr_list[0];
+            addr_.addr_in.sin_addr.s_addr = *reinterpret_cast<int*>( hostentry->h_addr_list[0] );
         }
         else
         {

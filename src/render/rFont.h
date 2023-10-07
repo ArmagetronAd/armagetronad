@@ -57,6 +57,7 @@ public:
 protected:
     virtual void ProcessImage(SDL_Surface *);       //!< process the surface before uploading it to GL
     virtual void OnSelect( bool enforce );
+    using rFileTexture::OnSelect;
 };
 
 
