@@ -501,7 +501,7 @@ void gWallRim::OnBlocksCamera( eCamera * camera, REAL height ) const
 //!
 // *******************************************************************************************
 
-REAL gWallRim::Height( void )
+REAL gWallRim::Height( void ) const
 {
     return renderHeight_;
 }
@@ -516,7 +516,7 @@ REAL gWallRim::Height( void )
 //!
 // *******************************************************************************************
 
-REAL gWallRim::SeeHeight( void )
+REAL gWallRim::SeeHeight( void ) const
 {
     return renderHeight_ * 2;
 }
