@@ -134,6 +134,10 @@ class nVersion
 public:
     nVersion();
     nVersion( int min, int max );
+
+    nVersion( nVersion const& ) = default;
+    nVersion& operator=( const nVersion& other ) = default;
+
     bool Supported( int version ) const;	// check if a particular version is supported
     bool Merge( const nVersion& a,
                 const nVersion& b);	// merges two versions to one; the new version supports only features both versions understand. false is returned if no common denominator could be found
@@ -142,8 +146,8 @@ public:
     int Max() const	{ return max_;}
 
     bool operator != ( const nVersion& other ){ return !operator==(other); }
-    bool operator == ( const nVersion& other );
-    nVersion& operator = ( const nVersion& other ) = default;
+    bool operator==( const nVersion& other );
+
 private:
     int min_, max_;
 };

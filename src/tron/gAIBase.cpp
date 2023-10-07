@@ -2285,9 +2285,11 @@ bool gAIPlayer::EmergencySurvive( ThinkData & data, int enemyevade, int prefered
 
     if (target && character->properties[AI_ENEMY] > 0)
     {
+        /*
         bool sdanger = false;
         for (i = DANGERLEVELS-1; i>=0; i--)
             sdanger |= sideDanger[i][0] > 4 || sideDanger[i][1] > 4;
+        */
 
         eCoord enemypos=target->Position() - Object()->Position();
         eCoord enemydir=target->Direction();

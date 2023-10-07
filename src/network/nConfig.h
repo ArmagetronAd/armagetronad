@@ -86,6 +86,7 @@ public:
     static void s_GetConfigMessage(nMessage &m);
 
     virtual void WasChanged(bool nonDefault);
+    virtual void WasChanged();
 
     virtual bool Writable();
 
@@ -125,8 +126,8 @@ public:
     saved_(t){}
     virtual ~nConfItem(){}
 
-
-    virtual void NetReadVal(nMessage &m){
+    virtual void NetReadVal( nMessage& m ) override
+    {
         T dummy;
         m >> dummy;
         if (sn_compare(dummy,*this->target)){
@@ -144,7 +145,8 @@ public:
         }
     }
 
-    virtual void NetWriteVal(nMessage &m){
+    virtual void NetWriteVal( nMessage& m ) override
+    {
         m << *this->target;
     }
 
@@ -159,22 +161,25 @@ public:
         }
     }
 
-    virtual void OnRevertToDefaults()      //!< revert this setting to its default
+    //!< revert this setting to its default
+    virtual void OnRevertToDefaults() override
     {
         Set( default_ );
     }
 
-    virtual void OnSaveValue()             //!< saves the current value
+    //!< saves the current value
+    virtual void OnSaveValue() override
     {
         saved_ = *this->target;
     }
 
-    virtual void OnRevertToSavedValue()    //!< revert this setting to the saved value
+    //!< revert this setting to the saved value
+    virtual void OnRevertToSavedValue() override
     {
         Set( saved_ );
     }
 private:
-    void WasChanged()
+    void WasChanged() override
     {
         nConfItemBase::WasChanged( ! (*this->target == default_) );
     }

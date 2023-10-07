@@ -127,7 +127,7 @@ void GLmeter_subby(float value,float max, float locx, float locy, float size, co
 
     if(displayvalue){
         rTextField speed_t(-x*1.45*size+locx,y*1.35*size+locy,.12*size,.24*size);
-        sprintf(string,"%.1f",value);
+        snprintf( string, sizeof( string ), "%.1f", value );
         speed_t << "0xccffff" << (string);
     }
     int length = title.Len();
@@ -441,7 +441,7 @@ static void display_hud_subby( ePlayer* player ){
                                 tColoredString message,messageColor;
                                 messageColor << "0xbf9d50";
 
-                                sprintf(fasteststring,"%.1f",max);
+                                snprintf( fasteststring, sizeof( fasteststring ), "%.1f", max );
                                 message << "  Fastest: " << name << " " << fasteststring;
                                 message.RemoveHex(); //cheers tank;
                                 int length = message.Len();
@@ -585,28 +585,28 @@ static void display_fps_subby()
             lastTime = thisTime->tm_min;
 
             if(thisTime->tm_min < 10) {
-                sprintf(m, "0%d", thisTime->tm_min);
+                snprintf( m, sizeof( m ), "0%d", thisTime->tm_min );
             } else {
-                sprintf(m, "%d", thisTime->tm_min);
+                snprintf( m, sizeof( m ), "%d", thisTime->tm_min );
             }
 
             if(show24hour) {
-                sprintf(h, "%d", thisTime->tm_hour);
+                snprintf( h, sizeof( h ), "%d", thisTime->tm_hour );
             } else {
                 int newhour;
 
                 if(thisTime->tm_hour > 12) {
                     newhour = thisTime->tm_hour-12;
-                    sprintf(ampm,"%s","PM");
+                    snprintf( ampm, sizeof( ampm ), "%s", "PM" );
                 } else {
                     newhour = thisTime->tm_hour;
                     if(newhour == 0) newhour = 12;
-                    sprintf(ampm,"%s","AM");
+                    snprintf( ampm, sizeof( ampm ), "%s", "AM" );
                 }
-                sprintf(h, "%d", newhour);
+                snprintf( h, sizeof( h ), "%d", newhour );
             }
 
-            sprintf(theTime, "%s:%s %s",h,m,ampm);
+            snprintf( theTime, sizeof( theTime ), "%s:%s %s", h, m, ampm );
         }
 
         // float timesize = subby_ScoreSize; // -((.15*timesize*(10-1.5))/2.0)

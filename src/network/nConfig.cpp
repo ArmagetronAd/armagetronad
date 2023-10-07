@@ -137,6 +137,12 @@ void nConfItemBase::WasChanged( bool nonDefault ){
     SendConfig();
 }
 
+void nConfItemBase::WasChanged()
+{
+    // we can't tell here whether the value is at default, so assume it is not
+    WasChanged( true );
+}
+
 bool nConfItemBase::Writable()
 {
     // network settings are read only on the client

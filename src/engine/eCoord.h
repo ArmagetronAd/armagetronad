@@ -36,6 +36,9 @@ public:
     REAL x,y;
     explicit eCoord(REAL X=0,REAL Y=0):x(X),y(Y){}
 
+    eCoord( eCoord const& ) = default;
+    eCoord& operator=( const eCoord& a ) = default;
+
     // Calculations:
     inline bool operator==(const eCoord &a) const;
     bool operator!=(const eCoord &a) const{return !operator==(a);}
@@ -46,8 +49,7 @@ public:
     const eCoord& operator*=(REAL a)  	{ x*=a; y*=a; return *this;}
     REAL NormSquared() 			const 	{return x*x+y*y;}
     REAL Norm() 				const 	{return sqrt(NormSquared());}
-    void Normalize()					{ *this *= 1/Norm(); }
-    eCoord &operator=(const eCoord &a) = default;
+    void Normalize() { *this *= 1 / Norm(); }
 
     //scalar product:
     static REAL F(const eCoord &a,const eCoord &b){
