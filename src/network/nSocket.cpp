@@ -1529,12 +1529,22 @@ int nSocket::Create( void )
     if ( socket_ < 0 )
         return -1;
 
-    // set TOS to low latency ( see manpages getsockopt(2), ip(7) and socket(7) )
-    // maybe this works for Windows, too?
 #ifndef WIN32
-    char tos = IPTOS_LOWDELAY;
+    // set TOS to low latency ( see manpages getsockopt(2), ip(7) and socket(7) )
+    // maybe this works for Windows, too? Docs say "Do not use" :(
+    // https://learn.microsoft.com/en-us/windows/win32/winsock/ipproto-ip-socket-options
+    // The alternative is poorly explained:
+    // https://learn.microsoft.com/en-us/windows/win32/winsock/ip-dscp-traffic-type
 
-    setsockopt( socket_, IPPROTO_IP, IP_TOS, &tos, sizeof(char) );
+    // The headers say the previously used IPTOS_LOWDELAY (0x10) is deprecated,
+    // so we use the new IPTOS_DSCP_AF32 (0x70) instead, which has new high bits
+    // set (0x60) which apparently mean "Flash". That's supposed to be fast, right?
+    // Even higher priorities would be available, but they seem like an overstep.
+    // Doku of the bits: https://blogs.manageengine.com/network/netflowanalyzer/2012/04/24/understanding-ip-precedence-tos-dscp.html
+    // For values, just see the headers.
+    char dscp = IPTOS_DSCP_AF32;
+
+    setsockopt( socket_, IPPROTO_IP, IP_TOS, &dscp, sizeof( dscp ) );
 #endif
 
     // unblock it
