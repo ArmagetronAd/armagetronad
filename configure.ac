@@ -364,10 +364,11 @@ test $CODELEVEL -ge 2 && CXXFLAGS="$CXXFLAGS -Wpointer-arith -W -Wcast-qual -Wca
 test $CODELEVEL -ge 3 && CXXFLAGS="$CXXFLAGS -Weffc++ -Wshadow -Winline -Wfloat-equal -Wconversion"
 test $CODELEVEL -ge 4 && CXXFLAGS="$CXXFLAGS -Werror"
 
-# unused variables should be tolerated while debugging, they're sometimes just there
-# to be printed in the debugger
-if test $CODELEVEL -ge 1 && test $DEBUGLEVEL -ge 1; then
+# unused things of any kind are expected in debug or dedicated mode
+if test x$build_dedicated = xtrue || test $DEBUGLEVEL -ge 1; then
     AX_CXXFLAGS_GCC_OPTION(-Wno-unused-but-set-variable)
+    AX_CXXFLAGS_GCC_OPTION(-Wno-unused-private-field)
+    AX_CXXFLAGS_GCC_OPTION(-Wno-unused-function)
 fi
 
 # work arond known cause of warnings in SDL headers
