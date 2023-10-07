@@ -77,7 +77,7 @@ class tEventQueue:public tHeap<tEvent>{
     // REAL currentTime;      // the current time
 
 public:
-    tEventQueue(){} //:currentTime(0){}
+    tEventQueue() {} //: currentTime(0){}
     ~tEventQueue();
 
     void Timestep(REAL time); // processes all the tEvents that

@@ -54,7 +54,8 @@ gCamera::~gCamera(){
 #endif
 }
 
-eCoord gCamera::CenterCycleDir() const {
+eCoord gCamera::CenterCycleDir() const
+{
     gCycle *c = dynamic_cast<gCycle *>( Center());
     if (c)
         return c->CamDir();

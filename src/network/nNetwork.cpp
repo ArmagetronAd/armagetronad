@@ -641,6 +641,7 @@ nDescriptorBase::nDescriptorBase(unsigned short identification,
 : tListItem<nDescriptorBase>(nDescriptor_anchor),
   id(identification), name(Name), acceptWithoutLogin(awl)
 {
+    std::ignore = name;
 #ifdef DEBUG
 #ifndef WIN32
     //  con << "Descriptor " << id << ": " << name << '\n';

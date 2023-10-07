@@ -89,6 +89,8 @@ public:
 
 private:
     std::vector<ParticleInfo> particles; // Array of particles
+
+#ifdef USE_PARTICLES
     ParticleSystem psystem;  // Info for the particle system
 
     glCoord focus;
@@ -97,6 +99,7 @@ private:
     REAL startTime;
     REAL lastTime;
     int thisSystem;
+#endif
 };
 
 #endif // ArmageTron_PARTICLES_H

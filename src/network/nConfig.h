@@ -203,17 +203,20 @@ public:
         }
     }
 
-    virtual void OnRevertToDefaults()      //!< revert this setting to its default
+    //!< revert this setting to its default
+    virtual void OnRevertToDefaults() override
     {
         Set( default_ );
     }
 
-    virtual void OnSaveValue()             //!< saves the current value
+    //!< saves the current value
+    virtual void OnSaveValue() override
     {
         saved_ = *this->target;
     }
 
-    virtual void OnRevertToSavedValue()    //!< revert this setting to the saved value
+    //!< revert this setting to the saved value
+    virtual void OnRevertToSavedValue() override
     {
         Set( saved_ );
     }
