@@ -140,7 +140,7 @@ void tIniFile::LoadFile(const char* filename) {
                 // If it's not a group, we have a current group, and it's not key=value,
                 // then we need to use our own generated keys and store the whole line
                 char buf[30];
-                sprintf(buf, "%d", autokey);
+                snprintf(buf, sizeof(buf), "%d", autokey);
                 key = buf;
                 value = oneLine;
                 autokey++;
