@@ -1543,6 +1543,8 @@ int nSocket::Create( void )
     // Doku of the bits: https://blogs.manageengine.com/network/netflowanalyzer/2012/04/24/understanding-ip-precedence-tos-dscp.html
     // For values, just see the headers.
 #ifndef IPTOS_DSCP_AF32
+    // not defined on macOS. Sadly, the call is then observerd to fail.
+    // IPTOS_LOWDELAY may be better, but fails as well.
     constexpr char IPTOS_DSCP_AF32 = 0x70;
 #endif
     char dscp = IPTOS_DSCP_AF32;
