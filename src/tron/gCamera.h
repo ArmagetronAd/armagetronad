@@ -38,7 +38,7 @@ public:
     gCamera(eGrid *grid, rViewport *vp,ePlayerNetID *owner,ePlayer *lp,eCamMode m=CAMERA_IN);
     virtual ~gCamera();
 
-    virtual eCoord CenterCycleDir();
+    virtual eCoord CenterCycleDir() const;
 
     virtual REAL SpeedMultiplier() const;
 
