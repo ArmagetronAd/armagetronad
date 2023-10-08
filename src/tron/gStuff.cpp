@@ -64,7 +64,6 @@ bool sg_MoviePack(){
     return sg_moviepackInstalled && sg_moviepackUse;
 }
 
-#ifndef MACOSX
 static bool sg_OpenStuff( char const * uri, bool tryBrowser )
 {
 #ifndef DEDICATED
@@ -86,17 +85,22 @@ static bool sg_OpenStuff( char const * uri, bool tryBrowser )
 #else
     // general unix
     std::ostringstream s; // composing a command
+#ifdef MACOSX
+    assert( !tryBrowser );
+    s << "open '" << uri << "' || "
+      << "safari '" << uri << "' &";
+#else
     if( tryBrowser )
     {
         s << "x-www-browser '" << uri << "' || ";
     }
     s << "xdg-open '" << uri << "' || " << "firefox '" << uri << "' &";
+#endif
     // execute command
     return  0 == system( s.str().c_str() );
 #endif
     return true;
 }
-#endif
 
 bool sg_OpenURI( char const * uri )
 {
@@ -114,19 +118,7 @@ bool sg_OpenURI( char const * uri )
 
 bool sg_OpenDirectory( char const * path )
 {
-#ifdef MACOSX
-#ifndef DEDICATED
-    FSRef ref;
-    CFURLRef url = CFURLCreateFromFileSystemRepresentation( NULL, reinterpret_cast<UInt8 const *>(path), strlen( path ), true );
-    // LSOpenCFURLRef() doesn't seem to traverse past "..", so we open a FSRef instead.
-    CFURLGetFSRef( url, &ref );
-    CFRelease( url );
-    LSOpenFSRef( &ref, NULL );
-#endif
-	return true;
-#else
     return sg_OpenStuff( path, false );
-#endif
 }
 
 //const eCoord se_zeroCoord(0,0);
