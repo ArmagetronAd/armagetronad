@@ -863,8 +863,8 @@ char *ANET_AddrToString (const struct sockaddr *addr)
     static char buffer[23];
     int haddr;
 
-    haddr = ntohl(((struct sockaddr_in const *)addr)->sin_addr.s_addr);
-    snprintf(buffer,22, "%d.%d.%d.%d:%d", (haddr >> 24) & 0xff, (haddr >> 16) & 0xff, (haddr >> 8) & 0xff, haddr & 0xff, ntohs(((struct sockaddr_in const *)addr)->sin_port));
+    haddr = ntohl( reinterpret_cast<sockaddr_in const*>( addr )->sin_addr.s_addr );
+    snprintf( buffer, 22, "%d.%d.%d.%d:%d", ( haddr >> 24 ) & 0xff, ( haddr >> 16 ) & 0xff, ( haddr >> 8 ) & 0xff, haddr & 0xff, ntohs( reinterpret_cast<sockaddr_in const*>( addr )->sin_port ) );
     return buffer;
 }
 
