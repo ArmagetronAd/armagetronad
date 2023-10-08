@@ -18,6 +18,18 @@ AccessModifierOffset: -4
 TabWidth: 4
 UseTab: Never
 
+BreakBeforeBraces: Allman
+# diff count trunk
+# none      : 189776
+# Attach    : 203028
+# Linux     : 198465
+# Mozilla   : 203028
+# Stroustrup: 198585 (Also WebKit)
+# Allman    : 189711 <-
+# Whitesmiths:234458
+# GNU       : 231651
+#
+
 # leave line breaks alone
 ColumnLimit: 0
 # note: it is still recommended to leave lines short, ideally below 80; but
