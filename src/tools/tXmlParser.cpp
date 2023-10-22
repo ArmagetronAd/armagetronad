@@ -341,10 +341,19 @@ bool tXmlParser::ParseDom() {
 }
 
 bool tXmlParser::ParseSax() {
+    // xmlSAXUserParseFile became deprecated around this version.
+    // maybe earlier, it was not worth finding the exact point only to avoid warnings.
+#if LIBXML_VERSION >= 21105
     auto* ctxt = xmlNewSAXParserCtxt( &aaSaxCallsback, this );
     auto ret = xmlCtxtReadFile( ctxt, m_Filename, nullptr, 0 );
     xmlFreeParserCtxt( ctxt );
     return ret;
+#else
+    if ( xmlSAXUserParseFile( &aaSaxCallsback, this, m_Filename ) < 0 )
+        return false;
+    else
+        return true;
+#endif
 }
 
 #ifndef DEDICATED
