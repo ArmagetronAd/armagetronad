@@ -875,8 +875,9 @@ case NthRoot:{ROperation interm=(*mmb2)^(1/(*mmb1));return interm.Diff(var);};
 
 char* ValToStr(float x)
 {
-    char*s=new char[30];
-    if(x==(float)3.141592653589793238462643383279L)snprintf(s,sizeof(s),"pi");else snprintf(s,sizeof(s),"%.16G",x);
+    const size_t size = 30;
+    char*s=new char[size];
+    if(x==(float)3.141592653589793238462643383279L)snprintf(s,size,"pi");else snprintf(s,size,"%.16G",x);
     return s;
 }
 
