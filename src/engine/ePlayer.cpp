@@ -4128,7 +4128,7 @@ static void se_ShufflePlayer(std::istream &s)
     }
 }
 static tConfItemFunc se_ShufflePlayerConf("SHUFFLE_PLAYER", &se_ShufflePlayer);
-static tAccessLevelSetter se_ShufflePlayerConfLevel( se_Login_Conf, tAccessLevel_Moderator );
+static tAccessLevelSetter se_ShufflePlayerConfLevel( se_ShufflePlayerConf, tAccessLevel_Moderator );
 
 // substitute: swap 2 players within a team
 static void se_ChatSubstitute( ePlayerNetID * p, std::istream & s );
