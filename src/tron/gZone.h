@@ -296,6 +296,7 @@ private:
     REAL Radius() const;           //!< returns the current radius
 
     virtual void Render(const eCamera *cam);  //!< renders the zone
+    virtual void Render2D(eCoord scale) const;  //!< renders the zone
 
     virtual void DrawSvg(std::ofstream &f); //! draws it in a svg file
 

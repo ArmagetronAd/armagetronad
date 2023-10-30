@@ -187,6 +187,9 @@ public:
     //! draws object to the screen using OpenGL
     virtual void Render(const eCamera *cam);
 
+    // draws it to the screen in two dimensions using OpenGL (ie. for the HUD map)
+    virtual void Render2D(eCoord scale) const;
+
     //! draws it in a svg file
     virtual void DrawSvg(std::ofstream &f);
 

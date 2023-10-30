@@ -146,7 +146,7 @@ static nSettingItem<bool> a_fcg
 
 
 //... hack for handling the hud map of 0.4 clients
-static bool stc_forbidHudMap = false;
+bool stc_forbidHudMap = false;
 static nSettingItem<bool> fcs("FORBID_HUD_MAP", stc_forbidHudMap);
 
 #ifndef DEDICATED
