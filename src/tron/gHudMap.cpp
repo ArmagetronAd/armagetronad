@@ -37,6 +37,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "ePlayer.h"
 #include "gHudMap.h"
 
+#ifndef DEDICATED
+
 extern tList<gNetPlayerWall> sg_netPlayerWallsGridded;
 extern std::deque<gZone *> sg_Zones;
 
@@ -145,9 +147,12 @@ static void DrawZones(std::deque<gZone *> &list)
 	glLineWidth( 1 );
 }
 
+#endif
+
 
 void DrawMap( gHudMapDrawConf c )
 {
+#ifndef DEDICATED
 	const eRectangle &bounds = eWallRim::GetBounds();
 	double lx = bounds.GetLow().x - c.border, hx = bounds.GetHigh().x + c.border;
 	double ly = bounds.GetLow().y - c.border, hy = bounds.GetHigh().y + c.border;
@@ -186,4 +191,5 @@ void DrawMap( gHudMapDrawConf c )
 		DrawZones(sg_Zones);
 	
 	glPopMatrix();
+#endif
 }
