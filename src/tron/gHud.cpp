@@ -53,6 +53,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 REAL subby_SpeedGaugeSize=.175, subby_SpeedGaugeLocX=0.0, subby_SpeedGaugeLocY=-0.9;
 REAL subby_BrakeGaugeSize=.175, subby_BrakeGaugeLocX=0.48, subby_BrakeGaugeLocY=-0.9;
 REAL subby_RubberGaugeSize=.175, subby_RubberGaugeLocX=-0.48, subby_RubberGaugeLocY=-0.9;
+bool subby_RubberMeterColorChange = true, subby_BrakeMeterColorChange = false;
 bool subby_ShowHUD=true, subby_ShowSpeedFastest=true, subby_ShowScore=true, subby_ShowAlivePeople=true, subby_ShowPing=true, subby_ShowSpeedMeter=true, subby_ShowBrakeMeter=true, subby_ShowRubberMeter=true;
 bool showTime=false;
 bool show24hour=false;
@@ -426,7 +427,12 @@ static void display_hud_subby( ePlayer* player ){
                         if(subby_ShowRubberMeter)
                         {
                             static gGLMeter meter[MAX_PLAYERS];
-                            meter[player->ID()].Display(h->GetRubber(),sg_rubberCycle,subby_RubberGaugeLocX,subby_RubberGaugeLocY,subby_RubberGaugeSize," Rubber Used");
+                            
+                            if(!subby_RubberMeterColorChange)
+                                meter[player->ID()].Display(h->GetRubber(),sg_rubberCycle,subby_RubberGaugeLocX,subby_RubberGaugeLocY,subby_RubberGaugeSize," Rubber Used");
+                            else
+                                meter[player->ID()].Display(h->GetRubber(),sg_rubberCycle,subby_RubberGaugeLocX,subby_RubberGaugeLocY,subby_RubberGaugeSize," Rubber Used", true, false, (h->GetRubber()/sg_rubberCycle), 1-(h->GetRubber()/sg_rubberCycle), 0);
+                            
                             if ( gCycle::RubberMalusActive() )
                             {
                                 static gGLMeter meter2[MAX_PLAYERS];
@@ -436,7 +442,11 @@ static void display_hud_subby( ePlayer* player ){
                         if(subby_ShowBrakeMeter)
                         {
                             static gGLMeter meter[MAX_PLAYERS];
-                            meter[player->ID()].Display(h->GetBrakingReservoir(), 1.0,subby_BrakeGaugeLocX,subby_BrakeGaugeLocY,subby_BrakeGaugeSize, " Brakes");
+                            
+                            if(!subby_BrakeMeterColorChange)
+                                meter[player->ID()].Display(h->GetBrakingReservoir(), 1.0,subby_BrakeGaugeLocX,subby_BrakeGaugeLocY,subby_BrakeGaugeSize, " Brakes");
+                            else
+                                meter[player->ID()].Display(h->GetBrakingReservoir(), 1.0,subby_BrakeGaugeLocX,subby_BrakeGaugeLocY,subby_BrakeGaugeSize, " Brakes", true, false, 1-h->GetBrakingReservoir(), h->GetBrakingReservoir(), 0);
                         }
 
                         //  bool displayfastest = true;// put into global, set via menusytem... subby to do.make sr_DISPLAYFASTESTout

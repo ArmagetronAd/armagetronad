@@ -609,10 +609,12 @@ static tConfItem<REAL> sgy("SPEED_GAUGE_LOCY",subby_SpeedGaugeLocY);
 static tConfItem<REAL> bgs("BRAKE_GAUGE_SIZE",subby_BrakeGaugeSize);
 static tConfItem<REAL> bgx("BRAKE_GAUGE_LOCX",subby_BrakeGaugeLocX);
 static tConfItem<REAL> bgy("BRAKE_GAUGE_LOCY",subby_BrakeGaugeLocY);
+static tConfItem<bool> bgc("BRAKE_GAUGE_COLOR",subby_BrakeMeterColorChange);
 
 static tConfItem<REAL> rgs("RUBBER_GAUGE_SIZE",subby_RubberGaugeSize);
 static tConfItem<REAL> rgx("RUBBER_GAUGE_LOCX",subby_RubberGaugeLocX);
 static tConfItem<REAL> rgy("RUBBER_GAUGE_LOCY",subby_RubberGaugeLocY);
+static tConfItem<bool> rgc("RUBBER_GAUGE_COLOR",subby_RubberMeterColorChange);
 
 static tConfItem<bool> showh("SHOW_HUD",subby_ShowHUD);
 static tConfItem<bool> showf("SHOW_FASTEST",subby_ShowSpeedFastest);

@@ -31,6 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 extern REAL subby_SpeedGaugeSize, subby_SpeedGaugeLocX, subby_SpeedGaugeLocY;
 extern REAL subby_BrakeGaugeSize, subby_BrakeGaugeLocX, subby_BrakeGaugeLocY;
 extern REAL subby_RubberGaugeSize, subby_RubberGaugeLocX, subby_RubberGaugeLocY;
+extern bool subby_RubberMeterColorChange, subby_BrakeMeterColorChange;
 extern bool subby_ShowHUD, subby_ShowSpeedFastest, subby_ShowScore, subby_ShowAlivePeople, subby_ShowPing, subby_ShowSpeedMeter, subby_ShowBrakeMeter, subby_ShowRubberMeter;
 extern REAL subby_ScoreLocX, subby_ScoreLocY, subby_ScoreSize;
 extern REAL subby_FastestLocX, subby_FastestLocY, subby_FastestSize;
