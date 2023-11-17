@@ -39,6 +39,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "rSysdep.h"
 #include "tConsole.h"
 #include "ePlayer.h"
+#include "../tron/gCycle.h"
 #include "eAdvWall.h"
 #include "nConfig.h"
 #include "eFloor.h"
@@ -1493,6 +1494,16 @@ void eCamera::Render(){
 
 #endif
 
+static bool se_glanceSnap = false;
+static tSettingItem< bool > se_glanceSnapConf( "CAMERA_GLANCE_SNAP", se_glanceSnap );
+
+static bool se_glanceSnapForward = true;
+static tSettingItem< bool > se_glanceSnapForwardConf( "CAMERA_GLANCE_FORWARD_SNAP", se_glanceSnapForward );
+
+static bool se_holdGlancing = false;
+static tSettingItem< bool > se_holdGlancingConf( "CAMERA_GLANCE_HOLD", se_holdGlancing );
+
+
 void eCamera::SwitchCenter(int d){
     zNear = 0.01f;
 
@@ -1788,12 +1799,52 @@ void eCamera::Timestep(REAL ts){
             // fetch the relevant turning speed
             REAL turnSpeed = ( mode == CAMERA_IN || mode == CAMERA_SMART_IN ) ? s_inTurnSpeed : customTurnSpeed;
 
-            if ( glancingForward )
+            if ( 
+                ( se_glanceSnapForward && glancingForward ) ||
+                ( se_glanceSnap && ( glancingBack || glancingLeft || glancingRight ) )
+            )
             {
                 turnSpeed += GLANCE_SPEED;
             }
             
             eCoord cycleDir = CenterCycleDir();
+            
+            if( se_holdGlancing )
+            {
+                static bool glancingLast = false;
+                static eCoord glancingPos;
+                if( !glancingLast )
+                {
+                    if( glancingBack || glancingLeft || glancingRight || glancingForward )
+                    {
+                        // for some reason using gCycle's Direction instead of the generic
+                        // fixes occasional glance issues here
+                        gCycle * c = dynamic_cast<gCycle *>(Center());
+                        if( c )
+                        {
+                            glancingPos = c->Direction();
+                            glancingPos.Normalize();
+                        }
+                        else
+                        {
+                            glancingPos = cycleDir;
+                        }
+                        glancingLast = true;
+                    }
+                }
+                else
+                {
+                    if( glancingBack || glancingLeft || glancingRight || glancingForward )
+                    {
+                        cycleDir = glancingPos;
+                    }
+                    else
+                    {
+                        glancingLast = false;
+                    }
+                }
+            }
+            
             newdir=dir+cycleDir*(turnSpeed*ts);
 
             // test if we're looking against the current driving direction

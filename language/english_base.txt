@@ -741,6 +741,9 @@ camera_glance_back_fromspeed_help        This value is multiplied with the curre
 camera_glance_rise_fromspeed_help        This value is multiplied with the current speed and added to CAMERA_GLANCE_RISE.
 camera_glance_pitch_help    Position of the glance camera: how much does it look up/down?
 
+camera_glance_snap_help   Essentially ups the turn speed while glancing. Helpful for immediately glancing in a direction after turning.
+camera_glance_hold_help   Hold the glance even after turning in a different direction, like 0.4 does.
+
 camera_server_glance_back_help        Position of the server glance camera: how much is it moved back from the cycle?
 camera_server_glance_rise_help        Position of the server glance camera: how much is it moved up from the cycle?
 camera_server_glance_back_fromspeed_help        This value is multiplied with the current speed and added to CAMERA_SERVER_GLANCE_BACK.
