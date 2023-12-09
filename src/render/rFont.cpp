@@ -358,6 +358,10 @@ void rTextField::FlushLine(int len,bool newline){
             (!color_.IsDark() && (sr_textShadow&2) )
         ))
         {
+            RenderEnd(true);
+            glEnable(GL_TEXTURE_2D);
+            sr_lastSelected = 0;
+            
             int fakex = realx;
             REAL l,t;
             
