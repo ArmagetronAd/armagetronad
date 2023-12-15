@@ -888,6 +888,9 @@ bool uMenuItemString::Event(SDL_Event &e){
         else if (c.sym == SDLK_RIGHT) {
             moveEnd = true;
         }
+        else if (c.sym == SDLK_v) {
+            pasteText = true;
+        }
     }
     // Linux and Windows
 #else
@@ -904,6 +907,9 @@ bool uMenuItemString::Event(SDL_Event &e){
         }
         else if (c.sym == SDLK_BACKSPACE) {
             deleteWordLeft = true;
+        }
+        else if (c.sym == SDLK_v) {
+            pasteText = true;
         }
     }
     else if (c.sym == SDLK_HOME) {
@@ -923,9 +929,6 @@ bool uMenuItemString::Event(SDL_Event &e){
         }
         else if (c.sym == SDLK_k) {
             killForwards = true;
-        }
-        else if (c.sym == SDLK_v) {
-            pasteText = true;
         }
     }
     // moveWordLeft = moveWordRight = deleteWordLeft = deleteWordRight = moveBeginning = moveEnd = killForwards
@@ -953,7 +956,12 @@ bool uMenuItemString::Event(SDL_Event &e){
     }
     else if (pasteText) {
 #ifndef WIN32
-        std::unique_ptr<FILE, decltype(&pclose)> clip(popen("xclip -selection clipboard -o", "r"), pclose);
+        #ifdef MACOSX
+            #define CMD_CLIPBOARD_PASTE "pbpaste"
+        #else
+            #define CMD_CLIPBOARD_PASTE "xclip -selection clipboard -o"
+        #endif
+        std::unique_ptr<FILE, decltype(&pclose)> clip(popen(CMD_CLIPBOARD_PASTE, "r"), pclose);
         if( clip )
 #else
         if (OpenClipboard(0))
