@@ -657,6 +657,9 @@ static void display_fps_subby()
 static int simplemapmode = 1;
 static tConfItem<int> simplemapmode_con("HUD_MAP", simplemapmode);
 
+float sr_hudMapSize = .4;
+static tConfItem<float> sr_hudMapSizeConf("HUD_MAP_SIZE", sr_hudMapSize);
+
 extern bool stc_forbidHudMap;
 
 static void drawMinimap()
@@ -672,8 +675,8 @@ static void drawMinimap()
         c.cycleSize = 5;
         c.border = 10;
         
-        c.x = .5; c.y = -1;
-        c.w = .5; c.h = .5 * sr_screenWidth / sr_screenHeight;
+        c.x = 0.5 + ( 0.5 - sr_hudMapSize ); c.y = -1;
+        c.w = sr_hudMapSize; c.h = sr_hudMapSize * sr_screenWidth / sr_screenHeight;
         c.rw = .25 * sr_screenWidth; c.rh = .25 * sr_screenWidth;
         c.ix = 1; c.iy = 1; // iy was 0
         
