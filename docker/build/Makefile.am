@@ -438,8 +438,6 @@ appimagetests.tag: \
 	test.appimage_server_64_fedora_oldest \
 	test.appimage_client_64_fedora_latest \
 	test.appimage_client_64_fedora_oldest \
-	test.appimage_server_64_centos_latest \
-	test.appimage_client_64_centos_latest \
 	test.appimage_server_32_debian_latest \
 	test.appimage_server_32_debian_oldest \
 	test.appimage_client_32_debian_latest \
@@ -658,6 +656,7 @@ deploy_zi: result.deploy_zi
 deploy_download: result.deploy_download
 
 deploy_ppa: \
+deploy_ppa_noble \
 deploy_ppa_mantic \
 deploy_ppa_lunar \
 deploy_ppa_jammy \
