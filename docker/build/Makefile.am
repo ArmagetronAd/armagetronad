@@ -394,11 +394,6 @@ test.appimage_server_64_fedora_oldest: upload/$(APPIMAGE_SERVER_64)
 test.appimage_client_64_fedora_latest: upload/$(APPIMAGE_CLIENT_64)
 test.appimage_client_64_fedora_oldest: upload/$(APPIMAGE_CLIENT_64)
 
-test.appimage_server_64_centos_latest: upload/$(APPIMAGE_SERVER_64)
-test.appimage_server_64_centos_oldest: upload/$(APPIMAGE_SERVER_64)
-test.appimage_client_64_centos_latest: upload/$(APPIMAGE_CLIENT_64)
-test.appimage_client_64_centos_oldest: upload/$(APPIMAGE_CLIENT_64)
-
 test.appimage_server_32_debian_latest: upload/$(APPIMAGE_SERVER_32)
 test.appimage_server_32_debian_oldest: upload/$(APPIMAGE_SERVER_32)
 test.appimage_client_32_debian_latest: upload/$(APPIMAGE_CLIENT_32)
@@ -440,8 +435,6 @@ appimagetests_ci.tag: \
 	test.appimage_client_64_ubuntu_latest \
 	test.appimage_client_64_ubuntu_oldest_skewed \
 	test.appimage_client_64_fedora_latest \
-	test.appimage_server_64_centos_oldest \
-	test.appimage_client_64_centos_oldest \
 	test.appimage_server_32_debian_oldest \
 	test.appimage_client_32_debian_oldest \
 	upload/.tag
