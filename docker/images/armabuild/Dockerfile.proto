@@ -191,6 +191,7 @@ zip \
 FROM armabuild_base as armadeploy_base
 RUN apt-get -y update && DEBIAN_FRONTEND=noninteractive apt-get install \
 0install-core \
+python3-launchpadlib \
 -y
 
 FROM armadeploy_base as armadeploy
