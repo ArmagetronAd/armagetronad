@@ -108,7 +108,7 @@ default:
 # template rule for deployment jobs
 .deploy_base:
   retry: 2 # deployments can fail temporarily for a million reasons
-  image: $CI_REGISTRY_IMAGE/armadeploy_64@sha256:e8c91ac70e53def1a4b8b0867f9e146f03a0ba5520f9c22ee373029830ecbc34
+  image: $CI_REGISTRY_IMAGE/armadeploy_64@sha256:fd15abbf96da36994b45e6bb1aacb49136433aedb769353c13061297e7c1adc9
   interruptible: false
   # resource_group: deployment # only ever run one deployment job at a time
   tags:
