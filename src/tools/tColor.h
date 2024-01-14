@@ -84,7 +84,10 @@ inline std::ostream &operator<< (std::ostream &s,const tColor &c){
 }
 
 inline bool operator==(const tColor &lColor, const tColor &rColor) {
-    return ( fabs(lColor.r_ - rColor.r_) < EPS && fabs(lColor.g_ - rColor.g_) < EPS && fabs(lColor.b_ == rColor.b_) < EPS && fabs(lColor.a_ == rColor.a_) < EPS );
+    return ( fabs( lColor.r_ - rColor.r_ ) < EPS &&
+             fabs( lColor.g_ - rColor.g_ ) < EPS &&
+             fabs( lColor.b_ - rColor.b_ ) < EPS &&
+             fabs( lColor.a_ - rColor.a_ ) < EPS );
 }
 
 inline bool operator!=(const tColor &lColor, const tColor &rColor) {
