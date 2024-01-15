@@ -878,7 +878,6 @@ armagetron_screenmode_help	Screen resolution
 armagetron_last_screenmode_help Last screen resolution
 armagetron_windowsize_help	Window size
 armagetron_last_windowsize_help Last Window size
-motion_blur_time_help       Time over which the last rendered frames are blended together
 armagetron_vsync_help       What to do with the monitor's vertical sync
 rmagetron_vsync_last_help  What to do with the monitor's vertical sync
 fullscreen_help			Fullscreen or windowed mode?
@@ -2056,11 +2055,6 @@ screen_vsync_default_help	Do not touch the system defaults.
 
 screen_vsync_off_text	Don't wait
 screen_vsync_off_help	Ignore the signal. This results in higher frame rates, but you won't see most of these frames; your monitor can't display them all. Usually a waste of resources and causes tearing artefacts.
-
-screen_vsync_motionblur_text	Motion Blur
-screen_vsync_motionblur_help	Ignore it and make use of the additional frames for motion blurring, which makes the tearing artefacts less prominent. Recommended for power gamers.
-
-screen_vsync_motionblur_unsupported	Motion Blur unsupported on your system, disabling it.\n
 
 screen_grab_mouse_text		Grab Mouse:
 screen_grab_mouse_help		If activated, the mouse pointer is centered after every move; thus, it is unable to leave the window. This option is only useful when you play \g in a window.
