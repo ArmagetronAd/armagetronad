@@ -411,7 +411,7 @@ static void sr_SetGLAttributes( int rDepth, int gDepth, int bDepth, int zDepth )
         break;
     case ArmageTron_VSync_Off:
     case ArmageTron_VSync_MotionBlur:
-        SDL_GL_SetAttribute( SDL_GL_SWAP_CONTROL, 1 );
+        SDL_GL_SetAttribute( SDL_GL_SWAP_CONTROL, 0 );
         break;
     case ArmageTron_VSync_Default:
         break;
