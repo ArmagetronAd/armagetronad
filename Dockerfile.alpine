@@ -1,4 +1,4 @@
-ARG BASE=docker.io/ubuntu:22.04
+ARG BASE_ALPINE=docker.io/alpine:3.16
 ARG CONFIGURE_ARGS=""
 ARG FAKERELEASE=false
 ARG PROGNAME="armagetronad"
@@ -7,20 +7,22 @@ ARG PROGTITLE="Armagetron Advanced"
 ########################################
 
 # runtime prerequisites
-FROM ${BASE} AS runtime_base
+FROM ${BASE_ALPINE} AS runtime_base
 LABEL maintainer="Manuel Moos <z-man@users.sf.net>"
 
 ARG PROGNAME
 
-RUN apt-get -y update && DEBIAN_FRONTEND=noninteractive apt-get install \
+RUN apk add \
 bash \
-libboost-thread1.74.0 \
 libxml2 \
-libprotobuf23 \
+libgcc \
+libstdc++ \
 runit \
--y
+--no-cache
 
-# use libprotobuf32 from ubuntu 23.04 onward
+# for 0.4
+# boost-thread \
+# protobuf \
 
 WORKDIR /
 
@@ -30,23 +32,33 @@ WORKDIR /
 FROM runtime_base AS builder
 
 # build dependencies
-RUN apt-get -y update && DEBIAN_FRONTEND=noninteractive apt-get install \
+RUN apk add \
 autoconf \
 automake \
-libboost-all-dev \
 patch \
 bash \
 bison \
-bzip2 \
 g++ \
 make \
-libtool \
 libxml2-dev \
-protobuf-compiler \
-pkg-config \
 python3 \
-wget \
--y
+--no-cache
+
+# for 0.4
+#protobuf-dev \
+#boost-dev \
+#boost-thread \
+
+# download, patch, configure, build, install ZThread and remove all source traces in a single layer
+RUN mkdir src && wget https://forums3.armagetronad.net/download/file.php?id=9628 -O src/zthread.patch.bz2 && \
+wget https://sourceforge.net/projects/zthread/files/ZThread/2.3.2/ZThread-2.3.2.tar.gz/download -O src/zthread.tgz && \
+cd src && tar -xzf zthread.tgz && cd ZThread* && bzcat ../zthread.patch.bz2 | patch -p 1 && \
+CXXFLAGS="-fpermissive -DPTHREAD_MUTEX_RECURSIVE_NP=PTHREAD_MUTEX_RECURSIVE" ./configure --prefix=/usr --enable-shared=yes --enable-static=no && \
+make -j `nproc` && \
+make install && \
+cd ../../ && rm -r src
+
+#RUN find /usr/lib/ -name *ZThread*
 
 ########################################
 
@@ -71,6 +83,7 @@ WORKDIR ${BUILD_DIR}
 RUN ARMAGETRONAD_FAKERELEASE=${FAKERELEASE} progname="${PROGNAME}" progtitle="${PROGTITLE}" \
 ${SOURCE_DIR}/configure --prefix=/usr/local --disable-glout --disable-sysinstall --disable-useradd \
     --disable-master --disable-uninstall --disable-desktop \
+    LDFLAGS=-Wl,-z,stack-size=8388608 \
     ${CONFIGURE_ARGS} && \
 make -j `nproc` && \
 DESTDIR=/root/destdir make install && \
@@ -81,6 +94,8 @@ rm -rf ${SOURCE_DIR} ${BUILD_DIR}
 # finish runtime
 FROM runtime_base AS runtime
 
+COPY --chown=root --from=builder /usr/lib/*ZThread*.so* /usr/lib/
+
 # pack
 FROM runtime AS run_server
 
@@ -89,11 +104,11 @@ ARG PROGNAME
 COPY --chown=root --from=build /root/destdir /
 COPY batch/docker-entrypoint.sh.in /usr/local/bin/docker-entrypoint.sh
 
-RUN bash /usr/local/share/games/*-dedicated/scripts/sysinstall install /usr/local && \
+RUN sh /usr/local/share/games/*-dedicated/scripts/sysinstall install /usr/local && \
 sed -i /usr/local/bin/docker-entrypoint.sh -e "s/@progname@/${PROGNAME}/g" && \
 chmod 755 /usr/local/bin/docker-entrypoint.sh
 
-USER nobody
+USER nobody:nobody
 
 VOLUME ["/var/${PROGNAME}"]
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
