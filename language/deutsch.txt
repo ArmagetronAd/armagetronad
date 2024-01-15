@@ -880,6 +880,8 @@ armagetron_screenmode_help    Bildschirmauflösung
 armagetron_last_screenmode_help letzte Bildschirmauflösung
 armagetron_windowsize_help    Fenstergrösse
 armagetron_last_windowsize_help letzte Fenstergrösse
+armagetron_vsync_help         Was mit dem Vertical Sync des Monitors gemacht werden soll
+
 fullscreen_help               Vollbild oder Fenster?
 last_fullscreen_help          Vollbild oder Fenster, letzte erfolgreiche Einstellung
 check_errors_help             Soll \g auf Fehler bei der Grafikinitialisierung achten?
@@ -2043,6 +2045,18 @@ screen_check_errors_help      Soll \g bei der Grafikinitialisierung auf Warnunge
 
 screen_use_sdl_text           Verwende SDL
 screen_use_sdl_help           Wenn aktiviert, wird OpenGL über die sauberen Initialisierungsroutinen von SDL gestartet. Sonst wird ein Hack benutzt. (SDL: Multiplattformbibliothek, die bei \g für Eingabe, Sound und Fenstermanagement verwendet wird)
+
+screen_vsync_text             VSync:
+screen_vsync_help             Was mit dem Vsync-Signal des Monitors angestellt werden soll
+
+screen_vsync_on_text          Warte
+screen_vsync_on_help          Warte bei jedem Frame darauf. Dies schlägt sich gewöhnlich in sehr flüssigen Animationen nieder, deren Framerate jedoch durch die Refreshrate deines Monitors begrenzt wird, und es ist der einzige Weg, um das Spiel nicht 100% der Zeit deines CPUs verschwenden zu lassen. Empfohlen.
+
+screen_vsync_default_text     Default
+screen_vsync_default_help     Verwendet den Standardwert des Systems.
+
+screen_vsync_off_text         Nicht warten
+screen_vsync_off_help         Ignoriert das Signal. Dies resultiert in höheren Framerates, aber die meisten davon wirst du nicht sehen. Dein Monitor kann sie nicht alle zeigen. Normalerweise Resourcenverschwendung, die Zerreißbilder zur Folge hat.
 
 screen_grab_mouse_text        Maus einfangen:
 screen_grab_mouse_help        Wenn das hier aktiviert ist, so kann der Mauszeiger das Fenster nicht verlassen. Nur so lässt sich die Maus im Fenstermodus richtig nutzen.

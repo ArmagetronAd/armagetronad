@@ -46,6 +46,12 @@ typedef enum {
 }
 rColorDepth;
 
+typedef enum {
+    ArmageTron_VSync_On, ArmageTron_VSync_Default, ArmageTron_VSync_Off,
+    ArmageTron_VSync_MotionBlur
+}
+rVSync;
+
 struct rScreenSize
 {
     rResolution         res;
@@ -71,6 +77,7 @@ public:
     rColorDepth			zDepth;
     bool				useSDL;
     bool				checkErrors;
+    rVSync              vSync;          // whether to wait for vsync
     REAL				aspect;			// aspect ratio of pixels ( width/height )
 
     rScreenSettings(rResolution r,
