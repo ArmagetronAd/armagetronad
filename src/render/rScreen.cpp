@@ -444,68 +444,35 @@ static int countBits(unsigned int count)
     #ifndef DEDICATED
     #ifdef SDL_OPENGL
 // sets the number of vsync signals to wait for each frame
-static void sr_SetSwapControl( int frames, bool after = false )
+static bool sr_SetSwapControl( int frames, bool after = false )
 {
-    bool success = false;
-
-    #ifdef LINUX
-    // set environment variable for the linux nvidia driver.
-    // darn, changes to this can't be made while the program is running,
-    // a restart is required.
-    char hack[2];
-    hack[0] = '0' + frames;
-    hack[1] = 0;
-    setenv( "__GL_SYNC_TO_VBLANK", hack, 1 );
-    setenv( "vblank_mode", hack, 1 );
-    #endif
-
-    #ifdef WIN32
-    // special Windows code
-    typedef BOOL (APIENTRY *PFNWGLSWAPINTERVALFARPROC)( int );
-    PFNWGLSWAPINTERVALFARPROC wglSwapIntervalEXT = 0;
-
-    {
-        const char *extensions = gl_extensions;
-
-        if( extensions && strstr( extensions, "WGL_EXT_swap_control" ) )
-        {
-            wglSwapIntervalEXT = (PFNWGLSWAPINTERVALFARPROC)wglGetProcAddress( "wglSwapIntervalEXT" );
-
-            if( wglSwapIntervalEXT )
-            {
-                success = true;
-                if ( after )
-                    wglSwapIntervalEXT( frames );
-            }
-        }
-    }
-    #endif
-
-    // use SDL, requires 1.2.10
-    #if SDL_VERSION_ATLEAST(1, 2, 10)
-    if ( !success )
-    #if SDL_VERSION_ATLEAST(2, 0, 0)
-        success = !SDL_GL_SetSwapInterval( frames );
-    #else
-        SDL_GL_SetAttribute( SDL_GL_SWAP_CONTROL, frames );
-    #endif
-    #endif
+// use SDL, requires 1.2.10
+#if SDL_VERSION_ATLEAST( 1, 2, 10 )
+#if SDL_VERSION_ATLEAST( 2, 0, 0 )
+    return !SDL_GL_SetSwapInterval( frames );
+#else
+    SDL_GL_SetAttribute( SDL_GL_SWAP_CONTROL, frames );
+    return true;
+#endif
+#endif
 }
 
-static void sr_SetSwapControlAuto( bool after = false )
+static bool sr_SetSwapControlAuto( bool after = false )
 {
+    bool success = true;
+
     // requires SDL 1.2.10
     if ( tRecorder::IsRecording() )
     {
         // recordings are always done with VSync enabled
 #ifndef DEBUG
-        sr_SetSwapControl( 1, after );
+        success = sr_SetSwapControl( 1, after );
 #endif
     }
     else if( rSysDep::IsBenchmark() )
     {
 #ifndef DEBUG
-        sr_SetSwapControl( 0, after );
+        success = sr_SetSwapControl( 0, after );
 #endif
     }
     else
@@ -513,16 +480,18 @@ static void sr_SetSwapControlAuto( bool after = false )
         switch (currentScreensetting.vSync)
         {
         case ArmageTron_VSync_On:
-            sr_SetSwapControl( 1, after );
+            success = sr_SetSwapControl( 1, after );
             break;
         case ArmageTron_VSync_Off:
         case ArmageTron_VSync_MotionBlur:
-            sr_SetSwapControl( 0, after );
+            success = sr_SetSwapControl( 0, after );
             break;
         case ArmageTron_VSync_Default:
             break;
         }
     }
+
+    return success;
 }
 
 static void sr_SetGLAttributes( int rDepth, int gDepth, int bDepth, int zDepth )
@@ -537,8 +506,6 @@ static void sr_SetGLAttributes( int rDepth, int gDepth, int bDepth, int zDepth )
 #endif
     SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, zDepth );
     SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
-
-    sr_SetSwapControlAuto();
 }
 
 // to be called after screen initialization
@@ -814,8 +781,6 @@ static bool lowlevel_sr_InitDisplay(){
 
         sr_SetWindowTitle();
 
-        sr_CompleteGLAttributes();
-
         SDL_EnableUNICODE(1);
     }
 
@@ -996,7 +961,7 @@ static bool lowlevel_sr_InitDisplay(){
         {
             if(sr_glcontext)
                 SDL_GL_DeleteContext(sr_glcontext);
-            sr_glcontext = SDL_GL_CreateContext(sr_screen);
+            sr_glcontext = SDL_GL_CreateContext( sr_screen );
         }
         if(!sr_glcontext)
         {
@@ -1006,6 +971,8 @@ static bool lowlevel_sr_InitDisplay(){
             std::cerr << lastError << '\n';
             return false;
         }
+
+        sr_CompleteGLAttributes();
     }
 
     #ifndef DEDICATED
@@ -1162,8 +1129,6 @@ static bool lowlevel_sr_InitDisplay(){
     lastSuccess=currentScreensetting;
     failed_attempts = 0;
 //    sr_useDirectX = use_directx_back;
-
-    sr_CompleteGLAttributes();
 
     st_SaveConfig();
 
@@ -1644,6 +1609,7 @@ void sr_ExitDisplay(){
 #if SDL_VERSION_ATLEAST(2,0,0)
     if(sr_glcontext)
         SDL_GL_DeleteContext(sr_glcontext);
+    sr_glcontext = nullptr;
 #endif
 
     #endif
