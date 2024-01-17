@@ -52,11 +52,15 @@ tPlayList::tPlayList() {
 }
 
 void tPlayList::Randomize() {
+#ifdef WIN32
+    std::random_shuffle(m_Playlist.begin(), m_Playlist.end());
+#else // WIN32
     static std::random_device rd;
     std::mt19937 g(rd());
 
     std::shuffle(m_Playlist.begin(), m_Playlist.end(), g);
     m_CurrentSong = m_Playlist.begin();
+#endif // WIN32
 }
 
 const tSong& tPlayList::GetNextSong() {
