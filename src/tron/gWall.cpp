@@ -462,7 +462,12 @@ void gWallRim::RenderReal(const eCamera *cam){
     {
         REAL time = se_mainGameTimer->Time();
         REAL ts = time - lastUpdate_;
-        if ( ts > 0 )
+        if ( ts < 0 )
+        {
+            // let the wall just creep up a little to avoid creating a displaylist
+            ts = 1E-6;
+        }
+
         {
             lastUpdate_ = time;
 
@@ -479,9 +484,9 @@ void gWallRim::RenderReal(const eCamera *cam){
         }
     }
 
-    if(abs(renderHeight_ - lastRenderHeight_) > 0.01)
+    if ( renderHeight_ != lastRenderHeight_ )
     {
-        DestroyDisplayList();
+        DestroyDisplayList( 20 );
         lastRenderHeight_ = renderHeight_;
     }
 }
@@ -500,6 +505,10 @@ void gWallRim::RenderReal(const eCamera *cam){
 void gWallRim::OnBlocksCamera( eCamera * camera, REAL height ) const
 {
     // lower the wall so it now longer blocks the view
+    if ( renderHeight_ < .25 )
+    {
+        renderHeight_ = .25;
+    }
     if ( height < renderHeight_ )
     {
         renderHeight_ = height;
@@ -507,10 +516,16 @@ void gWallRim::OnBlocksCamera( eCamera * camera, REAL height ) const
     if ( renderHeight_ < .25 )
         renderHeight_ = .25;
 
-    if(abs(renderHeight_ - lastRenderHeight_) > 0.01)
+    if ( renderHeight_ != lastRenderHeight_ )
     {
-        DestroyDisplayList();
+        DestroyDisplayList( 50 );
         lastRenderHeight_ = renderHeight_;
+    }
+
+    // do not grow too soon
+    if ( se_mainGameTimer )
+    {
+        lastUpdate_ = se_mainGameTimer->Time() + .2;
     }
 }
 

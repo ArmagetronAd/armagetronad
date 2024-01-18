@@ -73,7 +73,8 @@ public:
     //! renders all rim walls
     static void RenderAll( eCamera * camera ); 
     //! destroys the display list (call when geometry is updated)
-    static void DestroyDisplayList();
+    static void DestroyDisplayList( int inhibitGeneration );
+    static void DestroyDisplayList() { DestroyDisplayList( 3 ); }
     //! brings x into the bounds of the rim eWalls with a min distance of offset
     static REAL Bound(eCoord &x,REAL offset=0);
     //! brings out inside the bounds of the rim walls, moving it closer to in.

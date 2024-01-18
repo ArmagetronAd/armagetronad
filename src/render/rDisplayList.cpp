@@ -115,9 +115,10 @@ bool rDisplayList::OnCall()
         return false;
     }
 
-    if ( inhibit_ > 0 && list_ )
+    if ( inhibit_ > 0 )
     {
-        Clear();
+        if ( list_ )
+            Clear( 0 );
         --inhibit_;
         return false;
     }
