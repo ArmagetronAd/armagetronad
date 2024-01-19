@@ -486,7 +486,7 @@ void gWallRim::RenderReal(const eCamera *cam){
 
     if ( renderHeight_ != lastRenderHeight_ )
     {
-        DestroyDisplayList( 20 );
+        DestroyDisplayList();
         lastRenderHeight_ = renderHeight_;
     }
 }
@@ -518,7 +518,7 @@ void gWallRim::OnBlocksCamera( eCamera * camera, REAL height ) const
 
     if ( renderHeight_ != lastRenderHeight_ )
     {
-        DestroyDisplayList( 50 );
+        DestroyDisplayList();
         lastRenderHeight_ = renderHeight_;
     }
 
