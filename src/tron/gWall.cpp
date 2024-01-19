@@ -466,6 +466,8 @@ void gWallRim::RenderReal(const eCamera *cam){
 
         if ( ts > 0 )
         {
+            ts = std::max( ts, 1E-5f );
+
             lastUpdate_ = time;
 
             if ( renderHeight_ < .25 )
