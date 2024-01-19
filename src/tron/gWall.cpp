@@ -458,16 +458,13 @@ void gWallRim::RenderReal(const eCamera *cam){
     }
 
     // grow the wall again
+    REAL ts = 0;
     if ( se_mainGameTimer )
     {
         REAL time = se_mainGameTimer->Time();
-        REAL ts = time - lastUpdate_;
-        if ( ts < 0 )
-        {
-            // let the wall just creep up a little to avoid creating a displaylist
-            ts = 1E-6;
-        }
+        ts = time - lastUpdate_;
 
+        if ( ts > 0 )
         {
             lastUpdate_ = time;
 
@@ -484,7 +481,7 @@ void gWallRim::RenderReal(const eCamera *cam){
         }
     }
 
-    if ( renderHeight_ != lastRenderHeight_ )
+    if ( ts <= 0 || renderHeight_ != lastRenderHeight_ )
     {
         DestroyDisplayList();
         lastRenderHeight_ = renderHeight_;
