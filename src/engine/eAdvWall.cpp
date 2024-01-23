@@ -169,10 +169,10 @@ void eWallRim::RenderAll( eCamera * camera )
 // *    DestroyDisplayList
 // *
 // *******************************************************************************************
-void eWallRim::DestroyDisplayList()
+void eWallRim::DestroyDisplayList( int inhibitGeneration )
 {
 #ifndef DEDICATED
-    se_rimDisplayList.Clear( 3 );
+    se_rimDisplayList.Clear( inhibitGeneration );
 #endif
 }
 

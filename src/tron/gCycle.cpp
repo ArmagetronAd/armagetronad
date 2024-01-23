@@ -252,6 +252,7 @@ public:
     virtual void ProcessImage(SDL_Surface *im);
 
     virtual void OnSelect(bool enforce);
+    using rSurfaceTexture::OnSelect;
 };
 
 gTextureCycle::gTextureCycle(rSurface const & surface, const gRealColor& color,bool repx,bool repy,bool w)
@@ -5754,6 +5755,7 @@ bool gCycle::Extrapolate( REAL dt )
 
 #ifdef DEBUG
     eCoord posBefore = extrapolator_->Position();
+    std::ignore = posBefore;
 #endif
 
     // calculate target time

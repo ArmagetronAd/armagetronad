@@ -203,7 +203,7 @@ UPLOAD_SCP=${UPLOAD_SCP_BASE}${SF_DIR}/
 # STEAM_USER=<steam username authorized to upload packages>
 # STEAM_PASSWORD=<their password>
 # 
-# file ssfn<id> optained after the first failed login due to Steam Guard
+# file config.vdf optained after the first failed login due to Steam Guard, see deploy_steam.sh script
 
 # **********************************************************************
 
@@ -227,7 +227,7 @@ UPLOAD_ZI_SCP=arma0install@builder.armagetronad.org:/home/arma0install/0install/
 
 if test ${STAGING} == true || test "${SF_DIR}" != "stable"; then
     # download URI base to use for zeroinstall and the download site; use our own storage for transient builds
-    DOWNLOAD_URI_BASE=http://download.armagetronad.org/staging/${SF_DIR}/@version@/
+    DOWNLOAD_URI_BASE=https://download.armagetronad.org/staging/${SF_DIR}/@version@/
 else
 	# only final stable builds go to launchpad permanently
 	DOWNLOAD_URI_BASE=https://launchpad.net/${LP_PROJECT}/${LP_SERIES}/${LP_VERSION}/+download/

@@ -1,7 +1,7 @@
 FROM ubuntu:rolling
 # rolling = most recent
 
-RUN apt-get -y update && apt-get install \
+RUN apt-get -y update && DEBIAN_FRONTEND=noninteractive apt-get install \
 mesa-utils \
 -y
 

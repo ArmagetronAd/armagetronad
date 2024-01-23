@@ -1590,8 +1590,7 @@ gParser::LoadAndValidateMapXML(char const * uri, FILE* docfd, char const * fileP
 {
 #ifndef DEDICATED
     /* register error handler */
-    xmlGenericErrorFunc errorFunc = &sg_ErrorFunc;
-    initGenericErrorDefaultFunc( &errorFunc );
+    xmlSetGenericErrorFunc( nullptr, sg_ErrorFunc );
     sg_errorLeadIn = "XML validation error in ";
     sg_errorLeadIn += filePath;
     sg_errorLeadIn += ":\n\n";
@@ -1699,7 +1698,7 @@ gParser::LoadAndValidateMapXML(char const * uri, FILE* docfd, char const * fileP
 
 #ifndef DEDICATED
     /* reset error handler */
-    initGenericErrorDefaultFunc( NULL );
+    xmlSetGenericErrorFunc( nullptr, nullptr );
 #endif
 
     return validated;

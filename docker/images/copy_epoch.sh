@@ -5,6 +5,9 @@
 
 set -x
 
+wd="`dirname $0`"
+. ${wd}/prefer_podman.sh || exit $?
+
 source=$1
 target=$2
 

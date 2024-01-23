@@ -1,18 +1,11 @@
-image: registry.gitlab.com/armagetronad/armagetronad/armaroot_64@sha256:c45680095075ba85cc33a4dae7034738a3e7f828d6eb9d3613c6e6091987e481
-
 variables:
   # https://docs.gitlab.com/ee/ci/docker/using_docker_build.html
   #DOCKER_TLS_CERTDIR: "/certs"
   #DOCKER_HOST: ""
   HAS_ARMADEPLOY: "false"
-
-services:
-  # required for shared runners, does not hurt for our runner (just some diagnostic complaints)
-  - name: docker:19.03.0-dind
-    alias: docker
-variables:
-  DOCKER_DRIVER: overlay2
-  DOCKER_TLS_CERTDIR: ""
+  STAGING_ENVIRONMENT: "invalid"
+  FINAL_ENVIRONMENT: "invalid"
+  PYTHONIOENCODING: "UTF-8"
 
 stages:
   - minimal_build
@@ -21,10 +14,20 @@ stages:
   - build_main
   - build_collect
   - test
+  - pre_stage
   - stage
+  - pre_deploy
   - deploy
 
 default:
+  image: $CI_REGISTRY_IMAGE/armaroot_64@sha256:87bde9b9410b26f04d305290cff9484dbc07b26b12c9c0c92995bf9886a5b9f3
+  interruptible: true
+  retry:
+    max: 1
+    when:
+      - runner_system_failure
+      - stuck_or_timeout_failure
+      - unknown_failure
   # common before script: bootstrap, configure, make dist, prepare docker builds
   before_script:
     - if ! test -d gitlab_build; then
@@ -51,21 +54,139 @@ default:
     paths:
      - docker/scripts/.cache
 
-# dummy workflow rules to silence spammy gitlab warnings
+# template rule to maka a job only run on project runners; this implies they can
+# only run on protected branches
+.project_runner:
+  tags:
+  - armagetronad
+  - linux
+  rules:
+  - if: $CI_MERGE_REQUEST_ID
+    when: never
+  - if: $CI_COMMIT_REF_PROTECTED == "true"
+    when: on_success
+  - when: never
+
+# template rule for job to always run, maybe on shared runners
+.merge_request:
+  tags:
+  - docker
+  - linux
+  rules:
+  - when: on_success
+
+# keep image dependencies here
+.merge_request_64:
+  extends: .merge_request
+  image: $CI_REGISTRY_IMAGE/armabuild_64@sha256:9ad315df60923db7527a33019c5e9dc069b69666440c028bc165d12b811a69e5
+
+.merge_request_32:
+  extends: .merge_request
+  image: $CI_REGISTRY_IMAGE/armabuild_32@sha256:cc7ad35de62d6f80e2c6864d2557e45afc46f0847e2e9d1e7766944ecb97de0b
+
+.project_runner_64:
+  extends: .project_runner
+  image: $CI_REGISTRY_IMAGE/armabuild_64@sha256:9ad315df60923db7527a33019c5e9dc069b69666440c028bc165d12b811a69e5
+
+.project_runner_steam_64:
+  extends: .project_runner
+  image: $CI_REGISTRY_IMAGE/armasteam_64@sha256:c6786ef5ba823214be3b8a863cdeffe5e932768718e7aae9d5f2ff427d5dedfc
+
+.project_runner_32:
+  extends: .project_runner
+  image: $CI_REGISTRY_IMAGE/armabuild_32@sha256:cc7ad35de62d6f80e2c6864d2557e45afc46f0847e2e9d1e7766944ecb97de0b
+
+.project_runner_wine:
+  extends: .project_runner
+  image: $CI_REGISTRY_IMAGE/armawineblocks@sha256:f70849ff0ae55d2da655a0f2adacbe69df3743ae2b04d38a1b902bf23fa98a7d
+
+.project_runner_debian:
+  extends: .project_runner
+  image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:c0d45ff7bf90a89a0bd10006ba9e40b5aff2f1173842cfcdc6a97f4cad8b8267
+
+
+# template rule for deployment jobs
+.deploy_base:
+  retry: 2 # deployments can fail temporarily for a million reasons
+  image: $CI_REGISTRY_IMAGE/armadeploy_64@sha256:b0314c9841ac0ea41eaeec60560527568a2a62875ff4a623125e93eb6c04208a
+  interruptible: false
+  # resource_group: deployment # only ever run one deployment job at a time
+  tags:
+   - armagetronad_deploy
+  rules:
+   - if: $CI_MERGE_REQUEST_ID
+     when: never
+   - if: $CI_COMMIT_REF_PROTECTED == "true"
+     when: on_success
+   - when: never
+  before_script:
+    - ./docker/scripts/fix_gits.sh || exit $?
+    - ./docker/deploy/prepare_deploy.sh || exit $?
+
+.deploy_staged:
+  extends: .deploy_base
+  environment: $STAGING_ENVIRONMENT
+  dependencies:
+   - build_prepare
+   - build_collect
+  stage: stage
+  script:
+    # now enter the docker build directory and just invoke make there
+    - cd gitlab_build/docker/build
+    - make staged_${TARGET} -O -j$(nproc) -k
+
+.deploy_staged_ppa:
+  extends: .deploy_staged
+  image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:c0d45ff7bf90a89a0bd10006ba9e40b5aff2f1173842cfcdc6a97f4cad8b8267
+
+.deploy_final:
+  extends: .deploy_base
+  environment: $FINAL_ENVIRONMENT
+  dependencies:
+   - build_prepare
+   - build_collect
+  stage: deploy
+  script:
+    # check that no later pipeline already started
+    - docker/scripts/obsolete.sh || exit 0
+
+    # now enter the docker build directory and just invoke make there
+    - cd gitlab_build/docker/build
+    - make unstaged_${TARGET} -O -j$(nproc) -k
+
+.deploy_final_ppa:
+  extends: .deploy_final
+  image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:c0d45ff7bf90a89a0bd10006ba9e40b5aff2f1173842cfcdc6a97f4cad8b8267
+
+.deploy_final_steam:
+  extends: .deploy_final
+  image: $CI_REGISTRY_IMAGE/steamcmd@sha256:a902aefc0718d2fc32101c09d6fca5202d882e68e821ae232423014abba6bc3d
+
+# only run on protected branches or merge requests
 workflow:
   rules:
-    - when: always
+  - if: $CI_MERGE_REQUEST_ID
+    when: always
+  - if: '$CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_TAG'
+    when: always
+    variables:
+    # NOTE these two below will vary with our main branches
+    # these guard lines are there to prevent spurious merge conflicts
+      STAGING_ENVIRONMENT : "staging"
+      FINAL_ENVIRONMENT : "production"
+    # NOTE these two above will vary with our main branches
+    # these guard lines are there to prevent spurious merge conflicts
+  - if: '$CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_BRANCH'
+    when: always
+    variables:
+      STAGING_ENVIRONMENT : "testing_$CI_COMMIT_BRANCH"
+      FINAL_ENVIRONMENT : "testing_$CI_COMMIT_BRANCH"
+  - when: never
 
 # very basic build
 build_prepare:
   stage: build_prepare
-  rules:
-  - if: $CI_MERGE_REQUEST_ID
-    when: always
-  - if: $CI_COMMIT_REF_PROTECTED == "true"
-    when: always
-  - when: delayed
-    start_in: '8 hours'
+  extends: .merge_request
   script: [""]
   artifacts:
     untracked: true
@@ -74,10 +195,7 @@ build_prepare:
 
 build_server_32_raw:
   stage: build_base
-  rules:
-  - if: $CI_MERGE_REQUEST_ID
-    when: on_success
-  - when: on_success
+  extends: .merge_request_32
   script:
     - gitlab_build/docker/build/make_ci.sh -k result.build_server_32
   after_script:
@@ -88,11 +206,9 @@ build_server_32_raw:
 
 build_server_steam_raw:
   stage: build_base
-  rules:
-  - if: $CI_MERGE_REQUEST_ID
-    when: never
-  - when: on_success
+  extends: .project_runner_steam_64
   script:
+    - ./bootstrap.sh
     - gitlab_build/docker/build/make_ci.sh -k result.build_server_steam
   artifacts:
     untracked: true
@@ -103,15 +219,10 @@ build_server_steam_raw:
 # Windows builds are worst because they have an additional layer of emulation,
 # are not parallelized and are client and server build in one.
 build_windows:
+  extends: .project_runner_wine
   needs:
   - build_server_32_raw
-  dependencies:
-  - build_server_32_raw
   stage: build_main
-  rules:
-  - if: $CI_MERGE_REQUEST_ID
-    when: on_success
-  - when: on_success
   script:
     - gitlab_build/docker/build/make_ci.sh CI_windows
   artifacts:
@@ -120,15 +231,10 @@ build_windows:
     expire_in: 1 day
 
 build_windows_steam:
+  extends: .project_runner_wine
   needs:
   - build_server_steam_raw
-  dependencies:
-  - build_server_steam_raw
   stage: build_main
-  rules:
-  - if: $CI_MERGE_REQUEST_ID
-    when: never
-  - when: on_success
   script:
     - gitlab_build/docker/build/make_ci.sh CI_windows_steam
   artifacts:
@@ -138,13 +244,10 @@ build_windows_steam:
 
 # debtest is faster, but also not paralellized
 build_debtest:
+  extends: .project_runner_debian
   dependencies:
   - build_prepare
   stage: build_main
-  rules:
-  - if: $CI_MERGE_REQUEST_ID
-    when: on_success
-  - when: on_success
   script:
     - gitlab_build/docker/build/make_ci.sh CI_debtest
   artifacts:
@@ -154,13 +257,10 @@ build_debtest:
 
 # steam builds server and client in one go (the server is already pre-built), they are packed together
 build_linux_steam:
+  extends: .project_runner_steam_64
   dependencies:
   - build_server_steam_raw
   stage: build_main
-  rules:
-  - if: $CI_MERGE_REQUEST_ID
-    when: never
-  - when: on_success
   script:
     - gitlab_build/docker/build/make_ci.sh CI_linux_steam
   artifacts:
@@ -169,13 +269,10 @@ build_linux_steam:
     expire_in: 1 day
 
 build_client_64:
-  dependencies:
+  extends: .merge_request_64
+  needs:
   - build_prepare
   stage: build_main
-  rules:
-  - if: $CI_MERGE_REQUEST_ID
-    when: on_success
-  - when: on_success
   script:
     - gitlab_build/docker/build/make_ci.sh CI_linux_client_64
   artifacts:
@@ -184,13 +281,10 @@ build_client_64:
     expire_in: 1 day
 
 build_client_32:
+  extends: .project_runner_32
   dependencies:
   - build_prepare
   stage: build_main
-  rules:
-  - if: $CI_MERGE_REQUEST_ID
-    when: on_success
-  - when: on_success
   script:
     - gitlab_build/docker/build/make_ci.sh CI_linux_client_32
   artifacts:
@@ -199,13 +293,10 @@ build_client_32:
     expire_in: 1 day
 
 build_server_64:
+  extends: .project_runner_64
   dependencies:
   - build_prepare
   stage: build_main
-  rules:
-  - if: $CI_MERGE_REQUEST_ID
-    when: on_success
-  - when: on_success
   script:
     - gitlab_build/docker/build/make_ci.sh CI_linux_server_64
   artifacts:
@@ -215,13 +306,10 @@ build_server_64:
 
 # this one is special, it can rely on previous build work
 build_server_32:
+  extends: .project_runner_32
   dependencies:
   - build_server_32_raw
   stage: build_main
-  rules:
-  - if: $CI_MERGE_REQUEST_ID
-    when: on_success
-  - when: on_success
   script:
     - gitlab_build/docker/build/make_ci.sh CI_linux_server_32
   artifacts:
@@ -233,9 +321,14 @@ build_server_32:
 # it should build directly from git content, the prepared linux source directories have soft links that won't work.
 build_macos:
   needs: []
-  dependencies: []
+  # the mac runner is not always available and may go down while on the job,
+  # be extra tolerant
+  retry:
+    max: 2
+    when: always
   tags:
   - macos
+  - armagetronad
   stage: build_main
   rules:
   - if: $CI_MERGE_REQUEST_ID
@@ -254,13 +347,10 @@ build_macos:
     expire_in: 1 day
     
 build_collect:
+  extends: .project_runner_64
   stage: build_collect
-  rules:
-  - if: $CI_MERGE_REQUEST_ID
-    when: never
-  - when: on_success
   script:
-    - gitlab_build/docker/build/make_ci.sh debtest.tag CI || exit $?
+    - gitlab_build/docker/build/make_ci.sh debtest.tag CI reformat.tag || exit $?
     - rm -rf src
      # consider mac builds newer than anything else, they must not be redone
     - if test -d gitlab_build/docker/build/macOS; then touch gitlab_build/docker/build/macOS/*; fi
@@ -269,85 +359,88 @@ build_collect:
     expire_in: 1 day
 
 # deploy to staged environment
-deploy_staged:
-  dependencies:
-   - build_prepare
-   - build_collect
-  stage: stage
-  tags:
-   - armagetronad_deploy
-  rules:
-  - if: $HAS_ARMADEPLOY != "true"
-    when: never
-  - if: $CI_MERGE_REQUEST_ID
-    when: never
-  - if: $CI_COMMIT_REF_PROTECTED == "true"
-    when: on_success
-  - when: never
-  before_script:
-    - ./docker/scripts/fix_gits.sh || exit $?
-    - ./docker/deploy/prepare_deploy.sh || exit $?
-  script:
-    # now enter the docker build directory and just invoke make there
-    - cd gitlab_build/docker/build
-    - make staged_deploy -O -j$(nproc) -k
+deploy_staged_external:
+  stage: pre_stage
+  extends: .deploy_staged
+  variables:
+    TARGET: "deploy_external"
 
+deploy_staged_ours:
+  extends: .deploy_staged
+  variables:
+    TARGET: "deploy_ours"
 
-# do the actual release; manually for final releases, delayed to avoid spam for everyone else
+deploy_staged_ppa:
+  extends: .deploy_staged_ppa
+  variables:
+    TARGET: "deploy_ppa"
+
+# does not actually deploy, but tests deployment up to the final 'git push'
+deploy_staged_flatpak:
+  extends: .deploy_staged
+  variables:
+    TARGET: "deploy_fp"
+
+# delay full deployment
 delay_release:
-  dependencies: []
+  needs: []
   stage: stage
   rules:
-  - if: $CI_MERGE_REQUEST_ID
-    when: never
-  - if: $CI_COMMIT_REF_PROTECTED == "false"
-    when: never
-  - if: '$CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_TAG'
-    when: manual
   - if: '$CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_BRANCH'
     when: delayed
     start_in: '16 hours'
-  - when: on_success
+  - when: never
   before_script: [""]
   script: [""]
 
 # do the actual release; manually for final releases, delayed to avoid spam for everyone else
-deploy_release:
-  dependencies:
-   - build_prepare
-   - build_collect
-  stage: deploy
-  tags:
-   - armagetronad_deploy
-  rules:
-  - if: $HAS_ARMADEPLOY != "true"
-    when: never
-  - if: $CI_MERGE_REQUEST_ID
-    when: never
-  - if: $CI_COMMIT_REF_PROTECTED == "true"
-    when: on_success
-  - when: never
-  before_script:
-    - ./docker/scripts/fix_gits.sh || exit $?
-    - ./docker/deploy/prepare_deploy.sh || exit $?
-  script:
-    # test whether we're current
-    - docker/scripts/obsolete.sh || exit 0
+deploy_final_external:
+  stage: pre_deploy
+  extends: .deploy_final
+  variables:
+    TARGET: "deploy_external"
 
-    # build
-    - cd gitlab_build/docker/build
-    - rm -rf result.appimage_* context.appimage_* # remake appimages, now we can sign them
-    - make unstaged_deploy -O -j$(nproc) -k
+deploy_steam:
+  extends: .deploy_final_steam
+  variables:
+    TARGET: "deploy_steam"
+
+deploy_final_ours:
+  extends: .deploy_final
+  variables:
+    TARGET: "deploy_ours"
+
+deploy_final_ppa:
+  extends: .deploy_final_ppa
+  variables:
+    TARGET: "deploy_ppa"
+
+deploy_gitlab:
+  extends: .deploy_final
+  variables:
+    TARGET: "deploy_gitlab"
+
+deploy_itch:
+  extends: .deploy_final
+  variables:
+    TARGET: "deploy_itch"
+
+deploy_final_flatpak:
+  extends: .deploy_final
+  variables:
+    TARGET: "deploy_fp"
+
+
 
 # test build docker image (hopefully also initiating the cache for later deployment)
 # does not really need debtest, but we want to let the Windows builds go first
 build_docker:
+  extends: .project_runner
   stage: build_collect
   needs:
-   - build_prepare
-   - build_debtest
-  dependencies:
-   - build_prepare
+  - job: build_prepare
+  - job: build_debtest
+    artifacts: false
   after_script:
     - rm -f ~/.docker/config.json
   script:
@@ -355,18 +448,12 @@ build_docker:
 
 # deploy docker image to staging
 stage_docker:
+  extends: .project_runner
   stage: stage
   needs:
-   - build_prepare
-   - build_docker
-  dependencies:
-   - build_prepare
-  rules:
-   - if: $CI_MERGE_REQUEST_ID
-     when: never
-   - if: $CI_COMMIT_REF_PROTECTED == "true"
-     when: on_success
-   - when: never
+  - job: build_prepare
+  - job: build_docker
+    artifacts: false
   after_script:
     - rm -f ~/.docker/config.json
   script:
@@ -374,19 +461,15 @@ stage_docker:
 
 # deploy docker image
 deploy_docker:
+  extends: .project_runner
+  environment: $FINAL_ENVIRONMENT
   stage: deploy
   needs:
-   - build_prepare
-   - stage_docker
-   - delay_release
-  dependencies:
-   - build_prepare
-  rules:
-   - if: $CI_MERGE_REQUEST_ID
-     when: never
-   - if: $CI_COMMIT_REF_PROTECTED == "true"
-     when: on_success
-   - when: never
+  - job: build_prepare
+  - job: stage_docker
+    artifacts: false
+  - job: delay_release
+    artifacts: false
   after_script:
     - rm -f ~/.docker/config.json
   script:
@@ -397,54 +480,27 @@ deploy_docker:
     - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY 2>&1 | grep -v WARNING\|credential || exit $?
     - make -C gitlab_build/docker/build unstaged_deploy_docker.tag || exit $?
 
-# deploy build to Gitlab
-deploy_gitlab:
-  stage: deploy
-  dependencies:
-   - build_prepare
-   - build_collect
-  rules:
-   - if: $CI_MERGE_REQUEST_ID
-     when: never
-   - if: $CI_COMMIT_REF_PROTECTED == "true"
-     when: on_success
-   - when: never
-  script:
-    # test whether we're current
-    - docker/scripts/obsolete.sh || exit 0
-
-    # deploy
-    - make -C gitlab_build/docker/build unstaged_deploy_gitlab || exit $?
-
-# post-build tests
-post_test:
-  stage: build_collect
-  script:
-    - make -C gitlab_build/docker/build appimagetests_ci || exit $?
-
 # post-build tests that require our own runners (or a docker upgrade on GitLab)
-post_test_extra:
+post_test:
+  retry: 2 # some tests fail spuriously for download failures, always rerun
+  extends: .project_runner
   stage: build_collect
-  rules: 
-  - if: $CI_MERGE_REQUEST_ID
-    when: never
-  - if: $CI_COMMIT_REF_PROTECTED == "true"
-    when: on_success
-  - when: never
+  services:
+    # required for shared runners, does not hurt for our runner (just some diagnostic complaints)
+    - name: docker:19.03.0-dind
+      alias: docker
+  variables:
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
   script:
-    - make -C gitlab_build/docker/build appimagetests_extra || exit $?
+    - make -C gitlab_build/docker/build appimagetests_ci appimagetests_extra || exit $?
 
 # pack up the downloadable build files in one handy artifact
 pack:
-  stage: stage
+  extends: .project_runner
+  stage: pre_stage
   needs:
    - build_collect
-  dependencies:
-   - build_collect
-  rules:
-   - if: $CI_MERGE_REQUEST_ID
-     when: never
-   - when: on_success
   script: [""]
   before_script:
     # test that everything has been prepared correctly
@@ -467,6 +523,7 @@ pack:
 
 
 testbuild:
+  extends: .project_runner
   stage: test
   rules:
    - when: never
@@ -478,6 +535,7 @@ testbuild:
 
 # for local testing
 complete_build:
+  extends: .project_runner
   stage: build_main
   rules:
   - when: never

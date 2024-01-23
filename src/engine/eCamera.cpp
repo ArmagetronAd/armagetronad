@@ -821,13 +821,11 @@ public:
         REAL objectZ = 1.5;
         if ( camera_ )
             objectZ = camera_->CenterCamZ() * 2;
-        REAL heightLimit = ( .5 * zLimit_ * time + objectZ * ( 1 - time ) );
+        REAL heightLimit = .5 * ( .5 * zLimit_ * time + objectZ * ( 1 - time ) );
 
         // exit early if the wall does not obstruct view
-        if ( moved_ || !w || !owned->EdgeIsDangerous(w, time, alpha) || w->Height() <= heightLimit )
+        if ( moved_ || !w || !owned->EdgeIsDangerous( w, time, alpha ) || w->Height() <= heightLimit * .5 )
             return;
-
-        heightLimit *= .5f;
 
         // project camera position a bit to the other side of the wall:
         // get the two endpoints

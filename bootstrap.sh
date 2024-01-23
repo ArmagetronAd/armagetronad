@@ -10,7 +10,7 @@ if test -r batch/make/version; then
 
     # try to fix source epoch
     if test -e .git; then
-        if SOURCE_DATE_EPOCH=`git log --date=unix | grep Date: | head -n 1 | sed -e "s,Date: *,,"`; then
+        if SOURCE_DATE_EPOCH=`git show --pretty='format:%at' -q`; then
             git update-index --refresh > /dev/null
             if git diff-index --quiet HEAD --; then
                 echo "m4_define(SOURCE_DATE_EPOCH,${SOURCE_DATE_EPOCH})" >> version.m4 || exit 1

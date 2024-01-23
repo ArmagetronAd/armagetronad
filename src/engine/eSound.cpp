@@ -341,6 +341,23 @@ eWavData::eWavData(const char * fileName,const char *alternative)
 
 }
 
+#ifndef DEDICATED
+
+#ifdef SDL_LoadWAV
+#undef SDL_LoadWAV
+#endif
+
+static SDL_AudioSpec * SDLCALL SDL_LoadWAV(char const *file, SDL_AudioSpec *spec, Uint8 **audio_buf, Uint32 *audio_len)
+{
+    auto *rw = SDL_RWFromFile(file, "rb");
+    if(!rw)
+        return nullptr;
+
+    return SDL_LoadWAV_RW(rw,1, spec,audio_buf,audio_len);
+}
+
+#endif
+
 void eWavData::Load(){
     //wavs.Add(this,id);
 
@@ -504,9 +521,13 @@ eWavData::~eWavData(){
 #endif
 }
 
-bool eWavData::Mix(Uint8 *dest,Uint32 playlen,eAudioPos &pos,
-                   REAL Rvol,REAL Lvol,REAL Speed,bool loop){
+bool eWavData::Mix( Uint8* dest_u8, Uint32 playlen, eAudioPos& pos,
+                    REAL Rvol, REAL Lvol, REAL Speed, bool loop )
+{
 #ifndef DEDICATED
+    // we know the alignment is correct
+    short* dest_s = reinterpret_cast<short*>( dest_u8 );
+
     if ( !data )
     {
         if( !loadError )
@@ -568,8 +589,8 @@ bool eWavData::Mix(Uint8 *dest,Uint32 playlen,eAudioPos &pos,
                 while (playlen>0 && pos.pos<samples){
                     // fix endian problems for the Mac port, as well as support for other
                     // formats than  stereo...
-                    int l=((short *)dest)[0];
-                    int r=((short *)dest)[1];
+                    int l = dest_s[0];
+                    int r = dest_s[1];
                     r += (rvol*(data[(pos.pos<<1)  ]-128)) >> (VOL_SHIFT-8);
                     l += (lvol*(data[(pos.pos<<1)+1]-128)) >> (VOL_SHIFT-8);
                     if (r>MAX_VAL) r=MAX_VAL;
@@ -577,10 +598,10 @@ bool eWavData::Mix(Uint8 *dest,Uint32 playlen,eAudioPos &pos,
                     if (r<MIN_VAL) r=MIN_VAL;
                     if (l<MIN_VAL) l=MIN_VAL;
 
-                    ((short *)dest)[0]=l;
-                    ((short *)dest)[1]=r;
+                    dest_s[0] = l;
+                    dest_s[1] = r;
 
-                    dest+=4;
+                    dest_s += 2;
 
                     pos.pos+=speed;
 
@@ -593,20 +614,21 @@ bool eWavData::Mix(Uint8 *dest,Uint32 playlen,eAudioPos &pos,
                     playlen--;
                 }
             else{
+                auto data_s = reinterpret_cast<short const*>( data );
                 while (playlen>0 && pos.pos<samples){
-                    int l=((short *)dest)[0];
-                    int r=((short *)dest)[1];
-                    r += (rvol*(((short *)data)[(pos.pos<<1)  ])) >> VOL_SHIFT;
-                    l += (lvol*(((short *)data)[(pos.pos<<1)+1])) >> VOL_SHIFT;
+                    int l = dest_s[0];
+                    int r = dest_s[1];
+                    r += ( rvol * ( data_s[( pos.pos << 1 )] ) ) >> VOL_SHIFT;
+                    l += ( lvol * ( data_s[( pos.pos << 1 ) + 1] ) ) >> VOL_SHIFT;
                     if (r>MAX_VAL) r=MAX_VAL;
                     if (l>MAX_VAL) l=MAX_VAL;
                     if (r<MIN_VAL) r=MIN_VAL;
                     if (l<MIN_VAL) l=MIN_VAL;
 
-                    ((short *)dest)[0]=l;
-                    ((short *)dest)[1]=r;
+                    dest_s[0] = l;
+                    dest_s[1] = r;
 
-                    dest+=4;
+                    dest_s += 2;
 
                     pos.pos+=speed;
 
@@ -624,8 +646,8 @@ bool eWavData::Mix(Uint8 *dest,Uint32 playlen,eAudioPos &pos,
                 while (playlen>0 && pos.pos<samples){
                     // fix endian problems for the Mac port, as well as support for other
                     // formats than  stereo...
-                    int l=((short *)dest)[0];
-                    int r=((short *)dest)[1];
+                    int l = dest_s[0];
+                    int r = dest_s[1];
                     int d=data[pos.pos]-128;
                     l += (lvol*d) >> (VOL_SHIFT-8);
                     r += (rvol*d) >> (VOL_SHIFT-8);
@@ -634,10 +656,10 @@ bool eWavData::Mix(Uint8 *dest,Uint32 playlen,eAudioPos &pos,
                     if (r<MIN_VAL) r=MIN_VAL;
                     if (l<MIN_VAL) l=MIN_VAL;
 
-                    ((short *)dest)[0]=l;
-                    ((short *)dest)[1]=r;
+                    dest_s[0] = l;
+                    dest_s[1] = r;
 
-                    dest+=4;
+                    dest_s += 2;
 
                     pos.pos+=speed;
 
@@ -651,10 +673,12 @@ bool eWavData::Mix(Uint8 *dest,Uint32 playlen,eAudioPos &pos,
                 }
             }
             else
+            {
+                auto data_s = reinterpret_cast<short const*>( data );
                 while (playlen>0 && pos.pos<samples){
-                    int l=((short *)dest)[0];
-                    int r=((short *)dest)[1];
-                    int d=((short *)data)[pos.pos];
+                    int l = dest_s[0];
+                    int r = dest_s[1];
+                    int d = data_s[pos.pos];
                     l += (lvol*d) >> VOL_SHIFT;
                     r += (rvol*d) >> VOL_SHIFT;
                     if (r>MAX_VAL) r=MAX_VAL;
@@ -662,10 +686,10 @@ bool eWavData::Mix(Uint8 *dest,Uint32 playlen,eAudioPos &pos,
                     if (r<MIN_VAL) r=MIN_VAL;
                     if (l<MIN_VAL) l=MIN_VAL;
 
-                    ((short *)dest)[0]=l;
-                    ((short *)dest)[1]=r;
+                    dest_s[0] = l;
+                    dest_s[1] = r;
 
-                    dest+=4;
+                    dest_s += 2;
 
                     pos.pos+=speed;
 
@@ -676,6 +700,7 @@ bool eWavData::Mix(Uint8 *dest,Uint32 playlen,eAudioPos &pos,
                     }
                     playlen--;
                 }
+            }
         }
 
         if (loop && pos.pos>=samples)
@@ -684,8 +709,7 @@ bool eWavData::Mix(Uint8 *dest,Uint32 playlen,eAudioPos &pos,
             goon=false;
     }
 #endif
-    return (playlen>0);
-
+    return ( playlen > 0 );
 }
 
 void eWavData::Loop(){
@@ -711,6 +735,8 @@ void eWavData::Loop(){
         }
         else if (spec.format==AUDIO_S16SYS){
             samples=len>>1;
+            auto data_s = reinterpret_cast<short*>( data );
+            auto buff2_s = reinterpret_cast<short*>( buff2 );
             for(int i=samples-1;i>=0;i--){
 
                 /*
@@ -727,8 +753,7 @@ void eWavData::Loop(){
                 if (a>1) a=1;
                 REAL b=1-a;
 
-
-                ((short *)data)[i]=int(a*((short *)buff2)[i]+b*((short *)buff2)[j]);
+                data_s[i] = int( a * buff2_s[i] + b * buff2_s[j] );
             }
         }
         delete[] buff2;

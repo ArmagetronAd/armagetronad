@@ -1,0 +1,32 @@
+# editor configuration. As close to the de facto style as possible
+
+# this is the top level file
+root = true
+
+# Unix-style newlines with a newline ending every file
+[*]
+end_of_line = lf
+insert_final_newline = true
+
+charset = utf-8
+
+# default indentation for C(++) and python files is spaces, four per level
+indent_style = space
+indent_size = 4
+
+# Tab indentation (no size specified)
+[Makefile{,.am,.in}]
+indent_style = tab
+
+# map files
+[*.xml]
+indent_style = tab
+
+# special C++ settings
+[*.{c,h,cpp,hpp}]
+curly_bracket_next_line = true
+indent_brace_style = Allman
+
+# language files are still latin1
+[deutsch.txt,french.txt,polish.txt,spanish.txt]
+charset = latin1

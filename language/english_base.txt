@@ -1074,6 +1074,8 @@ armagetron_screenmode_help    Screen resolution
 armagetron_last_screenmode_help Last screen resolution
 armagetron_windowsize_help    Window size
 armagetron_last_windowsize_help Last Window size
+armagetron_vsync_help       What to do with the monitor's vertical sync
+rmagetron_vsync_last_help  What to do with the monitor's vertical sync
 fullscreen_help            Fullscreen or windowed mode?
 last_fullscreen_help        Fullscreen or windowed mode, last successful init
 check_errors_help        Listen to errors claiming a video mode does not exist
@@ -1562,7 +1564,7 @@ game_menu_disconnect_help    Disconnects from the server and returns to the main
 #********************************************
 version_info_title              About this installation of \g
 version_info_version            Version of \g: \1
-version_info_misc_stuff         \n0xff8888Official website:0xRESETT http://armagetronad.net/\n0xff8888Official forums:0xRESETT https://forums3.armagetronad.net/\n0xff8888Wiki (strategies, tournaments, ...):0xRESETT http://wiki.armagetronad.net/\n0xff8888Project admins:0xRESETT z-man, Tank Program (guru3), Lucifer
+version_info_misc_stuff         \n0xff8888Official website:0xRESETT https://armagetronad.net/\n0xff8888Official forums:0xRESETT https://forums3.armagetronad.net/\n0xff8888Wiki (strategies, tournaments, ...):0xRESETT https://wiki.armagetronad.net/\n0xff8888Project admins:0xRESETT z-man, Tank Program (guru3), Lucifer
 
 path_info_user_cfg              Location of user.cfg:
 path_info_config                Configuration directories:
@@ -2335,6 +2337,18 @@ screen_check_errors_help    Should we listen to the warnings about non-existent 
 
 screen_use_sdl_text        Use SDL OpenGL:
 screen_use_sdl_help        Toggles use of the clean OpenGL initialisation routines; if disabled, \g will use the dirty method that was necessary with SDL 1.0.
+
+screen_vsync_text		VSync:
+screen_vsync_help		What to do with the monitor's vertical sync signal.
+
+screen_vsync_on_text	Wait
+screen_vsync_on_help	Wait for it every frame. This usually results in very smooth animations at a frame rate limited by your monitor's refresh rate, and is the only way to make this game not use 100% CPU time. Recommended.
+
+screen_vsync_default_text	Default
+screen_vsync_default_help	Do not touch the system defaults.
+
+screen_vsync_off_text	Don't wait
+screen_vsync_off_help	Ignore the signal. This results in higher frame rates, but you won't see most of these frames; your monitor can't display them all. Usually a waste of resources and causes tearing artefacts.
 
 screen_grab_mouse_text        Grab Mouse:
 screen_grab_mouse_help        If activated, the mouse pointer is centered after every move; thus, it is unable to leave the window. This option is only useful when you play \g in a window.
@@ -3120,7 +3134,7 @@ network_master_host_lan_help    This will start a network game that is only visi
 
 resource_not_cached         Resource \1 not found in cache. Downloading it, please be patient...\n
 resource_downloading        Downloading \1 ...\n
-resource_fetcherror_noconnect ERROR: Impossible to reach host of URI \1. This may be caused by a DNS resolving issue, please report to https://forums3.armagetronad.net/ if this happens with the main resource repository(http://resource.armagetronad.net/resource/).\n
+resource_fetcherror_noconnect ERROR: Impossible to reach host of URI \1. This may be caused by a DNS resolving issue, please report to https://forums3.armagetronad.net/ if this happens with the main resource repository(https://resource.armagetronad.net/resource/).\n
 resource_fetcherror_404     ERROR: Return value 404 : File not found.\n
 resource_fetcherror         ERROR: Return value \1 != 200.\n
 resource_no_filename        ERROR: NULL or empty filename.\n

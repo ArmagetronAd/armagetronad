@@ -4,7 +4,15 @@
 # to be used in .gitlab-ci.yml as
 # docker/scripts/obsolete.sh || exit 0
 
-wget ${CI_SERVER_URL}/api/v4/projects/${CI_PROJECT_ID}/pipelines -O pipelines.json
+if ! curl ${CI_SERVER_URL}/api/v4/projects/${CI_PROJECT_ID}/pipelines > pipelines.json; then
+    wget ${CI_SERVER_URL}/api/v4/projects/${CI_PROJECT_ID}/pipelines -O pipelines.json
+fi
+
+if ! test -r pipelines.json; then
+    echo "Fetching pipeline info failed."
+    exit 2
+fi
+
 EXIT=1
 
 # remove any newlines

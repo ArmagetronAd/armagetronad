@@ -1,0 +1,51 @@
+Language: Cpp
+
+# to apply these settings on git commit on changed lines only, the easiest way
+# is to use pre-commit; read .pre-commit-config.yaml for details.
+# 
+# Another way is this pre-commit hook:
+#   https://github.com/barisione/clang-format-hooks
+# clone it somewhere, run '/path/to/clone/git-pre-commit-format install'
+
+# test diff with
+# git checkout src; find . -iname '*.h' -o -iname '*.cpp' | parallel clang-format -i; git diff src | wc -l
+# diff count: 118038
+
+# closest to our legacy style...
+BasedOnStyle: Microsoft
+IndentWidth: 4
+AccessModifierOffset: -4
+TabWidth: 4
+UseTab: Never
+
+# leave line breaks alone
+ColumnLimit: 0
+# note: it is still recommended to leave lines short, ideally below 80; but
+# letting clang-format handle that does not work well enough and one needs
+# to use tricks, like empty trailing comments.
+
+# do not mess with includes
+SortIncludes: false
+
+# the code has them more often than not, and this follows the astyle config
+# f( x ) instead of f(x)
+SpacesInParentheses: true
+
+# we have more "int* x" than "int *x" (or "int * x")
+PointerAlignment: Left
+
+AllowShortFunctionsOnASingleLine: true
+AllowShortBlocksOnASingleLine: true
+
+# Alignment options
+
+# leave to individual choice for now
+# AlignAfterOpenBracket: AlwaysBreak
+#AlignConsecutiveMacros: false
+#AlignConsecutiveAssignments: false
+#AlignConsecutiveDeclarations: false
+#AlignOperands: false
+#AlignTrailingComments: true
+
+
+#AllowAllConstructorInitializersOnNextLine: true

@@ -883,6 +883,8 @@ armagetron_screenmode_help    Bildschirmauflösung
 armagetron_last_screenmode_help letzte Bildschirmauflösung
 armagetron_windowsize_help    Fenstergrösse
 armagetron_last_windowsize_help letzte Fenstergrösse
+armagetron_vsync_help         Was mit dem Vertical Sync des Monitors gemacht werden soll
+
 fullscreen_help               Vollbild oder Fenster?
 last_fullscreen_help          Vollbild oder Fenster, letzte erfolgreiche Einstellung
 check_errors_help             Soll \g auf Fehler bei der Grafikinitialisierung achten?
@@ -1294,7 +1296,7 @@ game_menu_disconnect_help     Trennt die Verbindung zum Server und führt wieder 
 #********************************************
 version_info_title            Über diese Installation von \g
 version_info_version          Version von \g: \1
-version_info_misc_stuff       \n0xff8888Offizielle Website:0xRESETT http://armagetronad.net/\n0xff8888Offizielles Forum:0xRESETT https://forums3.armagetronad.net/\n0xff8888Wiki (Strategie, Turniere, Dokumentation, ...):0xRESETT http://wiki.armagetronad.net/\n0xff8888Projektverwalter:0xRESETT z-man, Tank Program (guru3), Lucifer
+version_info_misc_stuff       \n0xff8888Offizielle Website:0xRESETT https://armagetronad.net/\n0xff8888Offizielles Forum:0xRESETT https://forums3.armagetronad.net/\n0xff8888Wiki (Strategie, Turniere, Dokumentation, ...):0xRESETT https://wiki.armagetronad.net/\n0xff8888Projektverwalter:0xRESETT z-man, Tank Program (guru3), Lucifer
 
 path_info_user_cfg            Pfad zu user.cfg:
 path_info_config              Konfigurationsverzeichnisse:
@@ -2051,6 +2053,18 @@ screen_check_errors_help      Soll \g bei der Grafikinitialisierung auf Warnunge
 screen_use_sdl_text           Verwende SDL
 screen_use_sdl_help           Wenn aktiviert, wird OpenGL über die sauberen Initialisierungsroutinen von SDL gestartet. Sonst wird ein Hack benutzt. (SDL: Multiplattformbibliothek, die bei \g für Eingabe, Sound und Fenstermanagement verwendet wird)
 
+screen_vsync_text             VSync:
+screen_vsync_help             Was mit dem Vsync-Signal des Monitors angestellt werden soll
+
+screen_vsync_on_text          Warte
+screen_vsync_on_help          Warte bei jedem Frame darauf. Dies schlägt sich gewöhnlich in sehr flüssigen Animationen nieder, deren Framerate jedoch durch die Refreshrate deines Monitors begrenzt wird, und es ist der einzige Weg, um das Spiel nicht 100% der Zeit deines CPUs verschwenden zu lassen. Empfohlen.
+
+screen_vsync_default_text     Default
+screen_vsync_default_help     Verwendet den Standardwert des Systems.
+
+screen_vsync_off_text         Nicht warten
+screen_vsync_off_help         Ignoriert das Signal. Dies resultiert in höheren Framerates, aber die meisten davon wirst du nicht sehen. Dein Monitor kann sie nicht alle zeigen. Normalerweise Resourcenverschwendung, die Zerreißbilder zur Folge hat.
+
 screen_grab_mouse_text        Maus einfangen:
 screen_grab_mouse_help        Wenn das hier aktiviert ist, so kann der Mauszeiger das Fenster nicht verlassen. Nur so lässt sich die Maus im Fenstermodus richtig nutzen.
 
@@ -2762,7 +2776,7 @@ network_master_host_lan_help  Startet einen Server auf diesem Rechner, der nur i
 
 resource_not_cached           Datei \1 befindet sich nicht im lokalen Speicher. Bitte etwas Geduld, sie wird heruntergeladen...\n
 resource_downloading          Lade \1 herunter ...\n
-resource_fetcherror_noconnect FEHLER: Der host von URI \1 ist nicht erreichbar. Das kann ein DNS Namensauflösungsfehler sein. Falls es sich um das Hauptlager für Resourcen (http://resource.armagetronad.net/resource/) handelt, melde dies bitte auf https://forums3.armagetronad.net/.\n
+resource_fetcherror_noconnect FEHLER: Der host von URI \1 ist nicht erreichbar. Das kann ein DNS Namensauflösungsfehler sein. Falls es sich um das Hauptlager für Resourcen (https://resource.armagetronad.net/resource/) handelt, melde dies bitte auf https://forums3.armagetronad.net/.\n
 resource_fetcherror_404       FEHLER 404 : Datei nicht gefunden.\n
 resource_fetcherror           FEHLER \1 != 200.\n
 resource_no_filename          FEHLER: Leerer Dateiname.\n

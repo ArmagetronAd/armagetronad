@@ -51,7 +51,7 @@ CI_windows.tag: CI_base.tag steam_windows.tag closed_regular.tag
 	touch $@
 
 # all free linux builds (so, no steam)
-CI_free.tag: CI_base.tag free.tag reformat.tag
+CI_free.tag: CI_base.tag free.tag
 	touch $@
 
 # (OBSOLETE) targets for CI merge tests, a bit leaner than a full build
@@ -227,7 +227,7 @@ context.steam: context.64 gits_artifacts.tag
 		rm -f $@.dir/$$f; \
 		sed < $<.dir/$$f > $@.dir/$$f -e "s,textures/title.jpg,textures/title.png,"; \
 	done
-	cd $@.dir/source; automake
+	cd $@.dir/source; ./bootstrap.sh
 #   done
 	echo > $@
 
@@ -490,11 +490,6 @@ test.appimage_server_64_fedora_oldest: upload/$(APPIMAGE_SERVER_64)
 test.appimage_client_64_fedora_latest: upload/$(APPIMAGE_CLIENT_64)
 test.appimage_client_64_fedora_oldest: upload/$(APPIMAGE_CLIENT_64)
 
-test.appimage_server_64_centos_latest: upload/$(APPIMAGE_SERVER_64)
-test.appimage_server_64_centos_oldest: upload/$(APPIMAGE_SERVER_64)
-test.appimage_client_64_centos_latest: upload/$(APPIMAGE_CLIENT_64)
-test.appimage_client_64_centos_oldest: upload/$(APPIMAGE_CLIENT_64)
-
 test.appimage_server_32_debian_latest: upload/$(APPIMAGE_SERVER_32)
 test.appimage_server_32_debian_oldest: upload/$(APPIMAGE_SERVER_32)
 test.appimage_client_32_debian_latest: upload/$(APPIMAGE_CLIENT_32)
@@ -523,10 +518,6 @@ appimagetests.tag: \
 	test.appimage_server_64_fedora_oldest \
 	test.appimage_client_64_fedora_latest \
 	test.appimage_client_64_fedora_oldest \
-	test.appimage_server_64_centos_latest \
-	test.appimage_server_64_centos_oldest \
-	test.appimage_client_64_centos_latest \
-	test.appimage_client_64_centos_oldest \
 	test.appimage_server_32_debian_latest \
 	test.appimage_server_32_debian_oldest \
 	test.appimage_client_32_debian_latest \
@@ -540,8 +531,8 @@ appimagetests_ci.tag: \
 	test.appimage_client_64_ubuntu_latest \
 	test.appimage_client_64_ubuntu_oldest_skewed \
 	test.appimage_client_64_fedora_latest \
-	test.appimage_server_64_centos_oldest \
-	test.appimage_client_64_centos_oldest \
+	test.appimage_server_64_fedora_oldest \
+	test.appimage_client_64_fedora_oldest \
 	test.appimage_server_32_debian_oldest \
 	test.appimage_client_32_debian_oldest \
 	upload/.tag
@@ -732,10 +723,10 @@ deploy_base: deploy_base.tag
 
 # out of our control deploy targets that break from time to time; the whole deploy process needs to be delayed if they fail
 deploy_essential: result.deploy_lp result.deploy_scp
-deploy_external: deploy_essential deploy_steam
+deploy_external: deploy_essential
 
 # targets in our control
-deploy_ours: result.deploy_zi result.deploy_download deploy_external
+deploy_ours: result.deploy_zi result.deploy_download
 
 context.deploy_base_%: rootcontext.64 deploy_base.tag ${srcdir}/../deploy/deploy_%.sh ${srcdir}/../deploy/wait_for_upload.sh ../deploy/* CI_INFO
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' upload ../deploy/'*' ${srcdir}/../deploy/deploy_$*.sh ${srcdir}/../deploy/wait_for_upload.sh CI_INFO
@@ -748,7 +739,7 @@ result.deploy_%: context.deploy_%
 	echo > $@
 
 # special case steam: run in steamcmd image
-context.deploy_steam: context.deploy_base_steam ${srcdir}/../deploy/steamcontentbuilder/*/* steam.tag deploy_essential
+context.deploy_steam: context.deploy_base_steam ${srcdir}/../deploy/steamcontentbuilder/*/* steam.tag
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' ${srcdir}/../deploy/steamcontentbuilder
 	sed -i $@.dir/steamcontentbuilder/scripts/app_build_1306180.vdf -e "s/BUILD_DESCRIPTION/$(STEAM_PACKAGE_TITLE)$(PACKAGE_TITLE_SUFFIX) $(PACKAGE_VERSION)/"
 	mkdir -p $@.dir/steamcontentbuilder/content $@.dir/steamcontentbuilder/output
@@ -758,6 +749,25 @@ context.deploy_steam: context.deploy_base_steam ${srcdir}/../deploy/steamcontent
 	rm -rf $@.dir/upload
 	rm -f $@.dir/image
 	echo "steamcmd" > $@.dir/image
+	echo > $@
+
+# special case steam: obtain steam guard unlock data
+context.steam_guard: rootcontext.64 ${srcdir}/prepare_context.sh ${srcdir}/../deploy/steamcontentbuilder/*/* ${srcdir}/../deploy/*steam_guard*.sh CI_INFO Makefile
+	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' ../deploy/'*' ${srcdir}/../deploy/steamcontentbuilder ${srcdir}/../deploy/*steam_guard*.sh CI_INFO
+	mkdir -p $@.dir/steamcontentbuilder/content $@.dir/steamcontentbuilder/output
+	rm -rf $@.dir/upload
+	rm -f $@.dir/image
+	echo "steamcmd" > $@.dir/image
+	echo > $@
+
+result.steam_guard: context.steam_guard
+	$(srcdir)/context_to_result.sh $@.dir ./obtain_steam_guard_1.sh
+	echo "Enter Steam Guard Code : " && read STEAM_GUARD_CODE && echo "STEAM_GUARD_CODE=$${STEAM_GUARD_CODE}" > ./context.steam_guard.dir/secrets/steamguard.sh
+	$(srcdir)/context_to_result.sh $@.dir ./obtain_steam_guard_2.sh
+	echo > $@
+
+steam_guard: result.steam_guard
+	scp result.steam_guard.dir/output/config.vdf armadeploy@builder.armagetronad.org:~/secrets/
 	echo > $@
 
 context.deploy_gitlab: rootcontext.64 deploy_base.tag ../deploy/* ${srcdir}/../deploy/deploy_gitlab.sh CI_INFO
@@ -772,7 +782,7 @@ context.deploy_gitlab: rootcontext.64 deploy_base.tag ../deploy/* ${srcdir}/../d
 context.deploy_ppa_%: result.debsrc_% ${srcdir}/../deploy/deploy_ppa.sh ../deploy/targets.sh CI_INFO
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' ${srcdir}/../deploy/deploy_ppa.sh ../deploy/targets.sh ../deploy/secrets/*.gpg CI_INFO
 	echo > $@
-result.deploy_ppa_%: context.deploy_ppa_% deploy_ours
+result.deploy_ppa_%: context.deploy_ppa_%
 	+$(srcdir)/context_to_result.sh $@.dir ./deploy_ppa.sh $*
 	echo > $@
 
@@ -796,7 +806,7 @@ context.deploy_zi: context.deploy_base_zeroinstall result.update_zi ${srcdir}/..
 	rm -f $@.dir/image
 	echo "armadeploy_64" > $@.dir/image
 	echo > $@
-result.deploy_zi: context.deploy_zi deploy_external result.deploy_download
+result.deploy_zi: context.deploy_zi result.deploy_download
 	+$(srcdir)/context_to_result.sh $@.dir ./deploy_zeroinstall.sh
 	echo > $@
 
@@ -805,7 +815,7 @@ context.deploy_fp: context.deploy_base_flatpak ${srcdir}/../deploy/*_flatpak.sh
 	rm -f $@.dir/image
 	echo "armadeploy_64" > $@.dir/image
 	echo > $@
-result.deploy_fp: context.deploy_fp deploy_external result.deploy_download
+result.deploy_fp: context.deploy_fp
 	+$(srcdir)/context_to_result.sh $@.dir ./deploy_flatpak.sh
 	echo > $@
 
@@ -822,9 +832,6 @@ result.deploy_itch: context.deploy_itch
 	+$(srcdir)/context_to_result.sh $@.dir ./deploy_itch.sh
 	echo > $@
 
-# deploy to download site (additional dependency here only, standard rules apply)
-result.deploy_download: deploy_external
-
 # individual deploy targets
 deploy_lp: result.deploy_lp
 deploy_scp: result.deploy_scp
@@ -836,7 +843,9 @@ deploy_download: result.deploy_download
 deploy_itch: result.deploy_itch
 
 deploy_ppa: \
-deploy_ppa_kinetic \
+deploy_ppa_noble \
+deploy_ppa_mantic \
+deploy_ppa_lunar \
 deploy_ppa_jammy \
 deploy_ppa_focal \
 deploy_ppa_bionic \
@@ -846,7 +855,7 @@ deploy_ppa_trusty
 deploy_ppa_%: result.deploy_ppa_%
 	@echo Deployed $*
 
-deploy: deploy_lp deploy_scp deploy_ppa deploy_zi deploy_fp deploy_steam deploy_download deploy_itch
+deploy: deploy_lp deploy_scp deploy_zi deploy_fp deploy_steam deploy_download deploy_itch
 #deploy: deploy_scp
 #deploy: deploy_zi
 #deploy: deploy_ppa

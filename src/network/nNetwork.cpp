@@ -561,6 +561,7 @@ nDescriptor::nDescriptor(unsigned short identification,
         :tListItem<nDescriptor>(nDescriptor_anchor),
         id(identification),handler(handle),name(Name), acceptWithoutLogin(awl)
 {
+    std::ignore = name;
 #ifdef DEBUG
 #ifndef WIN32
     //  con << "Descriptor " << id << ": " << name << '\n';

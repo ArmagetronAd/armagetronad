@@ -1096,10 +1096,11 @@ static std::vector< tString > st_Stringify( char const * vetos[] )
 
 static bool s_VetoPlayback( tString const & line )
 {
-    static char const * vetos_char[]=
+    static char const* vetos_char[] =
         { "USE_DISPLAYLISTS", "CHECK_ERRORS", "ZDEPTH",
           "COLORDEPTH", "FULLSCREEN ", "ARMAGETRON_LAST_WINDOWSIZE",
           "ARMAGETRON_WINDOWSIZE", "ARMAGETRON_LAST_SCREENMODE",
+          "ARMAGETRON_VSYNC", "ARMAGETRON_VSYNC_LAST",
           "ARMAGETRON_SCREENMODE", "CUSTOM_SCREEN", "SOUND",
           "PASSWORD", "ADMIN_PASS",
           "ZTRICK", "MOUSE_GRAB", "PNG_SCREENSHOT", // "WHITE_SPARKS", "SPARKS",
