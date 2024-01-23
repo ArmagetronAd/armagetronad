@@ -322,6 +322,9 @@ typedef nSettingItem<REAL> gChatBotSetting;
 typedef nSettingItem<bool> gChatBotSwitch;
 #endif
 
+static bool sg_chatBotEnabled = false;
+static tSettingItem<bool> sg_chatBotEnabledConf( "CHATBOT_ENABLED", sg_chatBotEnabled );
+
 static bool sg_chatBotAlwaysActive = false;
 static gChatBotSwitch sg_chatBotAlwaysActiveConf( "CHATBOT_ALWAYS_ACTIVE", sg_chatBotAlwaysActive );
 
