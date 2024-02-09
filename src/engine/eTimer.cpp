@@ -30,12 +30,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "eNetGameObject.h"
 #include "nSimulatePing.h"
 #include "tRecorder.h"
+#include "tMath.h"
 #include "tConfiguration.h"
 #include "eLagCompensation.h"
 
 #include <memory>
 #include <numeric>
 #include <array>
+
 // #include <fstream>
 
 class eFPSCounter
