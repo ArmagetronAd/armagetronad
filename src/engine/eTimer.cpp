@@ -47,7 +47,7 @@ public:
         PrivateTick(dt);
     }
 
-    // gets the current best value for FPS
+    // gets the current best value for FPS
     int GetFPS() const noexcept
     {
         return bestFPS_;
