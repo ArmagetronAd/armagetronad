@@ -587,7 +587,7 @@ void eTimer::Reset(REAL t){
     startTimeSmoothedOffset_ = startTimeOffset_.GetAverage();
 }
 
-int eTimer::PreciseFPS() const noexcept
+int eTimer::FPS() const noexcept
 {
     return fpsCounter_->GetFPS();
 }
@@ -695,10 +695,10 @@ REAL se_AverageFrameTime() noexcept
         return 1 / 60.0;
 }
 
-int se_PreciseFPS() noexcept
+int se_FPS() noexcept
 {
     if (se_mainGameTimer)
-        return se_mainGameTimer->PreciseFPS();
+        return se_mainGameTimer->FPS();
     else
         return (60);
 }

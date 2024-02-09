@@ -218,7 +218,7 @@ static void tank_display_hud( ePlayerNetID* me ){
     {
         REAL newtime = tSysTimeFloat();
         REAL ts      = newtime - lastTime;
-        int newfps = se_PreciseFPS();
+        int newfps = se_FPS();
         if (fabs((newfps-fps)*ts)>4)
         {
             fps      = newfps;
@@ -556,7 +556,7 @@ static void display_fps_subby()
         }
     }
 
-    int newfps = se_PreciseFPS();
+    int newfps = se_FPS();
     if (fabs((newfps-fps)*ts)>4)
     {
         fps      = newfps;
