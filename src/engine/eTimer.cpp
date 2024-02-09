@@ -49,10 +49,16 @@ public:
         PrivateTick(dt);
     }
 
-    // gets the current best value for FPS
-    int GetFPS() const noexcept
+    // gets a stabilized value for FPS
+    int GetStableFPS() const noexcept
     {
         return bestFPS_;
+    }
+
+    // gets the most recent value for FPS
+    int GetLastFPS() const noexcept
+    {
+        return lastFPS_.back();
     }
 
     eFPSCounter(int initialFPS = 0)
@@ -109,28 +115,10 @@ private:
         if (maxFPS >= bestFPS_ && minFPS <= bestFPS_)
             return bestFPS_; // all is well, current best is still within the limits
 
-        // reset best FPS to median of the collected values; since we only have three, that is easy
-        if (minFPS == maxFPS)
-        {
-            return minFPS;
-        }
-
-        int maxCount{0};
-        int minCount{0};
-        for (auto fps : lastFPS_)
-        {
-            if (maxFPS == fps)
-                maxCount++;
-            else if (minFPS == fps)
-                minCount++;
-            else
-                return fps;
-        }
-
-        if (maxCount > minCount)
-            return maxFPS;
-        else
-            return minFPS;
+        // return the most recent collected value. Rationale: it is the
+        // value guaranteed to meed the above criteria for the longest time,
+        // and it keeps the average real FPS close to the average reported FPS.
+        return GetLastFPS();
     }
 
     void AddDataPoint(int fps) noexcept
@@ -591,7 +579,17 @@ void eTimer::Reset(REAL t){
 
 int eTimer::FPS() const noexcept
 {
-    return fpsCounter_->GetFPS();
+    return StableFPS();
+}
+
+int eTimer::LastFPS() const noexcept
+{
+    return fpsCounter_->GetLastFPS();
+}
+
+int eTimer::StableFPS() const noexcept
+{
+    return fpsCounter_->GetStableFPS();
 }
 
 bool eTimer::IsSynced() const
