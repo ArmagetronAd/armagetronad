@@ -52,6 +52,7 @@ public:
     void Reset(REAL t=0);
 
     REAL AverageFPS(){return 1/(averageSpf_.GetAverage()+EPS);}
+    int PreciseFPS() { return AverageFPS() + .5f; }
     REAL AverageFrameTime(){return averageSpf_.GetAverage();}
     REAL FrameTime(){return spf_;}
 
@@ -104,6 +105,7 @@ void se_PauseGameTimer(bool p, eTimerPauseSource source);
 REAL se_PredictTime();
 REAL se_AverageFrameTime();
 REAL se_AverageFPS();
+int se_PreciseFPS();
 
 extern eTimer *se_mainGameTimer;
 #endif

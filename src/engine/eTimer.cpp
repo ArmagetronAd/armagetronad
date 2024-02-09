@@ -530,7 +530,15 @@ REAL se_AverageFPS(){
     if (se_mainGameTimer)
         return se_mainGameTimer->AverageFPS();
     else
-        return (.2);
+        return (24);
+}
+
+int se_PreciseFPS()
+{
+    if (se_mainGameTimer)
+        return se_mainGameTimer->PreciseFPS();
+    else
+        return (24);
 }
 
 REAL se_PredictTime(){
