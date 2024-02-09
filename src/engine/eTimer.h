@@ -77,9 +77,9 @@ private:
     int  current;
 };
 
-//! timer class
 class eFPSCounter;
 
+//! timer class
 class eTimer:public nNetObject{
 public:
     REAL speed; // the time acceleration
