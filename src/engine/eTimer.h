@@ -78,6 +78,8 @@ private:
 };
 
 //! timer class
+class eFPSCounter;
+
 class eTimer:public nNetObject{
 public:
     REAL speed; // the time acceleration
@@ -99,9 +101,9 @@ public:
     void SyncTime();
     void Reset(REAL t=0,bool force=false);
 
-    REAL AverageFPS(){return 1/(averageSpf_.GetAverage()+EPS);}
-    REAL AverageFrameTime(){return averageSpf_.GetAverage();}
-    REAL FrameTime(){return spf_;}
+    int FPS() const noexcept;
+    REAL AverageFrameTime() const noexcept { return averageSpf_.GetAverage(); }
+    REAL FrameTime() const noexcept { return spf_; }
 
     bool IsSynced() const; //!< returns whether the timer is synced sufficiently well to allow rendering
 
@@ -149,6 +151,8 @@ private:
 
     //! returns the descriptor responsible for this class
     virtual nNetObjectDescriptorBase const & DoGetDescriptor() const;
+
+    std::unique_ptr<eFPSCounter> fpsCounter_; //!< the private implementation of a precise FPS counter
 };
 
 REAL se_GameTime();
@@ -170,9 +174,9 @@ enum eTimerPauseSource
 
 void se_PauseGameTimer(bool p, eTimerPauseSource source);
 
-REAL se_PredictTime();
-REAL se_AverageFrameTime();
-REAL se_AverageFPS();
+REAL se_PredictTime() noexcept;
+REAL se_AverageFrameTime() noexcept;
+int se_FPS() noexcept;
 
 extern eTimer *se_mainGameTimer;
 #endif

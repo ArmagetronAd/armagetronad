@@ -41,7 +41,9 @@ SortIncludes: false
 
 # the code has them more often than not, and this follows the astyle config
 # f( x ) instead of f(x)
-SpacesInParentheses: true
+# SpacesInParentheses: true
+# But, I (Z-Man) don't like it any more. It does not improve readability.
+# Might be my eyes, though.
 
 # we have more "int* x" than "int *x" (or "int * x")
 PointerAlignment: Left

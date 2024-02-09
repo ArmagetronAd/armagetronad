@@ -247,7 +247,7 @@ tValue::BasePtr cCockpit::cb_Framerate(void){
     const REAL newtime = tSysTimeFloat();
     const REAL ts      = newtime - lastTime;
 
-    int newfps   = static_cast<int>(se_AverageFPS());
+    int newfps = se_FPS();
     if (fabs((newfps-fps)*ts)>4)
     {
         fps      = newfps;
