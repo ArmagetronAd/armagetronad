@@ -102,7 +102,7 @@ private:
 
     // if the bcket is full, we write the current frames per second
     // into these rolling buffers
-    std::array<int, 3> lastFPS_;
+    std::array<int, 5> lastFPS_;
     int bestFPS_;
 
     int GetBestFPS() const noexcept
@@ -124,7 +124,7 @@ private:
     void AddDataPoint(int fps) noexcept
     {
         // record FPS
-        for (int i = 1; i >= 0; --i)
+        for (int i = lastFPS_.size() - 2; i >= 0; --i)
             lastFPS_[i] = lastFPS_[i + 1];
         lastFPS_.back() = fps;
 
