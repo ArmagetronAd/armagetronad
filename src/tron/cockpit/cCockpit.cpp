@@ -241,18 +241,8 @@ tValue::BasePtr cCockpit::cb_AliveTeammates(void){
 
 tValue::BasePtr cCockpit::cb_Framerate(void){
 
-    static int fps       = 60;
-    static REAL lastTime = 0;
+    int fps = se_FPS();
 
-    const REAL newtime = tSysTimeFloat();
-    const REAL ts      = newtime - lastTime;
-
-    int newfps = se_FPS();
-    if (fabs((newfps-fps)*ts)>4)
-    {
-        fps      = newfps;
-        lastTime = newtime;
-    }
     return tValue::BasePtr(new tValue::Int(fps));
 }
 
