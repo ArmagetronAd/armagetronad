@@ -147,22 +147,15 @@ private:
         currentBucket_ = (currentBucket_ + 1) % bucketCount;
 
         // sum up all buckets
-        const int rawFPS = std::accumulate(buckets_.begin(), buckets_.end(), 0);
+        const int frameCount = std::accumulate(buckets_.begin(), buckets_.end(), 0);
 
-        // take overhangs into account. If they differ by more than half the frame time,
-        // we overcounted or undercounted because the bucket cutoff counted one frame
-        // on one second, but not the other
-        const int fps = [&]() {
-            const REAL delta = .5f / std::max(1, rawFPS);
-            if (overhang < lastOverhang - delta)
-                return rawFPS - 1;
-            if (overhang > lastOverhang + delta)
-                return rawFPS + 1;
-            return rawFPS;
-        }();
+        // take overhangs into account; the real time for all the frames we
+        // counted is not precisely one second, but
+        const REAL time = 1 + lastOverhang - overhang;
+        const REAL fps = frameCount / std::max(0.01f, time);
 
-        // record
-        AddDataPoint(fps);
+        // round and record
+        AddDataPoint(fps + .5f);
     }
 
     void PrivateTick(REAL dt) noexcept
