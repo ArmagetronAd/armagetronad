@@ -53,7 +53,6 @@ public:
     void SyncTime();
     void Reset(REAL t=0);
 
-    REAL AverageFPS() const noexcept { return 1 / (averageSpf_.GetAverage() + EPS); }
     int PreciseFPS() const noexcept;
     REAL AverageFrameTime() const noexcept { return averageSpf_.GetAverage(); }
     REAL FrameTime() const noexcept { return spf_; }
@@ -108,7 +107,6 @@ void se_PauseGameTimer(bool p, eTimerPauseSource source);
 
 REAL se_PredictTime() noexcept;
 REAL se_AverageFrameTime() noexcept;
-REAL se_AverageFPS() noexcept;
 int se_PreciseFPS() noexcept;
 
 extern eTimer *se_mainGameTimer;

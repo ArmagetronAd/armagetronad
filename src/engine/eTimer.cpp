@@ -689,15 +689,10 @@ void se_PauseGameTimer(bool p,  eTimerPauseSource source){
 
 REAL se_AverageFrameTime() noexcept
 {
-    return 1/se_AverageFPS();
-}
-
-REAL se_AverageFPS() noexcept
-{
     if (se_mainGameTimer)
-        return se_mainGameTimer->AverageFPS();
+        return se_mainGameTimer->AverageFrameTime();
     else
-        return (24);
+        return 1 / 60.0;
 }
 
 int se_PreciseFPS() noexcept
@@ -705,7 +700,7 @@ int se_PreciseFPS() noexcept
     if (se_mainGameTimer)
         return se_mainGameTimer->PreciseFPS();
     else
-        return (24);
+        return (60);
 }
 
 REAL se_PredictTime() noexcept
