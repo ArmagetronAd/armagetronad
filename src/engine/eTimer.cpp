@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "eNetGameObject.h"
 #include "nSimulatePing.h"
 #include "tRecorder.h"
+#include "tMath.h"
 #include "tConfiguration.h"
 #include "eLagCompensation.h"
 #include "rSysdep.h"
@@ -50,6 +51,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <memory>
 #include <numeric>
 #include <array>
+
 // #include <fstream>
 
 class eFPSCounter
