@@ -101,7 +101,13 @@ public:
     void SyncTime();
     void Reset(REAL t=0,bool force=false);
 
+    // best FPS value for UI display (currently: same as StableFPS())
     int FPS() const noexcept;
+    // the most recent measure of FPS
+    int LastFPS() const noexcept;
+    // a stabilized measure of FPS, not changing as often as LastFPS
+    int StableFPS() const noexcept;
+
     REAL AverageFrameTime() const noexcept { return averageSpf_.GetAverage(); }
     REAL FrameTime() const noexcept { return spf_; }
 
