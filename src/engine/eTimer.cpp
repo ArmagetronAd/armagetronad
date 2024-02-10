@@ -34,6 +34,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tConfiguration.h"
 #include "eLagCompensation.h"
 
+#include <algorithm>
 #include <limits>
 #include <memory>
 #include <numeric>
@@ -62,6 +63,17 @@ public:
         auto const ret = lastFPS_.back();
         if (ret >= 0)
             return ret;
+        return GetStableFPS();
+    }
+
+    // gets the average of the last couple of FPS values
+    int GetLastAverageFPS(size_t back) const noexcept
+    {
+        back = std::min(lastFPS_.size(), back);
+        back = std::max(back, static_cast<size_t>(1));
+        auto const ret = std::accumulate(lastFPS_.end() - back, lastFPS_.end(), 0.0f) / back;
+        if (ret >= 0)
+            return ret + .5;
         return GetStableFPS();
     }
 
@@ -108,7 +120,7 @@ private:
 
     // if the bcket is full, we write the current frames per second
     // into these rolling buffers
-    std::array<int, 5> lastFPS_;
+    std::array<REAL, 5> lastFPS_;
     int bestFPS_;
 
     int GetBestFPS() const noexcept
@@ -121,13 +133,14 @@ private:
         if (maxFPS >= bestFPS_ && minFPS <= bestFPS_)
             return bestFPS_; // all is well, current best is still within the limits
 
-        // return the most recent collected value. Rationale: it is the
-        // value guaranteed to meed the above criteria for the longest time,
-        // and it keeps the average real FPS close to the average reported FPS.
-        return GetLastFPS();
+        // return the average of the three most recent collected values. Rationale:
+        // it is the value guaranteed to meed the above criteria for a long time,
+        // and it keeps the average real FPS close to the average reported FPS,
+        // and should be relatively stable even if there are fluctuations.
+        return GetLastAverageFPS(3);
     }
 
-    void AddDataPoint(int fps) noexcept
+    void AddDataPoint(REAL fps) noexcept
     {
         // record FPS
         for (int i = lastFPS_.size() - 2; i >= 0; --i)
@@ -136,7 +149,7 @@ private:
 
         bestFPS_ = GetBestFPS();
 #ifdef DEBUG
-        bestFPS_ = fps; // for testing; errors in basic calculation are washed away by GetBestFPS()
+        bestFPS_ = fps + .5; // for testing; errors in basic calculation are washed away by GetBestFPS()
 #endif
     }
 
@@ -160,8 +173,8 @@ private:
         const REAL time = 1 + lastOverhang - overhang;
         const REAL fps = frameCount / std::max(0.01f, time);
 
-        // round and record
-        AddDataPoint(fps + .5f);
+        // record
+        AddDataPoint(fps);
     }
 
     void PrivateTick(REAL dt) noexcept
