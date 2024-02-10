@@ -48,6 +48,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #ifdef DEBUG_X
 #include <fstream>
 #endif
+#include <algorithm>
+#include <limits>
 #include <memory>
 #include <numeric>
 #include <array>
@@ -57,28 +59,53 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 class eFPSCounter
 {
 public:
+    static int Round(REAL in) noexcept
+    {
+        return in + .5f;
+    }
+
     // call when a frame has ended
     void Tick(REAL dt) noexcept
     {
         PrivateTick(dt);
     }
 
-    // gets a stabilized value for FPS
-    int GetStableFPS() const noexcept
+    // gets a stabilized value for FPS, precise float
+    REAL GetStableFPS() const noexcept
     {
         return bestFPS_;
     }
 
-    // gets the most recent value for FPS
-    int GetLastFPS() const noexcept
+    // gets a stabilized value for FPS, rounded to nearest integer
+    int GetStableFPSRounded() const noexcept
     {
-        return lastFPS_.back();
+        return Round(bestFPS_);
+    }
+
+    // gets the most recent value for FPS
+    REAL GetLastFPS() const noexcept
+    {
+        auto const ret = lastFPS_.back();
+        if (ret >= 0)
+            return ret;
+        return GetStableFPS();
+    }
+
+    // gets the average of the last couple of FPS values
+    REAL GetLastAverageFPS(size_t back) const noexcept
+    {
+        back = std::min(lastFPS_.size(), back);
+        back = std::max(back, static_cast<size_t>(1));
+        auto const ret = std::accumulate(lastFPS_.end() - back, lastFPS_.end(), 0.0f) / back;
+        if (ret >= 0)
+            return ret;
+        return GetStableFPS();
     }
 
     eFPSCounter(int initialFPS = 0)
     {
         for (auto& lastFPS : lastFPS_)
-            lastFPS = initialFPS;
+            lastFPS = -EPS;
         bestFPS_ = initialFPS;
 
         // divide FPS evenly over buckets
@@ -86,7 +113,9 @@ public:
         {
             buckets_[i] = initialFPS / (i + 1);
             initialFPS -= buckets_[i];
-            bucketsOverhang_[i] = 0.0f;
+            // initialize overhangs so that the first round
+            // of FPS calculations works with a correct total time
+            bucketsOverhang_[i] = (i - static_cast<int>(bucketCount) + 1) * bucketLength;
         }
     }
 
@@ -115,29 +144,37 @@ private:
     std::array<REAL, bucketCount> bucketsOverhang_;
 
     // if the bcket is full, we write the current frames per second
-    // into these rolling buffers
-    std::array<int, 5> lastFPS_;
-    int bestFPS_;
+    // into these rolling buffers. Size constraint: there must be
+    // there must be less of these than there are buckets, or
+    // single frame drops will not get reported.
+    std::array<REAL, 9> lastFPS_;
+    REAL bestFPS_;
 
-    int GetBestFPS() const noexcept
+    REAL GetBestFPS() const noexcept
     {
-        // get maximum and minimum
-        const int maxFPS = std::accumulate(lastFPS_.begin(), lastFPS_.end(),
-                                           0, [](int a, int b)
-                                           { return std::max(a, b); });
-        const int minFPS = std::accumulate(lastFPS_.begin(), lastFPS_.end(),
-                                           maxFPS, [](int a, int b)
-                                           { return std::min(a, b); });
+        // get maximum and: minimum. minimum ignores initial negative values.
+        const auto maxFPS = std::accumulate(lastFPS_.begin(), lastFPS_.end(),
+                                            0.0f, [](REAL a, REAL b) { return std::max(a, b); });
+        const auto minFPS = std::accumulate(lastFPS_.begin(), lastFPS_.end(),
+                                            maxFPS, [](REAL a, REAL b) {
+                                                auto const ret = std::min(a, b);
+                                                return ret >= 0 ? ret : std::max(a, b);
+                                            });
         if (maxFPS >= bestFPS_ && minFPS <= bestFPS_)
             return bestFPS_; // all is well, current best is still within the limits
 
-        // return the most recent collected value. Rationale: it is the
-        // value guaranteed to meed the above criteria for the longest time,
-        // and it keeps the average real FPS close to the average reported FPS.
-        return GetLastFPS();
+        auto const bestFPSRounded = Round(bestFPS_);
+        if (Round(maxFPS) >= bestFPSRounded && Round(minFPS) <= bestFPSRounded)
+            return bestFPS_; // its in the limits with rounding taken into account, acceptable
+
+        // return the average of a couple of the most recent collected values. Rationale:
+        // it is the value guaranteed to meed the above criteria for a long time,
+        // and it keeps the average real FPS close to the average reported FPS,
+        // and should be relatively stable even if there are fluctuations.
+        return GetLastAverageFPS(5);
     }
 
-    void AddDataPoint(int fps) noexcept
+    void AddDataPoint(REAL fps) noexcept
     {
         // record FPS
         for (int i = lastFPS_.size() - 2; i >= 0; --i)
@@ -146,6 +183,11 @@ private:
 
         bestFPS_ = GetBestFPS();
 #ifdef DEBUG
+        if (Round(bestFPS_) != Round(fps))
+        {
+            int x;
+            x = 0; // for breakpoints
+        }
         bestFPS_ = fps; // for testing; errors in basic calculation are washed away by GetBestFPS()
 #endif
     }
@@ -163,20 +205,12 @@ private:
         currentBucket_ = (currentBucket_ + 1) % bucketCount;
 
         // sum up all buckets
-        const int rawFPS = std::accumulate(buckets_.begin(), buckets_.end(), 0);
+        const int frameCount = std::accumulate(buckets_.begin(), buckets_.end(), 0);
 
-        // take overhangs into account. If they differ by more than half the frame time,
-        // we overcounted or undercounted because the bucket cutoff counted one frame
-        // on one second, but not the other
-        const int fps = [&]()
-        {
-            const REAL delta = .5f / std::max(1, rawFPS);
-            if (overhang < lastOverhang - delta)
-                return rawFPS - 1;
-            if (overhang > lastOverhang + delta)
-                return rawFPS + 1;
-            return rawFPS;
-        }();
+        // take overhangs into account; the real time for all the frames we
+        // counted is not precisely one second, but
+        const REAL time = 1 + lastOverhang - overhang;
+        const REAL fps = frameCount / std::max(0.01f, time);
 
         // record
         AddDataPoint(fps);
@@ -189,14 +223,12 @@ private:
         leftInCurrentBucket_ -= dt;
 #ifdef DEBUG
         // fluctuate bucket overflow a bit to test one-off compensation
-        const REAL threshold = random() / (REAL(RAND_MAX) * bestFPS_ * 2);
+        const REAL threshold = random() / (REAL(RAND_MAX) * std::max(30.0f, bestFPS_) * 2);
 #else
         const REAL threshold = 0.0f;
 #endif
-        if (leftInCurrentBucket_ > threshold)
-            return;
-
-        AdvanceBucket();
+        while (leftInCurrentBucket_ <= threshold)
+            AdvanceBucket();
     }
 };
 
@@ -751,14 +783,14 @@ int eTimer::FPS() const noexcept
     return StableFPS();
 }
 
-int eTimer::LastFPS() const noexcept
+REAL eTimer::LastFPS() const noexcept
 {
     return fpsCounter_->GetLastFPS();
 }
 
 int eTimer::StableFPS() const noexcept
 {
-    return fpsCounter_->GetStableFPS();
+    return fpsCounter_->GetStableFPSRounded();
 }
 
 bool eTimer::IsSynced() const

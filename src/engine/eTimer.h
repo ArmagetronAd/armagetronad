@@ -104,7 +104,7 @@ public:
     // best FPS value for UI display (currently: same as StableFPS())
     int FPS() const noexcept;
     // the most recent measure of FPS
-    int LastFPS() const noexcept;
+    REAL LastFPS() const noexcept;
     // a stabilized measure of FPS, not changing as often as LastFPS
     int StableFPS() const noexcept;
 
