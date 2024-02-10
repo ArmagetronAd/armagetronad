@@ -125,11 +125,11 @@ private:
 
     int GetBestFPS() const noexcept
     {
-        // get maximum and minimum
-        const int maxFPS = std::accumulate(lastFPS_.begin(), lastFPS_.end(),
-                                           0, [](int a, int b) { return std::max(a, b); });
-        const int minFPS = std::accumulate(lastFPS_.begin(), lastFPS_.end(),
-                                           maxFPS, [](int a, int b) { return std::min(a, b); });
+        // get maximum and: minimum
+        const auto maxFPS = std::accumulate(lastFPS_.begin(), lastFPS_.end(),
+                                            0.0f, [](REAL a, REAL b) { return std::max(a, b); });
+        const auto minFPS = std::accumulate(lastFPS_.begin(), lastFPS_.end(),
+                                            maxFPS, [](REAL a, REAL b) { return std::min(a, b); });
         if (maxFPS >= bestFPS_ && minFPS <= bestFPS_)
             return bestFPS_; // all is well, current best is still within the limits
 
