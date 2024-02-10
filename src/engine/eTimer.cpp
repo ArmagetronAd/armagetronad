@@ -169,6 +169,11 @@ private:
 
         bestFPS_ = GetBestFPS();
 #ifdef DEBUG
+        if (Round(bestFPS_) != Round(fps))
+        {
+            int x;
+            x = 0; // for breakpoints
+        }
         bestFPS_ = fps; // for testing; errors in basic calculation are washed away by GetBestFPS()
 #endif
     }
