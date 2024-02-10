@@ -34,6 +34,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tConfiguration.h"
 #include "eLagCompensation.h"
 
+#include <limits>
 #include <memory>
 #include <numeric>
 #include <array>
@@ -58,13 +59,16 @@ public:
     // gets the most recent value for FPS
     int GetLastFPS() const noexcept
     {
-        return lastFPS_.back();
+        auto const ret = lastFPS_.back();
+        if (ret >= 0)
+            return ret;
+        return GetStableFPS();
     }
 
     eFPSCounter(int initialFPS = 0)
     {
         for (auto& lastFPS : lastFPS_)
-            lastFPS = initialFPS;
+            lastFPS = -1;
         bestFPS_ = initialFPS;
 
         // divide FPS evenly over buckets
@@ -72,7 +76,9 @@ public:
         {
             buckets_[i] = initialFPS / (i + 1);
             initialFPS -= buckets_[i];
-            bucketsOverhang_[i] = 0.0f;
+            // initialize overhangs so that the first round
+            // of FPS calculations works with a correct total time
+            bucketsOverhang_[i] = (i - static_cast<int>(bucketCount) + 1) * bucketLength;
         }
     }
 
