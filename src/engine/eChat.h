@@ -203,6 +203,16 @@ public:
      */
     bool Check();
 
+    // individual checks
+    bool CheckSpamHistory(nTimeRolling const& currentTime) const;
+    bool CheckSpamPrefix(eChatSaidEntry const& saidEntry) const;
+    bool CheckSpamVolume() const;
+    bool CheckAccessLevel() const;
+
+    // checks for spam only, no access level
+    bool CheckSpamOnly(nTimeRolling const& currentTime) const;
+    bool CheckSpamOnly() const;
+
     bool tested_;                   //!< flag indicating whether the chat line has already been checked fro spam
     bool shouldBlock_;              //!< true if the message should be blocked for spam
     ePlayerNetID * player_;         //!< the chatting player
@@ -211,6 +221,8 @@ public:
     eChatMessageType lastSaidType_; //!< The last said message type to be contained in an eChatSaidEntry record
 private:
     bool CheckSpam( REAL factor, tOutput const & message ) const;
+
+    eChatSaidEntry GetSaidEntry(nTimeRolling const& currentTime) const;
 };
 
 enum eChatPrefixSpamType
