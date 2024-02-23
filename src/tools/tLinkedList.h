@@ -215,10 +215,19 @@ private:
         if (a == this || !anchor)
             return nullptr;
 
-        // apparently, this is legal
-        auto* const rawAnchor = reinterpret_cast<char*>(anchor);
-        char* const rawPrev = rawAnchor - offsetof(tListItem, next);
-        auto* const listItemPrev = reinterpret_cast<tListItem*>(rawPrev);
+        // assert that the code below is correct
+        tASSERT(reinterpret_cast<tListItem const*>(&anchor) == this);
+
+        // apparently, this is legal; since anchor is our
+        // first data element and we have no virtual functions,
+        // its offset is guaranteed to be zero.
+        // Usually (if the assert above ever fails), one needs
+        // to subtract offsetof(tListItem, next), which is noti
+        // yet available on our oldest platforms.
+
+        // auto* const rawAnchor = reinterpret_cast<char*>(anchor);
+        // char* const rawPrev = rawAnchor - offsetof(tListItem, next);
+        auto* const listItemPrev = reinterpret_cast<tListItem*>(anchor); // (rawPrev);
         return static_cast<T*>(listItemPrev);
     }
 };
