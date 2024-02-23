@@ -2348,22 +2348,13 @@ nServerInfo *nServerInfo::GetMasters()
     if (!sn_masterList)
     {
         // back up the regular server list
-        nServerInfo * oldFirstServer = sn_FirstServer;
-        sn_FirstServer = NULL;
+        nServerInfo::SwapLists(sn_FirstServer, sn_masterList);
 
         // load the master server list cleanly
         Load( tDirectories::Config(), "master.srv" );
 
-        // transfer list
-        while ( sn_FirstServer )
-        {
-            nServerInfo * server = sn_FirstServer;
-            server->Remove();
-            server->Insert( sn_masterList );
-        }
-
-        // restore up the regular server list
-        sn_FirstServer = oldFirstServer;
+        // transfer list to sn_masterList and restore regular list
+        nServerInfo::SwapLists(sn_FirstServer, sn_masterList);
     }
 
     return sn_masterList;
