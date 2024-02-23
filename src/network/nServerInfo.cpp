@@ -391,17 +391,7 @@ nServerInfo *nServerInfo::GetFirstServer()
 
 nServerInfo *nServerInfo::Prev()
 {
-    if (reinterpret_cast<nServerInfo **>(anchor) == &sn_FirstServer)
-        return NULL;
-
-    static nServerInfo& info = *this; // will not cause recursion since it is called only once.
-
-    // uaaa. Pointer magic...
-    // TODO: perhaps there is a better way using member pointers?
-    return reinterpret_cast<nServerInfo *>
-           ( reinterpret_cast<char*> (anchor) +
-             ( reinterpret_cast<char*>( &info ) - reinterpret_cast<char*> (&info.next) )
-           );
+    return tListItem<nServerInfo>::Prev(sn_FirstServer);
 }
 
 // Sort server list
@@ -479,7 +469,7 @@ void nServerInfo::Sort( PrimaryKey key )
                 break;
 
             prev->Remove();
-            prev->Insert( ascend->next );
+            prev->InsertAfter(*ascend);
         }
     }
 }
