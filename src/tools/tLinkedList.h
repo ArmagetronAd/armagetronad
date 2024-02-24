@@ -135,6 +135,12 @@ public:
         return ret;
     }
 
+    // backward compatible
+    int Len()
+    {
+        return LenFromHere();
+    }
+
     //! sorts the list starting at anchor by the templated comparator function
     template <typename comparator>
     static void Sort(T* anchor)
@@ -203,13 +209,21 @@ public:
         // done!
     }
 
-private:
+    // backward compatible
+    template <typename comparator>
+    void Sort()
+    {
+        SortHere<comparator>();
+    }
+
+protected:
     T* next;
     T** anchor;
 
     T* Self() { return static_cast<T*>(this); }
     T const* Self() const { return static_cast<T const*>(this); }
 
+private:
     T* PrevInternal(T const* a) const
     {
         if (a == this || !anchor)
