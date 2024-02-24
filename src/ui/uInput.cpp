@@ -521,20 +521,12 @@ public:
 };
 }
 
-static int Input_Compare( const tListItemBase* a, const tListItemBase* b)
-
-{
-    return Input_Comparator::Compare( (const uAction*)a, (const uAction*)b );
-}
-
-
 static void s_InputConfigGeneric(int ePlayer, uAction *&actions,const tOutput &title){
     uMenuItemInput **input;
 
     uMenu input_menu(title);
 
-    if(actions)
-        actions->tListItemBase::Sort(&Input_Compare);
+    uAction::Sort<Input_Comparator>(actions);
 
     int len = actions->Len();
 
