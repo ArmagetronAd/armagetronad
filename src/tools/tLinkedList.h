@@ -241,7 +241,7 @@ private:
 
         // auto* const rawAnchor = reinterpret_cast<char*>(anchor);
         // char* const rawPrev = rawAnchor - offsetof(tListItem, next);
-        auto* const listItemPrev = reinterpret_cast<tListItem*>(anchor); // (rawPrev);
+        tListItem* const listItemPrev = reinterpret_cast<tListItem*>(anchor); // (rawPrev);
         return static_cast<T*>(listItemPrev);
     }
 };
