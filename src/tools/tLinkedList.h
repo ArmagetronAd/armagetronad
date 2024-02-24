@@ -36,7 +36,7 @@ template <class T>
 class tListItem
 {
 public:
-    tListItem() : next(nullptr), anchor(nullptr)
+    tListItem() : next(NULL), anchor(NULL)
     {
     }
 
@@ -75,8 +75,8 @@ public:
             next->anchor = anchor;
         }
 
-        anchor = nullptr;
-        next = nullptr;
+        anchor = NULL;
+        next = NULL;
     }
 
     //! insert this into the list given by the anchor
@@ -177,7 +177,7 @@ public:
         }
 
         // split the list in the middle
-        *middle->anchor = nullptr;
+        *middle->anchor = NULL;
         middle->anchor = &middle;
 
         // retrieve the anchor of the first half list
@@ -227,7 +227,7 @@ private:
     T* PrevInternal(T const* a) const
     {
         if (a == this || !anchor)
-            return nullptr;
+            return NULL;
 
         // assert that the code below is correct
         tASSERT(reinterpret_cast<tListItem const*>(&anchor) == this);
