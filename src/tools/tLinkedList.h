@@ -230,7 +230,7 @@ private:
             return NULL;
 
         // assert that the code below is correct
-        tASSERT(reinterpret_cast<tListItem const*>(&anchor) == this);
+        tASSERT(reinterpret_cast<tListItem const*>(&next) == this);
 
         // apparently, this is legal; since anchor is our
         // first data element and we have no virtual functions,
