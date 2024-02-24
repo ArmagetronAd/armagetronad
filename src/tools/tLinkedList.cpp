@@ -25,6 +25,98 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
+/*
+
 #include "tLinkedList.h"
-// cpp file has no purpose any more, but we keep it to ensure the header
-// parses cleanly without prerequisites.
+
+void tListItemBase::Remove(){
+    if (anchor){
+        *anchor      = next;
+        if (next)
+            next->anchor = anchor;
+        anchor       = NULL;
+        next         = NULL;
+    }
+}
+
+void  tListItemBase::Insert(tListItemBase *&a){
+    if (anchor)
+        Remove();
+    anchor = &a;
+    next   =  a;
+    a      =  this;
+    if (next)
+        next->anchor = &next;
+}
+
+int  tListItemBase::Len(){
+    int ret=0;
+    tListItemBase* x=this;
+    while (x){
+        ret++;
+        x = x->next;
+    }
+    return ret;
+}
+
+void tListItemBase::Sort( Comparator* compare )
+{
+    tASSERT_THIS();
+    
+    // early return statements: empty list or single element in list
+    if (!next )
+    {
+        return;
+    }
+
+    tListItemBase* middle = this;
+    {
+        // locate the middle of the list
+        tListItemBase* run = *anchor;
+        while ( run )
+        {
+            middle = middle->next;
+            run 	 = run->next;
+            if ( run )
+            {
+                run = run->next;
+            }
+        }
+    }
+
+    // split the list in the middle
+    *middle->anchor = NULL;
+    middle->anchor = &middle;
+
+    // retrieve the anchor of the first half list
+    tListItemBase*& first = *anchor;
+
+    // sort the two half lists
+    if(first)
+        first->Sort( compare );
+    if(middle)
+        middle->Sort( compare );
+
+    // merge the lists
+    {
+        tListItemBase** run = &first;
+        while ( middle )
+        {
+            // find the correct place for middle
+            while ( *run && compare( *run, middle ) > 0 )
+                run = &(*run)->next;
+
+            // remove middle from the second list; care needs to be taken because middle->remove() would modify middle.
+            tListItemBase* insert = middle;
+            insert->Remove();
+
+            // insert it into the first list
+            insert->Insert( *run );
+            run = &insert->next;
+        }
+    }
+
+    // done!
+}
+
+*/
