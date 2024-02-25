@@ -103,6 +103,7 @@ src/.cproject
 src/.project
 src/.settings
 .vscode
+autogen.sh
 *.o
 *.a
 *.dmg
