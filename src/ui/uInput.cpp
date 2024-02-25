@@ -1364,20 +1364,12 @@ public:
 };
 }
 
-static int Input_Compare( const tListItemBase* a, const tListItemBase* b)
-
-{
-    return Input_Comparator::Compare( (const uAction*)a, (const uAction*)b );
-}
-
-
 static void s_InputConfigGeneric(int ePlayer, uAction *&actions,const tOutput &title){
     uMenu input_menu(title);
 
     uActionTooltip::Disable(ePlayer+1);
 
-    if(actions)
-        actions->tListItemBase::Sort(&Input_Compare);
+    uAction::Sort<Input_Comparator>(actions);
 
     std::vector< uMenuItemInput * > inputs;
     for ( uAction *a = actions; a; a = a->Next() )

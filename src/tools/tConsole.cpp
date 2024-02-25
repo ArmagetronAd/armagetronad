@@ -123,12 +123,13 @@ static void FilterLine( tString& line )
     if ( !st_filterAnchor )
         return;
 
-#ifndef WIN32 // MSVC++ does not eat this code, but that's not tragic right now.
     // sort static filters according to priority
     static bool sorted = false;
     if ( !sorted )
-        st_filterAnchor->Sort< tConsoleFilterComparator >();
-#endif
+    {
+        tConsoleFilter::Sort<tConsoleFilterComparator>(st_filterAnchor);
+        sorted = true;
+    }
 
     // remove end of line
     bool hasEOL = false;
