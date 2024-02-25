@@ -115,7 +115,7 @@ public:
     bool IsInList() const { return anchor; }
 
     //! counts the length of a list
-    static int Len(T* anchor)
+    static int Len(T const* anchor)
     {
         if (!anchor)
             return 0;
@@ -123,10 +123,10 @@ public:
     }
 
     //! counts the length starting at this
-    int LenFromHere()
+    int LenFromHere() const
     {
         int ret = 0;
-        tListItem* x = this;
+        tListItem const* x = this;
         while (x)
         {
             ret++;
@@ -216,7 +216,7 @@ private:
             return nullptr;
 
         // assert that the code below is correct
-        tASSERT(reinterpret_cast<tListItem const*>(&anchor) == this);
+        tASSERT(reinterpret_cast<tListItem const*>(&next) == this);
 
         // apparently, this is legal; since anchor is our
         // first data element and we have no virtual functions,
