@@ -1,15 +1,4 @@
 
-#### Changes since 0.2.9.0:
-
-##### Fixed Bugs
-
- * Can't open the .appimage file. Missing libwebp.so.5 ([#54](https://gitlab.com/armagetronad/armagetronad/-/issues/54))
-
-##### Contributors
-
-Manuel Moos
-
-
 #### Changes since 0.2.8.3.5:
 
 ##### Fixed Bugs
