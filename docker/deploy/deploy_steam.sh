@@ -5,27 +5,27 @@
 #echo ${STAGING}+${STEAM_BRANCH}+${ZI_SERIES}
 case ${STAGING}+${STEAM_BRANCH}+${ZI_SERIES} in
     *++*)
-	echo "No steam branch, no release"
-	exit 0
-	;;
+        echo "No steam branch, no release"
+        exit 0
+        ;;
     true+*+stable)
-	# put up on staging branch
-	;;
+        echo "Staging phase of stable build, do release (not activated automatically)"
+        ;;
     false+*+stable)
-	# staging already happened when STAGING was true
-	exit 0
-	;;	
+        echo "Deployment should already have happened in the staging phase"
+        exit 0
+        ;;
     true+*+*)
-	# just staging, do not put up on steam yet
-	exit 0
-	;;
+        echo "Staging phase on a non-release build, do nothing; wait for final deployment"
+        exit 0
+        ;;
     false+*+*)
-	# final release of that branch, deploy
-	;;
+        echo "Final deployment of non-release build, do release"
+        ;;
     *+*+*)
-	echo "Unexpected STAGING+STEAM_BRANCH combination" ${STAGING}+${STEAM_BRANCH}
-	exit 1
-	;;
+        echo "Unexpected STAGING+STEAM_BRANCH combination" ${STAGING}+${STEAM_BRANCH}
+        exit 1
+        ;;
 esac
 
 . ./secrets/steamuser.sh || exit $?
