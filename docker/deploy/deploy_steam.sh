@@ -8,19 +8,12 @@ case ${STAGING}+${STEAM_BRANCH}+${ZI_SERIES} in
         echo "No steam branch, no release"
         exit 0
         ;;
-    true+*+stable)
-        echo "Staging phase of stable build, do release (not activated automatically)"
-        ;;
-    false+*+stable)
-        echo "Deployment should already have happened in the staging phase"
-        exit 0
-        ;;
     true+*+*)
-        echo "Staging phase on a non-release build, do nothing; wait for final deployment"
+        echo "Staging phase, do nothing; wait for final deployment (should not be called in the first place)"
         exit 0
         ;;
     false+*+*)
-        echo "Final deployment of non-release build, do release"
+        echo "Final deployment, do release"
         ;;
     *+*+*)
         echo "Unexpected STAGING+STEAM_BRANCH combination" ${STAGING}+${STEAM_BRANCH}
