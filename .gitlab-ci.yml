@@ -139,6 +139,10 @@ default:
   extends: .deploy_staged
   image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:c0d45ff7bf90a89a0bd10006ba9e40b5aff2f1173842cfcdc6a97f4cad8b8267
 
+.deploy_staged_steam:
+  extends: .deploy_staged
+  image: $CI_REGISTRY_IMAGE/steamcmd@sha256:a902aefc0718d2fc32101c09d6fca5202d882e68e821ae232423014abba6bc3d
+
 .deploy_final:
   extends: .deploy_base
   environment: $FINAL_ENVIRONMENT
@@ -375,6 +379,15 @@ deploy_staged_ppa:
   variables:
     TARGET: "deploy_ppa"
 
+deploy_staged_steam:
+  extends: .deploy_staged_steam
+  variables:
+    TARGET: "deploy_steam"
+  rules:
+  - if: '$CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_TAG'
+    when: on_success # tagged releases get pushed to steam immediately without delay; they require manual action in steam to go fully live
+  - when: never # makes no sense, does nothing anyway
+
 # does not actually deploy, but tests deployment up to the final 'git push'
 deploy_staged_flatpak:
   extends: .deploy_staged
@@ -402,10 +415,14 @@ deploy_final_external:
   variables:
     TARGET: "deploy_external"
 
-deploy_steam:
+deploy_final_steam:
   extends: .deploy_final_steam
   variables:
     TARGET: "deploy_steam"
+  rules:
+  - if: '$CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_BRANCH'
+    when: on_success
+  - when: never # makes no sense, does nothing anyway
 
 deploy_final_ours:
   extends: .deploy_final
