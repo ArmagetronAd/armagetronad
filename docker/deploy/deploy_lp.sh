@@ -34,7 +34,7 @@ elif test -z "${LP_SERIES}"; then
     echo "No LP upload configured"
 else
     EXIT=0
-    for f in upload/*${PACKAGE_VERSION}* upload/*.txt; do
+    for f in upload/*${PACKAGE_VERSION}* upload/*.AppImage upload/*.txt; do
 	if test -r $f; then
 	    if ! ./lp-project-upload ${LP_PROJECT} ${LP_SERIES} ${LP_VERSION} $f PATCHNOTES.txt RELEASENOTES.txt; then
             sleep 10
