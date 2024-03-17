@@ -4,7 +4,16 @@
   
   <name>@progtitle@</name>
   <summary>3D Lightcycle Game</summary>
-  
+  <x-flatpak-developer id="tld.vendor">
+    <name>Armagetron Advanced Development Team</name>
+  </x-flatpak-developer>
+
+  <categories>
+    <category>Game</category>
+    <category>ArcadeGame</category>
+    <category>ActionGame</category>
+  </categories>
+
   <metadata_license>MIT</metadata_license>
   <project_license>GPL-2.0-or-later</project_license>
   
@@ -19,17 +28,22 @@
       The game supports custom maps (sadly without an editor) and just about every gameplay variable can be tweaked to your, or more likely, the server owner&apos;s heart content. Speed, map size, trail length and timeouts are just the start. Even the rigid right angle turn rule can be bent!
     </p>
   </description>
-  
+
+  <icon type="stock">org.armagetronad.ArmagetronAdvanced</icon>
+
   <x-flatpak-launchable type="desktop-id">@progid@.desktop</x-flatpak-launchable>
   <screenshots>
     <screenshot type="default">
       <image>https://www.armagetronad.org/screenshots/ss_fort_1.png</image>
+      <caption>Fortress game mode: Conquer the enemy circle</caption>
     </screenshot>
     <screenshot>
       <image>https://www.armagetronad.org/screenshots/ss_sumo_1.png</image>
+      <caption>Sumo game mode: Survive in a shrinking circle</caption>
     </screenshot>
     <screenshot>
       <image>https://www.armagetronad.org/screenshots/screenshot_23.png</image>
+      <caption>Alternative visuals</caption>
     </screenshot>
   </screenshots>
 
