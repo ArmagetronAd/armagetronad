@@ -4,7 +4,7 @@
   
   <name>@progtitle@</name>
   <summary>3D Lightcycle Game</summary>
-  <x-flatpak-developer id="tld.vendor">
+  <x-flatpak-developer id="org.armagetronad">
     <name>Armagetron Advanced Development Team</name>
   </x-flatpak-developer>
 
