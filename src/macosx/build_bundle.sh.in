@@ -54,17 +54,19 @@ rm -rf ${BUNDLE}
 
 # additional libraries
 EXTRALIB=
-for adlib in /usr/local/opt/sdl2/lib/libSDL2-*.dylib; do
-    if test -r ${adlib}; then
-        mkdir -p "${BUNDLE}/@libdir@/"
-        cp ${adlib} "${BUNDLE}/@libdir@/"
-        EXTRALIB="${EXTRALIB} -x ./@libdir@/`basename ${adlib}`"
-    fi
-done
+if test -z "@progtitle_server@"; then
+    for adlib in /usr/local/opt/sdl2/lib/libSDL2-*.dylib; do
+        if test -r ${adlib}; then
+            mkdir -p "${BUNDLE}/@libdir@/"
+            cp ${adlib} "${BUNDLE}/@libdir@/"
+           EXTRALIB="${EXTRALIB} -x ./@libdir@/`basename ${adlib}`"
+        fi
+    done
+fi
 
 # bundle libraries
 #(cd "${BUNDLE}"; dylibbundler -od -b -x "./Contents/MacOS/@progname@" -d "./Contents/Frameworks/" -i /usr/lib/ -p '@executable_path/../Frameworks/') || exit $?
-(cd "${BUNDLE}"; dylibbundler -of -b -x "./@bindir@/@progname@" ${EXTRALIB} -d "./@libdir@/" -i /usr/lib/ -p @executable_path/../..@libdir@/) || exit $?
+(cd "${BUNDLE}"; dylibbundler -cd -of -b -x "./@bindir@/@progname@" ${EXTRALIB} -d "./@libdir@/" -i /usr/lib/ -p @executable_path/../..@libdir@/) || exit $?
 
 # Sign executable
 # original source: https://localazy.com/blog/how-to-automatically-sign-macos-apps-using-github-actions
