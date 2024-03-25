@@ -50,9 +50,21 @@ cp "@abs_top_srcdir@/MacOS/Armagetron Advanced.icns" "${BUNDLE}@datadir@/${TITLE
 #mv "${BUNDLE}"@prefix@ "${BUNDLE}"/Contents 
 #mv "${BUNDLE}"/Contents/bin "${BUNDLE}"/Contents/MacOS
 
+rm -rf ${BUNDLE}
+
+# additional libraries
+EXTRALIB=
+for adlib in /usr/local/opt/sdl2/lib/libSDL2-*.dylib; do
+    if test -r ${adlib}; then
+        mkdir -p "${BUNDLE}/@libdir@/"
+        cp ${adlib} "${BUNDLE}/@libdir@/"
+        EXTRALIB="${EXTRALIB} -x ./@libdir@/`basename ${adlib}`"
+    fi
+done
+
 # bundle libraries
 #(cd "${BUNDLE}"; dylibbundler -od -b -x "./Contents/MacOS/@progname@" -d "./Contents/Frameworks/" -i /usr/lib/ -p '@executable_path/../Frameworks/') || exit $?
-(cd "${BUNDLE}"; dylibbundler -od -b -x "./@bindir@/@progname@" -d "./@libdir@/" -i /usr/lib/ -p @executable_path/../..@libdir@/) || exit $?
+(cd "${BUNDLE}"; dylibbundler -of -b -x "./@bindir@/@progname@" ${EXTRALIB} -d "./@libdir@/" -i /usr/lib/ -p @executable_path/../..@libdir@/) || exit $?
 
 # Sign executable
 # original source: https://localazy.com/blog/how-to-automatically-sign-macos-apps-using-github-actions
@@ -61,8 +73,8 @@ if ! test -z "${APPLE_ID}"; then
 	# find correct real XCODE, if possible; the command line tools will not do (https://github.com/xamarin/xamarin-macios/issues/3931)
     XCODE_DIR=$(ls /Applications | grep Xcode | head -n 1)
     if ! test -z "${XCODE_DIR}"; then
-    	export DEVELOPER_DIR=/Applications/${XCODE_DIR}
-	    export XCODE_DEVELOPER_DIR_PATH=${DEVELOPER_DIR}/Contents/Developer
+        export DEVELOPER_DIR=/Applications/${XCODE_DIR}
+        export XCODE_DEVELOPER_DIR_PATH=${DEVELOPER_DIR}/Contents/Developer
     fi
 
 	# unlock keychain https://stackoverflow.com/a/57719571
