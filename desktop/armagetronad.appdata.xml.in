@@ -29,7 +29,7 @@
     </p>
   </description>
 
-  <icon type="stock">org.armagetronad.ArmagetronAdvanced</icon>
+  <icon type="stock">@progid@</icon>
 
   <x-flatpak-launchable type="desktop-id">@progid@.desktop</x-flatpak-launchable>
   <screenshots>

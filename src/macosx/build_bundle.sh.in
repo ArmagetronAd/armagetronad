@@ -50,8 +50,6 @@ cp "@abs_top_srcdir@/MacOS/Armagetron Advanced.icns" "${BUNDLE}@datadir@/${TITLE
 #mv "${BUNDLE}"@prefix@ "${BUNDLE}"/Contents 
 #mv "${BUNDLE}"/Contents/bin "${BUNDLE}"/Contents/MacOS
 
-rm -rf ${BUNDLE}
-
 # additional libraries
 EXTRALIB=
 if test -z "@progtitle_server@"; then

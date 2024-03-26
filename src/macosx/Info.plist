@@ -22,6 +22,6 @@
 	<string>SDLMain</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
-	<key>NSHighResolutionCapable</key><false/>
+	<key>NSHighResolutionCapable</key><true/>
 </dict>
 </plist>
