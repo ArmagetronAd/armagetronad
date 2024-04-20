@@ -60,7 +60,7 @@ AC_ARG_VAR(SDL2_CONFIG,[Configuration script of SDL to use, defaults to sdl2-con
 AC_ARG_VAR(FREETYPE_CONFIG,[Configuration script of freetype to use, defaults to freetype-config])
 
 source_date_epoch=SOURCE_DATE_EPOCH
-test ${source_date_epoch} = SOURCE_DATE_EPOCH && source_date_epoch=`date +%s`
+test ${source_date_epoch} = SOURCE_DATE_EPOCH && source_date_epoch=${SOURCE_DATE_EPOCH:-`date +%s`}
 AC_SUBST(source_date_epoch)
 
 # determine date, following the epoch time if we can
