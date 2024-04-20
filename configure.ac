@@ -47,7 +47,7 @@ version=$VERSION
 AC_SUBST(version)
 
 source_date_epoch=SOURCE_DATE_EPOCH
-test ${source_date_epoch} = SOURCE_DATE_EPOCH && source_date_epoch=`date +%s`
+test ${source_date_epoch} = SOURCE_DATE_EPOCH && source_date_epoch=${SOURCE_DATE_EPOCH:-`date +%s`}
 AC_SUBST(source_date_epoch)
 
 # determine date, following the epoch time if we can
