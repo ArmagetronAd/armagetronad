@@ -7,9 +7,11 @@ echo OLD_PROTOBUF=${OLD_PROTOBUF}
 if ! test -z "${OLD_PROTOBUF}"; then
     export PKG_CONFIG_PATH=${OLD_PROTOBUF}/lib/pkgconfig:${PKG_CONFIG_PATH}
     export PATH=${OLD_PROTOBUF}/bin:${PATH}
-    #echo PGK_CONFIG_PATH=${PKG_CONFIG_PATH}
+    #echo PKG_CONFIG_PATH=${PKG_CONFIG_PATH}
     #echo PATH=${PATH}
 fi
+
+export LDFLAGS="-headerpad_max_install_names"
 
 $(dirname $0)/../../configure --disable-restoreold --enable-automakedefaults \
     --disable-useradd --disable-sysinstall --disable-initscripts \
