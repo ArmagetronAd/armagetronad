@@ -22,6 +22,11 @@ indent_style = tab
 [*.xml]
 indent_style = tab
 
+# appstream files
+[*appdata.xml.in]
+indent_style = space
+indent_size = 2
+
 # special C++ settings
 [*.{c,h,cpp,hpp}]
 curly_bracket_next_line = true

@@ -386,7 +386,7 @@ delay_release:
   needs: []
   stage: stage
   rules:
-  - if: '$CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_BRANCH'
+  - if: '$CI_COMMIT_REF_PROTECTED == "true"'
     when: delayed
     start_in: '16 hours'
   - when: never
@@ -400,7 +400,7 @@ deploy_final_external:
   variables:
     TARGET: "deploy_external"
 
-deploy_steam:
+deploy_final_steam:
   extends: .deploy_final_steam
   variables:
     TARGET: "deploy_steam"
