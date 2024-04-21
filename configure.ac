@@ -942,10 +942,9 @@ PKG_CHECK_MODULES(PROTOBUF, protobuf >= 2.4.0,,
 for flag in ${PROTOBUF_CFLAGS}; do
 	if [[[ "${CXXFLAGS}" != *"${flag}"* ]]]; then
 		# echo ${flag}
-		CXXFLAGS="${CXXFLAGS} ${flag}"
+		CPPFLAGS="${flag} ${CPPFLAGS}"
 	fi
 done
-LIBS="${LIBS} ${PROTOBUF_LIBS}"
 
 AC_LANG([C++])
 
@@ -1334,7 +1333,10 @@ export CXXFLAGS
 
 fi dnl (dedicated server)
 
-
+dnl set protobuf libs only here at the bottom so any custom ones
+dnl get found before the regular ones from any generic /usr libary
+dnl include flags from other libraries
+LIBS="${PROTOBUF_LIBS} ${LIBS}"
 
 dnl Checks for header files.
 AC_HEADER_STDC
