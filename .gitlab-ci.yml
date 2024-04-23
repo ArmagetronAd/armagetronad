@@ -339,6 +339,8 @@ build_macos:
   script:
     - docker/scripts/obsolete.sh || exit 0
     - ./bootstrap.sh || exit 0
+    - date
+    - sntp -s time.apple.com
     - gitlab_build/docker/build/make_ci.sh macOS -j`nproc || echo 3`
   artifacts:
     paths:
