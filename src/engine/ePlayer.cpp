@@ -8516,16 +8516,22 @@ void ePlayerNetID::OnlineStatsLadderLog()
     int a_alive = 0;
     int h_dead  = 0;
     int a_dead  = 0;
+    int specs   = 0;
 
     for(int i = 0; i < se_PlayerNetIDs.Len(); i++)
     {
         ePlayerNetID *p = se_PlayerNetIDs[i];
         if (p)
         {
-            if (p->IsHuman())
-                humans++;
+            if( p->CanRespawn() || ( p->Object() && p->CurrentTeam() ) )
+            {
+                if (p->IsHuman())
+                    humans++;
+                else
+                    ais++;
+            }
             else
-                ais++;
+                specs++;
 
             if (p->Object())
             {
@@ -8552,6 +8558,7 @@ void ePlayerNetID::OnlineStatsLadderLog()
     }
 
     se_OnlinePlayersCountWriter << humans << ais << h_alive << a_alive << h_dead << a_dead;
+    se_OnlinePlayersCountWriter << specs;
     se_OnlinePlayersCountWriter.write();
 
     se_OnlinePlayersAliveWriter.write();
