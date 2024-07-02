@@ -14,13 +14,22 @@ charset = utf-8
 indent_style = space
 indent_size = 4
 
-# Tab indentation (no size specified)
+# Tab indentation for Makefiles (no size specified)
 [Makefile{,.am,.in}]
+indent_style = tab
+
+# Tab indentation for shell scripts
+[*.{sh,sh.in}]
 indent_style = tab
 
 # map files
 [*.xml]
 indent_style = tab
+
+# appstream files
+[*appdata.xml.in]
+indent_style = space
+indent_size = 2
 
 # special C++ settings
 [*.{c,h,cpp,hpp}]

@@ -104,6 +104,7 @@ src/.project
 src/.settings
 autogen.sh
 .vscode
+autogen.sh
 *.o
 *.a
 *.dmg

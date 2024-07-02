@@ -338,7 +338,7 @@ if test @enable_desktop@ = yes; then
         if test @prognamebase@ = armagetronad; then
             true # echo no rebranding
         else
-            for f in 16x16 32x32 48x48; do mv "${DESTDIR}${DESKTOPSOURCE}/icons/$f/armagetronad.png" "${DESTDIR}${DESKTOPSOURCE}/icons/$f/@prognamebase@.png" || exit $?; done
+            for f in 16x16 32x32 48x48 64x64 128x128; do mv "${DESTDIR}${DESKTOPSOURCE}/icons/$f/armagetronad.png" "${DESTDIR}${DESKTOPSOURCE}/icons/$f/@prognamebase@.png" || exit $?; done
         fi
 
         mkdir -p "${DESTDIR}${DESKTOPDESTDIR}"
@@ -348,14 +348,14 @@ if test @enable_desktop@ = yes; then
         mkdir_p "${DESTDIR}${METADEST}"
         mv "${DESTDIR}${DESKTOPSOURCE}/armagetronad.appdata.xml" "${DESTDIR}${METADEST}/@progid@.appdata.xml" || exit $?
     else
-        for f in 16x16 32x32 48x48; do rm -f "${DESTDIR}${DESKTOPSOURCE}/icons/$f/@prognamebase@.png"; done
+        for f in 16x16 32x32 48x48 64x64 128x128; do rm -f "${DESTDIR}${DESKTOPSOURCE}/icons/$f/@prognamebase@.png"; done
         rm -f "${DESTDIR}${DESKTOPDEST}"
         rm -f "${DESTDIR}${METADEST}/@progid@.appdata.xml"
     fi
 
     # set -x
     # install icons in canonical locations
-    for f in 16x16 32x32 48x48; do
+    for f in 16x16 32x32 48x48 64x64 128x128; do
         icontarget="${PREFIX}/share/icons/hicolor/$f/apps"
         mkdir -p "${DESTDIR}${icontarget}" || exit $?
         install_link "${DESKTOPSOURCE}/icons/$f/@prognamebase@.png" "${icontarget}/@progid@.png" || exit $?

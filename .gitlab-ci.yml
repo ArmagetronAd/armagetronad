@@ -339,6 +339,8 @@ build_macos:
   script:
     - docker/scripts/obsolete.sh || exit 0
     - ./bootstrap.sh || exit 0
+    - date
+    - sntp -s time.apple.com
     - gitlab_build/docker/build/make_ci.sh macOS -j`nproc || echo 3`
   artifacts:
     paths:
@@ -386,7 +388,7 @@ delay_release:
   needs: []
   stage: stage
   rules:
-  - if: '$CI_COMMIT_REF_PROTECTED == "true" && $CI_COMMIT_BRANCH'
+  - if: '$CI_COMMIT_REF_PROTECTED == "true"'
     when: delayed
     start_in: '16 hours'
   - when: never
@@ -400,7 +402,7 @@ deploy_final_external:
   variables:
     TARGET: "deploy_external"
 
-deploy_steam:
+deploy_final_steam:
   extends: .deploy_final_steam
   variables:
     TARGET: "deploy_steam"

@@ -795,6 +795,16 @@ int main(int argc,char **argv){
             }
 #endif
 
+#ifdef MACOSX
+            {
+                // defaults for playing well with retina displays
+                if (!getenv("SDL12COMPAT_HIGHDPI"))
+                    sg_PutEnv("SDL12COMPAT_HIGHDPI=1");
+                if (!getenv("SDL12COMPAT_OPENGL_SCALING"))
+                    sg_PutEnv("SDL12COMPAT_OPENGL_SCALING=1");
+            }
+#endif
+
             // atexit(ANET_Shutdown);
 
 #ifndef WIN32

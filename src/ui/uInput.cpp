@@ -524,13 +524,6 @@ public:
 };
 }
 
-static int Input_Compare( const tListItemBase* a, const tListItemBase* b)
-
-{
-    return Input_Comparator::Compare( (const uAction*)a, (const uAction*)b );
-}
-
-
 static void s_InputConfigGeneric(int ePlayer, uAction *&actions,const tOutput &title){
     uMenuItemInput **input;
 
@@ -538,10 +531,9 @@ static void s_InputConfigGeneric(int ePlayer, uAction *&actions,const tOutput &t
 
     uActionTooltip::Disable(ePlayer+1);
 
-    if(actions)
-        actions->tListItemBase::Sort(&Input_Compare);
+    uAction::Sort<Input_Comparator>(actions);
 
-    int len = actions->Len();
+    int len = uAction::Len(actions);
 
     input=tNEW(uMenuItemInput*)[len];
     int a=0;

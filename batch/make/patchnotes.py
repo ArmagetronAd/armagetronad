@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 #wd=`dirname $0`
 
 # generates patch notes from git log references to gitlab issues

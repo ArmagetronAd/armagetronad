@@ -32,6 +32,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "tSysTime.h"
 #include "nNetObject.h"
 
+class eFPSCounter;
+
 class eTimer:public nNetObject{
 public:
     REAL speed; // the time acceleration
@@ -51,9 +53,15 @@ public:
     void SyncTime();
     void Reset(REAL t=0);
 
-    REAL AverageFPS(){return 1/(averageSpf_.GetAverage()+EPS);}
-    REAL AverageFrameTime(){return averageSpf_.GetAverage();}
-    REAL FrameTime(){return spf_;}
+    // best FPS value for UI display (currently: same as StableFPS())
+    int FPS() const noexcept;
+    // the most recent measure of FPS
+    REAL LastFPS() const noexcept;
+    // a stabilized measure of FPS, not changing as often as LastFPS
+    int StableFPS() const noexcept;
+
+    REAL AverageFrameTime() const noexcept { return averageSpf_.GetAverage(); }
+    REAL FrameTime() const noexcept { return spf_; }
 
     bool IsSynced() const; //!< returns whether the timer is synced sufficiently well to allow rendering
 
@@ -80,6 +88,8 @@ private:
 
     double lastTime_;        //!< the smoothed system time of the last update
     double nextSync_;        //!< system time of the next sync to the clients
+
+    std::unique_ptr<eFPSCounter> fpsCounter_; //!< the private implementation of a precise FPS counter
 };
 
 REAL se_GameTime();
@@ -101,10 +111,10 @@ enum eTimerPauseSource
 
 void se_PauseGameTimer(bool p, eTimerPauseSource source);
 
-REAL se_PredictTime();
+REAL se_PredictTime() noexcept;
 REAL se_Time();
-REAL se_AverageFrameTime();
-REAL se_AverageFPS();
+REAL se_AverageFrameTime() noexcept;
+int se_FPS() noexcept;
 
 extern eTimer *se_mainGameTimer;
 #endif

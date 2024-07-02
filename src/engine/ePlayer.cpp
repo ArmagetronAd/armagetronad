@@ -2971,7 +2971,8 @@ static void handle_chat_admin_commands( ePlayerNetID * p, tString const & comman
     {
         // Really, there's no reason one would log in and log out all the time
         spam.factor_ = 1;
-        if ( spam.Block() )
+        // check spam only first; .Block also checks for access level, which is wrong here
+        if (spam.CheckSpamOnly() && spam.Block())
         {
             return;
         }

@@ -222,23 +222,14 @@ private:
 
 static int alivepeople, alivemates, thetopscore, hudfpscount;
 
-static void tank_display_hud( ePlayerNetID* me ){
-    static int fps       = 60;
-    static REAL lastTime = 0;
-
+static void tank_display_hud(ePlayerNetID* me)
+{
     if (se_mainGameTimer &&
             se_mainGameTimer->speed > .9 &&
             se_mainGameTimer->speed < 1.1 &&
             se_mainGameTimer->IsSynced() )
     {
-        REAL newtime = tSysTimeFloat();
-        REAL ts      = newtime - lastTime;
-        int newfps   = static_cast<int>(se_AverageFPS());
-        if (fabs((newfps-fps)*ts)>4)
-        {
-            fps      = newfps;
-            lastTime = newtime;
-        }
+        int fps = se_FPS();
 
         Color(1,1,1);
         rTextField c(-.9,-.6);
@@ -562,11 +553,8 @@ static void display_fps_subby()
             se_mainGameTimer->IsSynced() ) )
         return;
 
-    static int fps       = 60;
-    static REAL lastTime = 0;
-
     REAL newtime = tSysTimeFloat();
-    REAL ts      = newtime - lastTime;
+    int fps = se_FPS();
 
     static gTextCache cache;
     if ( cache.Call( fps, (int)tSysTimeFloat() ) )
@@ -590,13 +578,6 @@ static void display_fps_subby()
         {
             c2 << "0xffffffT:" << time.str() << "\n";
         }
-    }
-
-    int newfps   = static_cast<int>(se_AverageFPS());
-    if (fabs((newfps-fps)*ts)>4)
-    {
-        fps      = newfps;
-        lastTime = newtime;
     }
 
     if(sr_FPSOut){

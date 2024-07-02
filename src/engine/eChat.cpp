@@ -285,9 +285,13 @@ bool eChatSpamTester::Block()
     return shouldBlock_;
 }
 
-bool eChatSpamTester::Check()
+eChatSaidEntry eChatSpamTester::GetSaidEntry(nTimeRolling const& currentTime) const
 {
-    nTimeRolling currentTime = tSysTimeFloat();
+    return eChatSaidEntry(say_, player_->GetUserName(), currentTime, lastSaidType_);
+}
+
+bool eChatSpamTester::CheckSpamHistory(nTimeRolling const& currentTime) const
+{
 
     // check if the player already said the same thing not too long ago
     eChatLastSaid::SaidList const & lastSaid = player_->GetLastSaid().LastSaid();
@@ -302,8 +306,11 @@ bool eChatSpamTester::Check()
         }
     }
 
-    eChatSaidEntry saidEntry( say_, player_->GetUserName(), currentTime, lastSaidType_ );
+    return false;
+}
 
+bool eChatSpamTester::CheckSpamPrefix(eChatSaidEntry const& saidEntry) const
+{
     // check for prefix spam
     if ( se_prefixSpamShouldEnable )
     {
@@ -317,6 +324,11 @@ bool eChatSpamTester::Check()
         }
     }
 
+    return false;
+}
+
+bool eChatSpamTester::CheckSpamVolume() const
+{
     REAL lengthMalus = say_.Len() / 20.0;
     if ( lengthMalus > 4.0 )
     {
@@ -332,6 +344,12 @@ bool eChatSpamTester::Check()
 
     if ( CheckSpam( factor, tOutput("$spam_chat") ) )
         return true;
+
+    return false;
+}
+
+bool eChatSpamTester::CheckAccessLevel() const
+{
 
 #ifdef KRAWALL_SERVER
     if ( player_->GetAccessLevel() > se_chatAccessLevel )
@@ -353,7 +371,35 @@ bool eChatSpamTester::Check()
     }
 #endif
 
-    player_->GetLastSaid().AddSaid( saidEntry );
+    return false;
+}
+
+bool eChatSpamTester::CheckSpamOnly(nTimeRolling const& currentTime) const
+{
+    if (CheckSpamHistory(currentTime))
+        return true;
+    if (CheckSpamPrefix(GetSaidEntry(currentTime)))
+        return true;
+    if (CheckSpamVolume())
+        return true;
+
+    return false;
+}
+
+bool eChatSpamTester::CheckSpamOnly() const
+{
+    return CheckSpamOnly(tSysTimeFloat());
+}
+
+bool eChatSpamTester::Check()
+{
+    nTimeRolling currentTime = tSysTimeFloat();
+    if (CheckSpamOnly(currentTime))
+        return true;
+    if (CheckAccessLevel())
+        return true;
+
+    player_->GetLastSaid().AddSaid(GetSaidEntry(currentTime));
 
     return false;
 }

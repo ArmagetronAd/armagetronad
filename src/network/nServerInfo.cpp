@@ -390,17 +390,7 @@ nServerInfo *nServerInfo::GetFirstServer()
 
 nServerInfo *nServerInfo::Prev()
 {
-    if (reinterpret_cast<nServerInfo **>(anchor) == &sn_FirstServer)
-        return NULL;
-
-    static nServerInfo& info = *this; // will not cause recursion since it is called only once.
-
-    // uaaa. Pointer magic...
-    // TODO: perhaps there is a better way using member pointers?
-    return reinterpret_cast<nServerInfo *>
-           ( reinterpret_cast<char*> (anchor) +
-             ( reinterpret_cast<char*>( &info ) - reinterpret_cast<char*> (&info.next) )
-           );
+    return tListItem<nServerInfo>::Prev(sn_FirstServer);
 }
 
 // Sort server list
@@ -478,7 +468,7 @@ void nServerInfo::Sort( PrimaryKey key )
                 break;
 
             prev->Remove();
-            prev->Insert( ascend->next );
+            prev->InsertAfter(*ascend);
         }
     }
 }
@@ -2357,22 +2347,13 @@ nServerInfo *nServerInfo::GetMasters()
     if (!sn_masterList)
     {
         // back up the regular server list
-        nServerInfo * oldFirstServer = sn_FirstServer;
-        sn_FirstServer = NULL;
+        nServerInfo::SwapLists(sn_FirstServer, sn_masterList);
 
         // load the master server list cleanly
         Load( tDirectories::Config(), "master.srv" );
 
-        // transfer list
-        while ( sn_FirstServer )
-        {
-            nServerInfo * server = sn_FirstServer;
-            server->Remove();
-            server->Insert( sn_masterList );
-        }
-
-        // restore up the regular server list
-        sn_FirstServer = oldFirstServer;
+        // transfer list to sn_masterList and restore regular list
+        nServerInfo::SwapLists(sn_FirstServer, sn_masterList);
     }
 
     return sn_masterList;
