@@ -652,9 +652,9 @@ deploy_steam: #result.deploy_steam
 deploy_zi: result.deploy_zi
 deploy_download: result.deploy_download
 
+# this is a LTS branch, so we only target LTS Ubuntu versions to keep changes low
 deploy_ppa: \
 deploy_ppa_noble \
-deploy_ppa_mantic \
 deploy_ppa_jammy \
 deploy_ppa_focal \
 deploy_ppa_bionic \
