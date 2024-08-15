@@ -32,6 +32,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tThread.h"
 #include "tLockedQueue.h"
 #include "tSafePTR.h"
+#include "tMemManager.h"
+
+#include <utility>
 
 //! template that runs void member functions of reference countable objects
 template< class T > class tMemberFunctionRunnerTemplate
@@ -117,6 +120,45 @@ public:
     template< class T > static void ScheduleForeground( T & object, void (T::*function)() )
     {
         tMemberFunctionRunnerTemplate<T>::ScheduleForeground( object, function );
+    }
+};
+
+//! runs lambda functions or equivalents
+class tLambdaRunner
+{
+    template <typename F>
+    struct LambdaHolder : public tReferencable<LambdaHolder<F>>
+    {
+        LambdaHolder(LambdaHolder const&) = default;
+        LambdaHolder(LambdaHolder&&) noexcept = default;
+        LambdaHolder(F const& f) : f_{f} {};
+        LambdaHolder(F&& f) : f_{std::move(f)} {};
+
+        F f_;
+
+        void run()
+        {
+            f_();
+        }
+    };
+
+public:
+    //! runs a member function in a background thread
+    template <typename F>
+    static void ScheduleBackground(F&& f)
+    {
+        using T = LambdaHolder<F>;
+        auto* pHolder = tNEW(T)(std::move(f));
+        tMemberFunctionRunnerTemplate<T>::ScheduleBackground(*pHolder, &T::run);
+    }
+
+    //! runs a member function on the next call of st_DoToDo()
+    template <typename F>
+    static void ScheduleForeground(F&& f)
+    {
+        using T = LambdaHolder<F>;
+        auto* pHolder = tNEW(T)(std::move(f));
+        tMemberFunctionRunnerTemplate<T>::ScheduleForeground(*pHolder, &T::run);
     }
 };
 

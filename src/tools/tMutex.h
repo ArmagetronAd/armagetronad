@@ -69,11 +69,10 @@ template <class T>
 class lock_base
 {
 private:
-    T & mutex_;
     lock_base( lock_base const & );
     lock_base & operator = ( lock_base const & );
 protected:
-lock_base(T & m)
+    lock_base(T & m)
     : mutex_(m)
     {}
 
@@ -86,6 +85,8 @@ lock_base(T & m)
     {
         mutex_.unlock();
     }
+
+    T & mutex_;
 };
 
 template <class T>
@@ -136,6 +137,19 @@ public:
         {
             locked_ = false;
             this->unlock_();
+        }
+    }
+
+    T * release()
+    {
+        if( locked_ )
+        {
+            locked_ = false;
+            return &this->mutex_;
+        }
+        else
+        {
+            return nullptr;
         }
     }
 };

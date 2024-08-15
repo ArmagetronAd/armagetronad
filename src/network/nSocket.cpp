@@ -1185,6 +1185,9 @@ public:
         }
 
         ClearAddressCore();
+
+        // only finally release this object in the main thread
+        tLambdaRunner::ScheduleForeground([keep = tJUST_CONTROLLED_PTR<nDNSResolver>(this)]() {});
     }
 
     void Wait()
