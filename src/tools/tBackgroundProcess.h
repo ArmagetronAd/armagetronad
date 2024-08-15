@@ -130,7 +130,7 @@ class tLambdaRunner
     struct LambdaHolder : public tReferencable<LambdaHolder<F>>
     {
         LambdaHolder(LambdaHolder const&) = default;
-        LambdaHolder(LambdaHolder&&) noexcept = default;
+        LambdaHolder(LambdaHolder&&) = default;
         LambdaHolder(F const& f) : f_{f} {};
         LambdaHolder(F&& f) : f_{std::move(f)} {};
 
