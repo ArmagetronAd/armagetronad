@@ -84,6 +84,15 @@ default:
   extends: .merge_request
   image: $CI_REGISTRY_IMAGE/armabuild_32@sha256:4cba0dbf909790c2dbf8fd6e765011f85352e72f043a7dc335580f967b093e03
 
+.merge_request_steam_64:
+  extends: .merge_request
+  image: $CI_REGISTRY_IMAGE/armasteam_64@sha256:c6786ef5ba823214be3b8a863cdeffe5e932768718e7aae9d5f2ff427d5dedfc
+
+.merge_request_wine:
+  extends: .merge_request
+  image: $CI_REGISTRY_IMAGE/armawineblocks@sha256:f70849ff0ae55d2da655a0f2adacbe69df3743ae2b04d38a1b902bf23fa98a7d
+
+
 .project_runner_64:
   extends: .project_runner
   image: $CI_REGISTRY_IMAGE/armabuild_64@sha256:8bf6a80efb4a7ad74f61a934e652683fa254e7fc15e800b3b9469791437e8795
@@ -206,7 +215,7 @@ build_server_32_raw:
 
 build_server_steam_raw:
   stage: build_base
-  extends: .project_runner_steam_64
+  extends: .merge_request_steam_64
   script:
     - ./bootstrap.sh
     - gitlab_build/docker/build/make_ci.sh -k result.build_server_steam
@@ -219,7 +228,7 @@ build_server_steam_raw:
 # Windows builds are worst because they have an additional layer of emulation,
 # are not parallelized and are client and server build in one.
 build_windows:
-  extends: .project_runner_wine
+  extends: .merge_request_wine
   needs:
   - build_server_32_raw
   stage: build_main
