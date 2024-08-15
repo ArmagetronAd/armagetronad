@@ -86,11 +86,11 @@ default:
 
 .merge_request_steam_64:
   extends: .merge_request
-  image: $CI_REGISTRY_IMAGE/armasteam_64@sha256:c6786ef5ba823214be3b8a863cdeffe5e932768718e7aae9d5f2ff427d5dedfc
+  image: $CI_REGISTRY_IMAGE/armasteam_64@sha256:cae02938a300bf474414d4d2fd78b34cfaf8553d7f7f8f635cd10d02242ef26e
 
 .merge_request_wine:
   extends: .merge_request
-  image: $CI_REGISTRY_IMAGE/armawineblocks@sha256:f70849ff0ae55d2da655a0f2adacbe69df3743ae2b04d38a1b902bf23fa98a7d
+  image: $CI_REGISTRY_IMAGE/armawineblocks@sha256:ad1d8dd164238d321e4ac13aeac48477a278e11976ee9ce89a5587bb7f1512a7
 
 
 .project_runner_64:
