@@ -6920,18 +6920,18 @@ void ePlayerNetID::Update(){
             }
         }
 
-        // the player with the lowest ping essentially dominates ping charity
-        sn_pingCharityServer -= minHalfPing;
-
-        if (sn_pingCharityServer<0)
-            sn_pingCharityServer=0;
-
         // set configurable minimum
         if ( se_pingCharityServerControlled.Supported() )
         {
+            // the player with the lowest ping essentially dominates ping charity
+            sn_pingCharityServer -= minHalfPing;
+
             if ( sn_pingCharityServer < se_pingCharityMin )
                 sn_pingCharityServer = se_pingCharityMin;
         }
+
+        if (sn_pingCharityServer < 0)
+            sn_pingCharityServer = 0;
 
         if (old_c!=sn_pingCharityServer)
         {
