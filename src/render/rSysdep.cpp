@@ -447,32 +447,6 @@ private:
 
 static rFastForwardCommandLineAnalyzer analyzer;
 
-// #define MILLION 1000000
-
-/*
-static double lastFrame = -1;
-static void sr_DelayFrame( int targetFPS )
-{
-    // calculate microseconds per frame
-    int uSecsPerFrame = MILLION/(targetFPS + 10);
-
-    // calculate microseconds spent rendering
-    double thisFrame = tRealSysTimeFloat();
-
-    int uSecsPassed = static_cast<int>( MILLION * ( thisFrame - lastFrame ) );
-
-//    con << uSecsPassed << "\n";
-
-    // wait
-    int uSecsToWait = uSecsPerFrame - uSecsPassed;
-    if ( uSecsToWait > 0 )
-        tDelay( uSecsToWait );
-
-    // call glFinish to wait for GPU
-    glFinish();
-}
-*/
-
 rSysDep::rSwapMode rSysDep::swapMode_ = rSysDep::rSwap_glFlush;
 //rSysDep::rSwapMode rSysDep::swapMode_ = rSysDep::rSwap_60Hz;
 
@@ -721,18 +695,6 @@ void rSysDep::SwapGL(){
 
     if (sr_useMaxFPS && !tRecorder::IsPlayingBack())
     {
-        /*
-        static int FPS, now_time, last_time = 0;
-
-        now_time = SDL_GetTicks();
-        FPS = 1000 / sr_maxFPS;
-
-        if( now_time < last_time + FPS )
-            SDL_Delay( last_time + FPS - now_time );
-
-        last_time = SDL_GetTicks();
-        */
-
         static double FPS, now_time, last_time = 0;
 
         now_time = tRealSysTimeFloat();
@@ -743,9 +705,6 @@ void rSysDep::SwapGL(){
 
         last_time = tRealSysTimeFloat();
     }
-
-    // store frame time for next frame
-    // lastFrame = tRealSysTimeFloat();
 
     sr_glOut = next_glOut;
 }
