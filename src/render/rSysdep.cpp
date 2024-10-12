@@ -537,16 +537,13 @@ void rSysDep::StopNetSyncThread()
     }
 }
 
-bool sr_useMaxFPS = true;
-static tConfItem<bool> sr_useMaxFPSConf("USE_MAX_FPS", sr_useMaxFPS);
-
-int sr_maxFPS = 500;
+int sr_maxFPS = 0;
 static tConfItem<int> sr_maxFPSConf("MAX_FPS", sr_maxFPS,
-                                    [](const int& val) { return (val > 0); });
+                                    [](const int& val) { return (val >= 0); });
 
 void sr_LimitFPS()
 {
-    if (sr_useMaxFPS && !tRecorder::IsPlayingBack())
+    if (sr_maxFPS > 0 && !tRecorder::IsPlayingBack())
     {
         static double last_time = 0;
 
