@@ -879,7 +879,7 @@ armagetron_last_screenmode_help Last screen resolution
 armagetron_windowsize_help	Window size
 armagetron_last_windowsize_help Last Window size
 armagetron_vsync_help       What to do with the monitor's vertical sync
-rmagetron_vsync_last_help  What to do with the monitor's vertical sync
+armagetron_vsync_last_help  What to do with the monitor's vertical sync
 fullscreen_help			Fullscreen or windowed mode?
 last_fullscreen_help		Fullscreen or windowed mode, last successful init
 check_errors_help		Listen to errors claiming a video mode does not exist
@@ -892,6 +892,7 @@ use_sdl_help			Use SDL to init OpenGL?
 last_use_sdl_help		Use SDL to init OpenGL, last successful init
 failed_attempts_help		Number of failed attempts to initialise graphics mode
 software_renderer_help		Is the OpenGL renderer not hardware accelerated?
+max_fps_help                If set to something greater than 0, keep framerate at or below this value
 
 #model
 use_displaylists_help		Use display lists for rendering the cycles?
