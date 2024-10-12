@@ -695,15 +695,21 @@ void rSysDep::SwapGL(){
 
     if (sr_useMaxFPS && !tRecorder::IsPlayingBack())
     {
-        static double FPS, now_time, last_time = 0;
+        static double last_time = 0;
 
-        now_time = tRealSysTimeFloat();
-        FPS = 1.0 / sr_maxFPS;
+        const double now_time = tRealSysTimeFloat();
+        const double SPF = 1.0 / sr_maxFPS;
 
-        if (now_time < last_time + FPS)
-            SDL_Delay(round(1000 * (last_time + FPS - now_time)));
-
-        last_time = tRealSysTimeFloat();
+        const double target_now_time = last_time + SPF;
+        if (now_time < target_now_time)
+        {
+            SDL_Delay(round(1000 * (target_now_time - now_time)));
+            last_time = target_now_time;
+        }
+        else
+        {
+            last_time = now_time;
+        }
     }
 
     sr_glOut = next_glOut;
