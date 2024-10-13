@@ -894,6 +894,7 @@ use_sdl_help                  Initiiere OpenGL über SDL?
 last_use_sdl_help             Initiiere OpenGL über SDL, letzte erfolgreiche Einstellung
 failed_attempts_help          Anzahl der erfolglosen Versuche, die Grafik zu initialisieren
 software_renderer_help        Ist der OpenGL Renderer nicht Hadware-Beschleunigt?
+max_fps_help                  Begrenzung der Bildrate. 0 bedeutet keine Begrenzung
 
 #model
 use_displaylists_help         Sollen display lists für die Vehikel verwendet werden?

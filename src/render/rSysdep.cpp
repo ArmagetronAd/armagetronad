@@ -447,32 +447,6 @@ private:
 
 static rFastForwardCommandLineAnalyzer analyzer;
 
-// #define MILLION 1000000
-
-/*
-static double lastFrame = -1;
-static void sr_DelayFrame( int targetFPS )
-{
-    // calculate microseconds per frame
-    int uSecsPerFrame = MILLION/(targetFPS + 10);
-
-    // calculate microseconds spent rendering
-    double thisFrame = tRealSysTimeFloat();
-
-    int uSecsPassed = static_cast<int>( MILLION * ( thisFrame - lastFrame ) );
-
-//    con << uSecsPassed << "\n";
-
-    // wait
-    int uSecsToWait = uSecsPerFrame - uSecsPassed;
-    if ( uSecsToWait > 0 )
-        tDelay( uSecsToWait );
-
-    // call glFinish to wait for GPU
-    glFinish();
-}
-*/
-
 rSysDep::rSwapMode rSysDep::swapMode_ = rSysDep::rSwap_glFlush;
 //rSysDep::rSwapMode rSysDep::swapMode_ = rSysDep::rSwap_60Hz;
 
@@ -560,6 +534,32 @@ void rSysDep::StopNetSyncThread()
     {
         SDL_DestroyMutex( sr_netLock );
         sr_netLock = NULL;
+    }
+}
+
+int sr_maxFPS = 0;
+static tConfItem<int> sr_maxFPSConf("MAX_FPS", sr_maxFPS,
+                                    [](const int& val) { return (val >= 0); });
+
+void sr_LimitFPS()
+{
+    if (sr_maxFPS > 0 && !tRecorder::IsPlayingBack())
+    {
+        static double last_time = 0;
+
+        const double now_time = tRealSysTimeFloat();
+        const double SPF = 1.0 / sr_maxFPS;
+
+        const double target_now_time = last_time + SPF;
+        if (now_time < target_now_time)
+        {
+            SDL_Delay(round(1000 * (target_now_time - now_time)));
+            last_time = target_now_time;
+        }
+        else
+        {
+            last_time = now_time;
+        }
     }
 }
 
@@ -713,8 +713,7 @@ void rSysDep::SwapGL(){
     }
     //#endif
 
-    // store frame time for next frame
-    // lastFrame = tRealSysTimeFloat();
+    sr_LimitFPS();
 
     sr_glOut = next_glOut;
 }
