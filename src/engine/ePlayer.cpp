@@ -7683,26 +7683,36 @@ void ePlayerNetID::Update(){
             sn_pingCharityServer = se_pingCharityMax;
         }
 
+        int minHalfPing = 9999;
         for(i=se_PlayerNetIDs.Len()-1;i>=0;i--){
             ePlayerNetID *pni=se_PlayerNetIDs(i);
             pni->UpdateName();
-            int new_ps=pni->pingCharity;
-            new_ps+=int(pni->ping*500);
+            int halfPing = pni->ping * 500;
+            int new_ps = pni->pingCharity + halfPing;
 
             // only take ping charity into account for non-spectators
-            if ( sn_GetNetState() != nSERVER || pni->currentTeam || pni->nextTeam )
+            if (sn_GetNetState() != nSERVER ||
+                ((pni->currentTeam || pni->nextTeam) && pni->IsHuman()))
+            {
                 if (new_ps < sn_pingCharityServer)
                     sn_pingCharityServer=new_ps;
+                if (halfPing < minHalfPing)
+                    minHalfPing = halfPing;
+            }
         }
-        if (sn_pingCharityServer<0)
-            sn_pingCharityServer=0;
 
         // set configurable minimum
         if ( se_pingCharityServerControlled.Supported() )
         {
+            // the player with the lowest ping essentially dominates ping charity
+            sn_pingCharityServer -= minHalfPing;
+
             if ( sn_pingCharityServer < se_pingCharityMin )
                 sn_pingCharityServer = se_pingCharityMin;
         }
+
+        if (sn_pingCharityServer < 0)
+            sn_pingCharityServer = 0;
 
         if (old_c!=sn_pingCharityServer)
         {

@@ -436,8 +436,6 @@ private:
 
 static rFastForwardCommandLineAnalyzer analyzer;
 
-// #define MILLION 1000000
-
 rSysDep::rSwapOptimize rSysDep::swapOptimize_ = rSysDep::rSwap_Auto;
 rSysDep::rFramedropTolerance rSysDep::framedropTolerance_ = rSysDep::rSwap_Normal;
 
@@ -1375,6 +1373,32 @@ bool sr_MotionBlur( double time, std::unique_ptr< rTextureRenderTarget > & blurT
     return true;
 }
 
+int sr_maxFPS = 0;
+static tConfItem<int> sr_maxFPSConf("MAX_FPS", sr_maxFPS,
+                                    [](const int& val) { return (val >= 0); });
+
+void sr_LimitFPS()
+{
+    if (sr_maxFPS > 0 && !tRecorder::IsPlayingBack())
+    {
+        static double last_time = 0;
+
+        const double now_time = tRealSysTimeFloat();
+        const double SPF = 1.0 / sr_maxFPS;
+
+        const double target_now_time = last_time + SPF;
+        if (now_time < target_now_time)
+        {
+            SDL_Delay(round(1000 * (target_now_time - now_time)));
+            last_time = target_now_time;
+        }
+        else
+        {
+            last_time = now_time;
+        }
+    }
+}
+
 void rSysDep::SwapGL(){
     static std::unique_ptr< rTextureRenderTarget > blurTarget;
 
@@ -1522,8 +1546,7 @@ void rSysDep::SwapGL(){
     }
     //#endif
 
-    // store frame time for next frame
-    // lastFrame = tRealSysTimeFloat();
+    sr_LimitFPS();
 
     sr_glOut = next_glOut;
 }
