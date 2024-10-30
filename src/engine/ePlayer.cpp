@@ -2980,8 +2980,8 @@ static void se_ChatMsg( ePlayerNetID * p, std::istream & s, eChatSpamTester & sp
             // log locally
             sn_ConsoleOut(toServer,0);
 
-            // log to sender's console
-            sn_ConsoleOut(toServer, p->Owner());
+            // send back to sender
+            se_SendPrivateMessage(p, receiver, p, msg_core);
 
             // send to receiver
             if ( p->Owner() != receiver->Owner() )
