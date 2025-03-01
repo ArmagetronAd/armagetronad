@@ -75,7 +75,7 @@ tString tResourceManager::resRepoServer("http://resource.armagetronad.net/resour
 tString tResourceManager::resRepoClient("http://resource.armagetronad.net/resource/");
 static tSettingItem<tString> conf_res_repo("RESOURCE_REPOSITORY_CLIENT", tResourceManager::resRepoClient);
 
-tResourceManager::Result tResourceManager::FetchURI(const char* URI, std::ostream& o, int maxLen)
+tResourceManager::Result tResourceManager::FetchURI(const char* URI, std::ostream& o)
 {
 #ifdef LIBXML_HTTP_ENABLED
     {
@@ -99,13 +99,6 @@ tResourceManager::Result tResourceManager::FetchURI(const char* URI, std::ostrea
         char buf[10000];
         while ((len = xmlNanoHTTPRead(ctxt, buf, sizeof(buf))) > 0)
         {
-            if (maxLen >= 0)
-            {
-                if (maxLen == 0)
-                    break;
-                len = std::min(len, maxLen);
-                maxLen -= len;
-            }
             o.write(buf, len);
         }
 
@@ -159,10 +152,15 @@ static int myHTTPFetch(const char* URI, const char* filename, const char* savepa
     {
         std::ofstream o{savepath};
         tResourceManager::Result ret = tResourceManager::FetchURI(URI, o);
+        o.close();
+        if (ret != tResourceManager::Result::OK)
+            remove(savepath);
         return ret;
     }
     catch (...)
     {
+        remove(savepath);
+
         return 4;
     }
 

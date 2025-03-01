@@ -15,8 +15,8 @@ public:
         ERROR_NOACCESS = 4  // Access denied
     };
 
-    // fetches an URI and stores it in the provided stream, up to maxLen bytes
-    static Result FetchURI(const char* URI, std::ostream& o, int maxLen = -1);
+    // fetches an URI and stores it in the provided stream
+    static Result FetchURI(const char* URI, std::ostream& o);
 
     //! Return the position of the resource in the cache
     static tString locateResource(const char *uri, const char *file);
