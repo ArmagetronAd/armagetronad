@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <fstream>
 #include <sys/types.h>
 
 #include <libxml/nanohttp.h>
@@ -14,6 +15,50 @@
 #include "tResourceManager.h"
 #include "tString.h"
 
+#ifndef LIBXML_HTTP_ENABLED
+#ifdef LIBCURL_PROTOCOL_HTTP
+#include <curl/curl.h>
+
+class tCurlGlobal
+{
+public:
+    tCurlGlobal()
+    {
+        curl_global_init(CURL_GLOBAL_DEFAULT);
+    };
+
+    ~tCurlGlobal()
+    {
+        curl_global_cleanup();
+    }
+};
+
+class tCurlLocal
+{
+private:
+    CURL* _handle;
+
+public:
+    tCurlLocal()
+    {
+        static tCurlGlobal curlGlobal;
+        _handle = curl_easy_init();
+    };
+
+    ~tCurlLocal()
+    {
+        curl_easy_cleanup(_handle);
+    }
+
+    operator CURL*()
+    {
+        return _handle;
+    }
+};
+
+#endif
+#endif
+
 // server determined resource repository
 tString tResourceManager::resRepoServer("http://resource.armagetronad.net/resource/");
 // the nSettingItem is in gStuff.cpp
@@ -22,47 +67,98 @@ tString tResourceManager::resRepoServer("http://resource.armagetronad.net/resour
 tString tResourceManager::resRepoClient("http://resource.armagetronad.net/resource/");
 static tSettingItem<tString> conf_res_repo("RESOURCE_REPOSITORY_CLIENT", tResourceManager::resRepoClient);
 
-static int myHTTPFetch(const char *URI, const char *filename, const char *savepath)
+tResourceManager::Result tResourceManager::FetchURI(const char* URI, std::ostream& o, int maxLen)
 {
-    void *ctxt = NULL;
-    char *buf = NULL;
-    FILE* fd;
-    int len, rc;
+#ifdef LIBXML_HTTP_ENABLED
+    {
+        void* ctxt = NULL;
+        int len, rc;
 
-    con << tOutput( "$resource_downloading", URI );
+        ctxt = xmlNanoHTTPOpen(URI, NULL);
+        if (ctxt == NULL)
+        {
+            con << tOutput("$resource_fetcherror_noconnect", URI);
+            return ERROR_URI;
+        }
+
+        if ((rc = xmlNanoHTTPReturnCode(ctxt)) != 200)
+        {
+            con << tOutput(rc == 404 ? "$resource_fetcherror_404" : "$resource_fetcherror", rc);
+            return rc == 404 ? ERROR_NOACCESS : ERROR_NOTFOUND;
+        }
+
+        // xmlNanoHTTPFetchContent( ctxt, &buf, &len );
+        char buf[10000];
+        while ((len = xmlNanoHTTPRead(ctxt, buf, sizeof(buf))) > 0)
+        {
+            if (maxLen >= 0)
+            {
+                if (maxLen == 0)
+                    break;
+                len = std::min(len, maxLen);
+                maxLen -= len;
+            }
+            o.write(buf, len);
+        }
+
+        xmlNanoHTTPClose(ctxt);
+    }
+#else
+#ifdef LIBCURL_PROTOCOL_HTTP
+    {
+        tCurlLocal handle;
+
+        // Set the URL to request
+        curl_easy_setopt(handle, CURLOPT_URL, "https://www.example.com");
+        // Set the callback function to handle the response
+        curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, [](char* data, size_t size, size_t nmemb, void* userp) {
+            // Cast the user pointer to an ostream and write the data to it
+            static_cast<std::ostream*>(userp)->write(data, size);
+            // Return the number of bytes processed
+            return size * nmemb;
+        });
+        // Set the user pointer to be an ostream to which the response will be written
+        std::ostringstream response;
+        curl_easy_setopt(handle, CURLOPT_WRITEDATA, &response);
+        // Perform the request
+        CURLcode result = curl_easy_perform(handle);
+        // Check the result
+        if (result != CURLE_OK)
+        {
+            // If the request failed, print an error message
+            std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(result) << std::endl;
+        }
+        else
+        {
+            // If the request was successful, print the response
+            std::cout << response.str() << std::endl;
+        }
+        // Clean up
+        curl_easy_cleanup(handle);
+    }
+#else
+    con << "FAILED libcurl or libxml's nanohttp required";
+    return ERROR_UNKNOWN;
+#endif
+#endif
+    con << "OK\n";
+    return Result::OK;
+}
+
+static int myHTTPFetch(const char* URI, const char* filename, const char* savepath)
+{
+    con << tOutput("$resource_downloading", URI);
     // con << "Downloading " << URI << "...\n";
 
-    ctxt = xmlNanoHTTPOpen(URI, NULL);
-    if (ctxt == NULL) {
-        con << tOutput( "$resource_fetcherror_noconnect", URI );
-        return 1;
+    try
+    {
+        std::ofstream o{savepath};
+        return tResourceManager::FetchURI(URI, o);
     }
-
-    if ( (rc = xmlNanoHTTPReturnCode(ctxt)) != 200 ) {
-        con << tOutput( rc == 404 ? "$resource_fetcherror_404" : "$resource_fetcherror", rc );
-        return 2;
+    catch (...)
+    {
+        return 4;
     }
-
-    fd = fopen(savepath, "w");
-    if (fd == NULL) {
-        xmlNanoHTTPClose(ctxt);
-        con << tOutput( "$resource_no_write", savepath );
-        return 3;
-    }
-
-    //xmlNanoHTTPFetchContent( ctxt, &buf, &len );
-    int maxlen = 10000;
-    buf = (char*)malloc(maxlen);
-    while( (len = xmlNanoHTTPRead(ctxt, buf, maxlen)) > 0 ) {
-        Ignore( fwrite(buf, len, 1, fd) );
-    }
-    free(buf);
-
-    xmlNanoHTTPClose(ctxt);
-    fclose(fd);
-
-
-    con << "OK\n";
 
     return 0;
 }

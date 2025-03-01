@@ -37,6 +37,7 @@ the executable is not distributed).
 #include "tConsole.h"
 #include "nNetwork.h"
 #include "tConfiguration.h"
+#include "tResourceManager.h"
 #include "tArray.h"
 
 #include <string>
@@ -447,7 +448,7 @@ void nKrawall::CheckScrambledPassword( nCheckResultBase & result,
     }
 }
 
-int nKrawall::FetchURL( tString const & authority, char const * query, std::ostream & target, int maxlen )
+int nKrawall::FetchURL(tString const& authority, char const* query, std::ostream& target)
 {
     // compose real URL
     std::ostringstream fullURL;
@@ -458,31 +459,15 @@ int nKrawall::FetchURL( tString const & authority, char const * query, std::ostr
     // con << "Fetching authentication URL " << fullURL.str() << "\n";
 
     // fetch URL
-    void * ctxt = xmlNanoHTTPOpen( fullURL.str().c_str(), NULL);
-    if (ctxt == NULL)
+    tResourceManager::Result ret = tResourceManager::FetchURI(fullURL.str().c_str(), target);
+
+    switch (ret)
     {
+    case tResourceManager::Result::OK:
+        return 200;
+    default:
         return -1;
     }
-
-    int rc = xmlNanoHTTPReturnCode(ctxt);
-
-    // read content
-    char buf[1000];
-    buf[0] = 0;
-    unsigned int len = 1;
-    while ( len > 0 && maxlen > 0 )
-    {
-        int max = sizeof(buf);
-        if ( max > maxlen )
-            max = maxlen;
-        len = xmlNanoHTTPRead( ctxt, &buf, max );
-        target.write( buf, len );
-        maxlen -= len;
-    }
-
-    xmlNanoHTTPClose(ctxt);
-
-    return rc;
 }
 
 #ifdef KRAWALL_SERVER_LEAGUE
