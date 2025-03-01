@@ -121,6 +121,20 @@ tResourceManager::Result tResourceManager::FetchURI(const char* URI, std::ostrea
         curl_easy_setopt(handle, CURLOPT_FAILONERROR, 1L);
         // activate automatic redirection following
         curl_easy_setopt(handle, CURLOPT_FOLLOWLOCATION, 1L);
+        // activate SSL verification
+        curl_easy_setopt(handle, CURLOPT_SSL_VERIFYPEER, 1L);
+        curl_easy_setopt(handle, CURLOPT_SSL_VERIFYHOST, 2L);
+        // shorten timeouts (10s connect, 30s total)
+        curl_easy_setopt(handle, CURLOPT_TIMEOUT, 30L);
+        curl_easy_setopt(handle, CURLOPT_CONNECTTIMEOUT, 10L);
+        // set user agent
+        curl_easy_setopt(handle, CURLOPT_USERAGENT, "Armagetron Advanced"); // using that instead of the variable progtitle so servers always know what to expect
+#ifdef DEBUG
+        // more detailed error reporting
+        char errbuf[CURL_ERROR_SIZE];
+        curl_easy_setopt(handle, CURLOPT_ERRORBUFFER, errbuf);
+        curl_easy_setopt(handle, CURLOPT_VERBOSE, 1L);
+#endif
         // Perform the request
         CURLcode result = curl_easy_perform(handle);
         // Check the result
