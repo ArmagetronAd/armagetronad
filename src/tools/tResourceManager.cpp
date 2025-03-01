@@ -86,7 +86,7 @@ tResourceManager::Result tResourceManager::FetchURI(const char* URI, std::ostrea
         if (ctxt == NULL)
         {
             con << tOutput("$resource_fetcherror_noconnect", URI);
-            return ERROR_URI;
+            return ERROR_Uri;
         }
 
         if ((rc = xmlNanoHTTPReturnCode(ctxt)) != 200)
@@ -109,7 +109,7 @@ tResourceManager::Result tResourceManager::FetchURI(const char* URI, std::ostrea
     {
         tCurlLocal handle;
         if (nullptr == handle)
-            return Result::ERROR_UNKNOWN;
+            return Result::ERROR_Unknown;
 
         // Set the URL to request
         curl_easy_setopt(handle, CURLOPT_URL, URI);
@@ -128,7 +128,7 @@ tResourceManager::Result tResourceManager::FetchURI(const char* URI, std::ostrea
             curl_easy_getinfo(handle, CURLINFO_RESPONSE_CODE, &http_code);
             // If the request failed, print an error message
             std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(result) << std::endl;
-            return Result::ERROR_UNKNOWN;
+            return Result::ERROR_Unknown;
         }
 
         // Clean up
@@ -140,7 +140,7 @@ tResourceManager::Result tResourceManager::FetchURI(const char* URI, std::ostrea
 #endif
 #endif
     con << "OK\n";
-    return Result::OK;
+    return Result::RESULT_Ok;
 }
 
 static int myHTTPFetch(const char* URI, const char* filename, const char* savepath)
@@ -153,7 +153,7 @@ static int myHTTPFetch(const char* URI, const char* filename, const char* savepa
         std::ofstream o{savepath};
         tResourceManager::Result ret = tResourceManager::FetchURI(URI, o);
         o.close();
-        if (ret == tResourceManager::Result::OK)
+        if (ret == tResourceManager::Result::RESULT_Ok)
             return 0;
 
         // some error
@@ -164,7 +164,7 @@ static int myHTTPFetch(const char* URI, const char* filename, const char* savepa
     {
         remove(savepath);
 
-        return tResourceManager::Result::ERROR_FILE_ACCESS;
+        return tResourceManager::Result::ERROR_FileAccess;
     }
 
     return 0;

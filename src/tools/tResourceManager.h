@@ -8,12 +8,12 @@ class tResourceManager {
 public:
     enum Result
     {
-        OK = 200,               // all fine
-        ERROR_UNKNOWN = -1,     // unknown error
-        ERROR_URI = -2,         // URI not well formed
-        ERROR_FILE_ACCESS = -3, // target file not writable
-        ERROR_NOTFOUND = 404,   // URI not found
-        ERROR_NOACCESS = 401    // Access denied
+        RESULT_Ok = 200,       // all fine
+        ERROR_Unknown = -1,    // unknown error
+        ERROR_Uri = -2,        // URI not well formed
+        ERROR_FileAccess = -3, // target file not writable
+        ERROR_NotFound = 404,  // URI not found
+        ERROR_NoAccess = 401   // Access denied
     };
 
     // fetches an URI and stores it in the provided stream
