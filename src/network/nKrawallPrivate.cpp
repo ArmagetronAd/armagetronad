@@ -334,7 +334,7 @@ void nKrawall::CheckScrambledPassword( nCheckResultBase & result,
         std::stringstream content;
         int rc = FetchURL( data.fullAuthority, request.str().c_str(), content );
 
-        if (rc == -1)
+        if (rc < 0)
         {
             result.error = tOutput( "$login_error_invalidurl_notfound", result.authority );
             result.success = false;
@@ -459,15 +459,10 @@ int nKrawall::FetchURL(tString const& authority, char const* query, std::ostream
     // con << "Fetching authentication URL " << fullURL.str() << "\n";
 
     // fetch URL
-    tResourceManager::Result ret = tResourceManager::FetchURI(fullURL.str().c_str(), target);
-
-    switch (ret)
-    {
-    case tResourceManager::Result::OK:
-        return 200;
-    default:
+    int ret = tResourceManager::FetchURI(fullURL.str().c_str(), target);
+    if (ret < 0)
         return -1;
-    }
+    return ret;
 }
 
 #ifdef KRAWALL_SERVER_LEAGUE
