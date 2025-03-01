@@ -261,7 +261,7 @@ public:
     static void CheckScrambledPassword( nCheckResultBase & result,
                                         nPasswordCheckData const & data );
 
-    // fetches an URL content, return http return code (-1 if total failure), fill result stream.
+    // fetches an URL content, return http return code (negative values if total failure), fill result stream.
     static int FetchURL(tString const& authority, char const* query, std::ostream& target);
 
 #ifdef KRAWALL_SERVER_LEAGUE
