@@ -161,7 +161,7 @@ static int myHTTPFetch(const char* URI, const char* filename, const char* savepa
     {
         remove(savepath);
 
-        return 4;
+        return tResourceManager::Result::ERROR_FILE_ACCESS;
     }
 
     return 0;
