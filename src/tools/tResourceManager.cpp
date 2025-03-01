@@ -119,6 +119,8 @@ tResourceManager::Result tResourceManager::FetchURI(const char* URI, std::ostrea
         curl_easy_setopt(handle, CURLOPT_WRITEDATA, &o);
         // activate failure on HTTP errors
         curl_easy_setopt(handle, CURLOPT_FAILONERROR, 1L);
+        // activate automatic redirection following
+        curl_easy_setopt(handle, CURLOPT_FOLLOWLOCATION, 1L);
         // Perform the request
         CURLcode result = curl_easy_perform(handle);
         // Check the result
