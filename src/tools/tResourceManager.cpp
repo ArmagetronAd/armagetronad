@@ -54,6 +54,14 @@ public:
     {
         return _handle;
     }
+
+    static size_t write_to_ostream(char* data, size_t size, size_t nmemb, void* ostream)
+    {
+        // Cast the user pointer to an ostream and write the data to it
+        static_cast<std::ostream*>(ostream)->write(data, size * nmemb);
+        // Return the number of bytes processed
+        return size * nmemb;
+    }
 };
 
 #endif
@@ -107,32 +115,29 @@ tResourceManager::Result tResourceManager::FetchURI(const char* URI, std::ostrea
 #ifdef LIBCURL_PROTOCOL_HTTP
     {
         tCurlLocal handle;
+        if (nullptr == handle)
+            return Result::ERROR_UNKNOWN;
 
         // Set the URL to request
-        curl_easy_setopt(handle, CURLOPT_URL, "https://www.example.com");
+        curl_easy_setopt(handle, CURLOPT_URL, URI);
         // Set the callback function to handle the response
-        curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, [](char* data, size_t size, size_t nmemb, void* userp) {
-            // Cast the user pointer to an ostream and write the data to it
-            static_cast<std::ostream*>(userp)->write(data, size);
-            // Return the number of bytes processed
-            return size * nmemb;
-        });
+        curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, &tCurlLocal::write_to_ostream);
         // Set the user pointer to be an ostream to which the response will be written
-        std::ostringstream response;
-        curl_easy_setopt(handle, CURLOPT_WRITEDATA, &response);
+        curl_easy_setopt(handle, CURLOPT_WRITEDATA, &o);
+        // activate failure on HTTP errors
+        curl_easy_setopt(handle, CURLOPT_FAILONERROR, 1L);
         // Perform the request
         CURLcode result = curl_easy_perform(handle);
         // Check the result
         if (result != CURLE_OK)
         {
+            long http_code = 0;
+            curl_easy_getinfo(handle, CURLINFO_RESPONSE_CODE, &http_code);
             // If the request failed, print an error message
             std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(result) << std::endl;
+            return Result::ERROR_UNKNOWN;
         }
-        else
-        {
-            // If the request was successful, print the response
-            std::cout << response.str() << std::endl;
-        }
+
         // Clean up
         curl_easy_cleanup(handle);
     }
@@ -153,7 +158,8 @@ static int myHTTPFetch(const char* URI, const char* filename, const char* savepa
     try
     {
         std::ofstream o{savepath};
-        return tResourceManager::FetchURI(URI, o);
+        tResourceManager::Result ret = tResourceManager::FetchURI(URI, o);
+        return ret;
     }
     catch (...)
     {
