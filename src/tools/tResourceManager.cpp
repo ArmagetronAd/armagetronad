@@ -92,7 +92,7 @@ tResourceManager::Result tResourceManager::FetchURI(const char* URI, std::ostrea
         if ((rc = xmlNanoHTTPReturnCode(ctxt)) != 200)
         {
             con << tOutput(rc == 404 ? "$resource_fetcherror_404" : "$resource_fetcherror", rc);
-            return rc == 404 ? ERROR_NOACCESS : ERROR_NOTFOUND;
+            return static_cast<tResourceManager::Result>(rc);
         }
 
         // xmlNanoHTTPFetchContent( ctxt, &buf, &len );
@@ -153,8 +153,11 @@ static int myHTTPFetch(const char* URI, const char* filename, const char* savepa
         std::ofstream o{savepath};
         tResourceManager::Result ret = tResourceManager::FetchURI(URI, o);
         o.close();
-        if (ret != tResourceManager::Result::OK)
-            remove(savepath);
+        if (ret == tResourceManager::Result::OK)
+            return 0;
+
+        // some error
+        remove(savepath);
         return ret;
     }
     catch (...)
@@ -184,7 +187,8 @@ static int myFetch(const char *URIs, const char *filename, const char *savepath)
         // NOTE: skip semicolons, *NOT* nulls
         while (p[-1] == ' ') --p;			// skip spaces at the end of the item
         len = (size_t)(p - r);
-        if (len > 0) {						// skip this for null-length items
+        if (len > 0)
+        { // skip this for null-length items
             u = (char*)malloc((len + 1) * sizeof(char));
             strncpy(u, r, len);
             u[len] = '\0';					// u now contains the individual URI
