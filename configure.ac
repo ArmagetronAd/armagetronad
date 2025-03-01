@@ -611,6 +611,14 @@ if test x$armamain = xtrue; then
   AC_DEFINE(HAVE_LIBXML2, 1, [Define if you have the libxml2 library])
 
 dnl *************************************************
+dnl         curl
+dnl *************************************************
+
+LIBCURL_CHECK_CONFIG()
+CPPFLAGS="$CPPFLAGS $LIBCURL_CPPFLAGS"
+LIBS=$"$LIBS $LIBCURL"
+
+dnl *************************************************
 dnl         Armathentication Threading
 dnl *************************************************
 
