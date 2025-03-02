@@ -151,7 +151,7 @@ tResourceManager::Result tResourceManager::FetchURI(const char* URI, std::ostrea
         curl_easy_cleanup(handle);
     }
 #else
-    con << "FAILED libcurl or libxml's nanohttp required";
+    #error libcurl or libxml's nanohttp required; configure should have told you. Please file a bug.
     return ERROR_UNKNOWN;
 #endif
 #endif

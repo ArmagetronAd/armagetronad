@@ -136,6 +136,17 @@ AC_ARG_ENABLE(glout,
        *) AC_MSG_ERROR(bad value ${enableval} for --enable-glout) ;;
      esac],)
 
+use_curl=false
+AC_ARG_ENABLE(curl,
+     AC_HELP_STRING([--enable-curl],
+        [Use libcurl for http requests]),
+     [case "${enableval}" in
+       yes) use_curl=true ;;
+       no)  use_curl=false ;;
+       *) AC_MSG_ERROR(bad value ${enableval} for --enable-main) ;;
+     esac],[use_curl=false])
+
+
 # consistency check of the three build flags	 
 test x$armamain = xfalse && build_dedicated=false build_regular=false
 test x$build_dedicated = xfalse && test x$build_regular = xfalse && armamain=false
@@ -610,18 +621,23 @@ if test x$armamain = xtrue; then
   LIBS="$LIBS $XML2_LIBS"
   AC_DEFINE(HAVE_LIBXML2, 1, [Define if you have the libxml2 library])
 
+
+
 dnl *************************************************
 dnl         curl
 dnl *************************************************
 
-dnl We unconditionally check for curl even though on older systems,
-dnl libxml's nanoHTTP would suffice for fetching; we want our binary
-dnl builds to be future compatible with systems where nanoHTTP has
-dnl been removed.
-
-LIBCURL_CHECK_CONFIG()
-CPPFLAGS="$CPPFLAGS $LIBCURL_CPPFLAGS"
-LIBS=$"$LIBS $LIBCURL"
+if test x$use_curl = xtrue; then
+    LIBCURL_CHECK_CONFIG(,,
+    CPPFLAGS="$CPPFLAGS $LIBCURL_CPPFLAGS"
+    LIBS=$"$LIBS $LIBCURL",
+    AC_MSG_ERROR([libcurl not found. Either provide it or disable it (with `configure --disable-curl`)])
+    )
+else
+  AC_CHECK_DECL(LIBXML_HTTP_ENABLED,,
+                AC_MSG_ERROR([libxml2 does not have the http client compiled in. Rerun with curl enabled (`configure --enable-curl`)]),
+                [[#include "libxml/nanohttp.h"]])
+fi
 
 dnl *************************************************
 dnl         Armathentication Threading
