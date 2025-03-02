@@ -614,6 +614,11 @@ dnl *************************************************
 dnl         curl
 dnl *************************************************
 
+dnl We unconditionally check for curl even though on older systems,
+dnl libxml's nanoHTTP would suffice for fetching; we want our binary
+dnl builds to be future compatible with systems where nanoHTTP has
+dnl been removed.
+
 LIBCURL_CHECK_CONFIG()
 CPPFLAGS="$CPPFLAGS $LIBCURL_CPPFLAGS"
 LIBS=$"$LIBS $LIBCURL"
