@@ -15,7 +15,6 @@
 #include "tResourceManager.h"
 #include "tString.h"
 
-#ifndef LIBXML_HTTP_ENABLED
 #ifdef LIBCURL_PROTOCOL_HTTP
 #include <curl/curl.h>
 
@@ -63,8 +62,6 @@ public:
         return size * nmemb;
     }
 };
-
-#endif
 #endif
 
 // server determined resource repository
@@ -77,34 +74,6 @@ static tSettingItem<tString> conf_res_repo("RESOURCE_REPOSITORY_CLIENT", tResour
 
 tResourceManager::Result tResourceManager::FetchURI(const char* URI, std::ostream& o)
 {
-#ifdef LIBXML_HTTP_ENABLED
-    {
-        void* ctxt = NULL;
-        int len, rc;
-
-        ctxt = xmlNanoHTTPOpen(URI, NULL);
-        if (ctxt == NULL)
-        {
-            con << tOutput("$resource_fetcherror_noconnect", URI);
-            return ERROR_Uri;
-        }
-
-        if ((rc = xmlNanoHTTPReturnCode(ctxt)) != 200)
-        {
-            con << tOutput(rc == 404 ? "$resource_fetcherror_404" : "$resource_fetcherror", rc);
-            return static_cast<tResourceManager::Result>(rc);
-        }
-
-        // xmlNanoHTTPFetchContent( ctxt, &buf, &len );
-        char buf[10000];
-        while ((len = xmlNanoHTTPRead(ctxt, buf, sizeof(buf))) > 0)
-        {
-            o.write(buf, len);
-        }
-
-        xmlNanoHTTPClose(ctxt);
-    }
-#else
 #ifdef LIBCURL_PROTOCOL_HTTP
     {
         tCurlLocal handle;
@@ -151,8 +120,36 @@ tResourceManager::Result tResourceManager::FetchURI(const char* URI, std::ostrea
         curl_easy_cleanup(handle);
     }
 #else
-    #error libcurl or libxml's nanohttp required; configure should have told you. Please file a bug.
-    return ERROR_UNKNOWN;
+#ifdef LIBXML_HTTP_ENABLED
+    {
+        void* ctxt = NULL;
+        int len, rc;
+
+        ctxt = xmlNanoHTTPOpen(URI, NULL);
+        if (ctxt == NULL)
+        {
+            con << tOutput("$resource_fetcherror_noconnect", URI);
+            return ERROR_Uri;
+        }
+
+        if ((rc = xmlNanoHTTPReturnCode(ctxt)) != 200)
+        {
+            con << tOutput(rc == 404 ? "$resource_fetcherror_404" : "$resource_fetcherror", rc);
+            return static_cast<tResourceManager::Result>(rc);
+        }
+
+        // xmlNanoHTTPFetchContent( ctxt, &buf, &len );
+        char buf[10000];
+        while ((len = xmlNanoHTTPRead(ctxt, buf, sizeof(buf))) > 0)
+        {
+            o.write(buf, len);
+        }
+
+        xmlNanoHTTPClose(ctxt);
+    }
+#else
+#error libcurl or libxml nanohttp required; configure should have told you. Please file a bug.
+    return Result::ERROR_Unknown;
 #endif
 #endif
     con << "OK\n";
