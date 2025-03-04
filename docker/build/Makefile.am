@@ -98,7 +98,7 @@ STEAM_PACKAGE_NAME=retrocycles
 STEAM_PACKAGE_TITLE=Retrocycles
 
 # configurations for lean builds not supposed to be installed
-CONFIGURE_ARGUMENTS:=--disable-uninstall --disable-restoreold --enable-etc --enable-automakedefaults --disable-useradd --disable-sysinstall --disable-initscripts --enable-curl
+CONFIGURE_ARGUMENTS:=--disable-uninstall --disable-restoreold --enable-etc --enable-automakedefaults --disable-useradd --disable-sysinstall --disable-initscripts --disable-curl
 CONFIGURE_ARGUMENTS_SERVER:=--disable-glout --enable-armathentication
 
 # other directories
