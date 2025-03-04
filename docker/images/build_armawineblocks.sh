@@ -25,7 +25,7 @@ chmod +x ${bd}/download/winetricks || exit 1
 # check whether there were actual, relevant changes
 DIGEST=${wd}/armawineblocks.digest
 test -r ${wd}/armawineblocks.digest.local && DIGEST=${wd}/armawineblocks.digest.local
-test x`find ${bd} -newer ${DIGEST} -type f` == x && exit 0
+test "x`find ${bd} -newer ${DIGEST} -type f`" == "x" && exit 0
 echo "Actually changed files, need rebuild:"
 find ${bd} -newer ${DIGEST} -type f
 #touch ${wd}/armawineblocks.digest.local
@@ -33,8 +33,8 @@ find ${bd} -newer ${DIGEST} -type f
 
 # start X server suitable for docker (https://github.com/mviereck/x11docker/wiki/docker-build-with-interactive-GUI)
 x11docker --xephyr --printenv --xoverip --no-auth --display=30 | grep --line-buffered DISPLAY > ${sd}/.cache/display.txt &
-sleep 2
-#cat ${sd}/.cache/display.txt
+sleep 5
+cat ${sd}/.cache/display.txt
 # have the build process connect to it
 ${sd}/build_image.sh ${BASE_32} armawineblocks${EPIC} "${bd}" --network=host --build-arg `sed < ${sd}/.cache/display.txt -e "s/ / --build-arg /g"` || exit 1
 

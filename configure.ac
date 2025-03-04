@@ -136,6 +136,17 @@ AC_ARG_ENABLE(glout,
        *) AC_MSG_ERROR(bad value ${enableval} for --enable-glout) ;;
      esac],)
 
+use_curl=auto
+AC_ARG_ENABLE(curl,
+     AC_HELP_STRING([--enable-curl],
+        [Use libcurl for http requests]),
+     [case "${enableval}" in
+       yes) use_curl=true ;;
+       no)  use_curl=false ;;
+       *) AC_MSG_ERROR(bad value ${enableval} for --enable-main) ;;
+     esac],[use_curl=auto])
+
+
 # consistency check of the three build flags	 
 test x$armamain = xfalse && build_dedicated=false build_regular=false
 test x$build_dedicated = xfalse && test x$build_regular = xfalse && armamain=false
@@ -609,6 +620,28 @@ if test x$armamain = xtrue; then
   CPPFLAGS="$CPPFLAGS $XML2_CFLAGS"
   LIBS="$LIBS $XML2_LIBS"
   AC_DEFINE(HAVE_LIBXML2, 1, [Define if you have the libxml2 library])
+
+  AC_CHECK_DECL(LIBXML_HTTP_ENABLED,,
+               dnl no nanoHTTP, auto-enable curl (if not explicitly disabled)
+               if test x$use_curl = xfalse; then
+                   AC_MSG_ERROR([[libxml2 does not have the http client compiled in. Curl replacement needed, do not disable it.]])
+               else
+                   use_curl=true
+               fi
+               ,
+               [[#include "libxml/nanohttp.h"]])
+
+dnl *************************************************
+dnl         curl
+dnl *************************************************
+
+if test x$use_curl = xtrue; then
+   LIBCURL_CHECK_CONFIG(,,
+   CPPFLAGS="$CPPFLAGS $LIBCURL_CPPFLAGS"
+   LIBS=$"$LIBS $LIBCURL",
+   AC_MSG_ERROR([libcurl not found. Either provide it or disable it (with `configure --disable-curl`)])
+   )
+fi
 
 dnl *************************************************
 dnl         Armathentication Threading
