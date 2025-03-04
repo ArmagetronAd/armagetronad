@@ -48,6 +48,8 @@ function copylib()
     done
 }
 
+ldd ${APPDIR}/usr/bin/${PACKAGE}
+
 # dependency scrapyard
 # libstdc++ \
 
@@ -86,14 +88,40 @@ libvorbisenc \
 libwebp \
 libwrap \
 libxml2 \
+libcurl \
+libidn \
+librtmp \
+libssl \
+libcrypto \
+libgssapi_krb5 \
+libkrb5 \
+libk5crypto \
+libkrb5support \
+liblber-2.4 \
+libldap_r-2.4 \
+libhogweed \
+libnettle \
+libsasl2 \
+libgssapi \
+libkeyutils \
+libheimntlm \
+libheimbase \
+libasn1 \
+libhcrypto \
+libroken \
+libwind \
+libhx509 \
+libsqlite3 \
 libZThread-[0-9\.]* \
 ; do
   echo "Checking for library ${library}...."
-  baselib=$(ldd ${APPDIR}/usr/bin/${PACKAGE} | grep "${library}\.so[0-9\.]*" | sed -e "s,.*=> ,," -e "s, (.*,,")
-  if test -z "${baselib}"; then
+  baselibs=$(ldd ${APPDIR}/usr/bin/${PACKAGE} | grep "${library}\.so[0-9\.]*" | sed -e "s,.*=> ,," -e "s, (.*,,")
+  if test -z "${baselibs}"; then
     echo "Not linked."
   else
-    copylib ${baselib}
+    for l in ${baselibs}; do
+        copylib $l
+    done
   fi
 done
 
