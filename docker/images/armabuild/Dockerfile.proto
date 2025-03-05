@@ -38,7 +38,8 @@ make \
 libasound2-dev \
 #libboost-dev \
 #libboost-thread-dev \
-libcurl3-dev \
+# libssl-dev \
+libpsl-dev \
 libfile-mimeinfo-perl \
 #libfreetype6-dev \
 #libftgl-dev \
@@ -96,11 +97,16 @@ FROM armabuild_base as armabuild
 #COPY build_libsdl_image.sh .
 #RUN ./build_libsdl_image.sh SDL_image-1.2.12 && rm ./build_libsdl_image.sh
 
-# for production: do all manual builds in one go, set up builder user
+# install our version of libcurl
+#COPY build_libcurl.sh .
+#RUN ./build_libcurl.sh && rm ./build_libcurl.sh
+
+## for production: do all manual builds in one go, set up builder user
 COPY build*.sh *.patch ./
 RUN ./build_libxml2.sh libxml2-2.9.10 && rm ./build_libxml2.sh && \
     ./build_libsdl.sh SDL-1.2.15 && rm ./build_libsdl.sh && \
     ./build_libsdl_image.sh SDL_image-1.2.12 && rm ./build_libsdl_image.sh && \
+    ./build_libcurl.sh && rm ./build_libcurl.sh && \
     useradd builder && mkdir -p /home/builder && chown builder:builder /home/builder # && chmod 777 /home/builder
 
 # set up rest of builder user
