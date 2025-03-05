@@ -89,6 +89,7 @@ libwebp \
 libwrap \
 libxml2 \
 libcurl \
+libpsl \
 libidn \
 librtmp \
 libssl \
