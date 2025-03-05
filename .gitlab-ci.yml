@@ -20,7 +20,7 @@ stages:
   - deploy
 
 default:
-  image: $CI_REGISTRY_IMAGE/armaroot_64@sha256:857a30d727a10d4a80ed8fb8a9dbf635b59b88f9425a6470e900c926d099e311
+  image: $CI_REGISTRY_IMAGE/armaroot_64@sha256:1e1e821f59bd0991bb606e0f39283a990c96b1d60e0e46db4cade78fac6c72c3
   interruptible: true
   retry:
     max: 1
@@ -78,37 +78,37 @@ default:
 # keep image dependencies here
 .merge_request_64:
   extends: .merge_request
-  image: $CI_REGISTRY_IMAGE/armabuild_64@sha256:41dc899bf232ac374cdfc69ec527be4e98a97c151683af3477a18c4b9c927271
+  image: $CI_REGISTRY_IMAGE/armabuild_64@sha256:4abcb478d831be79ff300c47acaff6fa40e85d546ab28bebf63f2f627bb5d6bc
 
 .merge_request_32:
   extends: .merge_request
-  image: $CI_REGISTRY_IMAGE/armabuild_32@sha256:ad30393d46ab43602f7316196ed5c07d17b5edf1dafb2faed7f321f90bb0b90e
+  image: $CI_REGISTRY_IMAGE/armabuild_32@sha256:70e499d5cb987275d48dd8cefb9830a96e17a563b60033b680ad064548e57768
 
 .project_runner_64:
   extends: .project_runner
-  image: $CI_REGISTRY_IMAGE/armabuild_64@sha256:41dc899bf232ac374cdfc69ec527be4e98a97c151683af3477a18c4b9c927271
+  image: $CI_REGISTRY_IMAGE/armabuild_64@sha256:4abcb478d831be79ff300c47acaff6fa40e85d546ab28bebf63f2f627bb5d6bc
 
 .project_runner_steam_64:
   extends: .project_runner
-  image: $CI_REGISTRY_IMAGE/armasteam_64@sha256:8aa5766c670bcfe224c8c090b94904daf8849d945a500f75d108a8147ec83eb4
+  image: $CI_REGISTRY_IMAGE/armasteam_64@sha256:7eafb6a2e0ac97e492dd57a34fa451b49ac5d3d8bcf254deab6e598368321226
 
 .project_runner_32:
   extends: .project_runner
-  image: $CI_REGISTRY_IMAGE/armabuild_32@sha256:ad30393d46ab43602f7316196ed5c07d17b5edf1dafb2faed7f321f90bb0b90e
+  image: $CI_REGISTRY_IMAGE/armabuild_32@sha256:70e499d5cb987275d48dd8cefb9830a96e17a563b60033b680ad064548e57768
 
 .project_runner_wine:
   extends: .project_runner
-  image: $CI_REGISTRY_IMAGE/armawineblocks@sha256:edf75b56560b2fc87fde9ee0343332530c37d1a808be10d61ffa8fde716f0332
+  image: $CI_REGISTRY_IMAGE/armawineblocks@sha256:27c5ca729a9634fa5193aba7d7b91db2f65e4f3b75769f8db3443cee9477b2e9
 
 .project_runner_debian:
   extends: .project_runner
-  image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:c6c2f88d5a8a8d0e6d30f93146e2fa82543de652fd2c538e0d56b7e8a3cfe649
+  image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:b82e2b14363846ef7c7b30aa79cf9f8a14b6d31097711b4efbf139456b81ab10
 
 
 # template rule for deployment jobs
 .deploy_base:
   retry: 2 # deployments can fail temporarily for a million reasons
-  image: $CI_REGISTRY_IMAGE/armadeploy_64@sha256:4850f8afac446ac26a5e32d357e41e525fc6a14878703850afeeb16e8b87e51e
+  image: $CI_REGISTRY_IMAGE/armadeploy_64@sha256:5a0a06604bad8dbb3847c91692d08f3aa2b603313496747817b9233437ec6508
   interruptible: false
   # resource_group: deployment # only ever run one deployment job at a time
   tags:
@@ -137,7 +137,7 @@ default:
 
 .deploy_staged_ppa:
   extends: .deploy_staged
-  image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:c6c2f88d5a8a8d0e6d30f93146e2fa82543de652fd2c538e0d56b7e8a3cfe649
+  image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:b82e2b14363846ef7c7b30aa79cf9f8a14b6d31097711b4efbf139456b81ab10
 
 .deploy_final:
   extends: .deploy_base
@@ -156,11 +156,11 @@ default:
 
 .deploy_final_ppa:
   extends: .deploy_final
-  image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:c6c2f88d5a8a8d0e6d30f93146e2fa82543de652fd2c538e0d56b7e8a3cfe649
+  image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:b82e2b14363846ef7c7b30aa79cf9f8a14b6d31097711b4efbf139456b81ab10
 
 .deploy_final_steam:
   extends: .deploy_final
-  image: $CI_REGISTRY_IMAGE/steamcmd@sha256:92075639e85e21db9ddbdd5195acdb07c6ca9551e2eca4b7e3176019493da545
+  image: $CI_REGISTRY_IMAGE/steamcmd@sha256:7e1a80103f0f8d59bf4905d3beebeb91e247bede90d865b878b2315a1d9bb48b
 
 # only run on protected branches or merge requests
 workflow:
