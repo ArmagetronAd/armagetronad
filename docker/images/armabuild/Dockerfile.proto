@@ -194,6 +194,7 @@ RUN apt-get -y update && DEBIAN_FRONTEND=noninteractive apt-get install \
 0install-core \
 python3-launchpadlib \
 lptools \
+rsync \
 -y
 
 FROM armadeploy_base as armadeploy
