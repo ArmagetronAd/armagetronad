@@ -16,7 +16,7 @@ set -x
 dd=`dirname $0`
 
 trust_gitlab || exit $?
-git clone ${FP_GIT} flatpak || exit $?
+git clone --recursive ${FP_GIT} flatpak || exit $?
 
 BRANCH_BASE=${ZI_SERIES}
 
