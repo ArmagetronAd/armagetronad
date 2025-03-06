@@ -10,11 +10,11 @@ test -r /usr/lib/libcurl.* && exit 0
 test -r /usr/lib/x86_64-linux-gnu/libcurl.* && exit 0
 
 # fetch
-curl https://curl.se/download/${archive}.tar.bz2 -o ${archive}.tar.gz || exit $?
+curl https://curl.se/download/${archive}.tar.bz2 -o ${archive}.tar.bz2 || exit $?
 
 # unpack, configure, build, install, cleanup
-tar -xjf ${archive}.tar.gz
-rm ${archive}.tar.gz
+tar -xjf ${archive}.tar.bz2
+rm ${archive}.tar.bz2
 cd ${archive}
 
 # ./configure --help; exit 1
@@ -44,7 +44,7 @@ CFLAGS=-Os ./configure --prefix=/usr/ --program-prefix=nossl- \
 	--disable-qmtt \
 	--disable-manual \
 	--disable-docs \
-	--without-psl \
+	--without-libpsl \
 	--disable-curl \
 	|| exit $?
 

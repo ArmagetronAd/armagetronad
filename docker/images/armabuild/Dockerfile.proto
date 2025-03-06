@@ -39,7 +39,7 @@ libasound2-dev \
 #libboost-dev \
 #libboost-thread-dev \
 # libssl-dev \
-libpsl-dev \
+# libpsl-dev \
 libfile-mimeinfo-perl \
 #libfreetype6-dev \
 #libftgl-dev \
