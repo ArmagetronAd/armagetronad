@@ -90,7 +90,8 @@ libwrap \
 libxml2 \
 libcurl \
 libpsl \
-libcuuc \
+libicuuc \
+libicudata \
 libidn \
 librtmp \
 libssl \
