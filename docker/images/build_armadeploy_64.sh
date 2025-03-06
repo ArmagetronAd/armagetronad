@@ -9,3 +9,5 @@ ${wd}/build_armabuild.sh amd64/ubuntu:20.04 armadeploy_64 --target armadeploy
 # base64.encodestring was removed in (with good reason), but
 # 0publish still depends on it.
 
+# from the other end, the current version of butler from itch.io
+# no longer works in Ubuntu 16.04.
