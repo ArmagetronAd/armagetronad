@@ -25,6 +25,7 @@ pushd flatpak || exit $?
 # go back to last human edit
 git checkout ${BRANCH_BASE}_${VERSION_SERIES}_ci || exit $?
 git reset origin/${BRANCH_BASE}_${VERSION_SERIES} --hard || exit $?
+git submodule update --checkout || exit $?
 
 FILENAME=${PACKAGE_NAME}-${PACKAGE_VERSION}.tbz
 
@@ -45,6 +46,8 @@ fi
 git commit . -m "Update to version ${PACKAGE_VERSION}" || exit $?
 if ! test ${STAGING} == true; then
     git push --force || exit $?
+else
+	git log -p -2
 fi
 popd
 
