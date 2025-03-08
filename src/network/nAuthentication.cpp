@@ -586,7 +586,7 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
         std::stringstream answer;
         int rc = nKrawall::FetchURL( fullAuthority, "?query=methods", answer );
 
-        if ( rc == -1 )
+        if (rc < 0)
         {
             return ReportAuthorityError( tOutput( "$login_error_invalidurl_notfound", authority ) );
         }
@@ -633,7 +633,7 @@ bool nLoginProcess::FetchInfoFromAuthorityRemote()
         
         if ( rc != 200 )
         {
-            if ( rc == -1 )
+            if (rc < 0)
             {
                 return ReportAuthorityError( tOutput( "$login_error_invalidurl_notfound", authority ) );
             }

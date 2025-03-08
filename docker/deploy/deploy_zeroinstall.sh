@@ -31,7 +31,7 @@ fi
 
 # remove all signatures
 for f in ${CHANGED}; do
-     0launch -o -c 'http://0install.net/2006/interfaces/0publish' $f -u || true
+     0launch -o -c 'https://apps.0install.net/0install/0publish.xml' $f -u || true
 done
 
 # commit and push
@@ -46,9 +46,9 @@ fi
 CHANGED=`ls *.xml`
 CHANGED_XML="${CHANGED}"
 
-# sign XML files
+# sign XML files:
 for f in ${CHANGED_XML}; do
-     0launch -o -c 'http://0install.net/2006/interfaces/0publish' $f -x || exit $?
+     0launch -o -c 'https://apps.0install.net/0install/0publish.xml' $f -x || exit $?
 done
 
 # DEPLOY

@@ -98,7 +98,7 @@ STEAM_PACKAGE_NAME=retrocycles
 STEAM_PACKAGE_TITLE=Retrocycles
 
 # configurations for lean builds not supposed to be installed
-CONFIGURE_ARGUMENTS:=--disable-uninstall --disable-restoreold --enable-etc --enable-automakedefaults --disable-useradd --disable-sysinstall --disable-initscripts
+CONFIGURE_ARGUMENTS:=--disable-uninstall --disable-restoreold --enable-etc --enable-automakedefaults --disable-useradd --disable-sysinstall --disable-initscripts --enable-curl
 CONFIGURE_ARGUMENTS_SERVER:=--disable-glout --enable-armathentication
 
 # other directories
@@ -854,7 +854,9 @@ deploy_fp: result.deploy_fp
 deploy_download: result.deploy_download
 deploy_itch: result.deploy_itch
 
+# current list of suppored releases is here: http://www.releases.ubuntu.com/
 deploy_ppa: \
+deploy_ppa_plucky \
 deploy_ppa_oracular \
 deploy_ppa_noble \
 deploy_ppa_jammy \

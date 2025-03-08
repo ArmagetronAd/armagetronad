@@ -169,7 +169,7 @@ default:
 
 .deploy_final_steam:
   extends: .deploy_final
-  image: $CI_REGISTRY_IMAGE/steamcmd@sha256:a902aefc0718d2fc32101c09d6fca5202d882e68e821ae232423014abba6bc3d
+  image: $CI_REGISTRY_IMAGE/steamcmd@sha256:a00bbadd5a94d27af0c48a77472c62cc5b73bdc538f55ce4dab69067c1eec0bd
 
 # only run on protected branches or merge requests
 workflow:

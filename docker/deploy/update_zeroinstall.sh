@@ -76,7 +76,7 @@ function update_stream(){
     STAB=""
     test -z "${STABILITY}" || STAB="--set-stability=${STABILITY}"
 
-    0launch -o -c 'http://0install.net/2006/interfaces/0publish' \
+    0launch -o -c 'https://apps.0install.net/0install/0publish.xml' \
 	    ${XML} \
 	    --add-version ${ZEROVERSION} \
 	    --archive-url=${URI} \
@@ -85,7 +85,7 @@ function update_stream(){
 	    --set-main="${MAIN}" \
 	    --set-released=today -c -x || exit $?
 
-    0launch -o -c 'http://0install.net/2007/interfaces/FeedLint.xml' -o \
+    0launch -o -c 'https://apps.0install.net/0install/feedlint.xml' -o \
 	    ${XML} || exit $?
 }
 

@@ -40,6 +40,8 @@ libasound2-dev \
 bison \
 libboost-dev \
 libboost-thread-dev \
+# libssl-dev \
+# libpsl-dev \
 libfile-mimeinfo-perl \
 libfreetype6-dev \
 libftgl-dev \
@@ -121,12 +123,17 @@ FROM armabuild_base as armabuild
 #COPY build_libsdl_mixer.sh .
 #RUN ./build_libsdl_mixer.sh SDL2_mixer-2.0.1 && rm ./build_libsdl_mixer.sh
 
-# for production: do all manual builds in one go, set up builder user
+# install our version of libcurl
+#COPY build_libcurl.sh .
+#RUN ./build_libcurl.sh && rm ./build_libcurl.sh
+
+## for production: do all manual builds in one go, set up builder user
 COPY build*.sh *.patch ./
 RUN ./build_libxml2.sh libxml2-2.9.10 && rm ./build_libxml2.sh && \
     ./build_libsdl.sh SDL2-2.0.4 && rm ./build_libsdl.sh && \
     ./build_libsdl_image.sh SDL2_image-2.0.1 && rm ./build_libsdl_image.sh && \
     ./build_libsdl_mixer.sh SDL2_mixer-2.0.1 && rm ./build_libsdl_mixer.sh && \
+    ./build_libcurl.sh && rm ./build_libcurl.sh && \
     useradd builder && mkdir -p /home/builder && chown builder:builder /home/builder # && chmod 777 /home/builder
 
 # set up rest of builder user
@@ -219,9 +226,9 @@ zip \
 FROM armabuild_base as armadeploy_base
 RUN apt-get -y update && DEBIAN_FRONTEND=noninteractive apt-get install \
 0install-core \
-python-launchpadlib \
 python3-launchpadlib \
 lptools \
+rsync \
 -y
 
 FROM armadeploy_base as armadeploy
@@ -231,8 +238,8 @@ FROM armadeploy_base as armadeploy
 #USER builder
 # pre-load 0publish and feedlint
 RUN export TERM=linux && \
-yes Y | 0launch -c 'http://0install.net/2006/interfaces/0publish' --version && \
-yes Y | 0launch -c 'http://0install.net/2007/interfaces/FeedLint.xml' --version && \
+yes Y | 0launch -c 'https://apps.0install.net/0install/0publish.xml' --version && \
+yes Y | 0launch -c 'https://apps.0install.net/0install/feedlint.xml' --version && \
 git config --global push.default simple
 
 # ###########################
