@@ -38,9 +38,6 @@ dnl check whether m4 is available for documentation processing
 AC_CHECK_PROG(HAVE_M4,m4,true,false)
 AM_CONDITIONAL(HAVE_M4, test $HAVE_M4 = true)
 
-dnl load conan settings if they exist
-test -r $(dirname $0)/conanautotoolstoolchain.sh && source $(dirname $0)/conanautotoolstoolchain.sh 
-
 dnl dirty trick to allow verbatim output to Makefile.in -> Makefile
 dnl source: http://gnu-automake.7480.n7.nabble.com/ifdef-endif-issue-td2662.html
 AC_SUBST([protect], [""])
@@ -614,6 +611,9 @@ esac
 
 AC_CACHE_SAVE
 
+dnl load conan settings if they exist
+test -r $(dirname $0)/conanautotoolstoolchain.sh && source $(dirname $0)/conanautotoolstoolchain.sh
+
 dnl *************************************************
 dnl         libxml2
 dnl *************************************************
@@ -639,11 +639,12 @@ dnl         curl
 dnl *************************************************
 
 if test x$use_curl = xtrue; then
-   LIBCURL_CHECK_CONFIG(,,
-   CPPFLAGS="$CPPFLAGS $LIBCURL_CPPFLAGS"
-   LIBS=$"$LIBS $LIBCURL",
-   AC_MSG_ERROR([libcurl not found. Either provide it or disable it (with `configure --disable-curl`)])
-   )
+    PKG_CHECK_MODULES([LIBCURL], [libcurl >= 7],
+    AC_DEFINE(LIBCURL_PROTOCOL_HTTP, 1, [Define if you have libcurl and it supports http]) dnl not technically accurate... but we are using that define in the source.
+    CPPFLAGS="$CPPFLAGS $LIBCURL_CFLAGS"
+    LIBS=$"$LIBS $LIBCURL_LIBS",
+    AC_MSG_ERROR([libcurl not found. Either provide it or disable it (with `configure --disable-curl`)])
+    )
 fi
 
 dnl *************************************************

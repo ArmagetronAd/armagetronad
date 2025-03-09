@@ -4,7 +4,7 @@ from conan import ConanFile
 # conan install . --build=missing 
 
 class Pkg(ConanFile):
-    generators = "AutotoolsToolchain", "PkgConfigDeps"
+    generators = "AutotoolsToolchain", "PkgConfigDeps", "VirtualRunEnv"
 
     requires = "libcurl/[>=7]"
 
@@ -20,6 +20,8 @@ class Pkg(ConanFile):
         "libcurl/*:with_pop3": False,
         "libcurl/*:with_imap": False,
         "libcurl/*:with_smtp": False,
-        "libcurl/*:with_gopher": False
+        "libcurl/*:with_gopher": False,
+        "libcurl/*:shared": False,
+        "libcurl/*:static": True
     }
 
