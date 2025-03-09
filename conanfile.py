@@ -26,7 +26,9 @@ class Pkg(ConanFile):
         "libcurl/*:with_imap": False,
         "libcurl/*:with_smtp": False,
         "libcurl/*:with_gopher": False,
-        "libcurl/*:shared": False,
-        "libcurl/*:static": True
+        "libcurl/*:shared": True,
+        "libcurl/*:static": False,
+        "libxml2/*:iconv": False,
+        "libxml2/*:shared": True
     }
 
