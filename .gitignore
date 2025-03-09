@@ -119,3 +119,7 @@ src/nTrueVersion.h
 .changetag
 fingerprint
 wget-log*
+
+*conan*
+!conanfile.py
+*.pc
