@@ -47,6 +47,19 @@ class tResource;
  */
 class tResourceManager {
 public:
+    enum Result
+    {
+        RESULT_Ok = 200,       // all fine
+        ERROR_Unknown = -1,    // unknown error
+        ERROR_Uri = -2,        // URI not well formed
+        ERROR_FileAccess = -3, // target file not writable
+        ERROR_NotFound = 404,  // URI not found
+        ERROR_NoAccess = 401   // Access denied
+    };
+
+    // fetches an URI and stores it in the provided stream
+    static Result FetchURI(const char* URI, std::ostream& o);
+
     //! When finished, this will be the preferred way to load a resource.
     /**
             @param file the full path to the file
