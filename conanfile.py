@@ -4,9 +4,14 @@ from conan import ConanFile
 # conan install . --build=missing 
 
 class Pkg(ConanFile):
-    generators = "AutotoolsToolchain", "PkgConfigDeps", "VirtualRunEnv"
+    generators = \
+            "AutotoolsToolchain", \
+            "PkgConfigDeps", \
+            "VirtualRunEnv"
 
-    requires = "libcurl/[>=7]"
+    requires = \
+            "libcurl/[>=7]", \
+            "libxml2/[>=2.9.10]"
 
     default_options = {
         "libcurl/*:with_ssl": False,
