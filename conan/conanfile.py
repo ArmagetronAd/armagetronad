@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.tools.files import copy
+from conan.tools.env import VirtualRunEnv
 import os
 
 # activate with
@@ -8,8 +9,7 @@ import os
 class Pkg(ConanFile):
     generators = \
             "AutotoolsToolchain", \
-            "PkgConfigDeps", \
-            "VirtualRunEnv"
+            "PkgConfigDeps"
 
     requires = \
             "libcurl/[>=7]", \
@@ -37,9 +37,16 @@ class Pkg(ConanFile):
     keep_imports = True
 
     def generate(self):
+        # copy libraries
+        libs_path = os.path.join(self.build_folder, "lib")
         for dep_name, dep in self.dependencies.items():
             dirs = dep.cpp_info.libdirs + dep.cpp_info.bindirs
             for dir in dirs:
                 for extension in [ "*.so.*", "*.dylib*", "*.dll" ]:
-                    copy(self, extension, dir, os.path.join(self.build_folder, "lib"))
+                    copy(self, extension, dir, libs_path)
+
+        # modiy LD_LIBRARY_PATH
+        run_env = VirtualRunEnv(self)
+        run_env.environment().append_path("LD_LIBRARY_PATH", libs_path)
+        run_env.generate()
 
