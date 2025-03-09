@@ -612,7 +612,7 @@ esac
 AC_CACHE_SAVE
 
 dnl load conan settings if they exist
-test -r $(dirname $0)/conanautotoolstoolchain.sh && source $(dirname $0)/conanautotoolstoolchain.sh
+test -r $(dirname $0)/conan/conanautotoolstoolchain.sh && source $(dirname $0)/conan/conanautotoolstoolchain.sh
 
 dnl *************************************************
 dnl         libxml2
