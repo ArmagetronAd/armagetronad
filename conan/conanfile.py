@@ -1,4 +1,6 @@
 from conan import ConanFile
+from conan.tools.files import copy
+import os
 
 # activate with
 # conan install . --build=missing 
@@ -31,4 +33,13 @@ class Pkg(ConanFile):
         "libxml2/*:iconv": False,
         "libxml2/*:shared": True
     }
+
+    keep_imports = True
+
+    def generate(self):
+        for dep_name, dep in self.dependencies.items():
+            dirs = dep.cpp_info.libdirs + dep.cpp_info.bindirs
+            for dir in dirs:
+                for extension in [ "*.so.*", "*.dylib*", "*.dll" ]:
+                    copy(self, extension, dir, os.path.join(self.build_folder, "lib"))
 
