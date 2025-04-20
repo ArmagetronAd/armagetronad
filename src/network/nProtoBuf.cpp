@@ -517,9 +517,9 @@ nMessageStreamer & nProtoBufDescriptorBase::GetDefaultStreamer()
     return streamer;
 }
 
-std::string const & nProtoBufDescriptorBase::DetermineName( nProtoBuf const & prototype )
+std::string nProtoBufDescriptorBase::DetermineName(nProtoBuf const& prototype)
 {
-    return GetDescriptor(prototype)->full_name();
+    return std::string(GetDescriptor(prototype)->full_name());
 }
 
 nProtoBufDescriptorBase::DescriptorMap const & nProtoBufDescriptorBase::GetDescriptorsByName()

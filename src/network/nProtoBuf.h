@@ -355,7 +355,7 @@ public:
 
     nMessageStreamer & GetDefaultStreamer();
 
-    static std::string const & DetermineName( nProtoBuf const & prototype );
+    static std::string DetermineName(nProtoBuf const& prototype);
 
     //! dumb streaming to message
     inline void StreamTo( nProtoBuf const & in, nStreamMessage & out, StreamSections sections ) const
