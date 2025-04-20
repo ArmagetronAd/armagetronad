@@ -68,8 +68,10 @@ public:
     typedef BASE::value_type CHAR;      //!< the character class
 
     tString();                         //!< default constructor
-    tString(const BASE &);             //!< pseudo copy constructor
-    tString(const tString &);          //!< copy constructor
+    tString(BASE const&);              //!< pseudo copy constructor
+    tString(BASE&&);                   //!< pseudo move constructor
+    tString(tString const&);           //!< copy constructor
+    tString(tString&&);                //!< move constructor
     explicit tString(const CHAR *);    //!< conversion from C string
     template<typename T>
     tString(T begin, T end) : string(begin,end) {} //!< initialisation by iterators
