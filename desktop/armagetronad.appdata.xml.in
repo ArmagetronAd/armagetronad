@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>org.armagetronad.@progname@.desktop</id>
+  <id>org.armagetronad.@progname@</id>
   
   <name>@progtitle@</name>
   <summary>3D Lightcycle Game</summary>
