@@ -29,11 +29,11 @@ git submodule update --checkout || exit $?
 
 FILENAME=${PACKAGE_NAME}-${PACKAGE_VERSION}.tbz
 
-# scary SED patch in new package source
+# mildly scary SED patch in new package source
 SHA=`sha256sum ../upload/${FILENAME} | sed -e "s, .*,,"`
-sed -i org.armagetronad.ArmagetronAdvanced.json -e \
-"s~\\\"url\\\":.*armagetronad.*~\\\"url\\\": \\\"${DOWNLOAD_URI_BASE}${FILENAME}\\\",~" -e \
-"s~\\\"sha256\\\":.*~\\\"sha256\\\": \\\"${SHA}\\\"~" || exit $?
+sed -i org.armagetronad.ArmagetronAdvanced.yml -e \
+"s~url:.*armagetronad.*~url: ${DOWNLOAD_URI_BASE}${FILENAME}~" -e \
+"s~sha256:.*~sha256: ${SHA}~" || exit $?
 git diff
 
 CHANGED=`git status --short -uno | sed -e "s/^ . //"`
