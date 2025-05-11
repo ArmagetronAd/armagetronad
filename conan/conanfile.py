@@ -30,6 +30,10 @@ class Pkg(ConanFile):
         "libcurl/*:with_gopher": False,
         "libcurl/*:shared": True,
         "libcurl/*:static": False,
+        "libxml2/*:html": False,
+        "libxml2/*:http": False,
+        "libxml2/*:ftp": False,
+        "libxml2/*:zlib": False,
         "libxml2/*:iconv": False,
         "libxml2/*:shared": True
     }
