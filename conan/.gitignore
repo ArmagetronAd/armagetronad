@@ -1,0 +1,7 @@
+*conan*
+!conanfile.py
+!conan.lock
+*.pc
+bin
+lib
+
