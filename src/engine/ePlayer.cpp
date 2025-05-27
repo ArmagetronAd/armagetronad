@@ -4432,7 +4432,14 @@ void handle_chat( nMessage &m )
                 std::istringstream s(sayStr);
 
                 tString command;
-                s >> command;
+                int i=0;
+                char c=s.get();
+                while( c != ' ' && s.good() && !s.eof() )
+                {
+                    command[i++] = c;
+                    c = s.get();
+                }
+                command[i] = '\0';
 
                 // filter to lowercase
                 tToLower( command );
