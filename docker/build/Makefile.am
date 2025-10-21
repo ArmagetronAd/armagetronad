@@ -843,6 +843,8 @@ deploy_download: result.deploy_download
 deploy_itch: result.deploy_itch
 
 deploy_ppa: \
+deploy_ppa_questing \
+deploy_ppa_plucky \
 deploy_ppa_noble \
 deploy_ppa_mantic \
 deploy_ppa_jammy \
