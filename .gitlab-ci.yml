@@ -423,7 +423,7 @@ deploy_final_external:
 deploy_final_steam:
   extends: .deploy_final_steam
   rules:
-    when: manual
+    - when: manual
   variables:
     TARGET: "deploy_steam"
 
