@@ -36,7 +36,7 @@ if ! curl -k -L -o butler.zip https://broth.itch.ovh/butler/linux-amd64/${BUTLER
  sleep 30
  curl -k -L -o butler.zip https://broth.itch.ovh/butler/linux-amd64/${BUTLER_VERSION}/archive/default || exit $?
 fi
-unzip butler.zip || exit $?
+yes | unzip butler.zip || exit $?
 rm -f butler.zip || exit $?
 chmod +x butler || exit $?
 ./butler -V || exit $?

@@ -844,8 +844,8 @@ deploy_itch: result.deploy_itch
 
 # current list of suppored releases is here: http://www.releases.ubuntu.com/
 deploy_ppa: \
+deploy_ppa_questing \
 deploy_ppa_plucky \
-deploy_ppa_oracular \
 deploy_ppa_noble \
 deploy_ppa_jammy \
 deploy_ppa_focal \
