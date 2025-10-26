@@ -602,6 +602,19 @@ namespace
 {
 tString sn_configurationSavedInVersion{"0.2.8"};
 tConfItem<tString> sn_configurationSavedInVersionConf("SAVED_IN_VERSION",sn_configurationSavedInVersion);
+
+#ifndef DEDICATED
+struct SDLCleanup
+{
+    // no init, that requires parameters and gives a return 
+    ~SDLCleanup(){SDL_Quit();}
+};
+struct SDLSoundCleanup
+{
+    SDLSoundCleanup(){se_SoundInit();}
+    ~SDLSoundCleanup(){se_SoundExit();}
+};
+#endif
 }
 
 int main(int argc,char **argv){
@@ -794,7 +807,7 @@ int main(int argc,char **argv){
                 SDL_Init(SDL_INIT_VIDEO) < 0 )            {
                 tERR_ERROR("Couldn't initialize SDL: " << SDL_GetError());
             }
-            atexit(SDL_Quit);
+            SDLCleanup sdlCleanup; // call SDL_Quit later
 
             sr_glRendererInit();
 
@@ -808,8 +821,7 @@ int main(int argc,char **argv){
             tConsole::RegisterIdleCallback(&uMenu::IdleInput);
 
 #ifndef NOSOUND
-            se_SoundInit();
-            atexit(se_SoundExit);
+            SDLSoundCleanup soundInitAndCleanup; // se_SoundInit() now, se_SoundExit() later
 #ifndef DEBUG
 #if false // this was added a long time ago to work around problems. Now it occasionally causes startup freezes because
           // SDL does not like it when you init sound, then shut it down right away, some kind of race condition.
@@ -877,8 +889,6 @@ int main(int argc,char **argv){
                 //    cleanup(grid);
                 SDL_QuitSubSystem(SDL_INIT_VIDEO);
             }
-            se_SoundExit();
-            SDL_Quit();
 #else
             sr_glOut=0;
 
