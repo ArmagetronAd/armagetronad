@@ -6,6 +6,8 @@ variables:
   STAGING_ENVIRONMENT: "invalid"
   FINAL_ENVIRONMENT: "invalid"
   PYTHONIOENCODING: "UTF-8"
+  # list of ubuntu releases to supply; stick to LTS ones here, not always up to date, use CI variable instead
+  UBUNTU_RELEASES: "noble jammy"
 
 stages:
   - minimal_build
@@ -383,8 +385,24 @@ deploy_staged_ours:
 
 deploy_staged_ppa:
   extends: .deploy_staged_ppa
-  variables:
-    TARGET: "deploy_ppa"
+  script:
+    # now enter the docker build directory and just invoke make there
+    - cd gitlab_build/docker/build
+    - TARGETS=""
+    - for r in ${UBUNTU_RELEASES}; do TARGETS="${TARGETS} staged_deploy_ppa_$r"; done
+    - make ${TARGETS} -O -j$(nproc) -k
+
+deploy_final_ppa:
+  extends: .deploy_final_ppa
+  script:
+    # check that no later pipeline already started
+    - docker/scripts/obsolete.sh || exit 0
+
+    # now enter the docker build directory and just invoke make there
+    - cd gitlab_build/docker/build
+    - TARGETS=""
+    - for r in ${UBUNTU_RELEASES}; do TARGETS="${TARGETS} unstaged_deploy_ppa_$r"; done
+    - make ${TARGETS} -O -j$(nproc) -k
 
 # does not actually deploy, but tests deployment up to the final 'git push'
 deploy_staged_flatpak:
@@ -413,6 +431,8 @@ deploy_final_external:
 
 deploy_final_steam:
   extends: .deploy_final_steam
+  rules:
+    - when: manual
   variables:
     TARGET: "deploy_steam"
 
@@ -420,11 +440,6 @@ deploy_final_ours:
   extends: .deploy_final
   variables:
     TARGET: "deploy_ours"
-
-deploy_final_ppa:
-  extends: .deploy_final_ppa
-  variables:
-    TARGET: "deploy_ppa"
 
 deploy_gitlab:
   extends: .deploy_final
