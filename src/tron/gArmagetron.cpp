@@ -811,9 +811,14 @@ int main(int argc,char **argv){
             se_SoundInit();
             atexit(se_SoundExit);
 #ifndef DEBUG
+#if false // this was added a long time ago to work around problems. Now it occasionally causes startup freezes because
+          // SDL does not like it when you init sound, then shut it down right away, some kind of race condition.
+          // We leave it around in case we get the same idea again.
+          
             // double sound initialisation for dodgy cards
             se_SoundExit();
             se_SoundInit();
+#endif
 #endif
 #endif
 
