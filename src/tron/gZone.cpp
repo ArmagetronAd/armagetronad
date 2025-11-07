@@ -124,6 +124,9 @@ static tSettingItem<int> sg_zoneSegmentsConf( "ZONE_SEGMENTS", sg_zoneSegments )
 static REAL sg_zoneSegLength = .5;
 static tSettingItem<REAL> sg_zoneSegLengthConf( "ZONE_SEG_LENGTH", sg_zoneSegLength );
 
+static int sg_zoneSegSteps = 1;
+static tSettingItem<int> sg_zoneSegStepsConf( "ZONE_SEG_STEPS", sg_zoneSegSteps );
+
 static REAL sg_zoneBottom = 0.0f;
 static tSettingItem<REAL> sg_zoneBottomConf( "ZONE_BOTTOM", sg_zoneBottom );
 
@@ -2149,23 +2152,32 @@ void gZone::Render( const eCamera * cam )
         for ( int i = sg_zoneSegments - 1; i>=0; --i )
         {
             REAL a = i * 2 * M_PI / REAL( sg_zoneSegments );
-            REAL b = a + seglen;
 
             REAL sa = sin(a);
             REAL ca = cos(a);
-            REAL sb = sin(b);
-            REAL cb = cos(b);
 
-            glVertex3f(sa, ca, 0);
-            glVertex3f(sa, ca, 1);
-            glVertex3f(sb, cb, 1);
-            glVertex3f(sb, cb, 0);
-
-            if ( !useAlpha )
+            for ( int s = 0; s<sg_zoneSegSteps; ++s )
             {
+                REAL b = a + seglen / sg_zoneSegSteps;
+
+                REAL sb = sin(b);
+                REAL cb = cos(b);
+
                 glVertex3f(sa, ca, 0);
-                RenderEnd();
-                BeginLineStrip();
+                glVertex3f(sa, ca, 1);
+                glVertex3f(sb, cb, 1);
+                glVertex3f(sb, cb, 0);
+
+                if ( !useAlpha )
+                {
+                    glVertex3f(sa, ca, 0);
+                    RenderEnd();
+                    BeginLineStrip();
+                }
+                
+                a = b; // next segment step
+                sa = sb;
+                ca = cb;
             }
         }
 
