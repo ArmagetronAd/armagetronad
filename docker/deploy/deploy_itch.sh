@@ -32,9 +32,9 @@ mkdir -p ~/bin || exit $?
 pushd ~/bin || exit $?
 # BUTLER_VERSION=LATEST
 BUTLER_VERSION=15.21.0
-if ! curl -k -L -o butler.zip https://broth.itch.ovh/butler/linux-amd64/${BUTLER_VERSION}/archive/default; then
+if ! curl -k -L -o butler.zip https://broth.itch.zone/butler/linux-amd64/${BUTLER_VERSION}/archive/default; then
  sleep 30
- curl -k -L -o butler.zip https://broth.itch.ovh/butler/linux-amd64/${BUTLER_VERSION}/archive/default || exit $?
+ curl -k -L -o butler.zip https://broth.itch.zone/butler/linux-amd64/${BUTLER_VERSION}/archive/default || exit $?
 fi
 yes | unzip butler.zip || exit $?
 rm -f butler.zip || exit $?
