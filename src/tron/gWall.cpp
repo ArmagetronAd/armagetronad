@@ -960,7 +960,7 @@ void gNetPlayerWall::RenderList(bool list, gWallRenderMode renderMode ){
             if ( bool(cycle_) && gCycle::WallsLength() > 0 )
             {
                 REAL denom = pa-pe;
-                if( denom > 0 )
+                if( denom >= 0 )
                 {
                     continue;
                 }
