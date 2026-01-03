@@ -2391,7 +2391,17 @@ bool gCycleMovement::Timestep( REAL currentTime )
                         eCoord dirTurn = (currentDestination->position - pos);
 
                         // see witch of the alternatives comes closer to the desired direction
-                        turnTo = ( ( fabs( dirMinus * dirTurn ) - .1 * eCoord::F( dirMinus, dirTurn ) )/dirTurn.NormSquared() < ( fabs( dirPlus * dirTurn ) - .1 * eCoord::F( dirPlus, dirTurn ) )/dirTurn.NormSquared() ) ? -1 : +1;
+                        REAL dirTurnNormSquared = dirTurn.NormSquared();
+                        if ( dirTurnNormSquared < EPS )
+                        {
+                            // avoid NaN when destination equals current position; use destination direction instead.
+                            eCoord dirRef = currentDestination->direction;
+                            turnTo = ( ( dirMinus - dirRef ).NormSquared() < ( dirPlus - dirRef ).NormSquared() ) ? -1 : +1;
+                        }
+                        else
+                        {
+                            turnTo = ( ( fabs( dirMinus * dirTurn ) - .1 * eCoord::F( dirMinus, dirTurn ) )/dirTurnNormSquared < ( fabs( dirPlus * dirTurn ) - .1 * eCoord::F( dirPlus, dirTurn ) )/dirTurnNormSquared ) ? -1 : +1;
+                        }
                     }
                     else
                     {
