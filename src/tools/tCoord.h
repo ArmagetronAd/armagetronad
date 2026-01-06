@@ -99,9 +99,9 @@ private:
             REAL ta = Tangent(m_reference, a), tb = Tangent(m_reference, b);
 
             //check for 90 degree angles...
-            if(ta == NAN && tb == NAN) return fabs((m_reference-a).NormSquared()) < fabs((m_reference-b).NormSquared());
-            if(ta == NAN) return tb<0;
-            if(tb == NAN) return ta>0;
+            if(std::isnan(ta) && std::isnan(tb)) return fabs((m_reference-a).NormSquared()) < fabs((m_reference-b).NormSquared());
+            if(std::isnan(ta)) return tb<0;
+            if(std::isnan(tb)) return ta>0;
 
             //check for opposite sides
             if(ta>0 && tb<0) return true;
