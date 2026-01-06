@@ -839,7 +839,7 @@ ePoint * eGrid::DrawLine(ePoint *start, const eCoord &end, eWall *w, bool change
             while (run)
             {
                 eHalfEdge *next = run->next->next;
-                tASSERT(next->next = run);
+                tASSERT(next->next == run);
                 next = next->other;
 
                 tASSERT(next->Point() == start);
