@@ -681,7 +681,7 @@ static bool lowlevel_sr_InitDisplay(){
 
     // reinit on color/z depth or resolution change
     if(currentScreensetting.zDepth != lastSuccess.zDepth ||
-       currentScreensetting.colorDepth != lastSuccess.zDepth ||
+       currentScreensetting.colorDepth != lastSuccess.colorDepth ||
        lastHighDPI != highDPI
        )
     {
