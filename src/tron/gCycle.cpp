@@ -1661,7 +1661,7 @@ void gCycle::OnDropTempWall( gPlayerWall * wall, eCoord const & position, eCoord
     tRecorderSync< unsigned short >::Archive( "_ON_DROP_WALL", 8, idrec );
 
     // determine if the grinded wall is current enough
-    bool wallRight = ( currentWall && ( wall->NetWall() == currentWall || wall->NetWall() == currentWall ) );
+    bool wallRight = ( currentWall && ( wall->NetWall() == currentWall || wall->NetWall() == lastWall ) );
 
     // don't drop if we already dropped a short time ago
     if ( wallRight && currentWall->Edge()->Vec().NormSquared() < verletSpeed_ * verletSpeed_ * sg_minDropInterval * sg_minDropInterval )
