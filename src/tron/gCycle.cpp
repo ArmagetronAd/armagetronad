@@ -5515,7 +5515,7 @@ void gCycle::ReadSync( Game::CycleSync const & syncX, nSenderInfo const & sender
         preRubberMalus = 1;
         if( syncX.has_rubber_effectiveness_compressed() )
         {
-            compressZeroOne.Read( syncX.rubber_effectiveness_compressed() );
+            preRubberMalus = compressZeroOne.Read( syncX.rubber_effectiveness_compressed() );
         }
 
         // undo skewing
