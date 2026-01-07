@@ -582,7 +582,6 @@ rTextField & rTextField::StringOutput(const FTGL_CHAR * c, ColorMode colorMode)
             lastIsNewline = false;
             // count number of nonblank characters following
             FTGL_CHAR const * nextSpace = c+1;
-            int wordLen = 0;
             while ( *nextSpace != '\0' && *nextSpace != '\n' && !isblank(*nextSpace) )
             {
                 if (*nextSpace=='0' && my_strnlen(nextSpace, 8)>=8 && nextSpace[1]=='x' && colorMode != COLOR_IGNORE )
@@ -594,7 +593,6 @@ rTextField & rTextField::StringOutput(const FTGL_CHAR * c, ColorMode colorMode)
                 {
                     // count letter
                     nextSpace++;
-                    wordLen++;
                 }
             }
             FTGL_STRING str(c, nextSpace);
