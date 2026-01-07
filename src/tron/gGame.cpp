@@ -3730,7 +3730,6 @@ void gGame::Analysis(REAL time){
     int last_team_alive=-1;
     // int last_alive_and_not_disconnected=-1;
     int humans = 0;
-    int active_humans = 0;
     int ais    = 0;
     REAL deathTime=0;
 
@@ -3755,8 +3754,6 @@ void gGame::Analysis(REAL time){
             for (int j=t->NumPlayers()-1; j>=0; --j)
             {
                 ePlayerNetID* p = t->Player(j);
-                if (p->IsActive())
-                    active_humans++;
 
                 gCycle *g=dynamic_cast<gCycle *>(p->Object());
                 if (g){

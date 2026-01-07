@@ -34,6 +34,8 @@ class uActionPlayer;
 
 #include "tCoord.h"
 
+#include <cmath>
+
 //! special joystick controls for the lightcycles. Simple left-right controls
 // just don't cut it there.
 
