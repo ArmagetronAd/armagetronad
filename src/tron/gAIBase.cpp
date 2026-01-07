@@ -2358,7 +2358,7 @@ bool gAIPlayer::EmergencySurvive( ThinkData & data, int enemyevade, int prefered
 
             // give us a chance to turn around:
             if (frontDanger[SPACELEVEL] * 2 < sideDanger[SPACELEVEL][i])
-                sideDanger[LOOPLEVEL][i] -= sideDanger[SPACELEVEL][i] * 2;
+                sideDanger[LOOPLEVEL][1-i] -= sideDanger[SPACELEVEL][i] * 2;
         }
     }
 
@@ -2469,8 +2469,8 @@ bool gAIPlayer::EmergencySurvive( ThinkData & data, int enemyevade, int prefered
                             bool canAccelerateByTurning =
                                 ( sides[1-i]->Hit() &&
                                   sides[1-i]->distance < Object()->Speed() * delay * 5 &&
-                                  sides[i]->distance > Object()->Speed() * delay &&
-                                  !sides[i]->frontLoop[i].loop) ;
+                                  sides[1-i]->distance > Object()->Speed() * delay &&
+                                  !sides[1-i]->frontLoop[i].loop) ;
 
                             bool ohShit = target->Speed() > Object()->Speed() + sqrt(closest);
 
