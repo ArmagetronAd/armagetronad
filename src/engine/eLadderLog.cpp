@@ -36,6 +36,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "md5.h"
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
