@@ -20,3 +20,6 @@ Changes in AppImage Land: Our AppImage files now are signed and support bandwidt
 
 We now support installation via Flatpak for the 64-bit Linux client. Get the stable versions from [Flathub](https://flathub.org/apps/details/org.armagetronad.ArmagetronAdvanced); [our own repository](https://download.armagetronad.org/docs/flatpak/) has those and also carries the usual test builds.
 
+0.2.9.2.4 adds a tiny initialization fix, sometimes the Linux version would freeze into a nasty state on startup.
+
+That version also adds builds for the current two non-LTS Ubuntu releases, and changes the build script so that we don't have to bump the version for that again.

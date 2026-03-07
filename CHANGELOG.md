@@ -1,4 +1,19 @@
 
+#### Changes since 0.2.9.2.3:
+
+##### Fixed Bugs
+
+ * Startup freeze ([#161](https://gitlab.com/armagetronad/armagetronad/-/issues/161))
+
+##### Other Changes
+
+ * sdl12-compat for macOS (was: Retina resolution support) ([#147](https://gitlab.com/armagetronad/armagetronad/-/issues/147))
+
+##### Contributors
+
+Manuel Moos
+
+
 #### Changes since 0.2.9.1.1:
 
 ##### Fixed Bugs
@@ -73,12 +88,12 @@ Christian Mäder, Manuel Moos
 ##### New Features
 
  * Make AppImage builds fit for registration at AppImageHub ([#17](https://gitlab.com/armagetronad/armagetronad/-/issues/17))
- * Make SIZE_ and SPEED_FACTOR floating point instead of integer ([#20](https://gitlab.com/armagetronad/armagetronad/-/issues/20))
  * Do not show a player's own IP on the client ([#27](https://gitlab.com/armagetronad/armagetronad/-/issues/27))
  * Make --playback optional so recordings can be more easily played back ([#37](https://gitlab.com/armagetronad/armagetronad/-/issues/37))
  * Steam on Windows: Add playback registry keys so .aarec files automatically playback with a doubleclick ([#38](https://gitlab.com/armagetronad/armagetronad/-/issues/38))
  * Make clientside playback more robust ([#56](https://gitlab.com/armagetronad/armagetronad/-/issues/56))
  * user.cfg fine grained upgrade system ([#61](https://gitlab.com/armagetronad/armagetronad/-/issues/61))
+ * Make SIZE_ and SPEED_FACTOR floating point instead of integer ([#20](https://gitlab.com/armagetronad/armagetronad/-/issues/20))
 
 ##### Other Changes
 
