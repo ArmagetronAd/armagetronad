@@ -15,7 +15,9 @@ cp ${APPDIR}/org.armagetronad.${PACKAGE}.desktop ${APPDIR}/usr/share/application
 # add appinfo (noncanonical place, usually it goes to prefix/share/appdata)
 mkdir -p ${APPDIR}/usr/share/metainfo || exit $?
 cp ${APPDIR}/usr/share/games/${PACKAGE}/desktop/armagetronad.appdata.xml ${APPDIR}/usr/share/metainfo/org.armagetronad.${PACKAGE}.appdata.xml || exit $?
-#sed -i -e 's,type="desktop-id">,type="desktop-id">../../../,' ${APPDIR}/usr/share/metainfo/org.armagetronad.${PACKAGE}.appdata.xml || exit $?
+
+# we are dealing with older linters here that require the .desktop extension to the app id
+sed -i -e 's,</id>,.desktop</id>,' ${APPDIR}/usr/share/metainfo/org.armagetronad.${PACKAGE}.appdata.xml || exit $?
 
 # hack Icon
 ICON_NAME=`grep 'Icon=' ${APPDIR}/org.armagetronad.${PACKAGE}.desktop | sed -e 's,Icon=,,'`

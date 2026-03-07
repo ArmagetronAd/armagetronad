@@ -673,6 +673,18 @@ namespace
 {
 tString sn_configurationSavedInVersion{"0.2.8"};
 tConfItem<tString> sn_configurationSavedInVersionConf("SAVED_IN_VERSION",sn_configurationSavedInVersion);
+
+#ifndef DEDICATED
+struct SDLCleanup
+{
+    // no init, that requires parameters and gives a return
+    ~SDLCleanup(){SDL_Quit();}
+};
+struct SDLSoundCleanup
+{
+    ~SDLSoundCleanup(){eSoundMixer::ShutDown();}
+};
+#endif
 }
 
 int main(int argc,char **argv){
@@ -886,6 +898,8 @@ int main(int argc,char **argv){
             sr_glOut=1;
             //std::cout << "checked mp\n";
 
+            SDLCleanup sdlCleanup; // call SDL_Quit later
+
             sr_glRendererInit();
 
 #if SDL_VERSION_ATLEAST(2,0,0)
@@ -897,6 +911,10 @@ int main(int argc,char **argv){
 
             tConsole::RegisterMessageCallback(&uMenu::Message);
             tConsole::RegisterIdleCallback(&uMenu::IdleInput);
+
+#ifndef NOSOUND
+            SDLSoundCleanup soundInitAndCleanup; // se_SoundInit() now, se_SoundExit() later
+#endif
 
             if (sr_InitDisplay()){
 
@@ -977,9 +995,7 @@ int main(int argc,char **argv){
                 SDL_QuitSubSystem(SDL_INIT_VIDEO);
             }
 
-            eSoundMixer::ShutDown();
 
-            SDL_Quit();
 #else // DEDICATED
             sr_glOut=0;
 
