@@ -113,7 +113,7 @@ default:
 
 .project_runner_debian:
   extends: .project_runner
-  image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:2a8e092bdae0a4dc799dfe3f2509a953a6e498b8f5e3c92a9830f16ae34b78fe
+  image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:60b668c02b129d12bd4f8a3fb53c3e2ed6dc830873a4e08aa3346c446a140c5c
 
 
 # template rule for deployment jobs
@@ -148,7 +148,7 @@ default:
 
 .deploy_staged_ppa:
   extends: .deploy_staged
-  image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:2a8e092bdae0a4dc799dfe3f2509a953a6e498b8f5e3c92a9830f16ae34b78fe
+  image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:60b668c02b129d12bd4f8a3fb53c3e2ed6dc830873a4e08aa3346c446a140c5c
 
 .deploy_final:
   extends: .deploy_base
@@ -167,7 +167,7 @@ default:
 
 .deploy_final_ppa:
   extends: .deploy_final
-  image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:2a8e092bdae0a4dc799dfe3f2509a953a6e498b8f5e3c92a9830f16ae34b78fe
+  image: $CI_REGISTRY_IMAGE/armadeb_64@sha256:60b668c02b129d12bd4f8a3fb53c3e2ed6dc830873a4e08aa3346c446a140c5c
 
 .deploy_final_steam:
   extends: .deploy_final
