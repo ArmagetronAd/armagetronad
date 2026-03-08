@@ -14,6 +14,7 @@ Build-Depends:
  libsdl-mixer1.2-dev,
  libsdl1.2-dev,
  libxml2-dev,
+ libcurl4-openssl-dev | libcurl4-gnutls-dev | libcurl-dev,
  pkg-config,
  libzthread-dev,
  zlib1g-dev

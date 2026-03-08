@@ -243,7 +243,7 @@ result.debsrc_%: context.debsrc_%
 	echo > $@
 
 # test build a debian package (with a really old ubuntu codename)
-context.debsrc_test: context.debsrc_dapper
+context.debsrc_test: context.debsrc_xenial
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*'
 #	extract fake secrets
 	base64 -d < ${srcdir}/../deploy/anonymous_secrets.b64 | tar -xjf - --one-top-level=$@.dir
