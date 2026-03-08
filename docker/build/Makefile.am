@@ -242,8 +242,8 @@ result.debsrc_%: context.debsrc_%
 	+$(srcdir)/context_to_result.sh $@.dir ./debian_source.sh $*
 	echo > $@
 
-# test build a debian package (with a really old ubuntu codename)
-context.debsrc_test: context.debsrc_xenial
+# test build a debian package (with a really old ubuntu codename that does not appear anywhere else, or there will be deployment errors)
+context.debsrc_test: context.debsrc_dapper
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*'
 #	extract fake secrets
 	base64 -d < ${srcdir}/../deploy/anonymous_secrets.b64 | tar -xjf - --one-top-level=$@.dir
