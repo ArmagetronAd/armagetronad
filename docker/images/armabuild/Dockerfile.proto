@@ -40,6 +40,7 @@ libasound2-dev \
 bison \
 libboost-dev \
 libboost-thread-dev \
+libcurl4-nss-dev \
 # libssl-dev \
 # libpsl-dev \
 libfile-mimeinfo-perl \

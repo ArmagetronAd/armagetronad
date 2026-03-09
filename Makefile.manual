@@ -186,6 +186,7 @@ DEBUGFILES=.gdbinit @progname@
 debug: $(DEBUGFILES)
 
 run: debug all
+	if test -r ${srcdir}/conan/conanrunenv.sh; then . ${srcdir}/conan/conanrunenv.sh; fi; \
 	./@progname@
 
 debugclean:

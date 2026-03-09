@@ -22,6 +22,7 @@ Build-Depends:
  libprotobuf-dev,
  protobuf-compiler,
  libxml2-dev,
+ libcurl4-openssl-dev | libcurl4-gnutls-dev | libcurl-dev,
  pkg-config,
  libzthread-dev,
  zlib1g-dev
