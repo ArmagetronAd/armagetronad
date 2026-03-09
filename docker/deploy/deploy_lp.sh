@@ -36,13 +36,13 @@ else
     EXIT=0
     for f in upload/*${PACKAGE_VERSION}* upload/*.AppImage upload/*.txt; do
 	if test -r $f; then
-	    if ! ./lp-project-upload ${LP_PROJECT} ${LP_SERIES} ${LP_VERSION} $f PATCHNOTES.txt RELEASENOTES.txt; then
+	    if ! lp-project-upload ${LP_PROJECT} ${LP_SERIES} ${LP_VERSION} $f PATCHNOTES.txt RELEASENOTES.txt; then
             sleep 10
-            if ! ./lp-project-upload ${LP_PROJECT} ${LP_SERIES} ${LP_VERSION} $f PATCHNOTES.txt RELEASENOTES.txt; then
+            if ! lp-project-upload ${LP_PROJECT} ${LP_SERIES} ${LP_VERSION} $f PATCHNOTES.txt RELEASENOTES.txt; then
                 sleep 10
-                if ! ./lp-project-upload ${LP_PROJECT} ${LP_SERIES} ${LP_VERSION} $f PATCHNOTES.txt RELEASENOTES.txt; then
+                if ! lp-project-upload ${LP_PROJECT} ${LP_SERIES} ${LP_VERSION} $f PATCHNOTES.txt RELEASENOTES.txt; then
                     sleep 10
-                    ./lp-project-upload ${LP_PROJECT} ${LP_SERIES} ${LP_VERSION} $f  PATCHNOTES.txt RELEASENOTES.txt || EXIT=$?
+                    lp-project-upload ${LP_PROJECT} ${LP_SERIES} ${LP_VERSION} $f  PATCHNOTES.txt RELEASENOTES.txt || EXIT=$?
                 fi
             fi
         fi
