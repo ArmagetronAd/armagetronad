@@ -25,7 +25,8 @@ for image in \
     armabuild_64 \
     armalpine_32 \
     armaroot_64 \
-    armadeploy_64 \
+    armadeploy_20 \
+    armadeploy_24 \
     steamcmd \
     ; do
     docker tag ${REGISTRY}${image}:${source} ${REGISTRY}${image}:${target}
