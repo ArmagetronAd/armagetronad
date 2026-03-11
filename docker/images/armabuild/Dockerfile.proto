@@ -38,7 +38,7 @@ make \
 libasound2-dev \
 #libboost-dev \
 #libboost-thread-dev \
-libcurl4-nss-dev \
+libcurl4-openssl-dev \
 # libssl-dev \
 # libpsl-dev \
 libfile-mimeinfo-perl \

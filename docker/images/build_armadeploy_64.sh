@@ -3,7 +3,7 @@
 # builds an deploy capable machine
 
 wd="`dirname $0`"
-${wd}/build_armabuild.sh amd64/ubuntu:20.04 armadeploy_64 --target armadeploy
+${wd}/build_armabuild.sh amd64/ubuntu:24.04 armadeploy_64 --target armadeploy
 
 # version choice: Ubuntu 20.04 does not yet have Python 3.9, where
 # base64.encodestring was removed in (with good reason), but
