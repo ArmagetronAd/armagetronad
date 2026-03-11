@@ -18,7 +18,7 @@ rm -rf secrets/*
 test ${EXIT} = 0 || test ${EXIT} = 2 || exit ${EXIT}
 EXIT=0
 mv lp-credentials secrets/
-export LP_CREDENTIALS_FILE=./secrets/lp-credentials
+export LP_CREDENTIALS_FILE=`pwd`/secrets/lp-credentials
 
 set -x
 
