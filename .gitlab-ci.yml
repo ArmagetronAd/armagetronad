@@ -119,7 +119,7 @@ default:
 # template rule for deployment jobs
 .deploy_base:
   retry: 2 # deployments can fail temporarily for a million reasons
-  image: $CI_REGISTRY_IMAGE/armadeploy_24@sha256:2d1cfc664bd36041f712ff1a010ac0b20494757038ca2c3e35b3e6082976ecd3
+  image: $CI_REGISTRY_IMAGE/armadeploy_20@sha256:92af822308316e58db04547121ac1c07f0b993de00aa289f6a88311b7cfc7ee3
   interruptible: false
   # resource_group: deployment # only ever run one deployment job at a time
   tags:
@@ -375,12 +375,13 @@ build_collect:
 deploy_staged_external:
   stage: pre_stage
   extends: .deploy_staged
+  image: $CI_REGISTRY_IMAGE/armadeploy_16@sha256:ce5f6f23e10d9e75c06d2fc41786a1b44737bd8c9ac41cf9ddacc0ae8f48dbfa
   variables:
     TARGET: "deploy_external"
 
 deploy_staged_ours:
   extends: .deploy_staged
-  image: $CI_REGISTRY_IMAGE/armadeploy_20@sha256:160ed2832678feb852bcd677935c3e28dd536c5c50bed7431fc579453b984698
+  image: $CI_REGISTRY_IMAGE/armadeploy_20@sha256:92af822308316e58db04547121ac1c07f0b993de00aa289f6a88311b7cfc7ee3
   variables:
     TARGET: "deploy_ours"
 
@@ -427,6 +428,7 @@ delay_release:
 deploy_final_external:
   stage: pre_deploy
   extends: .deploy_final
+  image: $CI_REGISTRY_IMAGE/armadeploy_16@sha256:ce5f6f23e10d9e75c06d2fc41786a1b44737bd8c9ac41cf9ddacc0ae8f48dbfa
   variables:
     TARGET: "deploy_external"
 
@@ -439,7 +441,7 @@ deploy_final_steam:
 
 deploy_final_ours:
   extends: .deploy_final
-  image: $CI_REGISTRY_IMAGE/armadeploy_20@sha256:160ed2832678feb852bcd677935c3e28dd536c5c50bed7431fc579453b984698
+  image: $CI_REGISTRY_IMAGE/armadeploy_20@sha256:92af822308316e58db04547121ac1c07f0b993de00aa289f6a88311b7cfc7ee3
   variables:
     TARGET: "deploy_ours"
 
