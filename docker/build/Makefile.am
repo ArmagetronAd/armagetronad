@@ -787,8 +787,8 @@ result.deploy_ppa_%: context.deploy_ppa_%
 	echo > $@
 
 # deploy for launchpad needs armadeb image
-context.deploy_lp: context.deploy_base_lp
-	${srcdir}/prepare_context.sh $@.dir $<.dir/'*'
+context.deploy_lp: context.deploy_base_lp ${srcdir}/../deploy/lp-project-upload
+	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' ${srcdir}/../deploy/lp-project-upload
 	rm -f $@.dir/image
 	echo "armadeb_64" > $@.dir/image
 	echo > $@
