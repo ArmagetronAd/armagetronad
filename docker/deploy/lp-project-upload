@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 # Copyright (c) 2009 Canonical Ltd.
 #
@@ -36,7 +36,7 @@ from launchpadlib.credentials import UnencryptedFileCredentialStore
 
 import subprocess
 
-from lptools import config
+# from lptools import config
 
 def create_release(project, series_name, version):
     '''Create new release and milestone for LP project.'''
@@ -47,9 +47,9 @@ def create_release(project, series_name, version):
             series = ser
             break
     if not series:
-        print >> sys.stderr, 'Series %s not found, available:' % series_name
+        print('Series %s not found, available:' % series_name, file=sys.stderr)
         for s in proj.series.entries:
-            print '%s: %s' % (s['display_name'], s['summary'])
+            print('%s: %s' % (s['display_name'], s['summary']), file=sys.stderr)
         sys.exit(3)
 
     release_date = datetime.date.today().strftime('%Y-%m-%d')
@@ -74,11 +74,11 @@ def cat_file(f):
         content += line
     return content.strip()
 
-def main()
+def main():
     if len(sys.argv) < 5 or len(sys.argv) > 7:
-        print >> sys.stderr, '''Upload a release tarball to a Launchpad project.
+        print('''Upload a release tarball to a Launchpad project.
 
-    Usage: %s <project name> <series> <version> <tarball> [changelog file] [releasenotes file]''' % sys.argv[0]
+    Usage: %s <project name> <series> <version> <tarball> [changelog file] [releasenotes file]''' % sys.argv[0], file=sys.stderr)
         sys.exit(1)
 
     new_milestone = None
@@ -93,10 +93,14 @@ def main()
 
     #print("login")
     
+    # Armagetronad: Looks like we also used custom login procedure, seems to work
     scriptPath = sys.argv[0] #executable
     secretFile = os.path.join(os.path.dirname(scriptPath),"secrets","lp-credentials")
     # print secretFile
     launchpad = Launchpad.login_with("lptools-project-upload","production",credential_store=UnencryptedFileCredentialStore(secretFile))
+    
+    # the canonical way would be this, requires 'import lptools', which is not universally available
+    # launchpad = config.get_launchpad("project-upload")
 
     #print("login done")
 
