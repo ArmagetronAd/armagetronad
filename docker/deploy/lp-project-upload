@@ -93,11 +93,16 @@ def main():
 
     #print("login")
     
-    # Armagetronad: Looks like we also used custom login procedure, seems to work
-    scriptPath = sys.argv[0] #executable
-    secretFile = os.path.join(os.path.dirname(scriptPath),"secrets","lp-credentials")
+    # Armagetronad: Looks like we also used custom login procedure, seems to work, but we provide credentials via
+    # LP_CREDENTIALS_FILE environment variable now, which simplifies things
+
+    #scriptPath = sys.argv[0] #executable
+    #secretFile = os.path.join(os.path.dirname(scriptPath),"secrets","lp-credentials")
     # print secretFile
-    launchpad = Launchpad.login_with("lptools-project-upload","production",credential_store=UnencryptedFileCredentialStore(secretFile))
+    #launchpad = Launchpad.login_with("lptools-project-upload","production",credential_store=UnencryptedFileCredentialStore(secretFile))
+    # end old method
+
+    launchpad = Launchpad.login_with("lptools-project-upload","production")
     
     # the canonical way would be this, requires 'import lptools', which is not universally available
     # launchpad = config.get_launchpad("project-upload")
