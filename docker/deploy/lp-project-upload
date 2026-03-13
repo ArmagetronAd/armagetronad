@@ -1,4 +1,4 @@
-#! /usr/bin/python
+#!/usr/bin/python3
 
 # Copyright (c) 2009 Canonical Ltd.
 #
@@ -18,6 +18,9 @@
 #  Dustin Kirkland <kirkland@ubuntu.com>
 #  - support files for changelog and release notes
 #  Adapted to upload all the file types of Armagetron Advanced, not just tarballs
+
+# Based on the version shipping with Ubuntu 24.04.
+# Modified for Armagetron Advanced to support series and different file types.
 
 '''Upload a release tarball to a Launchpad project.'''
 
@@ -57,8 +60,8 @@ def create_release(project, series_name, version):
 
 def edit_file(prefix, description):
     (fd, f) = tempfile.mkstemp(prefix=prefix+'.')
-    os.write(fd, '\n\n#------\n# Please enter the %s here. '
-                 'Lines which start with "#" are ignored.\n' % description)
+    os.write(fd, b'\n\n#------\n# Please enter the %s here. '
+                 b'Lines which start with "#" are ignored.\n' % description.encode())
     os.close(fd)
     subprocess.call(['sensible-editor', f])
     return cat_file(f)
@@ -71,7 +74,7 @@ def cat_file(f):
         content += line
     return content.strip()
 
-def main():
+def main()
     if len(sys.argv) < 5 or len(sys.argv) > 7:
         print >> sys.stderr, '''Upload a release tarball to a Launchpad project.
 
@@ -102,17 +105,19 @@ def main():
         proj = launchpad.projects[project]
 
         # Get the file contents.
-        file_content = open(tarball, 'r').read()
+        with open(tarball, 'rb') as f:
+            file_content = f.read()
         # Get the signature, if available.
         signature = tarball + '.asc'
         if not os.path.exists(signature):
-            print 'Calling GPG to create tarball signature...'
+            print('Calling GPG to create tarball signature...')
             cmd = ['gpg', '--armor', '--sign', '--detach-sig', tarball]
             if subprocess.call(cmd) != 0:
-                print >> sys.stderr, 'gpg failed, aborting'
+                print('gpg failed, aborting', file=sys.stderr)
 
         if os.path.exists(signature):
-            signature_content = open(signature, 'r').read()
+            with open(signature, 'rb') as f:
+                signature_content = f.read()
         else:
             signature_content = None
 
@@ -235,8 +240,8 @@ def main():
                 if mil.name in [milestone.name for milestone in series.all_milestones]:
                     series.newMilestone(name=new_milestone)
 
-    except HTTPError, error:
-        print('An error happened in the upload:', error.content, error)
+    except HTTPError as error:
+        print('An error happened in the upload:', error.content)
         sys.exit(1)
 
 if __name__ == '__main__':
