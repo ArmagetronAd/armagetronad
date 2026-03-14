@@ -1,4 +1,4 @@
-#! /usr/bin/python
+#!/usr/bin/env python3
 
 # Copyright (c) 2009 Canonical Ltd.
 #
@@ -19,6 +19,9 @@
 #  - support files for changelog and release notes
 #  Adapted to upload all the file types of Armagetron Advanced, not just tarballs
 
+# Based on the version shipping with Ubuntu 24.04.
+# Modified for Armagetron Advanced to support series and different file types.
+
 '''Upload a release tarball to a Launchpad project.'''
 
 import datetime
@@ -33,7 +36,7 @@ from launchpadlib.credentials import UnencryptedFileCredentialStore
 
 import subprocess
 
-from lptools import config
+# from lptools import config
 
 def create_release(project, series_name, version):
     '''Create new release and milestone for LP project.'''
@@ -44,9 +47,9 @@ def create_release(project, series_name, version):
             series = ser
             break
     if not series:
-        print >> sys.stderr, 'Series %s not found, available:' % series_name
+        print('Series %s not found, available:' % series_name, file=sys.stderr)
         for s in proj.series.entries:
-            print '%s: %s' % (s['display_name'], s['summary'])
+            print('%s: %s' % (s['display_name'], s['summary']), file=sys.stderr)
         sys.exit(3)
 
     release_date = datetime.date.today().strftime('%Y-%m-%d')
@@ -57,8 +60,8 @@ def create_release(project, series_name, version):
 
 def edit_file(prefix, description):
     (fd, f) = tempfile.mkstemp(prefix=prefix+'.')
-    os.write(fd, '\n\n#------\n# Please enter the %s here. '
-                 'Lines which start with "#" are ignored.\n' % description)
+    os.write(fd, b'\n\n#------\n# Please enter the %s here. '
+                 b'Lines which start with "#" are ignored.\n' % description.encode())
     os.close(fd)
     subprocess.call(['sensible-editor', f])
     return cat_file(f)
@@ -73,9 +76,9 @@ def cat_file(f):
 
 def main():
     if len(sys.argv) < 5 or len(sys.argv) > 7:
-        print >> sys.stderr, '''Upload a release tarball to a Launchpad project.
+        print('''Upload a release tarball to a Launchpad project.
 
-    Usage: %s <project name> <series> <version> <tarball> [changelog file] [releasenotes file]''' % sys.argv[0]
+    Usage: %s <project name> <series> <version> <tarball> [changelog file] [releasenotes file]''' % sys.argv[0], file=sys.stderr)
         sys.exit(1)
 
     new_milestone = None
@@ -90,10 +93,19 @@ def main():
 
     #print("login")
     
-    scriptPath = sys.argv[0] #executable
-    secretFile = os.path.join(os.path.dirname(scriptPath),"secrets","lp-credentials")
+    # Armagetronad: Looks like we also used custom login procedure, seems to work, but we provide credentials via
+    # LP_CREDENTIALS_FILE environment variable now, which simplifies things
+
+    #scriptPath = sys.argv[0] #executable
+    #secretFile = os.path.join(os.path.dirname(scriptPath),"secrets","lp-credentials")
     # print secretFile
-    launchpad = Launchpad.login_with("lptools-project-upload","production",credential_store=UnencryptedFileCredentialStore(secretFile))
+    #launchpad = Launchpad.login_with("lptools-project-upload","production",credential_store=UnencryptedFileCredentialStore(secretFile))
+    # end old method
+
+    launchpad = Launchpad.login_with("lptools-project-upload","production")
+    
+    # the canonical way would be this, requires 'import lptools', which is not universally available
+    # launchpad = config.get_launchpad("project-upload")
 
     #print("login done")
 
@@ -102,17 +114,19 @@ def main():
         proj = launchpad.projects[project]
 
         # Get the file contents.
-        file_content = open(tarball, 'r').read()
+        with open(tarball, 'rb') as f:
+            file_content = f.read()
         # Get the signature, if available.
         signature = tarball + '.asc'
         if not os.path.exists(signature):
-            print 'Calling GPG to create tarball signature...'
+            print('Calling GPG to create tarball signature...')
             cmd = ['gpg', '--armor', '--sign', '--detach-sig', tarball]
             if subprocess.call(cmd) != 0:
-                print >> sys.stderr, 'gpg failed, aborting'
+                print('gpg failed, aborting', file=sys.stderr)
 
         if os.path.exists(signature):
-            signature_content = open(signature, 'r').read()
+            with open(signature, 'rb') as f:
+                signature_content = f.read()
         else:
             signature_content = None
 
@@ -235,8 +249,8 @@ def main():
                 if mil.name in [milestone.name for milestone in series.all_milestones]:
                     series.newMilestone(name=new_milestone)
 
-    except HTTPError, error:
-        print('An error happened in the upload:', error.content, error)
+    except HTTPError as error:
+        print('An error happened in the upload:', error.content)
         sys.exit(1)
 
 if __name__ == '__main__':

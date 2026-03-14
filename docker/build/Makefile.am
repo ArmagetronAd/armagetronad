@@ -713,7 +713,7 @@ steam.tag: steam_windows.tag steam_linux.tag steam_macos.tag
 context.reformat: rootcontext.64 CI_pack.tag ${srcdir}/context/reformat.sh
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' upload/*.md ${srcdir}/context/reformat.sh
 	rm -f $@.dir/image
-	echo "armadeploy_64" > $@.dir/image
+	echo "armadeploy_24" > $@.dir/image
 	echo > $@
 result.reformat: context.reformat
 	+$(srcdir)/context_to_result.sh $@.dir ./reformat.sh $*
@@ -808,7 +808,7 @@ context.deploy_lp: context.deploy_base_lp ${srcdir}/../deploy/lp-project-upload
 context.update_zi: context.deploy_base_zeroinstall ${srcdir}/../deploy/*_zeroinstall.sh
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' ${srcdir}/../deploy/*_zeroinstall.sh
 	rm -f $@.dir/image
-	echo "armadeploy_64" > $@.dir/image
+	echo "armadeploy_20" > $@.dir/image
 	echo > $@
 result.update_zi: context.update_zi
 	+$(srcdir)/context_to_result.sh $@.dir ./update_zeroinstall.sh
@@ -816,7 +816,7 @@ result.update_zi: context.update_zi
 context.deploy_zi: context.deploy_base_zeroinstall result.update_zi ${srcdir}/../deploy/*_zeroinstall.sh
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' result.update_zi.dir/zeroinstall ${srcdir}/../deploy/*_zeroinstall.sh
 	rm -f $@.dir/image
-	echo "armadeploy_64" > $@.dir/image
+	echo "armadeploy_20" > $@.dir/image
 	echo > $@
 result.deploy_zi: context.deploy_zi result.deploy_download
 	+$(srcdir)/context_to_result.sh $@.dir ./deploy_zeroinstall.sh
@@ -825,7 +825,7 @@ result.deploy_zi: context.deploy_zi result.deploy_download
 context.deploy_fp: context.deploy_base_flatpak ${srcdir}/../deploy/*_flatpak.sh
 	${srcdir}/prepare_context.sh $@.dir $<.dir/'*' ${srcdir}/../deploy/*_flatpak.sh
 	rm -f $@.dir/image
-	echo "armadeploy_64" > $@.dir/image
+	echo "armadeploy_24" > $@.dir/image
 	echo > $@
 result.deploy_fp: context.deploy_fp
 	+$(srcdir)/context_to_result.sh $@.dir ./deploy_flatpak.sh
@@ -838,7 +838,7 @@ context.deploy_itch: context.deploy_base_itch ${srcdir}/../deploy/*_itch.sh uplo
 	mkdir -p $@.dir/appdir_linux_32; cd $@.dir/appdir_linux_32; tar -xjf ../../upload/$(APPTAR_CLIENT_32)
 	mkdir -p $@.dir/appdir_windows; cd $@.dir/appdir_windows; unzip ../../$(WINZIP_CLIENT)
 	rm -f $@.dir/image
-	echo "armadeploy_64" > $@.dir/image
+	echo "armadeploy_24" > $@.dir/image
 	echo > $@
 result.deploy_itch: context.deploy_itch
 	+$(srcdir)/context_to_result.sh $@.dir ./deploy_itch.sh

@@ -10,14 +10,15 @@
 #set +x
 
 # import gpg keys; remove all secrets except lp-credentials
-mv secrets/lp-credentials .
+mv secrets/lp-credentials* .
 EXIT=0
 gpg --import secrets/pub.gpg || EXIT=$?
 gpg --allow-secret-key-import --import secrets/sec.gpg || EXIT=$?
 rm -rf secrets/*
 test ${EXIT} = 0 || test ${EXIT} = 2 || exit ${EXIT}
 EXIT=0
-mv lp-credentials secrets/
+mv lp-credentials* secrets/
+export LP_CREDENTIALS_FILE=`pwd`/secrets/lp-credentials
 
 set -x
 

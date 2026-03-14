@@ -119,7 +119,7 @@ default:
 # template rule for deployment jobs
 .deploy_base:
   retry: 2 # deployments can fail temporarily for a million reasons
-  image: $CI_REGISTRY_IMAGE/armadeploy_64@sha256:46953970c1e490295a64c2b182d1ca90645ae8d4581862981badea7c60899b48
+  image: $CI_REGISTRY_IMAGE/armadeploy_24@sha256:2d1cfc664bd36041f712ff1a010ac0b20494757038ca2c3e35b3e6082976ecd3
   interruptible: false
   # resource_group: deployment # only ever run one deployment job at a time
   tags:
@@ -380,6 +380,7 @@ deploy_staged_external:
 
 deploy_staged_ours:
   extends: .deploy_staged
+  image: $CI_REGISTRY_IMAGE/armadeploy_20@sha256:92af822308316e58db04547121ac1c07f0b993de00aa289f6a88311b7cfc7ee3
   variables:
     TARGET: "deploy_ours"
 
@@ -438,6 +439,7 @@ deploy_final_steam:
 
 deploy_final_ours:
   extends: .deploy_final
+  image: $CI_REGISTRY_IMAGE/armadeploy_20@sha256:92af822308316e58db04547121ac1c07f0b993de00aa289f6a88311b7cfc7ee3
   variables:
     TARGET: "deploy_ours"
 

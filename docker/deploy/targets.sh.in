@@ -213,7 +213,10 @@ LP_PROJECT=armagetronad
 LP_VERSION=`echo @version@ | sed -e s/_/-/g`
 
 # Launchpad uploads require an authentication token in the plain text file secrets/lp-credentials.
-# Just run lp-project-upload with some garbage parameters, log in, and it will be created for you.
+# Just do
+#   export LP_CREDENTIALS_FILE=./secrets/lp-credentials
+#   lp-project-upload fjsdfl345 0 fgjkldftglkj
+# log in, and it will be created for you.
 # To GPG-sign the uploads, provide gpg keys in secrets/pub.gpg and secrets/sec.gpg.
 
 # **********************************************************************

@@ -4,7 +4,8 @@
 
 set +x
 
-mv secrets/ssh ~/.ssh
+mkdir -p ~/.ssh
+mv secrets/ssh/* ~/.ssh/
 
 rm -rf secrets/*
 
@@ -16,6 +17,7 @@ set -x
 dd=`dirname $0`
 
 trust_gitlab || exit $?
+ls -alt ~/.ssh
 git clone --recursive ${FP_GIT} flatpak || exit $?
 
 BRANCH_BASE=${ZI_SERIES}

@@ -40,7 +40,7 @@ libasound2-dev \
 bison \
 libboost-dev \
 libboost-thread-dev \
-libcurl4-nss-dev \
+libcurl4-openssl-dev \
 # libssl-dev \
 # libpsl-dev \
 libfile-mimeinfo-perl \
@@ -232,16 +232,21 @@ lptools \
 rsync \
 -y
 
-FROM armadeploy_base as armadeploy
+FROM armadeploy_base as armadeploy_nozero
 # set up builder user
 #RUN useradd builder && mkdir -p /home/builder && chown builder:builder /home/builder # && chmod 777 /home/builder
 #WORKDIR /home/builder
 #USER builder
 # pre-load 0publish and feedlint
 RUN export TERM=linux && \
-yes Y | 0launch -c 'https://apps.0install.net/0install/0publish.xml' --version && \
-yes Y | 0launch -c 'https://apps.0install.net/0install/feedlint.xml' --version && \
 git config --global push.default simple
+
+
+FROM armadeploy_nozero as armadeploy
+# pre-load 0publish and feedlint
+RUN export TERM=linux && \
+yes Y | 0launch -c 'https://apps.0install.net/0install/0publish.xml' --version && \
+yes Y | 0launch -c 'https://apps.0install.net/0install/feedlint.xml' --version
 
 # ###########################
 # bootstrap dependencies (ubuntu base)
