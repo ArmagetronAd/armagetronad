@@ -41,8 +41,10 @@ export USER=steam
 export HOME=/home/steam
 
 script_dir=`pwd`
-set +x
 
+ls -alt /home/steam/Steam/config
+
+set +x
 /home/steam/steamcmd/steamcmd.sh +login "${STEAM_USER}" "${STEAM_PASSWORD}" +run_app_build_http ${script_dir}/app_build_1306180.vdf +quit || exit $?
 
 # If the above command fails, you need to activate steam guard on the deployment machine.
