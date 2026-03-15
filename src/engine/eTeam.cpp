@@ -911,7 +911,7 @@ void eTeam::Enforce( int minTeams, int maxTeams, int maxImbalance)
 
                 numTeams++;
 
-                if ( humans == 0 )
+                if ( humans <= 0 )
                     ai = t;
 
                 if ( humans > maxP )
