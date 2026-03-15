@@ -201,7 +201,7 @@ UPLOAD_SCP=${UPLOAD_SCP_BASE}${SF_DIR}/
 # steam: no configurable data here, look into ../build/context/steamcontentbuilder
 # required secrets: script steamuser.sh, content
 # STEAM_USER=<steam username authorized to upload packages>
-# STEAM_PASSWORD=<their password>
+# STEAM_PASSWORD=<their password> (only for first login to get Steam Guard token, not used in CI)
 # 
 # file config.vdf optained after the first failed login due to Steam Guard, see deploy_steam.sh script
 

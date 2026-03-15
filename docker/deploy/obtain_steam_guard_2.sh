@@ -19,7 +19,7 @@ set +x
 # among the deployment secrets.
 /home/steam/steamcmd/steamcmd.sh +set_steam_guard_code ${STEAM_GUARD_CODE} "+login ${STEAM_USER} ${STEAM_PASSWORD}" +quit || exit $?
 #  you can test whether that was successful by running
-/home/steam/steamcmd/steamcmd.sh "+login ${STEAM_USER} ${STEAM_PASSWORD}" +quit || exit $?
+/home/steam/steamcmd/steamcmd.sh "+login ${STEAM_USER}" +info +quit || exit $?
 
 set -x
 
