@@ -189,7 +189,7 @@ void gAITeam::BalanceWithAIs(bool balanceWithAIs)
     // set correct team number
     EnforceConstraints();
 
-    int numTeams = 0, numTeamsWithPlayers = 0;
+    int numTeamsWithPlayers = 0;
 
     // determine the maximum number of human players on a team
     int i;
@@ -199,9 +199,6 @@ void gAITeam::BalanceWithAIs(bool balanceWithAIs)
         eTeam *t = teams(i);
 
         t->UpdateProperties();
-
-        if ( t->BalanceThisTeam() )
-            numTeams++;
 
         if ( t->NumHumanPlayers() > 0 )
             numTeamsWithPlayers++;
@@ -365,7 +362,6 @@ static bool CheckLoop(const gCycle *a, const gCycle *b,
     tASSERT(0<= dir && 1 >= dir);
 
     int tries = 10;       // so long until we give up
-    int ends  = 0;
 
     bool bClosedIn    = false;
 
@@ -471,7 +467,6 @@ static bool CheckLoop(const gCycle *a, const gCycle *b,
 
                 end  = 1;
                 side = 1-side;
-                ends++;
                 dist = -2 * TOL;
             }
             else
