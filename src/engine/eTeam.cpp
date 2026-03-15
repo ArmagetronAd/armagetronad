@@ -731,7 +731,6 @@ void eTeam::Enforce( int minTeams, int maxTeams, int maxImbalance)
         int    maxColorID = 0;
 
         int numTeams = 0;
-        int numHumanTeams = 0;
 
         int i;
         for ( i = teams.Len()-1; i>=0; --i )
@@ -744,9 +743,7 @@ void eTeam::Enforce( int minTeams, int maxTeams, int maxImbalance)
 
                 numTeams++;
 
-                if ( humans > 0 )
-                    numHumanTeams++;
-                else
+                if ( humans <= 0 )
                     ai = t;
 
                 if ( humans > maxP )

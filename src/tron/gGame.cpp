@@ -1077,19 +1077,16 @@ public:
         }
 
         // only do something in multiplayer mode
-        int i;
-        int count=0;
 
         tArray<ePlayerNetID*> active;
 
-        for(i=se_PlayerNetIDs.Len()-1;i>=0;i--)
+        for(int i=se_PlayerNetIDs.Len()-1;i>=0;i--)
         {
             ePlayerNetID* p=se_PlayerNetIDs(i);
 
             // only take enemies of the current winners (and the winners themselves) into the list
             if (p->IsHuman() && ( p->CurrentTeam() == winningTeam || eTeam::Enemies( winningTeam, p ) ) )
             {
-                count++;
                 active[active.Len()] = p;
             }
         }
@@ -1106,7 +1103,7 @@ public:
 
         REAL pot=0;
 
-        for(i=active.Len()-1;i>=0;i--){
+        for(int i=active.Len()-1;i>=0;i--){
 
             nums[i]=Find(active(i)->GetUserName(),true);
 
@@ -1126,7 +1123,7 @@ public:
         // the winners ping+ping charity:
 
         // take the bet from the losers and give it to the winner
-        for(i=active.Len()-1; i>=0; i--)
+        for(int i=active.Len()-1; i>=0; i--)
         {
             ePlayerNetID* player = active(i);
             if(player->CurrentTeam() == winningTeam )
@@ -3693,7 +3690,6 @@ void gGame::Analysis(REAL time){
     int last_team_alive=-1;
     // int last_alive_and_not_disconnected=-1;
     int humans = 0;
-    int active_humans = 0;
     int ais    = 0;
     REAL deathTime=0;
 
@@ -3718,8 +3714,6 @@ void gGame::Analysis(REAL time){
             for (int j=t->NumPlayers()-1; j>=0; --j)
             {
                 ePlayerNetID* p = t->Player(j);
-                if (p->IsActive())
-                    active_humans++;
 
                 gCycle *g=dynamic_cast<gCycle *>(p->Object());
                 if(g){
