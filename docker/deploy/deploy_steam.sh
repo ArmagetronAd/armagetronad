@@ -45,8 +45,12 @@ script_dir=`pwd`
 ls -alt /home/steam/Steam/config
 
 set +x
-/home/steam/steamcmd/steamcmd.sh +login "${STEAM_USER}" "${STEAM_PASSWORD}" +run_app_build_http ${script_dir}/app_build_1306180.vdf +quit || exit $?
+/home/steam/steamcmd/steamcmd.sh +login "${STEAM_USER}" +run_app_build_http ${script_dir}/app_build_1306180.vdf +quit || exit $?
 
+# According to the DOCS at https://partner.steamgames.com/doc/sdk/uploading#automating_steampipe,
+# you do not supply a password on CI runs. The token in config.vdf is enough, and giving
+# a password just invalidates it for the next run.
+#
 # If the above command fails, you need to activate steam guard on the deployment machine.
 # Run "make steam_guard" in the docker/build directory. Enter the received steam guard
 # code when promtped.
