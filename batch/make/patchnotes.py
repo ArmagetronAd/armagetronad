@@ -88,10 +88,10 @@ def FixedAfterTag(repo, team, project, tags):
 						#print(uri_rest)
 						if uri_rest.startswith(uri_middle_1): # an issue
 							ref = uri_rest[len(uri_middle_1):]
-							print("issue", ref)
+							#print("issue", ref)
 						elif uri_rest.startswith(uri_middle_2): # a work item
 							ref = uri_rest[len(uri_middle_2):]
-							print("workitem", ref)
+							#print("workitem", ref)
 					elif word.startswith('#'):
 						ref = word[1:]
 					if not ref is None and RepresentsInt(ref):
