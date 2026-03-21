@@ -537,7 +537,7 @@ void rSysDep::StopNetSyncThread()
     }
 }
 
-int sr_maxFPS = 0;
+int sr_maxFPS = 360;
 static tConfItem<int> sr_maxFPSConf("MAX_FPS", sr_maxFPS,
                                     [](const int& val) { return (val >= 0); });
 
