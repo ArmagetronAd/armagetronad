@@ -2059,6 +2059,10 @@ screen_vsync_default_help     Verwendet den Standardwert des Systems.
 screen_vsync_off_text         Nicht warten
 screen_vsync_off_help         Ignoriert das Signal. Dies resultiert in höheren Framerates, aber die meisten davon wirst du nicht sehen. Dein Monitor kann sie nicht alle zeigen. Normalerweise Resourcenverschwendung, die Zerreißbilder zur Folge hat.
 
+screen_max_fps_text           FPS-Begrenzung:
+screen_max_fps_off_text       Unbegrenzt
+screen_max_fps_off_help       Keine Bremse, soviele Frames wie das System ausgeben kann.
+
 screen_grab_mouse_text        Maus einfangen:
 screen_grab_mouse_help        Wenn das hier aktiviert ist, so kann der Mauszeiger das Fenster nicht verlassen. Nur so lässt sich die Maus im Fenstermodus richtig nutzen.
 
