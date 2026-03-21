@@ -62,7 +62,9 @@ def GetTags(repo, tag_lower_limit):
 def FixedAfterTag(repo, team, project, tags):
 	# for each tag, collect which issues have been resolved (Fix.. Close.. Solve.. Implement...)
 	# or mentioned otherwise
-	uri_start=Template('https://gitlab.com/${team}/${project}/-/issues/').substitute(team=team, project=project)
+	uri_start=Template('https://gitlab.com/${team}/${project}/-/').substitute(team=team, project=project)
+	uri_middle_1="issues/"
+	uri_middle_2="work_items/"
 	# The build system is on Python 3.5, so we're stuck with this mechanism
 	# print(uri_start)
 
@@ -81,8 +83,15 @@ def FixedAfterTag(repo, team, project, tags):
 			ref=None
 			if logline[0:4] == '    ':
 				for word in logline.split():
-					if word.startswith(uri_start):
-						ref = word[len(uri_start):]
+					if word.startswith(uri_start): # a full issue/work item reference
+						uri_rest = word[len(uri_start):]
+						#print(uri_rest)
+						if uri_rest.startswith(uri_middle_1): # an issue
+							ref = uri_rest[len(uri_middle_1):]
+							print("issue", ref)
+						elif uri_rest.startswith(uri_middle_2): # a work item
+							ref = uri_rest[len(uri_middle_2):]
+							print("workitem", ref)
 					elif word.startswith('#'):
 						ref = word[1:]
 					if not ref is None and RepresentsInt(ref):
@@ -149,10 +158,6 @@ def MapAuthor(full_author):
 
 # return (tag, list of contributing authors)
 def ContributorsAfterTag(repo, team, project, tags):
-	uri_start=Template('https://gitlab.com/${team}/${project}/-/issues/').substitute(team=team, project=project)
-	# The build system is on Python 3.5, so we're stuck with this mechanism
-	# print(uri_start)
-
 	revisions_already_seen=set([])
 	authors_by_tag={}
 

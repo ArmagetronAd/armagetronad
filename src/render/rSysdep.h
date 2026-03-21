@@ -69,4 +69,6 @@ public:
     static rSwapMode swapMode_;
 };
 
+extern int sr_maxFPS;
+
 #endif

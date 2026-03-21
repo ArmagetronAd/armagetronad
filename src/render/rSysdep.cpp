@@ -450,6 +450,8 @@ static rFastForwardCommandLineAnalyzer analyzer;
 rSysDep::rSwapMode rSysDep::swapMode_ = rSysDep::rSwap_glFlush;
 //rSysDep::rSwapMode rSysDep::swapMode_ = rSysDep::rSwap_60Hz;
 
+int sr_maxFPS = 360;
+
 // buffer swap:
 #ifndef DEDICATED
 // for setting breakpoints in optimized mode, too
@@ -537,7 +539,6 @@ void rSysDep::StopNetSyncThread()
     }
 }
 
-int sr_maxFPS = 0;
 static tConfItem<int> sr_maxFPSConf("MAX_FPS", sr_maxFPS,
                                     [](const int& val) { return (val >= 0); });
 
