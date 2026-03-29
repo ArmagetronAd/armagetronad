@@ -709,18 +709,23 @@ dnl *************************************************
 dnl         SDL
 dnl *************************************************
 
-AC_MSG_CHECKING(whether SDL is installed)
-if SDLLIBS=`${SDL_CONFIG} --libs`; then
-    AC_MSG_RESULT(yes)
-fi
+PKG_CHECK_MODULES([SDL], [sdl], [
+    CPPFLAGS="$CPPFLAGS $SDL_CFLAGS"
+    LIBS="$LIBS $SDL_LIBS"
+    ], [
+    AC_MSG_CHECKING(whether SDL is installed)
+    if SDLLIBS=`${SDL_CONFIG} --libs`; then
+        AC_MSG_RESULT(yes)
+    fi
 
-CPPFLAGS="$CPPFLAGS `${SDL_CONFIG} --cflags`"
-LIBS="${SDLLIBS} $LIBS"
+    CPPFLAGS="$CPPFLAGS `${SDL_CONFIG} --cflags`"
+    LIBS="${SDLLIBS} $LIBS"
 
-AC_CHECK_FUNC(SDL_Init,
-AC_DEFINE(HAVE_LIBSDL,,[Define if you have the library SDL]),
-AC_MSG_ERROR([You need the library SDL to compile ${progtitle}. Read the file doc/install_linux.html.])
-,)
+    AC_CHECK_FUNC(SDL_Init,
+    AC_DEFINE(HAVE_LIBSDL,,[Define if you have the library SDL]),
+    AC_MSG_ERROR([You need the library SDL to compile ${progtitle}. Read the file doc/install_linux.html.])
+    ,)
+])
 
 dnl *************************************************
 dnl         SDL_Mixer
@@ -815,26 +820,32 @@ dnl	libjpeg not found. Expect small graphical errors ( missing moviepack title s
 dnl	)
 dnl )
 
-AC_CHECK_LIB(SDL_image, IMG_Load,,
-dnl AC_CHECK_LIB(IMG, main,,
-AC_MSG_ERROR([You need the library SDL_image to compile ${progtitle}.]
-dnl )
-))
+PKG_CHECK_MODULES([SDL_IMAGE], [SDL_image], [
+    CPPFLAGS="$CPPFLAGS $SDL_IMAGE_CFLAGS"
+    LIBS="$LIBS $SDL_IMAGE_LIBS"
+    ], [
+    AC_CHECK_LIB(SDL_image, IMG_Load,,
+    dnl AC_CHECK_LIB(IMG, main,,
+    AC_MSG_ERROR([You need the library SDL_image to compile ${progtitle}.]
+    dnl )
+    ))
 
-dnl look for the right header for SDL_image
-AC_CHECK_HEADERS(SDL_image.h,,
-[
-AC_MSG_WARN([SDL_image header not found where it should be ( the SDL include directory ).
-Trying fallback.])
-AC_CHECK_HEADERS(SDL/SDL_image.h,,
-[AC_MSG_WARN([
-SDL_image header not found. The library is there, so something must be unusual
-in your setup: SDL_image.h does not reside in the same folder as the rest of the SDL
-inlcudes and not in any SDL subdirectory in the inclue path. If you know the
-correct path to it, edit src/render/rTexture.cpp and enter it there.])]
-)
-]
-)
+    dnl look for the right header for SDL_image
+    AC_CHECK_HEADERS(SDL_image.h,,
+    [
+    AC_MSG_WARN([SDL_image header not found where it should be ( the SDL include directory ).
+    Trying fallback.])
+    AC_CHECK_HEADERS(SDL/SDL_image.h,,
+    [AC_MSG_WARN([
+    SDL_image header not found. The library is there, so something must be unusual
+    in your setup: SDL_image.h does not reside in the same folder as the rest of the SDL
+    inlcudes and not in any SDL subdirectory in the inclue path. If you know the
+    correct path to it, edit src/render/rTexture.cpp and enter it there.])]
+    )
+    ]
+    )
+])
+
 
 ifelse(,,,
 [
