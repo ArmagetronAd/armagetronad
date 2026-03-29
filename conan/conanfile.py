@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.tools.files import copy
+from conan.tools.gnu import PkgConfigDeps
 from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
 import os
 
@@ -8,17 +9,18 @@ import os
 
 class Pkg(ConanFile):
     generators = \
-            "AutotoolsToolchain", \
-            "PkgConfigDeps"
+            "AutotoolsToolchain"
 
 
     requires = \
+            "none_aa/0.0.1", \
             "sdl_aa/[>=1.2.15 <2.0.0]", \
             "sdl_image_aa/[>=1.2.12 <2.0.0]", \
             "libcurl/[>=7]", \
             "libxml2/[>=2.9.10]"
-
+    
     default_options = {
+        "sdl/*:shared": True, # sdl_compat uses dynamic loading
         "libcurl/*:with_ssl": False,
         "libcurl/*:with_https": False,
         "libcurl/*:with_ftp": False,
@@ -46,6 +48,14 @@ class Pkg(ConanFile):
     def generate(self):
         venv = VirtualBuildEnv(self)
         venv.generate()
+
+        pc = PkgConfigDeps(self)
+        pc.generate()
+
+        # Copy none.pc from the dummy package
+        none_pkg = self.dependencies["none_aa"]
+        none_pc = os.path.join(none_pkg.package_folder, "lib", "pkgconfig", "none.pc")
+        copy(self, "none.pc", os.path.dirname(none_pc), self.build_folder)
 
         # copy libraries
         libs_path = os.path.join(self.build_folder, "lib")

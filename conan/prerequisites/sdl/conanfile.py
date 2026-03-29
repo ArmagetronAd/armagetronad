@@ -11,6 +11,7 @@ class SdlConan(ConanFile):
     description = "SDL 1.2 library (legacy, uses SDL2)"
     settings = "os", "arch", "compiler", "build_type"
     generators = "PkgConfigDeps", "VirtualBuildEnv"
+    exports_sources = "CMakeLists.txt", "src/*", "include/*"
 
     requires = \
             "sdl/[>=2.0.0 <3.0.0]"
@@ -53,4 +54,5 @@ class SdlConan(ConanFile):
         self.cpp_info.includedirs = ["include/SDL"]
         self.cpp_info.libdirs = ["lib"]
         self.cpp_info.bindirs = ["bin"]
+        self.cpp_info.requires = ["sdl::sdl"]
         self.cpp_info.set_property("pkg_config_name", "sdl")

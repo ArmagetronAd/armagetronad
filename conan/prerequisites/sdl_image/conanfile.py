@@ -12,13 +12,14 @@ class SdlImageConan(ConanFile):
     version = "1.2.12"
     description = "SDL_image 1.2 library"
     settings = "os", "arch", "compiler", "build_type"
-    exports_sources = "CMakeLists.txt", "src/*", "include/*"
+    generators = "PkgConfigDeps", "VirtualBuildEnv"
 
     requires = \
             "sdl_aa/[>=1.2.10 <2.0.0]", \
             "libpng/[>=1.0.0 <2.0.0]"
 
     default_options = {
+        "sdl/*:shared": True, # sdl_compat uses dynamic loading
         "libxml2/*:html": False,
         "libxml2/*:http": False,
         "libxml2/*:ftp": False,
@@ -28,13 +29,11 @@ class SdlImageConan(ConanFile):
     }
 
     def source(self):
-        #git = Git(self)
-        #git.clone(url="https://github.com/libsdl-org/SDL_image.git", target=".")
-        #git.checkout("7c6ea40bb75262740cd07f7658bc543f13c65b3c")
+        git = Git(self)
+        git.clone(url="https://github.com/libsdl-org/SDL_image.git", target=".")
+        git.checkout("7c6ea40bb75262740cd07f7658bc543f13c65b3c")
 
-        get(self,
-        "https://www.libsdl.org/projects/old/SDL_image/release/SDL_image-1.2.12.tar.gz",
-        strip_root=True)
+        #get(self,"https://www.libsdl.org/projects/old/SDL_image/release/SDL_image-1.2.12.tar.gz",strip_root=True)
 
     def generate(self):
         tc = AutotoolsToolchain(self)
@@ -49,7 +48,7 @@ class SdlImageConan(ConanFile):
         pkg_config_paths = [os.path.join(lib, "pkgconfig") for lib in lib_paths]
 
         env = Environment()
-        env.define("CPPFLAGS", include_statements)
+        # env.define("CPPFLAGS", include_statements)
         env.define("LDFLAGS", include_statements)
         env.define_path("LIBRARY_PATH", os.pathsep.join(lib_paths))
         env.define_path("LD_LIBRARY_PATH", os.pathsep.join(lib_paths))
