@@ -11,9 +11,10 @@ class Pkg(ConanFile):
             "AutotoolsToolchain", \
             "PkgConfigDeps"
 
+
     requires = \
-            "aa_libsdl/[>=1.2.15 <2.0.0]", \
-            "aa_libsdl_image/[>=1.2.12 <2.0.0]", \
+            "sdl_aa/[>=1.2.15 <2.0.0]", \
+            "sdl_image_aa/[>=1.2.12 <2.0.0]", \
             "libcurl/[>=7]", \
             "libxml2/[>=2.9.10]"
 

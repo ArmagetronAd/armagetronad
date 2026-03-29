@@ -8,29 +8,41 @@ import os
 # created after a suggestion by perplexity.ai
 
 class SdlImageConan(ConanFile):
-    name = "aa_libsdl_image"
+    name = "sdl_image_aa"
     version = "1.2.12"
     description = "SDL_image 1.2 library"
     settings = "os", "arch", "compiler", "build_type"
+    exports_sources = "CMakeLists.txt", "src/*", "include/*"
 
     requires = \
-            "aa_libsdl/[>=1.2.10 <2.0.0]", \
+            "sdl_aa/[>=1.2.10 <2.0.0]", \
             "libpng/[>=1.0.0 <2.0.0]"
 
-    def source(self):
-        git = Git(self)
-        git.clone(url="https://github.com/libsdl-org/SDL_image.git", target=".")
-        git.checkout("7c6ea40bb75262740cd07f7658bc543f13c65b3c")
+    default_options = {
+        "libxml2/*:html": False,
+        "libxml2/*:http": False,
+        "libxml2/*:ftp": False,
+        "libxml2/*:zlib": False,
+        "libxml2/*:iconv": False,
+        "libxml2/*:shared": True
+    }
 
-        #get(self,
-        #"https://www.libsdl.org/projects/old/SDL_image/release/SDL_image-1.2.12.tar.gz",
-        #strip_root=True)
+    def source(self):
+        #git = Git(self)
+        #git.clone(url="https://github.com/libsdl-org/SDL_image.git", target=".")
+        #git.checkout("7c6ea40bb75262740cd07f7658bc543f13c65b3c")
+
+        get(self,
+        "https://www.libsdl.org/projects/old/SDL_image/release/SDL_image-1.2.12.tar.gz",
+        strip_root=True)
 
     def generate(self):
         tc = AutotoolsToolchain(self)
 
         # hack in dependency library paths
         lib_paths = [lib for _, dep in self.dependencies.items() for lib in dep.cpp_info.libdirs]
+        #print(lib_paths)
+        #exit(1)
         include_paths = [lib for _, dep in self.dependencies.items() for lib in dep.cpp_info.includedirs]
         include_statements = [" -I" + inc for inc in include_paths]
         lib_statements = [" -L" + lib for lib in lib_paths]       
@@ -45,7 +57,7 @@ class SdlImageConan(ConanFile):
         env = env.vars(self, scope="build")
 
         # set SDL prefix explicitly to avoid finding system SDL
-        sdl = self.dependencies["aa_libsdl"]
+        sdl = self.dependencies["sdl_aa"]
         #print(sdl.cpp_info.includedirs)
         #exit(1)
 
