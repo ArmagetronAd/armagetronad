@@ -1,10 +1,10 @@
 from conan import ConanFile
 from conan.tools.files import copy
-from conan.tools.env import VirtualRunEnv
+from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
 import os
 
 # activate with
-# conan install . --build=missing 
+# ./conan_install.sh
 
 class Pkg(ConanFile):
     generators = \
@@ -12,6 +12,8 @@ class Pkg(ConanFile):
             "PkgConfigDeps"
 
     requires = \
+            "aa_libsdl/[>=1.2.15 <2.0.0]", \
+            "aa_libsdl_image/[>=1.2.12 <2.0.0]", \
             "libcurl/[>=7]", \
             "libxml2/[>=2.9.10]"
 
@@ -41,6 +43,9 @@ class Pkg(ConanFile):
     keep_imports = True
 
     def generate(self):
+        venv = VirtualBuildEnv(self)
+        venv.generate()
+
         # copy libraries
         libs_path = os.path.join(self.build_folder, "lib")
         for dep_name, dep in self.dependencies.items():

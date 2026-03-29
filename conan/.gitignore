@@ -4,4 +4,4 @@
 *.pc
 bin
 lib
-
+*_env.sh
