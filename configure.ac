@@ -709,7 +709,7 @@ dnl *************************************************
 dnl         SDL
 dnl *************************************************
 
-PKG_CHECK_MODULES([SDL], [sdl], [
+PKG_CHECK_MODULES([SDL], [sdl < 2], [
     CPPFLAGS="$CPPFLAGS $SDL_CFLAGS"
     LIBS="$LIBS $SDL_LIBS"
     ], [
