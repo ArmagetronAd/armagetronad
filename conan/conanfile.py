@@ -1,8 +1,12 @@
 from conan import ConanFile
-from conan.tools.files import copy
+from conan.tools.files import save, copy
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
 import os
+
+##################
+# ArmagetronAd   #
+##################
 
 # activate with
 # ./conan_install.sh
@@ -13,7 +17,6 @@ class Pkg(ConanFile):
 
 
     requires = \
-            "none_aa/0.0.1", \
             "sdl_aa/[>=1.2.15 <2.0.0]", \
             "sdl_image_aa/[>=1.2.12 <2.0.0]", \
             "libcurl/[>=7]", \
@@ -52,10 +55,19 @@ class Pkg(ConanFile):
         pc = PkgConfigDeps(self)
         pc.generate()
 
-        # Copy none.pc from the dummy package
-        none_pkg = self.dependencies["none_aa"]
-        none_pc = os.path.join(none_pkg.package_folder, "lib", "pkgconfig", "none.pc")
-        copy(self, "none.pc", os.path.dirname(none_pc), self.build_folder)
+        # Create none.pc to complete SDL2 config
+        pc_content = """\
+Name: none
+Description: Dummy none backend for SDL2
+Version: 0.0.1
+Libs: 
+Cflags: 
+        """
+        save(self, os.path.join(self.build_folder, "none.pc"), pc_content)
+
+        #none_pkg = self.dependencies["none_aa"]
+        #none_pc = os.path.join(none_pkg.package_folder, "lib", "pkgconfig", "none.pc")
+        #copy(self, "none.pc", os.path.dirname(none_pc), self.build_folder)
 
         # copy libraries
         libs_path = os.path.join(self.build_folder, "lib")

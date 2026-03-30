@@ -3,6 +3,10 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import download, unzip, get, copy
 import os
 
+##################
+# SDL            #
+##################
+
 # created after a suggestion by perplexity.ai
 
 class SdlConan(ConanFile):

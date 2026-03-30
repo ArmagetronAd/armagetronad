@@ -5,6 +5,11 @@ from conan.tools.env import Environment
 from conan.tools.scm import Git
 import os
 
+##################
+# SDL_image      #
+##################
+
+
 # created after a suggestion by perplexity.ai
 
 class SdlImageConan(ConanFile):
