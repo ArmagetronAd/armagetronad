@@ -59,4 +59,4 @@ class SdlConan(ConanFile):
         self.cpp_info.libdirs = ["lib"]
         self.cpp_info.bindirs = ["bin"]
         self.cpp_info.requires = ["sdl::sdl"]
-        self.cpp_info.set_property("pkg_config_name", "sdl")
+        self.cpp_info.set_property("pkg_config_name", "sdl_aa")
