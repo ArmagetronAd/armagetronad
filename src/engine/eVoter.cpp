@@ -1032,7 +1032,7 @@ static void se_HandleServerVoteChanged( nMessage& m )
 
 static void se_HandleNewServerVote( nMessage& m )
 {
-    if ( sn_GetNetState() != nCLIENT ||  eVoteItem::AcceptNewVote( m ) )
+    if ( /*sn_GetNetState() != nCLIENT || */ eVoteItem::AcceptNewVote( m ) )
     {
         // accept message
         eVoteItem* item = tNEW( eVoteItemServerControlled )();
