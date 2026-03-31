@@ -47,8 +47,8 @@ class SdlImageConan(ConanFile):
         pkg_config_paths = [os.path.join(lib, "pkgconfig") for lib in lib_paths]
 
         env = Environment()
-        env.define("CPPFLAGS", include_statements)
-        env.define("LDFLAGS", include_statements)
+        env.define("CPPFLAGS", os.environ.get("CPPFLAGS", "") + " " + " ".join(include_statements))
+        env.define("LDFLAGS",  os.environ.get("LDFLAGS", "") + " " + " ".join(lib_statements))
         env.append_path("LIBRARY_PATH", os.pathsep.join(lib_paths))
         env.append_path("LD_LIBRARY_PATH", os.pathsep.join(lib_paths))
         #env.define_path("PKG_CONFIG_PATH", os.pathsep.join(pkg_config_paths))
