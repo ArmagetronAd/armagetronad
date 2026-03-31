@@ -21,13 +21,7 @@ class SdlConan(ConanFile):
             "sdl/[>=2.0.0 <3.0.0]"
 
     default_options = {
-        "sdl/*:shared": True, # sdl_compat uses dynamic loading
-        "libxml2/*:html": False,
-        "libxml2/*:http": False,
-        "libxml2/*:ftp": False,
-        "libxml2/*:zlib": False,
-        "libxml2/*:iconv": False,
-        "libxml2/*:shared": True
+        "sdl/*:shared": True, # sdl_compat uses dynamic loading, so we absolutely need this
     }
 
     def source(self):
