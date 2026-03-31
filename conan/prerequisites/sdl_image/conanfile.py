@@ -17,7 +17,7 @@ class SdlImageConan(ConanFile):
     version = "1.2.12"
     description = "SDL_image 1.2 library"
     settings = "os", "arch", "compiler", "build_type"
-    generators = "PkgConfigDeps", "VirtualBuildEnv"
+    generators = "PkgConfigDeps", "VirtualBuildEnv", "VirtualRunEnv"
 
     requires = \
             "sdl_aa/[>=1.2.10 <2.0.0]", \
@@ -40,16 +40,17 @@ class SdlImageConan(ConanFile):
         lib_paths = [lib for _, dep in self.dependencies.items() for lib in dep.cpp_info.libdirs]
         #print(lib_paths)
         #exit(1)
+        os.environ.get("LIBRARY_PATH", "")
         include_paths = [lib for _, dep in self.dependencies.items() for lib in dep.cpp_info.includedirs]
         include_statements = [" -I" + inc for inc in include_paths]
         lib_statements = [" -L" + lib for lib in lib_paths]       
         pkg_config_paths = [os.path.join(lib, "pkgconfig") for lib in lib_paths]
 
         env = Environment()
-        # env.define("CPPFLAGS", include_statements)
+        env.define("CPPFLAGS", include_statements)
         env.define("LDFLAGS", include_statements)
-        env.define_path("LIBRARY_PATH", os.pathsep.join(lib_paths))
-        env.define_path("LD_LIBRARY_PATH", os.pathsep.join(lib_paths))
+        env.append_path("LIBRARY_PATH", os.pathsep.join(lib_paths))
+        env.append_path("LD_LIBRARY_PATH", os.pathsep.join(lib_paths))
         #env.define_path("PKG_CONFIG_PATH", os.pathsep.join(pkg_config_paths))
         env = env.vars(self, scope="build")
 
