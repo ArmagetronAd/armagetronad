@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import Environment, VirtualRunEnv, VirtualBuildEnv
 from conan.tools.files import download, unzip, get, copy
 import os
 
@@ -14,7 +15,7 @@ class SdlConan(ConanFile):
     version = "1.2.15"
     description = "SDL 1.2 library (legacy, uses SDL2)"
     settings = "os", "arch", "compiler", "build_type"
-    generators = "PkgConfigDeps", "VirtualBuildEnv", "VirtualRunEnv"
+    generators = "PkgConfigDeps"
     exports_sources = "CMakeLists.txt", "src/*", "include/*"
 
     requires = \
@@ -33,8 +34,26 @@ class SdlConan(ConanFile):
         cmake_layout(self)
 
     def generate(self):
+        venv = VirtualBuildEnv(self)
+        venv.generate()
+
+        # copy libraries
+        libs_path = os.path.join(self.build_folder, "lib")
+        for dep_name, dep in self.dependencies.items():
+            dirs = dep.cpp_info.libdirs + dep.cpp_info.bindirs
+            for dir in dirs:
+                for extension in [ "*.so.*", "*.dylib*", "*.dll" ]:
+                    copy(self, extension, dir, libs_path)
+
+        # modiy LD_LIBRARY_PATH
+        run_env = VirtualRunEnv(self)
+        run_env.environment().append_path("LD_LIBRARY_PATH", libs_path)
+        run_env.environment().append_path("LC_RPATH_PATH", libs_path)
+        run_env.generate()
+
         tc = CMakeToolchain(self)
         tc.generate()
+
         deps = CMakeDeps(self)
         deps.generate()
 

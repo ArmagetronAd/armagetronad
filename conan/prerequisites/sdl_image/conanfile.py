@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.files import download, unzip, get, copy
-from conan.tools.env import Environment
+from conan.tools.env import Environment, VirtualRunEnv, VirtualBuildEnv
 from conan.tools.scm import Git
 import os
 
@@ -17,7 +17,7 @@ class SdlImageConan(ConanFile):
     version = "1.2.12"
     description = "SDL_image 1.2 library"
     settings = "os", "arch", "compiler", "build_type"
-    generators = "PkgConfigDeps", "VirtualBuildEnv", "VirtualRunEnv"
+    generators = "PkgConfigDeps"
 
     requires = \
             "sdl_aa/[>=1.2.10 <2.0.0]", \
@@ -35,6 +35,24 @@ class SdlImageConan(ConanFile):
 
     def generate(self):
         tc = AutotoolsToolchain(self)
+
+        # copy libraries
+        libs_path = os.path.join(self.build_folder, "lib")
+        print(libs_path)
+        for dep_name, dep in self.dependencies.items():
+            dirs = dep.cpp_info.libdirs + dep.cpp_info.bindirs
+            print(dirs)
+            for dir in dirs:
+                for extension in [ "*.so.*", "*.dylib*", "*.dll" ]:
+                    copy(self, extension, dir, libs_path)
+
+        build_env = VirtualBuildEnv(self)
+
+        # modiy LD_LIBRARY_PATH
+        run_env = VirtualRunEnv(self)
+        run_env.environment().prepend_path("LD_LIBRARY_PATH", libs_path)
+        run_env.environment().prepend_path("DYLD_LIBRARY_PATH", libs_path)
+        run_env.environment().prepend_path("LC_RPATH", libs_path)
 
         # hack in dependency library paths
         lib_paths = [lib for _, dep in self.dependencies.items() for lib in dep.cpp_info.libdirs]
@@ -54,6 +72,9 @@ class SdlImageConan(ConanFile):
         #env.define_path("PKG_CONFIG_PATH", os.pathsep.join(pkg_config_paths))
         env = env.vars(self, scope="build")
 
+        build_env.environment().define("CPPFLAGS", os.environ.get("CPPFLAGS", "") + " " + " ".join(include_statements))
+
+
         # set SDL prefix explicitly to avoid finding system SDL
         sdl = self.dependencies["sdl_aa"]
         #print(sdl.cpp_info.includedirs)
@@ -67,6 +88,8 @@ class SdlImageConan(ConanFile):
         env.save_script("sdl_env")
 
         tc.generate()
+        run_env.generate()
+        build_env.generate()
 
     def build(self):
         autotools = Autotools(self)

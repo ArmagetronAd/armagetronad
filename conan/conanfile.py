@@ -80,5 +80,6 @@ Cflags:
         # modiy LD_LIBRARY_PATH
         run_env = VirtualRunEnv(self)
         run_env.environment().append_path("LD_LIBRARY_PATH", libs_path)
+        run_env.environment().append_path("LC_RPATH_PATH", libs_path)
         run_env.generate()
 
