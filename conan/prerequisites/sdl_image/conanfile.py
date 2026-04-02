@@ -21,6 +21,7 @@ class SdlImageConan(ConanFile):
 
     requires = \
             "sdl_aa/[>=1.2.10 <2.0.0]", \
+            "libjpeg/[9f]", \
             "libpng/[>=1.0.0 <2.0.0]"
 
     default_options = {
