@@ -47,21 +47,21 @@ class SdlImageConan(ConanFile):
                     copy(self, extension, dir, libs_path)
 
         build_env = VirtualBuildEnv(self)
+        build_env.environment().prepend_path("LD_LIBRARY_PATH", libs_path)
+        build_env.environment().prepend_path("DYLD_LIBRARY_PATH", libs_path)
+        build_env.environment().prepend_path("DYLD_FALLBACK_LIBRARY_PATH", libs_path)
 
         # modiy LD_LIBRARY_PATH
         run_env = VirtualRunEnv(self)
         run_env.environment().prepend_path("LD_LIBRARY_PATH", libs_path)
         run_env.environment().prepend_path("DYLD_LIBRARY_PATH", libs_path)
-        run_env.environment().prepend_path("LC_RPATH", libs_path)
+        run_env.environment().prepend_path("DYLD_FALLBACK_LIBRARY_PATH", libs_path)
 
         # hack in dependency library paths
         lib_paths = [lib for _, dep in self.dependencies.items() for lib in dep.cpp_info.libdirs]
-        #print(lib_paths)
-        #exit(1)
-        os.environ.get("LIBRARY_PATH", "")
         include_paths = [lib for _, dep in self.dependencies.items() for lib in dep.cpp_info.includedirs]
         include_statements = [" -I" + inc for inc in include_paths]
-        lib_statements = [" -L" + lib for lib in lib_paths]       
+        lib_statements = [" -L" + lib for lib in lib_paths]
         pkg_config_paths = [os.path.join(lib, "pkgconfig") for lib in lib_paths]
 
         env = Environment()
@@ -69,11 +69,10 @@ class SdlImageConan(ConanFile):
         env.define("LDFLAGS",  os.environ.get("LDFLAGS", "") + " " + " ".join(lib_statements))
         env.append_path("LIBRARY_PATH", os.pathsep.join(lib_paths))
         env.append_path("LD_LIBRARY_PATH", os.pathsep.join(lib_paths))
-        #env.define_path("PKG_CONFIG_PATH", os.pathsep.join(pkg_config_paths))
+        env.append_path("PKG_CONFIG_PATH", os.pathsep.join(pkg_config_paths))
         env = env.vars(self, scope="build")
 
         build_env.environment().define("CPPFLAGS", os.environ.get("CPPFLAGS", "") + " " + " ".join(include_statements))
-
 
         # set SDL prefix explicitly to avoid finding system SDL
         sdl = self.dependencies["sdl_aa"]

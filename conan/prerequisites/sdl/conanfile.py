@@ -34,10 +34,7 @@ class SdlConan(ConanFile):
         cmake_layout(self)
 
     def generate(self):
-        venv = VirtualBuildEnv(self)
-        venv.generate()
-
-        # copy libraries
+        # Copy dependency libs into local build lib path for configure-time runtime tests
         libs_path = os.path.join(self.build_folder, "lib")
         for dep_name, dep in self.dependencies.items():
             dirs = dep.cpp_info.libdirs + dep.cpp_info.bindirs
@@ -45,10 +42,18 @@ class SdlConan(ConanFile):
                 for extension in [ "*.so.*", "*.dylib*", "*.dll" ]:
                     copy(self, extension, dir, libs_path)
 
-        # modiy LD_LIBRARY_PATH
+        # Build-time environment to allow configure checks that execute linked binaries.
+        build_env = VirtualBuildEnv(self)
+        build_env.environment().prepend_path("LD_LIBRARY_PATH", libs_path)
+        build_env.environment().prepend_path("DYLD_LIBRARY_PATH", libs_path)
+        build_env.environment().prepend_path("DYLD_FALLBACK_LIBRARY_PATH", libs_path)
+        build_env.generate()
+
+        # Runtime package environment as well
         run_env = VirtualRunEnv(self)
-        run_env.environment().append_path("LD_LIBRARY_PATH", libs_path)
-        run_env.environment().append_path("LC_RPATH_PATH", libs_path)
+        run_env.environment().prepend_path("LD_LIBRARY_PATH", libs_path)
+        run_env.environment().prepend_path("DYLD_LIBRARY_PATH", libs_path)
+        run_env.environment().prepend_path("DYLD_FALLBACK_LIBRARY_PATH", libs_path)
         run_env.generate()
 
         tc = CMakeToolchain(self)
