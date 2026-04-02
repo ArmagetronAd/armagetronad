@@ -36,10 +36,11 @@ class SdlConan(ConanFile):
     def generate(self):
         # Copy dependency libs into local build lib path for configure-time runtime tests
         libs_path = os.path.join(self.build_folder, "lib")
+        os.makedirs(libs_path, exist_ok=True)
         for dep_name, dep in self.dependencies.items():
             dirs = dep.cpp_info.libdirs + dep.cpp_info.bindirs
             for dir in dirs:
-                for extension in [ "*.so.*", "*.dylib*", "*.dll" ]:
+                for extension in [ "*.so", "*.so.*", "*.dylib", "*.dylib*", "*.dll" ]:
                     copy(self, extension, dir, libs_path)
 
         # Build-time environment to allow configure checks that execute linked binaries.
