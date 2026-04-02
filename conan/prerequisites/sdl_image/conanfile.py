@@ -87,6 +87,7 @@ class SdlImageConan(ConanFile):
         #png = self.dependencies["libpng"]
         tc.configure_args.extend([
             "--with-sdl-prefix=" + sdl.package_folder,
+            "--disable-imageio",
         ])
 
         env.save_script("sdl_env")
