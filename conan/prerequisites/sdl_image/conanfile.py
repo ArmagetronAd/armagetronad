@@ -27,11 +27,11 @@ class SdlImageConan(ConanFile):
     }
 
     def source(self):
-        #git = Git(self)
-        #git.clone(url="https://github.com/libsdl-org/SDL_image.git", target=".")
-        #git.checkout("7c6ea40bb75262740cd07f7658bc543f13c65b3c")
+        git = Git(self)
+        git.clone(url="https://github.com/libsdl-org/SDL_image.git", target=".")
+        git.checkout("7c6ea40bb75262740cd07f7658bc543f13c65b3c")
 
-        get(self,"https://www.libsdl.org/projects/old/SDL_image/release/SDL_image-1.2.12.tar.gz",strip_root=True)
+        # get(self,"https://www.libsdl.org/projects/old/SDL_image/release/SDL_image-1.2.12.tar.gz",strip_root=True)
 
     def generate(self):
         tc = AutotoolsToolchain(self)
