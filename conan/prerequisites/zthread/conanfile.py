@@ -40,8 +40,16 @@ class ZThreadConan(ConanFile):
 
     def source(self):
         get(self,"https://sourceforge.net/projects/zthread/files/ZThread/2.3.2/ZThread-2.3.2.tar.gz",strip_root=True)
-        #download(self, "https://forums3.armagetronad.net/download/file.php?id=9628", "patches/zthread-2.3.2-fix-cmake.patch")
-        #patch(self, "patches/zthread-2.3.2-fix-cmake.patch")
+
+        # steal patches from debian
+        get(self, "http://archive.ubuntu.com/ubuntu/pool/universe/z/zthreads/zthreads_2.3.2-11.1build1.debian.tar.xz", strip_root=False)
+        files = os.listdir(os.path.join(self.source_folder, "debian/patches"))
+        files.sort()
+        for file in files:
+            if file.endswith(".patch"):
+                print(f"Applying patch: {file}")
+                patch(self, patch_file=os.path.join("debian/patches", file), strip=1)
+
     def generate(self):
         tc = AutotoolsToolchain(self)
 
