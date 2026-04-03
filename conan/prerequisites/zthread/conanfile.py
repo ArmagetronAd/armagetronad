@@ -99,6 +99,9 @@ class ZThreadConan(ConanFile):
         build_env.environment().define("CPPFLAGS", os.environ.get("CPPFLAGS", "") + " " + " ".join(include_statements))
         build_env.environment().define("LDFLAGS", os.environ.get("LDFLAGS", "") + " " + " ".join(lib_statements + rpath_statements))
 
+        # this lib uses c++ methods deprecated in c++11 and removed in c++17
+        build_env.environment().define("CXXFLAGS", "--std=c++11 " + os.environ.get("CXXFLAGS", ""))
+
         # hack to avoid complaints
         build_env.environment().define("MISSING", "true")
 
