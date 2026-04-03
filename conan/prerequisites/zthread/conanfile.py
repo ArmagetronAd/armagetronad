@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.gnu import Autotools, AutotoolsToolchain
-from conan.tools.files import download, unzip, get, copy, patch
+from conan.tools.files import download, unzip, get, copy, patch, replace_in_file
 from conan.tools.env import Environment, VirtualRunEnv, VirtualBuildEnv
 from conan.tools.scm import Git
 import os
@@ -50,6 +50,9 @@ class ZThreadConan(ConanFile):
                 print(f"Applying patch: {file}")
                 patch(self, patch_file=os.path.join("debian/patches", file), strip=1)
 
+        # correct sed syntax
+        replace_in_file(self, os.path.join(self.source_folder, "configure"), "[:space:]", "[[:space:]]")
+
     def generate(self):
         tc = AutotoolsToolchain(self)
 
@@ -95,6 +98,9 @@ class ZThreadConan(ConanFile):
 
         build_env.environment().define("CPPFLAGS", os.environ.get("CPPFLAGS", "") + " " + " ".join(include_statements))
         build_env.environment().define("LDFLAGS", os.environ.get("LDFLAGS", "") + " " + " ".join(lib_statements + rpath_statements))
+
+        # hack to avoid complaints
+        build_env.environment().define("MISSING", "true")
 
         # Provide explicit build/host system types to work around config.guess issues in nix
         gnu_triple = self._get_gnu_triple()
