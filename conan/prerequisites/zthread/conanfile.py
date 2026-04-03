@@ -4,6 +4,7 @@ from conan.tools.files import download, unzip, get, copy, patch
 from conan.tools.env import Environment, VirtualRunEnv, VirtualBuildEnv
 from conan.tools.scm import Git
 import os
+import platform
 
 ##################
 # ZThread        #
@@ -21,6 +22,41 @@ class ZThreadConan(ConanFile):
 
     default_options = {
     }
+
+    def _get_gnu_triple(self):
+        """Construct GNU triple (cpu-vendor-os) for use with autotools configure."""
+        arch_map = {
+            "x86_64": "x86_64",
+            "x86": "i686",
+            "armv7": "armv7",
+            "armv8": "arm64",  # Apple uses arm64, not aarch64
+            "armv8_32": "arm64",
+            "armv8.3": "arm64",
+            "sparc": "sparc",
+            "sparcv9": "sparcv9",
+            "mips": "mips",
+            "mips4": "mips",
+            "ppc32": "powerpc",
+            "ppc32be": "powerpc",
+            "ppc64": "powerpc64",
+            "ppc64le": "powerpc64le",
+        }
+        
+        os_map = {
+            "Linux": "linux-gnu",
+            "Macos": "apple-darwin",
+            "Windows": "w64-mingw32",
+            "FreeBSD": "freebsd",
+        }
+        
+        cpu = arch_map.get(str(self.settings.arch), str(self.settings.arch))
+        os_name = os_map.get(str(self.settings.os), str(self.settings.os))
+        
+        # Add Darwin version for macOS to improve config.sub compatibility
+        if str(self.settings.os) == "Macos":
+            return f"{cpu}-{os_name}21"  # 21+ is Big Sur and newer (arm64 support)
+        
+        return f"{cpu}-{os_name}"
 
     def source(self):
         get(self,"https://sourceforge.net/projects/zthread/files/ZThread/2.3.2/ZThread-2.3.2.tar.gz",strip_root=True)
@@ -72,12 +108,14 @@ class ZThreadConan(ConanFile):
         build_env.environment().define("CPPFLAGS", os.environ.get("CPPFLAGS", "") + " " + " ".join(include_statements))
         build_env.environment().define("LDFLAGS", os.environ.get("LDFLAGS", "") + " " + " ".join(lib_statements + rpath_statements))
 
-        #png = self.dependencies["libpng"]
+        # Provide explicit build/host system types to work around config.guess issues in nix
+        gnu_triple = self._get_gnu_triple()
         tc.configure_args.extend([
-            "--disable-imageio",
+            f"--build={gnu_triple}",
+            f"--host={gnu_triple}",
         ])
 
-        env.save_script("sdl_env")
+        env.save_script("zthread_env")
 
         tc.generate()
         run_env.generate()
