@@ -100,7 +100,7 @@ class ZThreadConan(ConanFile):
         build_env.environment().define("LDFLAGS", os.environ.get("LDFLAGS", "") + " " + " ".join(lib_statements + rpath_statements))
 
         # this lib uses c++ methods deprecated in c++11 and removed in c++17
-        build_env.environment().define("CXXFLAGS", "--std=c++11 " + os.environ.get("CXXFLAGS", ""))
+        build_env.environment().define("CXXFLAGS", "--std=c++11 -fpermissive -DPTHREAD_MUTEX_RECURSIVE_NP=PTHREAD_MUTEX_RECURSIVE " + os.environ.get("CXXFLAGS", ""))
 
         # hack to avoid complaints
         build_env.environment().define("MISSING", "true")
@@ -110,6 +110,7 @@ class ZThreadConan(ConanFile):
         tc.configure_args.extend([
             f"--build={gnu_triple}",
             f"--host={gnu_triple}",
+            "--enable-shared=false",
         ])
 
         env.save_script("zthread_env")
