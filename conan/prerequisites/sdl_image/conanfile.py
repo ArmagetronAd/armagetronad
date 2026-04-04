@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.gnu import Autotools, AutotoolsToolchain
-from conan.tools.files import download, unzip, get, copy
-from conan.tools.env import Environment, VirtualRunEnv, VirtualBuildEnv
+from conan.tools.files import get
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.scm import Git
 import os
 
@@ -38,7 +38,6 @@ class SdlImageConan(ConanFile):
         tc = AutotoolsToolchain(self)
 
         build_env = VirtualBuildEnv(self)
-        run_env = VirtualRunEnv(self)
 
         # hack in dependency library paths
         lib_paths = [lib for _, dep in self.dependencies.items() for lib in dep.cpp_info.libdirs]
@@ -54,7 +53,6 @@ class SdlImageConan(ConanFile):
         ])
 
         tc.generate()
-        run_env.generate()
         build_env.generate()
 
     def build(self):

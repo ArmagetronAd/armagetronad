@@ -14,7 +14,7 @@ class SdlConan(ConanFile):
     version = "1.2.15"
     description = "SDL 1.2 library (legacy, uses SDL2)"
     settings = "os", "arch", "compiler", "build_type"
-    generators = "PkgConfigDeps", "VirtualRunEnv", "VirtualBuildEnv"
+    generators = "PkgConfigDeps"
     exports_sources = "CMakeLists.txt", "src/*", "include/*"
 
     requires = \

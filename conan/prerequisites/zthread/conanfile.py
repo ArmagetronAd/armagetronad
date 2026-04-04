@@ -1,8 +1,7 @@
 from conan import ConanFile
 from conan.tools.gnu import Autotools, AutotoolsToolchain
-from conan.tools.files import download, unzip, get, copy, patch, replace_in_file
-from conan.tools.env import Environment, VirtualRunEnv, VirtualBuildEnv
-from conan.tools.scm import Git
+from conan.tools.files import get, patch, replace_in_file
+from conan.tools.env import VirtualBuildEnv
 import os
 import platform
 
@@ -57,7 +56,6 @@ class ZThreadConan(ConanFile):
         tc = AutotoolsToolchain(self)
 
         build_env = VirtualBuildEnv(self)
-        run_env = VirtualRunEnv(self)
 
         # this lib uses c++ methods deprecated in c++11 and removed in c++17
         build_env.environment().define("CXXFLAGS", "--std=c++11 -fpermissive -DPTHREAD_MUTEX_RECURSIVE_NP=PTHREAD_MUTEX_RECURSIVE " + os.environ.get("CXXFLAGS", ""))
@@ -75,7 +73,6 @@ class ZThreadConan(ConanFile):
         ])
 
         tc.generate()
-        run_env.generate()
         build_env.generate()
 
     def build(self):
