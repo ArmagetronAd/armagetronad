@@ -1,8 +1,9 @@
 from conan import ConanFile
 from conan.tools.files import save, copy
 from conan.tools.gnu import PkgConfigDeps, AutotoolsToolchain
-from conan.tools.env import VirtualRunEnv, VirtualBuildEnv, Environment
+from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
 import os
+import shutil
 
 ##################
 # ArmagetronAd   #
@@ -53,6 +54,9 @@ Cflags:
             for dir in dirs:
                 for extension in [ "*.so", "*.so.*", "*.dylib", "*.dylib*", "*.dll" ]:
                     copy(self, extension, dir, libs_path)
+
+        # fix sdl pkg-config files; standard conan puts SDL2 config as sdl.pc, usually sdl.pc would be reserved for SDL 1.2
+        shutil.copy(os.path.join(self.build_folder, "sdl_aa.pc"), os.path.join(self.build_folder, "sdl.pc"))
 
         build_env = VirtualBuildEnv(self)
 
