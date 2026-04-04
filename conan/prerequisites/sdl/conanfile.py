@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import Environment, VirtualRunEnv, VirtualBuildEnv
-from conan.tools.files import download, unzip, get, copy
+from conan.tools.files import get
 import os
 
 ##################
@@ -15,7 +14,7 @@ class SdlConan(ConanFile):
     version = "1.2.15"
     description = "SDL 1.2 library (legacy, uses SDL2)"
     settings = "os", "arch", "compiler", "build_type"
-    generators = "PkgConfigDeps"
+    generators = "PkgConfigDeps", "VirtualRunEnv", "VirtualBuildEnv"
     exports_sources = "CMakeLists.txt", "src/*", "include/*"
 
     requires = \
@@ -34,29 +33,6 @@ class SdlConan(ConanFile):
         cmake_layout(self)
 
     def generate(self):
-        # Copy dependency libs into local build lib path for configure-time runtime tests
-        libs_path = os.path.join(self.build_folder, "lib")
-        os.makedirs(libs_path, exist_ok=True)
-        for dep_name, dep in self.dependencies.items():
-            dirs = dep.cpp_info.libdirs + dep.cpp_info.bindirs
-            for dir in dirs:
-                for extension in [ "*.so", "*.so.*", "*.dylib", "*.dylib*", "*.dll" ]:
-                    copy(self, extension, dir, libs_path)
-
-        # Build-time environment to allow configure checks that execute linked binaries.
-        build_env = VirtualBuildEnv(self)
-        build_env.environment().prepend_path("LD_LIBRARY_PATH", libs_path)
-        build_env.environment().prepend_path("DYLD_LIBRARY_PATH", libs_path)
-        build_env.environment().prepend_path("DYLD_FALLBACK_LIBRARY_PATH", libs_path)
-        build_env.generate()
-
-        # Runtime package environment as well
-        run_env = VirtualRunEnv(self)
-        run_env.environment().prepend_path("LD_LIBRARY_PATH", libs_path)
-        run_env.environment().prepend_path("DYLD_LIBRARY_PATH", libs_path)
-        run_env.environment().prepend_path("DYLD_FALLBACK_LIBRARY_PATH", libs_path)
-        run_env.generate()
-
         tc = CMakeToolchain(self)
         tc.generate()
 
