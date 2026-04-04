@@ -19,30 +19,11 @@ class Pkg(ConanFile):
             "sdl_image_aa/[>=1.2.12 <2.0.0]", \
             "libcurl/[>=7]", \
             "libxml2/[>=2.9.10]"
-    
-    default_options = {
-        "sdl/*:shared": True, # sdl_compat uses dynamic loading
-        "libcurl/*:with_ssl": False,
-        "libcurl/*:with_https": False,
-        "libcurl/*:with_ftp": False,
-        "libcurl/*:with_file": False,
-        "libcurl/*:with_rtsp": False,
-        "libcurl/*:with_dict": False,
-        "libcurl/*:with_telnet": False,
-        "libcurl/*:with_tftp": False,
-        "libcurl/*:with_pop3": False,
-        "libcurl/*:with_imap": False,
-        "libcurl/*:with_smtp": False,
-        "libcurl/*:with_gopher": False,
-        "libcurl/*:shared": True,
-        "libcurl/*:static": False,
-        "libxml2/*:html": False,
-        "libxml2/*:http": False,
-        "libxml2/*:ftp": False,
-        "libxml2/*:zlib": False,
-        "libxml2/*:iconv": False,
-        "libxml2/*:shared": True
-    }
+
+    # we need the -config binaries from these dependencies at build time
+    build_requires = \
+            "zthread_aa/[>=2.0.0 <3.0.0]", \
+            "sdl_aa/[>=1.2.15 <2.0.0]"
 
     keep_imports = True
 
@@ -60,10 +41,6 @@ Cflags:
         """
         save(self, os.path.join(self.build_folder, "none.pc"), pc_content)
 
-        #none_pkg = self.dependencies["none_aa"]
-        #none_pc = os.path.join(none_pkg.package_folder, "lib", "pkgconfig", "none.pc")
-        #copy(self, "none.pc", os.path.dirname(none_pc), self.build_folder)
-
         tc = AutotoolsToolchain(self)
 
         # copy libraries
@@ -78,51 +55,15 @@ Cflags:
                     copy(self, extension, dir, libs_path)
 
         build_env = VirtualBuildEnv(self)
+
+        # modify LD_LIBRARY_PATH for build time to find dependency libraries (this should not be required if we would properly separate tests in configure.ac, like only compose found libraries right at the end)
         build_env.environment().prepend_path("LD_LIBRARY_PATH", libs_path)
-        build_env.environment().prepend_path("DYLD_LIBRARY_PATH", libs_path)
         build_env.environment().prepend_path("DYLD_FALLBACK_LIBRARY_PATH", libs_path)
 
-        # modiy LD_LIBRARY_PATH
+        # modify LD_LIBRARY_PATH
         run_env = VirtualRunEnv(self)
-        run_env.environment().prepend_path("LD_LIBRARY_PATH", libs_path)
-        run_env.environment().prepend_path("DYLD_LIBRARY_PATH", libs_path)
-        run_env.environment().prepend_path("DYLD_FALLBACK_LIBRARY_PATH", libs_path)
-
-        # hack in dependency library paths
-        bin_paths = [lib for _, dep in self.dependencies.items() for lib in dep.cpp_info.bindirs]
-        lib_paths = [lib for _, dep in self.dependencies.items() for lib in dep.cpp_info.libdirs]
-        include_paths = [lib for _, dep in self.dependencies.items() for lib in dep.cpp_info.includedirs]
-        include_statements = [" -I" + inc for inc in include_paths]
-        lib_statements = [" -L" + lib for lib in lib_paths]
-        pkg_config_paths = [os.path.join(lib, "pkgconfig") for lib in lib_paths]
-
-        env = Environment()
-        env.define("CPPFLAGS", os.environ.get("CPPFLAGS", "") + " " + " ".join(include_statements))
-
-        rpath_statements = ["-Wl,-rpath," + lib for lib in lib_paths]
-        env.define("LDFLAGS", os.environ.get("LDFLAGS", "") + " " + " ".join(lib_statements + rpath_statements))
-
-        env.append_path("LIBRARY_PATH", os.pathsep.join(lib_paths))
-        env.append_path("LD_LIBRARY_PATH", os.pathsep.join(lib_paths))
-        env.append_path("PKG_CONFIG_PATH", os.pathsep.join(pkg_config_paths))
-        env = env.vars(self, scope="build")
-
-        build_env.environment().define("CPPFLAGS", os.environ.get("CPPFLAGS", "") + " " + " ".join(include_statements))
-        build_env.environment().define("LDFLAGS", os.environ.get("LDFLAGS", "") + " " + " ".join(lib_statements + rpath_statements))
-        build_env.environment().append_path("PATH", os.pathsep.join(bin_paths))
-
-        # set SDL prefix explicitly to avoid finding system SDL
-        sdl = self.dependencies["sdl_aa"]
-        #print(sdl.cpp_info.includedirs)
-        #exit(1)
-
-        #png = self.dependencies["libpng"]
-        tc.configure_args.extend([
-            "--with-sdl-prefix=" + sdl.package_folder,
-            "--disable-imageio",
-        ])
-
-        env.save_script("aa_env")
+        run_env.environment().prepend_path("LD_LIBRARY_PATH", libs_path) # linux
+        run_env.environment().prepend_path("DYLD_FALLBACK_LIBRARY_PATH", libs_path) # macOS
 
         tc.generate()
         run_env.generate()
