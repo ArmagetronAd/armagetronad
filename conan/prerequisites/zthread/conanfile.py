@@ -110,6 +110,7 @@ class ZThreadConan(ConanFile):
         tc.configure_args.extend([
             f"--build={gnu_triple}",
             f"--host={gnu_triple}",
+            f"--prefix={self.package_folder}",
             "--enable-shared=false",
         ])
 
@@ -124,6 +125,15 @@ class ZThreadConan(ConanFile):
         autotools.configure()
         autotools.make()
 
+    def _make_install(self):
+        """Manually run make install without DESTDIR."""
+        import os
+        # Run make install directly, inheriting environment
+        cmd = f"cd {self.build_folder} && make install"
+        result = os.system(cmd)
+        if result != 0:
+            raise RuntimeError(f"make install failed with code {result}")
+
     def package_info(self):
         self.cpp_info.libs = ["zthread"]
         self.cpp_info.includedirs = ["include"]
@@ -132,7 +142,9 @@ class ZThreadConan(ConanFile):
 
     def package(self):
         autotools = Autotools(self)
-        autotools.install()
+        # Don't use DESTDIR since zthread applies it inconsistently
+        # Prefix is already set at configure time to self.package_folder
+        self._make_install()
 
     def export_sources(self):
         copy(self, "patches/*", self.recipe_folder, self.export_sources_folder)
