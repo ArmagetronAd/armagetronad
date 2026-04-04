@@ -14,6 +14,7 @@ import os
 class Pkg(ConanFile):
 
     requires = \
+            "zthread_aa/[>=2.0.0 <3.0.0]", \
             "sdl_aa/[>=1.2.15 <2.0.0]", \
             "sdl_image_aa/[>=1.2.12 <2.0.0]", \
             "libcurl/[>=7]", \

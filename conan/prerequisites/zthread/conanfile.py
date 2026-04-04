@@ -15,7 +15,7 @@ import platform
 
 class ZThreadConan(ConanFile):
     name = "zthread_aa"
-    version = "1.2.12"
+    version = "2.3.2"
     description = "ZThread library"
     settings = "os", "arch", "compiler", "build_type"
     generators = "PkgConfigDeps"
