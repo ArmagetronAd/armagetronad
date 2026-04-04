@@ -56,7 +56,8 @@ Cflags:
                     copy(self, extension, dir, libs_path)
 
         # fix sdl pkg-config files; standard conan puts SDL2 config as sdl.pc, usually sdl.pc would be reserved for SDL 1.2
-        shutil.copy(os.path.join(self.build_folder, "sdl_aa.pc"), os.path.join(self.build_folder, "sdl.pc"))
+        # shutil.copy(os.path.join(self.build_folder, "sdl_aa.pc"), os.path.join(self.build_folder, "sdl.pc"))
+        # or, don't. Apparently the old method we use as fallback, sdl-config, works better on macOS, this makes running the game fail.
 
         build_env = VirtualBuildEnv(self)
 
