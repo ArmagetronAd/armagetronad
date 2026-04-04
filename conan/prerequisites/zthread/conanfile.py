@@ -56,48 +56,8 @@ class ZThreadConan(ConanFile):
     def generate(self):
         tc = AutotoolsToolchain(self)
 
-        # copy libraries
-        libs_path = os.path.join(self.build_folder, "lib")
-        os.makedirs(libs_path, exist_ok=True)
-        print(libs_path)
-        for dep_name, dep in self.dependencies.items():
-            dirs = dep.cpp_info.libdirs + dep.cpp_info.bindirs
-            print(dirs)
-            for dir in dirs:
-                for extension in [ "*.so", "*.so.*", "*.dylib", "*.dylib*", "*.dll" ]:
-                    copy(self, extension, dir, libs_path)
-
         build_env = VirtualBuildEnv(self)
-        build_env.environment().prepend_path("LD_LIBRARY_PATH", libs_path)
-        build_env.environment().prepend_path("DYLD_LIBRARY_PATH", libs_path)
-        build_env.environment().prepend_path("DYLD_FALLBACK_LIBRARY_PATH", libs_path)
-
-        # modiy LD_LIBRARY_PATH
         run_env = VirtualRunEnv(self)
-        run_env.environment().prepend_path("LD_LIBRARY_PATH", libs_path)
-        run_env.environment().prepend_path("DYLD_LIBRARY_PATH", libs_path)
-        run_env.environment().prepend_path("DYLD_FALLBACK_LIBRARY_PATH", libs_path)
-
-        # hack in dependency library paths
-        lib_paths = [lib for _, dep in self.dependencies.items() for lib in dep.cpp_info.libdirs]
-        include_paths = [lib for _, dep in self.dependencies.items() for lib in dep.cpp_info.includedirs]
-        include_statements = [" -I" + inc for inc in include_paths]
-        lib_statements = [" -L" + lib for lib in lib_paths]
-        pkg_config_paths = [os.path.join(lib, "pkgconfig") for lib in lib_paths]
-
-        env = Environment()
-        env.define("CPPFLAGS", os.environ.get("CPPFLAGS", "") + " " + " ".join(include_statements))
-
-        rpath_statements = ["-Wl,-rpath," + lib for lib in lib_paths]
-        env.define("LDFLAGS", os.environ.get("LDFLAGS", "") + " " + " ".join(lib_statements + rpath_statements))
-
-        env.append_path("LIBRARY_PATH", os.pathsep.join(lib_paths))
-        env.append_path("LD_LIBRARY_PATH", os.pathsep.join(lib_paths))
-        env.append_path("PKG_CONFIG_PATH", os.pathsep.join(pkg_config_paths))
-        env = env.vars(self, scope="build")
-
-        build_env.environment().define("CPPFLAGS", os.environ.get("CPPFLAGS", "") + " " + " ".join(include_statements))
-        build_env.environment().define("LDFLAGS", os.environ.get("LDFLAGS", "") + " " + " ".join(lib_statements + rpath_statements))
 
         # this lib uses c++ methods deprecated in c++11 and removed in c++17
         build_env.environment().define("CXXFLAGS", "--std=c++11 -fpermissive -DPTHREAD_MUTEX_RECURSIVE_NP=PTHREAD_MUTEX_RECURSIVE " + os.environ.get("CXXFLAGS", ""))
@@ -113,8 +73,6 @@ class ZThreadConan(ConanFile):
             f"--prefix={self.package_folder}",
             "--enable-shared=false",
         ])
-
-        env.save_script("zthread_env")
 
         tc.generate()
         run_env.generate()
@@ -145,7 +103,4 @@ class ZThreadConan(ConanFile):
         # Don't use DESTDIR since zthread applies it inconsistently
         # Prefix is already set at configure time to self.package_folder
         self._make_install()
-
-    def export_sources(self):
-        copy(self, "patches/*", self.recipe_folder, self.export_sources_folder)
 
