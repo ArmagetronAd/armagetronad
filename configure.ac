@@ -654,20 +654,23 @@ dnl *************************************************
 
 if test x$enable_armathentication = xyes; then
 
-dnl ACX_PTHREAD([
-
-dnl LIBS="${PTHREAD_LIBS} ${LIBS}"
-dnl CXXFLAGS="${CXXFLAGS} ${PTHREAD_CFLAGS}"
-dnl CC="${PTHREAD_CC}"
-dnl AC_DEFINE(HAVE_PTHREAD,1,[Define if you have POSIX threads libraries and header files.])
-
-dnl ],[
-
-AM_PATH_ZTHREAD_AA(2.3.2)
+dnl AM_PATH_ZTHREAD_AA(2.3.2)
 CXXFLAGS="${CXXFLAGS} ${ZTHREAD_CXXFLAGS}"
 LIBS="${LIBS} ${ZTHREAD_LIBS}"
 
-dnl ])
+AC_LANG([C++])
+
+if test "x$ZTHREAD_LIB" = x; then
+
+dnl if z-thread is unavailable, make do with pthread
+ACX_PTHREAD([
+LIBS="${PTHREAD_LIBS} ${LIBS}"
+CXXFLAGS="${CXXFLAGS} ${PTHREAD_CFLAGS}"
+CC="${PTHREAD_CC}"
+AC_DEFINE(HAVE_PTHREAD,1,[Define if you have POSIX threads libraries and header files.])
+],
+)
+fi
 
 fi # krawall
 fi # armamain
