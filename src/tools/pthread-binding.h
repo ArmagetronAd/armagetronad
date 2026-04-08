@@ -2,15 +2,12 @@
 #include <pthread.h>
 #include <stdexcept>
 
-class tPThreadMutex
+class tPThreadMutexBase
 {
-private:
+protected:
     pthread_mutex_t mutex;
+
 public:
-    tPThreadMutex() {
-        // TODO: error checking
-        pthread_mutex_init(&mutex, NULL);
-    }
     void acquire() {
         pthread_mutex_lock(&mutex);
     };
@@ -19,14 +16,20 @@ public:
     };
 };
 
-class tPThreadRecursiveMutex
- : public tPThreadMutex
+class tPThreadMutex : public tPThreadMutexBase
 {
-private:
-    pthread_mutex_t mutex;
 public:
-    tPThreadRecursiveMutex() {
-        // TODO: error checking
+    tPThreadMutex()
+    {
+        pthread_mutex_init(&mutex, NULL);
+    }
+};
+
+class tPThreadRecursiveMutex : public tPThreadMutexBase
+{
+public:
+    tPThreadRecursiveMutex()
+    {
         pthread_mutexattr_t mta;
         
         pthread_mutexattr_settype(&mta, PTHREAD_MUTEX_RECURSIVE);
