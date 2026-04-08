@@ -83,9 +83,7 @@ public:
 }; // namespace ZThread
 
 // from now on, we can pretend to have ZThread
-#define HAVE_LIBZTHREAD
-
-// #elif defined(HAVE_BOOST_THREAD)
+#define HAVE_LIBZTHREAD 1
 
 #else
 
@@ -102,5 +100,8 @@ namespace ZThread
 using FastMutex = tMockMutex;
 using FastRecursiveMutex = tMockMutex;
 } // namespace ZThread
+
+// we don't pretend to have zthread here.
+// #error need_threading
 
 #endif
