@@ -15,7 +15,6 @@ import shutil
 class Pkg(ConanFile):
 
     requires = \
-            "zthread_aa/[>=2.0.0 <3.0.0]", \
             "sdl_aa/[>=1.2.15 <2.0.0]", \
             "sdl_image_aa/[>=1.2.12 <2.0.0]", \
             "libcurl/[>=7]", \
@@ -23,7 +22,6 @@ class Pkg(ConanFile):
 
     # we need the -config binaries from these dependencies at build time
     build_requires = \
-            "zthread_aa/[>=2.0.0 <3.0.0]", \
             "sdl_aa/[>=1.2.15 <2.0.0]"
 
     keep_imports = True
