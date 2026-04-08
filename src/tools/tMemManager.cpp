@@ -86,23 +86,8 @@ static CRITICAL_SECTION  mutex;
 
 static bool reported=false;
 
-#ifdef HAVE_LIBZTHREAD
-#include <zthread/FastRecursiveMutex.h>
-
+#include "tZThread.h"
 typedef ZThread::FastRecursiveMutex MUTEX;
-#elif defined(HAVE_PTHREAD)
-#include "pthread-binding.h"
-typedef tPThreadRecursiveMutex MUTEX;
-#else
-class tMockMutex
-{
-public:
-    void acquire(){}
-    void release(){}
-};
-
-typedef tMockMutex MUTEX;
-#endif
 
 static bool inited=true;
 

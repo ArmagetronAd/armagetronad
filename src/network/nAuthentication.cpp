@@ -42,15 +42,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <string.h>
 #include <deque>
 
+#include "tZThread.h"
+
 #ifdef HAVE_LIBZTHREAD
-#include <zthread/Thread.h>
-#include <zthread/LockedQueue.h>
-//#include <zthread/ClassLockable.h>
-#include <zthread/FastMutex.h>
-#include <zthread/FastRecursiveMutex.h>
-#include <zthread/Guard.h>
-// #include <zthread/SynchronousExecutor.h>
-#include <zthread/ThreadedExecutor.h>
 typedef ZThread::ThreadedExecutor nExecutor;
 //typedef ZThread::SynchronousExecutor nExecutor;
 typedef ZThread::FastMutex nMutex;
