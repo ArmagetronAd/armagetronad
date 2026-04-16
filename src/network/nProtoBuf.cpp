@@ -262,7 +262,7 @@ void nProtoBufMessageBase::Filter( nProtoBuf & buf )
         FieldDescriptor const * field = descriptor->field( i );
         tASSERT( field );
         
-        if ( field->label() == FieldDescriptor::LABEL_REPEATED )
+        if ( field->is_repeated() )
         {
             for( int j = r->REFL_GET( FieldSize, buf, field ) - 1; j >= 0; --j )
             {
@@ -628,7 +628,7 @@ void nProtoBufDescriptorBase::StreamFromDefault( nStreamMessage & in, nProtoBuf 
             continue;
         }
 
-        if ( field->label() == FieldDescriptor::LABEL_REPEATED )
+        if ( field->is_repeated() )
         {
             if ( i != 0 )
             {
@@ -794,7 +794,7 @@ void nProtoBufDescriptorBase::StreamToDefault( nProtoBuf const & in, nStreamMess
             continue;
         }
 
-        if ( field->label() == FieldDescriptor::LABEL_REPEATED )
+        if ( field->is_repeated() )
         {
             if ( i != 0 )
             {
@@ -926,7 +926,7 @@ void nProtoBufDescriptorBase::EstimateMessageDifference( nProtoBuf const & a,
         int weight = 0;
         bool differ = false;
 
-        if ( field->label() == FieldDescriptor::LABEL_REPEATED )
+        if ( field->is_repeated() )
         {
             continue;
         }
@@ -1016,7 +1016,7 @@ void nProtoBufDescriptorBase::DiffMessages( nProtoBuf const & base,
         FieldDescriptor const * field = descriptor->field( i );
         tASSERT( field );
 
-        if ( field->label() == FieldDescriptor::LABEL_REPEATED )
+        if ( field->is_repeated() )
         {
             continue;
         }
@@ -1089,7 +1089,7 @@ void nProtoBufDescriptorBase::ClearRepeated( nProtoBuf & message )
         FieldDescriptor const * field = descriptor->field( i );
         tASSERT( field );
 
-        if ( field->label() == FieldDescriptor::LABEL_REPEATED )
+        if ( field->is_repeated() )
         {
             // clear the field
             reflection->REFL_GET( ClearField, &message, field );
