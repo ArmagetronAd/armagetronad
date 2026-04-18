@@ -49,6 +49,7 @@
 
   <url type="homepage">https://www.armagetronad.org</url>
   <url type="bugtracker">https://gitlab.com/armagetronad/armagetronad/-/issues</url>
+  <url type="vcs-browser">https://gitlab.com/armagetronad/armagetronad</url>
 
   <releases>
     <release version="@version@" date="@date_iso@"/>
