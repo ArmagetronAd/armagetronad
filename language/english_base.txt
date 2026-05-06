@@ -779,6 +779,7 @@ max_in_rate_help        Maximum network input rate
 ping_charity_help        How much ping are you willing to take over from your opponent?
 ping_charity_max_help    Server option: maximum ping charity value. Set to 0 to avoid instant kills. Active only if all clients are 0.2.8.3 or better.
 ping_charity_min_help    Server option: minimum ping charity value. Use to enforce fairness. Active only if all clients are 0.2.8.3 or better.
+ping_charity_min_player_help    Server option: minimum ping charity value enforced to players. Use to enforce fairness to high ping players without restricting the value of ping_charity_server directly.
 ping_charity_server_help Don't touch: the server says this is the maximal ping compensation.
 big_brother_help        Did we already send the big brother information?
 server_name_help        Name of this server

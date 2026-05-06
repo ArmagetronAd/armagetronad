@@ -7272,6 +7272,9 @@ void ePlayerNetID::CreateVoter()
     }
 }
 
+static int se_pingCharityMinPlayer = 0;
+static tSettingItem<int> se_pingCharityMinPConf( "PING_CHARITY_MIN_PLAYER", se_pingCharityMinPlayer );
+
 void ePlayerNetID::WriteSync(nMessage &m)
 {
     lastSync=tSysTimeFloat();
@@ -7577,6 +7580,8 @@ void ePlayerNetID::ReadSync(nMessage &m)
     }
 
     m.Read(pingCharity);
+    if( pingCharity < se_pingCharityMinPlayer )
+        pingCharity = se_pingCharityMinPlayer;
     sg_ClampPingCharity(pingCharity);
 
     // name as sent from the other end
