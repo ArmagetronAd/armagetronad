@@ -53,7 +53,7 @@ doublebind_time_help    Tempo en segundos durante o cal dous eventos diferentes 
 #********************************************
 #********************************************
 
-cycle_speed_help                Velocidade básica da túa moto se conduces en liña recta e non preto dos muros.
+cycle_speed_help                Velocidade básica da túa moto se conduces en liña recta e non preto das paredes.
 cycle_speed_min_help            Velocidade mínima da túa moto, medida relativa a CYCLE_SPEED
 cycle_speed_max_help		    Velocidade máxima da túa moto, medida en relación con CYCLE_SPEED. Un valor de 0 significa sen velocidade máxima.
 cycle_speed_decay_below_help    Cociente da velocidade de moto ao cal se achega ao valor CYCLE_SPEED desde velocidades inferiores
@@ -61,21 +61,21 @@ cycle_speed_decay_above_help    Cociente da velocidade de moto ao cal se achega 
 cycle_start_speed_help		 Moto inicial speed											   
 cycle_sound_speed_help       Velocidade do son.
 
-cycle_accel_help              Factor de aceleración dos muros.
-cycle_accel_self_help         Multiplicador de CYCLE_ACCEL do teu propio muro
-cycle_accel_team_help         Multiplicador de CYCLE_ACCEL para os muros dos teus compañeiros de equipo
-cycle_accel_enemy_help        Multiplicador de CYCLE_ACCEL para os muros dos teus inimigos
-cycle_accel_rim_help          Multiplicador de CYCLE_ACCEL para os muros externos da area
-cycle_accel_slingshot_help    Multiplicar para o efecto total de CYCLE_ACCEL, se a moto está entre o seu propio muro e outro muro
-cycle_accel_tunnel_help         Multiplicador do efecto total de CYCLE_ACCEL, se a moto está entre dúas paredes que non creou ela mesma.
-cycle_accel_offset_help       Distancia mínima dos muros aceleradores, debe ser positiva.
-cycle_wall_near_help          Distancia máxima dos muros aceleradores.
+cycle_accel_help              Factor de aceleración das paredes.
+cycle_accel_self_help         Multiplicador de CYCLE_ACCEL da túa propia parede
+cycle_accel_team_help         Multiplicador de CYCLE_ACCEL para as paredes dos teus compañeiros de equipo
+cycle_accel_enemy_help        Multiplicador de CYCLE_ACCEL para as paredes dos teus inimigos
+cycle_accel_rim_help          Multiplicador de CYCLE_ACCEL para as paredes externas da area
+cycle_accel_slingshot_help    Multiplicar para o efecto total de CYCLE_ACCEL, se a moto está entre a súa propia parede e outra parede
+cycle_accel_tunnel_help         Multiplicador do efecto total de CYCLE_ACCEL, se a moto está entre duas paredes que non creou ela mesma.
+cycle_accel_offset_help       Distancia mínima das paredes aceleradoras, debe ser positiva.
+cycle_wall_near_help          Distancia máxima das paredes aceleradoras.
 
 cycle_boost_self_help           Aumento de velocidade ao saír da túa propia parede
 cycle_boost_team_help           Aumento de velocidade ao saír da parede dun compañeiro
 cycle_boost_enemy_help          Aumento de velocidade ao saír da parede dun inimigo
 cycle_boost_rim_help            Aumento de velocidade ao saír da parede exterior
-cycle_boostfactor_self_help     Factor polo que se multiplica a túa velocidade ao saír da túa propia parede
+cycle_boostfactor_self_help     Factor polo que se multiplica a túa velocidade ao saír do túa propia parede
 cycle_boostfactor_team_help     Factor polo que se multiplica a túa velocidade ao saír da parede dun compañeiro
 cycle_boostfactor_enemy_help    Factor polo que se multiplica a túa velocidade ao saír da parede dun inimigo
 cycle_boostfactor_rim_help      Factor polo que se multiplica a túa velocidade ao saír da parede exterior
@@ -95,26 +95,26 @@ cycle_width_side_help        Distancia mínima dunha moto a unha parede en calqu
 cycle_width_rubber_min_help  Se as condicións de cycle_width se violan lixeiramente, consome esta cantidade de goma. Se se pon a 1, a taxa de uso da goma é a mesma que se estivese diante dunha parede.
 cycle_width_rubber_max_help  Se as condicións de cycle_width se violan moito, consome esta cantidade de goma. Se se pon a 1, a taxa de uso da goma é a mesma que se estivese diante dunha parede.
 
-cycle_rubber_help             Distancia mínima permitida de condución preto de un muro.
-cycle_rubber_time_help        Escala de tempo coa que o rubber restablécese.
-cycle_rubber_legacy_help      Volver ao modo antigo do rubber se está conectado algún cliente con versións <= 0.2.7.0
-cycle_rubber_timebased_help   A utilización do rubber basearase na distancia percorrida se vale 0 (por defecto) e do tempo se vale 1. Tamén son posibles valores intermedios e fóra destes límites.
-cycle_rubber_speed_help       Velocidade logarítmica da aproximación do muro (cada segundo, achégaste ao muro por un factor de 0.4^{este valor} ~).
-cycle_rubber_mindistance_help Valor da distancia mínima que se che permite estar do muro.
-cycle_rubber_mindistance_gap_help		Se > 0, CYCLE_RUBBER_MINDISTANCE efectivamente nunca se toma maior que este valor multiplicado polo tamaño de calquera burato detectado polo que a moto poida pasar. Para xogo “Open”.
-cycle_rubber_mindistance_gap_backdoor_help Se > 0, CYCLE_RUBBER_MINDISTANCE efectivamente nunca se toma maior que este valor multiplicado polo tamaño de calquera burato traseiro detectado polo que a moto poida pasar. Para xogo “Open”. Se = 0, CYCLE_RUBBER_MINDISTANCE_GAP aplícase tamén aos buratos traseiros.
-cycle_rubber_mindistance_gap_side_help A detección de buratos só considera buratos aos que a moto pode chegar en non menos que este número de segundos.
-cycle_rubber_mindistance_ratio_help	Distancia adicional a CYCLE_RUBBER_MINDISTANCE por cada unidade de lonxitude da parede que teñas diante.
-cycle_rubber_mindistance_reservoir_help Distancia adicional se tes o medidor de rubber baleiro (se decrementará mentres vaias usando todo o rubber).
-cycle_rubber_mindistance_unprepared_help Distancia adicional para xiros inesperados; aplícase cando o último xiro da moto fíxose fai unha fracción de segundo e se decrementó nun tempo de preparación maior que CYCLE_RUBBER_MINDISTANCE_PREPARATION.
-cycle_rubber_mindistance_preparation_help Escala de tempo en segundos coa que se compara o tempo do último xiro dunha moto para determinar o efecto de CYCLE_RUBBER_MINDISTANCE_UNPREPARED.
-cycle_rubber_mindistance_legacy_help Factor adicional para a distancia mínima aos muros, activo cando haxa xogadores conectados que teñan o rip bug.
-cycle_rubber_minadjust_help   Axustándose aproximadamente a 180ing. ao muro, permite achegarche ao muro polo menos por este valor (relativo á última distancia).
-cycle_rubber_delay_help       Durante esta fracción do tempo de retardo da moto tras cada quenda, a eficiencia do rubber multiplicarase por CYCLE_RUBBER_DELAY_BONUS.
-cycle_rubber_delay_bonus_help Factor para a eficiencia do rubber CYCLE_RUBBER_DELAY.
-cycle_ping_rubber_help        Valor de finura adicional para xogadores cun ping alto.
-cycle_rubber_wall_shrink_help Con rastros de lonxitude finita, o rubber usado multiplícase por este valor e o resultado réstase da lonxitude do muro.
-cycle_rubber_sync_help              Determina se a goma está sincronizada cos clientes. O valor predeterminado 1 sincroniza só co propietario de cada moto; un valor de 0 non a sincroniza en absoluto e fai inútiles os medidores de goma; un valor de 2 sincroniza a goma de tódalas motos con tódolos clientes, que era o comportamento antigo antes de introducir esta opción.
+cycle_rubber_help             Distancia mínima permitida de condución preto dunha parede.
+cycle_rubber_time_help        Escala de tempo na que se restaura a elasticidade.
+cycle_rubber_legacy_help      Reverte ao código antigo de elasticidade se está conectado algún cliente con versións <= 0.2.7.0
+cycle_rubber_timebased_help   O uso da elasticidade baséase na distancia percorrida se é 0 (por defecto) e no tempo transcorrido se é 1. Tamén son posibles valores intermedios e fóra destes límites.
+cycle_rubber_speed_help       Velocidade logarítmica de aproximación á parede cando a elasticidade está activa (cada segundo achégaste á parede por un factor de ~0.4^{este valor}).
+cycle_rubber_mindistance_help Distancia mínima co código de elasticidade mantén entre ti e a parede dianteira.
+cycle_rubber_mindistance_gap_help		Se > 0, CYCLE_RUBBER_MINDISTANCE nunca se considera maior que este valor multiplicado polo tamaño de calquera fenda detectada pola ca moto poida pasar. Para xogo “Open”.
+cycle_rubber_mindistance_gap_backdoor_help Se > 0, CYCLE_RUBBER_MINDISTANCE nunca se considera maior que este valor multiplicado polo tamaño de calquera fenda traseira detectada pola que a moto poida pasar. Para xogo “Open”. Se = 0, CYCLE_RUBBER_MINDISTANCE_GAP aplícase tamén as fendas traseiras.
+cycle_rubber_mindistance_gap_side_help A detección de fendas só considera aquelas ás que a moto pode chegar en non menos de este número de segundos.
+cycle_rubber_mindistance_ratio_help	Distancia adicional a CYCLE_RUBBER_MINDISTANCE por cada unidade de lonxitude da parede que tes diante.
+cycle_rubber_mindistance_reservoir_help Distancia adicional se tes o medidor de elasticidade baleiro (desvanece gradualmente a medida que consumes elasticidade).
+cycle_rubber_mindistance_unprepared_help Distancia adicional para xiros inesperados; aplícase cando o derradeiro xiro da moto foi hai só unha fracción de segundo e desvanécese para tempos de preparación maiores que CYCLE_RUBBER_MINDISTANCE_PREPARATION.
+cycle_rubber_mindistance_preparation_help Escala de tempo en segundos coa que se compara o tempo do derradeiro xiro dunha moto para determinar o efecto de CYCLE_RUBBER_MINDISTANCE_UNPREPARED.
+cycle_rubber_mindistance_legacy_help Factor adicional para a distancia mínima as paredes, activo cando hai pares con o bug de rachar conectados.
+cycle_rubber_minadjust_help   Ao axustarse ou facer un xiro de 180º cara a unha parede, permite achegarse polo menos esta cantidade máis (en relación coa última distancia).
+cycle_rubber_delay_help       Durante esta fracción do tempo de atraso da moto despois de cada xiro, a eficiencia da elasticidade multiplícase polo valor de CYCLE_RUBBER_DELAY_BONUS.
+cycle_rubber_delay_bonus_help Factor de bonificación da elasticidade para CYCLE_RUBBER_DELAY.
+cycle_ping_rubber_help        Elasticidade adicional para xogadores con ping alto.
+cycle_rubber_wall_shrink_help Con rastros de lonxitude finita, a elasticidade usada multiplícase por este valor e o resultado réstase á lonxitude da parede.
+cycle_rubber_sync_help              Determina se a elasticidade se sincroniza cos clientes. O valor por defecto 1 faino sincronizar só co propietario de cada moto; 0 non a sincroniza en absoluto e fai inútil o medidor de elasticidade; 2 sincroniza a elasticidade de todas as motos con todos os clientes, como no comportamento antigo antes de engadir este axuste.
 cycle_brake_refill_help       Relación de enchido da reserva de freos cando non estás a frear.
 cycle_brake_deplete_help      Relación de baleirado da reserva de freos cando estás a frear.
 cycle_sync_interval_enemy_help Tempo (en segundos), entre as actualizacións servidor/cliente das motos inimigas.
@@ -141,7 +141,7 @@ cycle_max_refcount_help       Número máximo de referencias permitido para as m
 #********************************************
 
 chatbot_always_active_help          Se se define en 1, o bot da charla está activo todo o tempo
-chatbot_new_wall_blindness_help     o bot da charla non verá os muros que se construíron hai menos destes segundos
+chatbot_new_wall_blindness_help     o bot da charla non verá as paredes que se construíron hai menos destes segundos
 chatbot_min_timestep_help           tempo mínimo en segundos entre os pensamentos do bot da charla
 chatbot_delay_help                  tempo entre a entrada no chat e a activación do bot da charla
 chatbot_range_help                  tempo en segundos co bot é capaz de planificar con antelación
@@ -157,8 +157,8 @@ chatbot_decay_help                  velocidade á que a calidade do bot da charl
 
 enemy_teammate_penalty_help   Penalización do tempo efectivo en segundos se a detección de influencia de inimigo provén dun compañeiro de equipo
 enemy_dead_penalty_help       Penalización do tempo efectivo en segundos se a detección de influencia de inimigo provén dun xogador morto
-enemy_chatbot_penalty_help    Penalización en segundos se a vítima está no modo de bot de charla e a influencia do inimigo é só co bot de charla evade un muro
-enemy_currenttime_influence_help Se vale 1, o tempo actual entra en comparación para a influencia de inimigos (e non o tempo de construción do muro atopado). Permiten valores arbitrarios de mesturado.
+enemy_chatbot_penalty_help    Penalización en segundos se a vítima está no modo de bot de charla e a influencia do inimigo é só co bot de charla evade unha parede
+enemy_currenttime_influence_help Se vale 1, o tempo actual entra en comparación para a influencia de inimigos (e non o tempo de construción da parede atopada). Permiten valores arbitrarios de mesturado.
 enemy_suicide_timeout_help    Se non se atopa ningunha influencia de inimigo durante estes segundos, a morte da xogador conta como un suicidio
 score_die_help                Puntos que consegues por morrer
 score_survive_help            Puntos que consegues por sobrevivir
@@ -173,8 +173,8 @@ deadly_explosions_help        Deberían destruírse as motos que están no radio
 
 
 sp_score_win_help             Puntos que consegues por gañar unha rolda no modo de xogador único
-sp_walls_stay_up_delay_help   Número de segundos que os muros permanecen levantados despois de morrer un xogador; con valores negativos sempre estarán levantados
-sp_walls_length_help          Lonxitude dos muros das motos en metros, para valores negativos a lonxitude dos muros será infinita
+sp_walls_stay_up_delay_help   Número de segundos cas paredes permanecen levantadas despois de morrer un xogador; con valores negativos sempre estarán levantadas
+sp_walls_length_help          Lonxitude das paredes das motos en metros, para valores negativos a lonxitude das paredes será infinita
 sp_explosion_radius_help      Radio da onda de explosión
 sp_team_balance_on_quit_help  Equilibrar equipos cando un xogador abandone?
 sp_team_balance_with_ais_help Equilibrar equipos con bots?
@@ -199,8 +199,8 @@ sp_limit_advance_help         Remata a partida en modo un xogador cando o primei
 spawn_wingmen_back_help       Determina canto se despraza cara atrás cada beirado nun equipo.
 spawn_wingmen_side_help       Determina canto se despraza cara ao lado cada beirado nun equipo.
 
-walls_stay_up_delay_help      Número de segundos que os muros permanecen levantados despois de morrer un xogador; con valores negativos sempre estarán levantados
-walls_length_help             Lonxitude dos muros das motos en metros, para valores negativos a lonxitude dos muros será infinita
+walls_stay_up_delay_help      Número de segundos cas pededes permanecen levantadas despois de morrer un xogador; con valores negativos sempre estarán levantadas
+walls_length_help             Lonxitude das paredes das motos en metros, para valores negativos a lonxitude das paredes será infinita
 explosion_radius_help         Radio da onda de explosión
 explosion_radius_speed_factor_help  Valores positivos aumentarán EXPLOSION_RADIUS canto máis rápida sexa a moto; valores negativos diminuirano.
 team_balance_on_quit_help     Equilibrar equipos cando un xogador abandone?
@@ -285,14 +285,14 @@ team_blue_7_help compoñente azul da cor do equipo 7
 team_blue_8_help compoñente azul da cor do equipo 8
 
 # wall length modification
-cycle_dist_wall_shrink_help   Multiplicador de distancia no cálculo da lonxitude do muro. Tódolos valores son legais. Consultar a documentación en settings.cfg
-cycle_dist_wall_shrink_offset_help Desfasamento de distancia no cálculo da lonxitude do muro. Todos os valores son legais. Consultar a documentación en settings.cfg
+cycle_dist_wall_shrink_help   Multiplicador de distancia no cálculo da lonxitude da parede. Tódolos valores son legais. Consultar a documentación en settings.cfg
+cycle_dist_wall_shrink_offset_help Desfasamento de distancia no cálculo da lonxitude da parede. Tódolos valores son legais. Consultar a documentación en settings.cfg
 
 # respawn relevant settings (non server supports respawning yet, but the client is prepared)
 cycle_blink_frequency_help    Frecuencia en Hz á cunha moto invulnerable pestanexa.
 cycle_invulnerable_time_help  Tempo en segundos cunha moto é invulnerable despois de reaparecer.
-cycle_wall_time_help          Tempo en segundos cunha moto non deixa muros despois de reaparecer.
-cycle_first_spawn_protection_help poñer en 1 se a invulnerabilidade e o atraso dos muro deben activarse na aparición inicial ao comezo dunha rolda.
+cycle_wall_time_help          Tempo en segundos cunha moto non deixa paredes despois de reaparecer.
+cycle_first_spawn_protection_help poñer en 1 se a invulnerabilidade e o atraso das paredes deben activarse na aparición inicial ao comezo dunha rolda.
 
 #********************************************
 #********************************************
@@ -392,9 +392,9 @@ spectator_mode_help           Fai deste xogador un espectador
 auto_incam_help               Trocar automaticamente á cámara interna nun labirinto
 camwobble_help                Permite mover a cámara interna coa túa moto
 
-color_b_help                  Cor da moto e muro, compoñente azul.
-color_g_help                  Cor da moto e muro, compoñente verde.
-color_r_help                  Cor da moto e muro, compoñente vermella.
+color_b_help                  Cor da moto e parede, compoñente azul.
+color_g_help                  Cor da moto e parede, compoñente verde.
+color_r_help                  Cor da moto e parede, compoñente vermella.
 
 #********************************************
 #********************************************
@@ -676,15 +676,15 @@ camera_server_glance_back_fromspeed_help		Este valor multiplícase pola velocida
 camera_server_glance_rise_fromspeed_help		Este valor multiplícase pola velocidade actual e engádese a CAMERA_SERVER_GLANCE_RISE.
 camera_server_glance_pitch_help		Posición da cámara de mirada do servidor: canto mira cara arriba/abaixo?
 
-camera_visibility_recovery_speed_help a velocidade á que os focos de visibilidade recupéranse ao chocar un muro
-camera_visibility_wall_distance_help a distancia á que os focos de visibilidade mantéñense dos muros
+camera_visibility_recovery_speed_help a velocidade á que os focos de visibilidade recupéranse ao chocar unha parede
+camera_visibility_wall_distance_help a distancia á cos focos de visibilidade mantéñense das paredes
 camera_visibility_clip_speed_help velocidade coa cal os focos de visibilidade tráense á vista
 camera_visibility_extension_help distancia (medida en segundos, multiplícase pola velocidade) dos focos de visibilidade desde o obxecto observado
 camera_visibility_sideskew_help compoñente dianteiro adicional dos focos oblicuos da visibilidade
-camera_visibility_lower_wall_help se vale 1, os muros báixanse cando bloquean a vista e a cámara non se move
+camera_visibility_lower_wall_help se vale 1, as paredes báixanse cando bloquean a vista e a cámara non se move
 camera_visibility_lower_wall_smart_help como CAMERA_VISIBILITY_LOWER_WALL, pero configuración especial para a cámara intelixente
-bug_transparency_help         non soportado: facer tódolos muros da area semitransparentes debuxándoos sen realizar comprobacións de obstrución
-bug_transparency_demand_help  non soportado: usar transparencia en lugar de baixar os muros
+bug_transparency_help         non soportado: facer tódolas paredes da area semitransparentes debuxándoas sen realizar comprobacións de obstrución
+bug_transparency_demand_help  non soportado: usar transparencia en lugar de baixar as paredes
 
 #red/green 3D rendering settings
 camera_eye_distance_help              Distancia entre os dous ollos da cámara. Pon este valor a 0 para desactivar o renderizado 3D.
@@ -747,7 +747,7 @@ setting_legacy_behavior_breaking_help Comportamento por defecto para configuraci
 setting_legacy_behavior_bumpy_help Comportamento por defecto para configuracións que permiten en principio xogar en clientes antigos, pero con severas limitacións (motos que pegan botes, comandos de xogador non executados á súa hora).
 setting_legacy_behavior_annoying_help Comportamento por defecto que só causa molestias de menor importancia en clientes antigos, como as motos inimigas parándose durante .1 segundos despois de cada quenda. Exemplo: CYCLE_RUBBER_MINDISTANCE
 setting_legacy_behavior_cheating_help Comportamento por defecto para configuracións nas que o comportamento por defecto poida ser considerado de cheating se se configurou como por non por defecto. Exemplo: DOUBLEBIND_TIME
-setting_legacy_behavior_visual_help Comportamento por defecto para configuracións que só afectan a visualización do estado e efectos visuais, non a física do xogo. Exemplo: CYCLE_RUBBER_* (o cliente mostra o medidor de rubber, pero non se usa para nada).
+setting_legacy_behavior_visual_help Comportamento por defecto para configuracións que só afectan a visualización do estado e efectos visuais, non a física do xogo. Exemplo: CYCLE_RUBBER_* (o cliente mostra o medidor de elasticidade, pero non se usa para nada).
 
 # server browser
 
@@ -798,9 +798,9 @@ UPPER_SKY_SCALE_help     Escala do ceo superior (reducir para facer as caracter�
 UPPER_SKY_HEIGHT_help    Altura do ceo superior (trocos durante o xogo poden causar erros gráficos)
 LOWER_SKY_HEIGHT_help    Altura do ceo inferior (trocos durante o xogo poden causar erros gráficos)
 
-rim_wall_stretch_x_help       Extensión da textura do muro exterior na dirección horizontal
-rim_wall_stretch_y_help       Extensión da textura do muro exterior na dirección vertical
-rim_wall_wrap_y_help          Colocar a 1 se a textura do muro exterior deberíase repetir na dirección vertical
+rim_wall_stretch_x_help       Extensión da textura da parede exterior na dirección horizontal
+rim_wall_stretch_y_help       Extensión da textura da parede exterior na dirección vertical
+rim_wall_wrap_y_help          Colocar a 1 se a textura da parede exterior deberíase repetir na dirección vertical
 
 rim_wall_red_help        Compoñente vermella das paredes do aro cando non se usan texturas. Calquera valor entre 0 e 1.
 rim_wall_green_help      Compoñente verde das paredes do aro cando non se usan texturas. Calquera valor entre 0 e 1.
@@ -810,9 +810,9 @@ rim_wall_blue_help       Compoñente azul das paredes do aro cando non se usan t
 moviepack_floor_red_help      Cor do chan (compoñente vermella)
 moviepack_floor_green_help    Cor do chan (compoñente verde)
 moviepack_floor_blue_help     Cor do chan (compoñente azul)
-moviepack_wall_stretch_help   Distancia entre as liñas verticais nos muros do paquete visual
-moviepack_rim_wall_stretch_x_help Extensión dun cadrado da textura do muro exterior na dirección horizontal para o paquete visual
-moviepack_rim_wall_stretch_y_help Extensión da textura do muro exterior na dirección vertical para o paquete visual
+moviepack_wall_stretch_help   Distancia entre as liñas verticais nas paredes do paquete visual
+moviepack_rim_wall_stretch_x_help Extensión dun cadrado da textura da parede exterior na dirección horizontal para o paquete visual
+moviepack_rim_wall_stretch_y_help Extensión da textura da parede exterior na dirección vertical para o paquete visual
 
 #detail settings
 swapmode_text                 Modo de sincronización:
@@ -849,7 +849,7 @@ framedrop_tolerance_help Controla a cantidade de fotogramas perdidos tolerada pa
 swap_latency_delay_factor_help   Factor de seguridade para calcular o retraso despois dos swaps en modo Latency Swap. Entre 0 e 1, non tocar, adáptase automaticamente segundo a configuración de FRAMEDROP_TOLERANCE.
 
 texture_mode_0_help           Texturas do chan:
-texture_mode_1_help           Texturas dos muros:
+texture_mode_1_help           Texturas das paredes:
 texture_mode_2_help           Texturas dos obxectos:
 texture_mode_3_help           Fonte:
 
@@ -901,9 +901,9 @@ lag_o_meter_blend_help		Cantidade coa que a cor do xogador debe mesturarse con b
 lag_o_meter_use_old_help	Debemos usar o antigo Lag-O-Meter con erros? Esta funcionalidade desaparecerá pronto.
 axes_indicator_help		Debe representarse o Indicador de Eixes?
 predict_objects_help          Predí o desprazamento das motos durante o xogo en rede
-predict_walls_help      Predicir os muros da moto. Útil para evitar mortes instantáneas.
+predict_walls_help      Predicir as paredes da moto. Útil para evitar mortes instantáneas.
 textures_hi_help              Utiliza texturas de alta definición
-sparks_help                   Debuxa faíscas cando unha moto circula demasiado preto de un muro
+sparks_help                   Debuxa faíscas cando unha moto circula demasiado preto dunha parede
 explosion_help                Habilitar explosións?
 wrap_menu_help                Se está activo, volve á parte baixa do menú ao subir na parte alta.
 floor_mirror_int_help         Intensidade do efecto reflejante do chan
@@ -1105,9 +1105,9 @@ silence_enemies_help        Se está activado, a charla enviada polos inimigos n
 #********************************************
 #********************************************
 
-bug_rip_help                  Permite saír do muro exterior conducindo Moi preto do muro.
-bug_tunnel_help               Permite aos xogadores pasar a través dos muros en raras ocasións.
-bug_color_overflow_help         Permite diferentes cores para a moto e os muros cando as cores do xogador sobrepasen os límites.
+bug_rip_help                  Permite saír da parede exterior conducindo Moi preto da parede.
+bug_tunnel_help               Permite aos xogadores pasar a través das paredes en raras ocasións.
+bug_color_overflow_help         Permite diferentes cores para a moto e as paredes cando as cores do xogador sobrepasen os límites.
 
 #********************************************
 #********************************************
@@ -1595,77 +1595,77 @@ game_menu_max_teams_help      Número máximo de equipos
 game_menu_min_teams_text      Número mín equipos:
 game_menu_min_teams_help      Número mínimo de equipos
 
-game_menu_wallstayup_text     Duración dos muros:
-game_menu_wallstayup_help     Tempo que os muros permanecen levantados despois de morrer un xogador
+game_menu_wallstayup_text     Duración das paredes:
+game_menu_wallstayup_help     Tempo cas paredes permanecen levantados despois de morrer un xogador
 
 game_menu_wallstayup_infinite_text Infinito
-game_menu_wallstayup_infinite_help Os muros sempre están levantados
+game_menu_wallstayup_infinite_help As paredes sempre están levantadas
 
 game_menu_wallstayup_immediate_text Inmediato
-game_menu_wallstayup_immediate_help Os muros desaparecen inmediatamente
+game_menu_wallstayup_immediate_help As paredes desaparecen inmediatamente
 
 game_menu_wallstayup_halfsecond_text 1/2s
-game_menu_wallstayup_halfsecond_help Os muros desaparecen tras medio segundo
+game_menu_wallstayup_halfsecond_help As paredes desaparecen tras medio segundo
 
 game_menu_wallstayup_second_text 1s
-game_menu_wallstayup_second_help Os muros desaparecen tras un segundo
+game_menu_wallstayup_second_help As paredes desaparecen tras un segundo
 
 game_menu_wallstayup_2second_text 2s
-game_menu_wallstayup_2second_help Os muros desaparecen tras dous segundos
+game_menu_wallstayup_2second_help As paredes desaparecen tras dous segundos
 
 game_menu_wallstayup_4second_text 4s
-game_menu_wallstayup_4second_help Os muros desaparecen tras 4 segundos
+game_menu_wallstayup_4second_help As paredes desaparecen tras 4 segundos
 
 game_menu_wallstayup_8second_text 8s
-game_menu_wallstayup_8second_help Os muros desaparecen tras 8 segundos
+game_menu_wallstayup_8second_help As paredes desaparecen tras 8 segundos
 
 game_menu_wallstayup_16second_text 16s
-game_menu_wallstayup_16second_help Os muros desaparecen tras 16 segundos
+game_menu_wallstayup_16second_help As paredes desaparecen tras 16 segundos
 
 game_menu_wallstayup_32second_text 32s
-game_menu_wallstayup_32second_help Os muros desaparecen tras 32 segundos
+game_menu_wallstayup_32second_help As paredes desaparecen tras 32 segundos
 
-game_menu_wallslength_text    Lonxitude de muros:
-game_menu_wallslength_help    Lonxitude dos muros das motos, en metros
+game_menu_wallslength_text    Lonxitude de paredes:
+game_menu_wallslength_help    Lonxitude das paredes das motos, en metros
 
 game_menu_wallslength_infinite_text Infinita
-game_menu_wallslength_infinite_help Os muros son dunha lonxitude infinita
+game_menu_wallslength_infinite_help As paredes son dunha lonxitude infinita
 
 game_menu_wallslength_25meter_text 25m
-game_menu_wallslength_25meter_help Os muros son de 25 metros de lonxitude
+game_menu_wallslength_25meter_help As paredes son de 25 metros de lonxitude
 
 game_menu_wallslength_50meter_text 50m
-game_menu_wallslength_50meter_help Os muros son de 50 metros de lonxitude
+game_menu_wallslength_50meter_help As paredes son de 50 metros de lonxitude
 
 game_menu_wallslength_100meter_text 100m
-game_menu_wallslength_100meter_help Os muros son de 100 metros de lonxitude
+game_menu_wallslength_100meter_help As paredes son de 100 metros de lonxitude
 
 game_menu_wallslength_200meter_text 200m
-game_menu_wallslength_200meter_help Os muros son de 200 metros de lonxitude
+game_menu_wallslength_200meter_help As paredes son de 200 metros de lonxitude
 
 game_menu_wallslength_300meter_text 300m
-game_menu_wallslength_300meter_help Os muros son de 300 metros de lonxitude
+game_menu_wallslength_300meter_help As paredes son de 300 metros de lonxitude
 
 game_menu_wallslength_400meter_text 400m
-game_menu_wallslength_400meter_help Os muros son de 400 metros de lonxitude
+game_menu_wallslength_400meter_help As paredes son de 400 metros de lonxitude
 
 game_menu_wallslength_600meter_text 600m
-game_menu_wallslength_600meter_help Os muros son de 600 metros de lonxitude
+game_menu_wallslength_600meter_help As paredes son de 600 metros de lonxitude
 
 game_menu_wallslength_800meter_text 800m
-game_menu_wallslength_800meter_help Os muros son de 800 metros de lonxitude
+game_menu_wallslength_800meter_help As paredes son de 800 metros de lonxitude
 
 game_menu_wallslength_1200meter_text 1200m
-game_menu_wallslength_1200meter_help Os muros son de 1200 metros de lonxitude
+game_menu_wallslength_1200meter_help As paredes son de 1200 metros de lonxitude
 
 game_menu_wallslength_1600meter_text 1600m
-game_menu_wallslength_1600meter_help Os muros son de 1600 metros de lonxitude
+game_menu_wallslength_1600meter_help As paredes son de 1600 metros de lonxitude
 
 game_menu_wallslength_2400meter_text 2400m
-game_menu_wallslength_2400meter_help Os muros son de 2400 metros de lonxitude
+game_menu_wallslength_2400meter_help As paredes son de 2400 metros de lonxitude
 
 game_menu_exrad_text          Radio de explosión:
-game_menu_exrad_help          Radio de destrución da explosión dunha moto; os muros dentro do radio destruiranse
+game_menu_exrad_help          Radio de destrución da explosión dunha moto; As paredes dentro do radio destruiranse
 
 game_menu_exrad_0_text        Ningún
 game_menu_exrad_0_help        Sen destrución
@@ -1741,17 +1741,17 @@ tutorial_fail_backdoor            Fallo: Siga as outras motos.
 
 tutorial_menu_doublegrind_text     Dobre Rozamento
 tutorial_menu_doublegrind_help     Titorial de Dobre Rozamento: aprende a outra manobra de apertura estándar en formación de equipo
-tutorial_menu_doublegrind_instructions IEn moitas configuracións, unha variación da formación estándar chamada *doble rozamento* resulta vantaxosa: os dous xogadores xunto ao centro non rozan inmediatamente. No canto diso, avanzan recto un pouco, logo xiran cara atrás, e despois outra vez cara adiante. Rozan ao xogador central dúas veces, de aí o nome. Isto dálle máis tempo entre dous muros e, polo tanto, máis aceleración. O teu traballo como xogador situado ao seu carón é fornecer ese muro extra. Non rozes demasiado preto do centro ou poderías matar ao que fai o dobre rozamento.\nO dobre rozamento en si require práctica para facelo ben e o tempo exacto depende moito da configuración, polo que non o podemos ensinar aquí. Non te preocupes, é case sempre opcional.
+tutorial_menu_doublegrind_instructions IEn moitas configuracións, unha variación da formación estándar chamada *doble rozamento* resulta vantaxosa: os dous xogadores xunto ao centro non rozan inmediatamente. No canto diso, avanzan recto un pouco, logo xiran cara atrás, e despois outra vez cara adiante. Rozan ao xogador central dúas veces, de aí o nome. Isto dálle máis tempo entre dúas paredes e, polo tanto, máis aceleración. O teu traballo como xogador situado ao seu carón é fornecer esa parede extra. Non rozes demasiado preto do centro ou poderías matar ao que fai o dobre rozamento.\nO dobre rozamento en si require práctica para facelo ben e o tempo exacto depende moito da configuración, polo que non o podemos ensinar aquí. Non te preocupes, é case sempre opcional.
 tutorial_menu_doublegrind_animation textures/tutorials/doublegrind/doublegrind.txt
 
 tutorial_menu_speedkill_text     Asasinato rápido
 tutorial_menu_speedkill_help     Titorial de Asasinato rápido: aprende a destruír a alta velocidade.
-tutorial_menu_speedkill_instructions A morte por velocidade é a forma máis básica de librarte dos teus inimigos en \g. Achégaste ás agochadas, rozando o seu muro, e despois de adiantalos, córtaslles o paso e péchasos coa túa estela.\nAquí preparamos unha situación doada para que practiques unha morte por velocidade contra unha IA descoidada.
+tutorial_menu_speedkill_instructions A morte por velocidade é a forma máis básica de librarte dos teus inimigos en \g. Achégaste ás agochadas, rozando o súa parede, e despois de adiantalos, córtaslles o paso e péchalos coa túa estela.\nAquí preparamos unha situación doada para que practiques unha morte por velocidade contra unha IA descoidada.
 tutorial_menu_speedkill_animation textures/tutorials/speedkill/speedkill.txt
 
 tutorial_menu_speedkilldefense_text     Defensa contra asasinato rápido
 tutorial_menu_speedkilldefense_help     Titorial de Defensa contra asasinato rápido: aprende a sobrevivir a intentos de asasinato rápido.
-tutorial_menu_speedkilldefense_instructions Se un inimigo vén cara a ti a gran velocidade, pode tentar atravesar o teu muro e matarte. Para defendente, podes afastarte, facer xiros rápidos ou contraatacar co teu propio asasinato rápido.\nNeste exercicio, practica como reaccionar e sobrevivir.
+tutorial_menu_speedkilldefense_instructions Se un inimigo vén cara a ti a gran velocidade, pode tentar atravesar a túa parede e matarte. Para defendente, podes afastarte, facer xiros rápidos ou contraatacar co teu propio asasinato rápido.\nNeste exercicio, practica como reaccionar e sobrevivir.
 tutorial_menu_speedkilldefense_animation textures/tutorials/speedkilldefense/speedkilldefense.txt
 
 tutorial_menu_congratulations_text     Palabras finais
@@ -1759,41 +1759,41 @@ tutorial_menu_congratulations_help     Non todo se pode ensinar nos titoriais.
 tutorial_menu_congratulations_instructions Parabéns, agora deberías ter completado tódolos titoriais esenciais. O que segue son desafíos opcionais. Xa estás listo para entrar no xogo propiamente dito, que é a parte multixogador en liña. Antes de mergullarte, hai un par de cousas que debes saber sobre a comunidade en liña e os servidores:\n\nPodes desprazarte por esta e outras mensaxes deste tipo cara arriba e abaixo usando as teclas de cursor.\n\nModo Sumo: Aquí ensináronche os fundamentos do modo Fortaleza; Sumo usa a mesma mecánica básica, pero normalmente para xogadores individuais e non para equipos, e as zonas de varios xogadores competindo colócanse unhas enriba das outras. Ademais, encollem.\n\nCaptura a Bandeira (CTF): Algúns servidores ofrecen este modo clásico, cunha pequena zona representando a bandeira e unha maior como base para devolver a bandeira.\n\nTamén é recomendable ler a documentación incluída (usa o menú Axuda para abrila nun navegador). E definitivamente deberías comezar cos modos de xogo básicos e coas configuracións próximas ás predeterminadas. O navegador de servidores axuda con isto ocultando inicialmente os servidores avanzados; aínda así podes acceder a eles cedo se te atreves.
 
 tutorial_menu_bullies_text     Desafío do Labirinto
-tutorial_menu_bullies_help     Labirinto: dous inimigos atrapáronte entre os seus muros. Podes sobrevivir?
-tutorial_menu_bullies_instructions Dous abusóns atrapáronte entre os seus muros e están obrigándote a atravesar o seu labirinto. Segue os xiros que fan e escapa.
+tutorial_menu_bullies_help     Labirinto: dous inimigos atrapáronte entre as suas paredes. Podes sobrevivir?
+tutorial_menu_bullies_instructions Dous abusóns atrapáronte entre as suas paredes e están obrigándote a atravesar o seu labirinto. Segue os xiros que fan e escapa.
 tutorial_menu_bullies_animation 
 tutorial_menu_bullies_teamname Abusóns
 
 tutorial_menu_hilbert2_text     Desafío do Labirinto: Hilbert 2
-tutorial_menu_hilbert2_help     Labirinto: dous inimigos atrapáronte entre os seus muros. Podes sobrevivir? Seguen unha Curva de Hilbert de orde 2.
+tutorial_menu_hilbert2_help     Labirinto: dous inimigos atrapáronte entre as suas paredes. Podes sobrevivir? Seguen unha Curva de Hilbert de orde 2.
 tutorial_menu_hilbert2_instructions Os dous abusóns leron un libro de matemáticas e agora tórtanche con Curvas de Hilbert, camiños que cobren un cadrado completo con densidade arbitraria. Primeiro, unha curva de orde dous sinxela.
 
 tutorial_menu_hilbert3_text     Desafío do Labirinto: Hilbert 3
-tutorial_menu_hilbert3_help     Labirinto: dous inimigos atrapáronte entre os seus muros. Podes sobrevivir? Seguen unha Curva de Hilbert de orde 3.
+tutorial_menu_hilbert3_help     Labirinto: dous inimigos atrapáronte entre as suas paredes. Podes sobrevivir? Seguen unha Curva de Hilbert de orde 3.
 tutorial_menu_hilbert3_instructions Os dous abusóns agora obrigánte a seguir unha Curva de Hilbert máis rápida de orde 3.
 
 tutorial_menu_hilbert4_text     Desafío Máximo do Labirinto
-tutorial_menu_hilbert4_help     Labirinto: dous inimigos atrapáronte entre os seus muros. Podes sobrevivir? Seguen unha Curva de Hilbert de orde 4.
+tutorial_menu_hilbert4_help     Labirinto: dous inimigos atrapáronte entre as suas paredes. Podes sobrevivir? Seguen unha Curva de Hilbert de orde 4.
 tutorial_menu_hilbert4_instructions Os dous abusóns agora obrigánte a seguir unha Curva de Hilbert extremadamente rápida e estreita de orde 4.\n\nNingún humano pode sobrevivir a isto.
 
 tutorial_menu_dragon1_text     Desafío do Labirinto: Dragón 5
-tutorial_menu_dragon1_help     Labirinto: dous inimigos atrapáronte entre os seus muros. Podes sobrevivir? Seguen unha Curva de Dragón Simplificada de orde 5.
+tutorial_menu_dragon1_help     Labirinto: dous inimigos atrapáronte entre as suas paredes. Podes sobrevivir? Seguen unha Curva de Dragón Simplificada de orde 5.
 tutorial_menu_dragon1_instructions Os dous abusóns agora obrigánte a seguir unha Curva de Dragón simplificada de orde 5. (A curva de dragón normal intersectaríase nos vértices, o que non podemos permitir. Así que seguimos as diagonais.)
 
 tutorial_menu_dragon2_text     Desafío do Labirinto: Dragón 6
-tutorial_menu_dragon2_help     Labirinto: dous inimigos atrapáronte entre os seus muros. Podes sobrevivir? Seguen unha Curva de Dragón Simplificada de orde 6.
+tutorial_menu_dragon2_help     Labirinto: dous inimigos atrapáronte entre as suas paredes. Podes sobrevivir? Seguen unha Curva de Dragón Simplificada de orde 6.
 tutorial_menu_dragon2_instructions Os dous abusóns agora obrigánte a seguir unha Curva de Dragón simplificada de orde 6.
 
 tutorial_menu_dragon3_text     Desafío do Labirinto: Dragón 7
-tutorial_menu_dragon3_help     Labirinto: dous inimigos atrapáronte entre os seus muros. Podes sobrevivir? Seguen unha Curva de Dragón Simplificada de orde 7.
+tutorial_menu_dragon3_help     Labirinto: dous inimigos atrapáronte entre as suas paredes. Podes sobrevivir? Seguen unha Curva de Dragón Simplificada de orde 7.
 tutorial_menu_dragon3_instructions Os dous abusóns agora obrigánte a seguir unha Curva de Dragón simplificada de orde 7.
 
 tutorial_menu_dragon4_text     Desafío do Labirinto: Dragón 8
-tutorial_menu_dragon4_help     Labirinto: dous inimigos atrapáronte entre os seus muros. Podes sobrevivir? Seguen unha Curva de Dragón Simplificada de orde 8.
+tutorial_menu_dragon4_help     Labirinto: dous inimigos atrapáronte entre as suas paredes. Podes sobrevivir? Seguen unha Curva de Dragón Simplificada de orde 8.
 tutorial_menu_dragon4_instructions Os dous abusóns agora obrigánte a seguir unha Curva de Dragón simplificada de orde 8.
 
 tutorial_menu_dragon5_text     Desafío do Labirinto: Dragón 9
-tutorial_menu_dragon5_help     Labirinto: dous inimigos atrapáronte entre os seus muros. Podes sobrevivir? Seguen unha Curva de Dragón Simplificada de orde 9.
+tutorial_menu_dragon5_help     Labirinto: dous inimigos atrapáronte entre as suas paredes. Podes sobrevivir? Seguen unha Curva de Dragón Simplificada de orde 9.
 tutorial_menu_dragon5_instructions Os dous abusóns agora obrigánte a seguir unha Curva de Dragón simplificada de orde 9.
 
 tutorial_menu_survival1_text     Desafío de Supervivencia 1
@@ -1810,11 +1810,11 @@ tutorial_menu_survival3_instructions A boa noticia: os teus motores están nun e
 
 tutorial_menu_survival4_text     Desafío de Supervivencia 4
 tutorial_menu_survival4_help     Sobrevive durante un tempo determinado.
-tutorial_menu_survival4_instructions Os teus motores están perfectos esta vez, pero hai tres IAs que se rexeneran infinitamente na arena, complicándoche o estilo. E os seus muros danche aceleración extra.
+tutorial_menu_survival4_instructions Os teus motores están perfectos esta vez, pero hai tres IAs que se rexeneran infinitamente na arena, complicándoche o estilo. E as suas paredes danche aceleración extra.
 
 tutorial_menu_ai1_text     Loita contra IA
 tutorial_menu_ai1_help     Xoga contra unha IA, sen límite de tempo.
-tutorial_menu_ai1_instructions Como titorial final, probamos as túas habilidades contra unha IA solitaria.\n\nAs axudas de aprendizaxe están desactivadas; tocar muros é tan mortal como debería ser.
+tutorial_menu_ai1_instructions Como titorial final, probamos as túas habilidades contra unha IA solitaria.\n\nAs axudas de aprendizaxe están desactivadas; tocar paredes é tan mortal como debería ser.
 
 tutorial_ai_timeout        Fallo: Tempo esgotado
 tutorial_ai_extratime      Tempo extra
@@ -1853,7 +1853,7 @@ tutorial_menu_ai8_instructions Logra quince mortes.
 
 tutorial_menu_highrubber_text         Exhibición: Alta Elasticidade
 tutorial_menu_highrubber_help         Prepárate para algunhas configuracións estrañas que atoparás.
-tutorial_menu_highrubber_instructions Lembras como nos primeiros tutoriais podías tocar muros sen explotar de inmediato? Chamámoslle "elasticidade" por razóns históricas. Algúns servidores aumentan esa configuración de forma moi alta e tamén reducen o retraso entre xiros da bici, facendo máis difícil morrer.\n\nOutros xogadores que atopes nestes servidores farán movementos moi axustados preto dos muros en corredores estreitos; é imposible anticipalos e saír despois de que estean construídos, así que debes observar aos xogadores.\n\nPode ser útil (pero non necesario se tes dedos rápidos) usar 'doble atado': vai á configuración de entrada e asigna os comandos de xiro a dúas teclas, logo prema ambas ao mesmo tempo durante o xogo. Farás un xiro instantáneo de 180 graos.\n\nComo sempre, mata tódalas IAs.
+tutorial_menu_highrubber_instructions Lembras como nos primeiros tutoriais podías tocar paredes sen explotar de inmediato? Chamámoslle "elasticidade" por razóns históricas. Algúns servidores aumentan esa configuración de forma moi alta e tamén reducen o retraso entre xiros da bici, facendo máis difícil morrer.\n\nOutros xogadores que atopes nestes servidores farán movementos moi axustados preto das paredes en corredores estreitos; é imposible anticipalos e saír despois de que estean construídos, así que debes observar aos xogadores.\n\nPode ser útil (pero non necesario se tes dedos rápidos) usar 'doble atado': vai á configuración de entrada e asigna os comandos de xiro a dúas teclas, logo prema ambas ao mesmo tempo durante o xogo. Farás un xiro instantáneo de 180 graos.\n\nComo sempre, mata tódalas IAs.
 
 tutorial_menu_brakeboost_text         Exhibición: Impulso de Freo
 tutorial_menu_brakeboost_help         Prepárate para algunhas das configuracións estrañas.
@@ -2499,11 +2499,11 @@ detail_floor_mirror_off_help  Ningún
 detail_floor_mirror_obj_text  Só obxectos
 detail_floor_mirror_obj_help  Tódolos obxectos que se moven
 
-detail_floor_mirror_ow_text   Obxectos e muros
+detail_floor_mirror_ow_text   Obxectos e paredes
 detail_floor_mirror_ow_help   Todo o que é importante no xogo
 
 detail_floor_mirror_ev_text   Todo!
-detail_floor_mirror_ev_help   (Actualmente, non hai diferenza con "Obxectos e muros")
+detail_floor_mirror_ev_help   (Actualmente, non hai diferenza con "Obxectos e paredes")
 
 detail_simple_trail_text    Traxectorias simples:
 detail_simple_trail_help    Se está activado, as traxectorias das bicis móstranse de forma simplificada, sen acumulación tras a moto.
@@ -2527,7 +2527,7 @@ detail_floor_2tex_text        Dobre plano con textura
 detail_floor_2tex_help        Do mesmo xeito que en 'Plano con textura', o chan é un plano infinito con textura. Pero aquí, os dous grupos de liñas debúxanse en dobre pasada, dando como resultado unha imaxe máis nítida
 
 detail_alpha_text             Alpha Blending:
-detail_alpha_help             O alpha blending utilízase para amosar obxectos semitransparentes, como as explosións ou os muros das motos. Normalmente non supón perda de rendemento ao utilizar con aceleración de tarxeta 3D, pero se provocará retardación ao utilizar rendering por software
+detail_alpha_help             O alpha blending utilízase para amosar obxectos semitransparentes, como as explosións ou as paredes das motos. Normalmente non supón perda de rendemento ao utilizar con aceleración de tarxeta 3D, pero se provocará retardación ao utilizar rendering por software
 
 detail_smooth_text            Smooth Shading:
 detail_smooth_help            Os bordos móstranse suavizados ao utilizar un gradiente de cor nas superficies. Incluso o rendering por software non se retardará con esta opción!
@@ -2537,7 +2537,7 @@ detail_text_truecolor_help    Utiliza texturas de 32 bits de profundidade de cor
 
 #preferences menu
 pref_sparks_text              Faíscas:
-pref_sparks_help              Faíscas que aparecen cando conduces bastante preto de un muro.
+pref_sparks_help              Faíscas que aparecen cando conduces bastante preto dunha parede.
 
 pref_explosion_text           Explosión:
 pref_explosion_help           Activa ou desactiva a animación da explosión cando unha moto choca.
@@ -2555,7 +2555,7 @@ pref_uppersky_text            Ceo superior:
 pref_uppersky_help            Amosa o plano superior do ceo, un plano sólido similar ao chan. Activando os dous planos do ceo afecta o rendemento do xogo.
 
 pref_highrim_text             Paredes altas:
-pref_highrim_help             Se está activo, as paredes da area serán de altura infinita. En caso contrario, serán aproximadamente da mesma altura que os muros das motos.
+pref_highrim_help             Se está activo, as paredes da area serán de altura infinita. En caso contrario, serán aproximadamente da mesma altura cas paredes das motos.
 
 pref_headlight_text           Amosar foco:
 pref_headlight_help           Amosa unha luz en fronte de cada moto. Necesita soporte da túa tarxeta de vídeo.
@@ -2587,7 +2587,7 @@ pref_showbrake_help           Amosa o estado de utilización dos freos nun medid
 pref_showspeed_text           Amosar velocidade:
 pref_showspeed_help           Amosa a túa velocidade nun contador no HUD (o HUD debe estar activo)
 
-pref_showrubber_text          Amosar medidor de rubber:
+pref_showrubber_text          Amosar medidor de elasticidade:
 pref_showrubber_help          Amosa o estado dos pneumáticos nun medidor no HUD (o HUD debe estar activo)
 
 misc_fps_text                 Amosar FPS:
@@ -3307,9 +3307,9 @@ classification_acceleration_3 alta aceleración
 classification_delay_1 atraso
 classification_delay_2 baixo atraso
 classification_delay_3 alto atraso
-classification_rubber_1 goma
-classification_rubber_2 pouca goma
-classification_rubber_3 moita goma
+classification_rubber_1 elasticidade
+classification_rubber_2 pouca elasticidade
+classification_rubber_3 moita elasticidade
 classification_walls_1 paredes
 classification_walls_2 paredes curtas
 classification_walls_3 paredes longas
