@@ -1,5 +1,5 @@
 language                      Galician
-encoding                      latin1
+encoding                      utf8
 
 #*****************************************
 #*****************************************
@@ -24,6 +24,7 @@ rinclude_help           Inclúe un ficheiro usando o sistema de recursos. Usa a 
 new_team_allowed_help		É posible crear un novo equipo?
 yes                     Si
 no                      Non						   
+
 #********************************************
 #********************************************
 #
@@ -79,7 +80,7 @@ cycle_boostfactor_team_help     Factor polo que se multiplica a túa velocidade 
 cycle_boostfactor_enemy_help    Factor polo que se multiplica a túa velocidade ao saír da parede dun inimigo
 cycle_boostfactor_rim_help      Factor polo que se multiplica a túa velocidade ao saír da parede exterior
 
-cycle_turn_memory_help        Número de xiros pendentes que unha moto memorizará exactamente
+cycle_turn_memory_help        Número de xiros pendentes cunha moto memorizará exactamente
 cycle_delay_help              Tempo mínimo entre os xiros (debe ser maior que 0).
 cycle_delay_bonus_help        Factor adicional de suavidade a CYCLE_DELAY aplicado só no servidor dedicado.
 cycle_delay_timebased_help    Os retardos de xiro basearanse no tempo desde o último xiro se vale 1 (por defecto), e da distancia se vale 0. Tamén son posibles valores intermedios e fóra destes límites.
@@ -113,7 +114,7 @@ cycle_rubber_delay_help       Durante esta fracción do tempo de retardo da moto
 cycle_rubber_delay_bonus_help Factor para a eficiencia do rubber CYCLE_RUBBER_DELAY.
 cycle_ping_rubber_help        Valor de finura adicional para xogadores cun ping alto.
 cycle_rubber_wall_shrink_help Con rastros de lonxitude finita, o rubber usado multiplícase por este valor e o resultado réstase da lonxitude do muro.
-cycle_rubber_sync_help              Determina se a goma está sincronizada cos clientes. O valor predeterminado 1 sincroniza só co propietario de cada moto; un valor de 0 non a sincroniza en absoluto e fai inútiles os medidores de goma; un valor de 2 sincroniza a goma de todas as motos con todos os clientes, que era o comportamento antigo antes de introducir esta opción.
+cycle_rubber_sync_help              Determina se a goma está sincronizada cos clientes. O valor predeterminado 1 sincroniza só co propietario de cada moto; un valor de 0 non a sincroniza en absoluto e fai inútiles os medidores de goma; un valor de 2 sincroniza a goma de tódalas motos con tódolos clientes, que era o comportamento antigo antes de introducir esta opción.
 cycle_brake_refill_help       Relación de enchido da reserva de freos cando non estás a frear.
 cycle_brake_deplete_help      Relación de baleirado da reserva de freos cando estás a frear.
 cycle_sync_interval_enemy_help Tempo (en segundos), entre as actualizacións servidor/cliente das motos inimigas.
@@ -128,8 +129,8 @@ topology_police_help          Cando vale 1, realiza comprobacións para verifica
 topology_police_parallel_help Indicador extra de policía de topoloxía para comprobar paredes que se colocan na estrutura de datos da grella exactamente en paralelo. Requírese que TOPOLOGY_POLICE estea activo.
 cycle_smooth_time_help        Escala de tempos para as opcións de suavizado. Aumentándoa fará a interpolación máis suave, pero menos precisa. Diminuíndoa provocará saltos na sincronización de rede.
 cycle_smooth_min_speed_help   Velocidade mínima de corrección de suavizado relativa á velocidade da moto.
-cycle_smooth_threshold_help   Só as sincronizacións que difiren da túa posición por menos deste valor (medido en velocidade) trataranse mediante suavizado, para maiores diferenzas os cambios serán aplicados inmediatamente.
-cycle_max_refcount_help       Número máximo de referencias permitido para as motos antes de que se autodestruyan. Este parámetro protexe contra ataques de denegación de servizo (Dous).
+cycle_smooth_threshold_help   Só as sincronizacións que difiren da túa posición por menos deste valor (medido en velocidade) trataranse mediante suavizado, para maiores diferenzas os trocos serán aplicados inmediatamente.
+cycle_max_refcount_help       Número máximo de referencias permitido para as motos antes de que se autodestruian. Este parámetro protexe contra ataques de denegación de servizo (Dous).
 
 #********************************************
 #********************************************
@@ -139,12 +140,12 @@ cycle_max_refcount_help       Número máximo de referencias permitido para as m
 #********************************************
 #********************************************
 
-chatbot_always_active_help          Se se define en 1, o chatbot está activo todo o tempo
-chatbot_new_wall_blindness_help     o chatbot non verá os muros que se construíron hai menos destes segundos
-chatbot_min_timestep_help           tempo mínimo en segundos entre os pensamentos do chatbot
-chatbot_delay_help                  tempo entre a entrada no chat e a activación do chatbot
-chatbot_range_help                  tempo en segundos que o bot é capaz de planificar con antelación
-chatbot_decay_help                  velocidade á que a calidade do chatbot decae co tempo
+chatbot_always_active_help          Se se define en 1, o bot da charla está activo todo o tempo
+chatbot_new_wall_blindness_help     o bot da charla non verá os muros que se construíron hai menos destes segundos
+chatbot_min_timestep_help           tempo mínimo en segundos entre os pensamentos do bot da charla
+chatbot_delay_help                  tempo entre a entrada no chat e a activación do bot da charla
+chatbot_range_help                  tempo en segundos co bot é capaz de planificar con antelación
+chatbot_decay_help                  velocidade á que a calidade do bot da charla decae co tempo
 
 #********************************************
 #********************************************
@@ -156,7 +157,7 @@ chatbot_decay_help                  velocidade á que a calidade do chatbot deca
 
 enemy_teammate_penalty_help   Penalización do tempo efectivo en segundos se a detección de influencia de inimigo provén dun compañeiro de equipo
 enemy_dead_penalty_help       Penalización do tempo efectivo en segundos se a detección de influencia de inimigo provén dun xogador morto
-enemy_chatbot_penalty_help    Penalización en segundos se a vítima está no modo de bot de chateo e a influencia do inimigo é só que o bot de chat evade un muro
+enemy_chatbot_penalty_help    Penalización en segundos se a vítima está no modo de bot de charla e a influencia do inimigo é só co bot de charla evade un muro
 enemy_currenttime_influence_help Se vale 1, o tempo actual entra en comparación para a influencia de inimigos (e non o tempo de construción do muro atopado). Permiten valores arbitrarios de mesturado.
 enemy_suicide_timeout_help    Se non se atopa ningunha influencia de inimigo durante estes segundos, a morte da xogador conta como un suicidio
 score_die_help                Puntos que consegues por morrer
@@ -207,7 +208,7 @@ team_balance_with_ais_help    Equilibrar equipos con bots?
 team_max_imbalance_help       Desequilibrio máximo e temporal autorizado por equipo
 team_max_players_help         Número máximo de xogadores por equipo
 team_min_players_help         Número mínimo de xogadores por equipo
-team_allow_shuffle_up_help  Se está en 1, os xogadores poden cambiar a súa posición no equipo cando queiran. Se está en 0, só poden baixar de rango.
+team_allow_shuffle_up_help  Se está en 1, os xogadores poden trocar a súa posición no equipo cando queiran. Se está en 0, só poden baixar de rango.
 team_center_is_boss_help    Se está en 1, o xogador central é o xefe do equipo. Se está en 0, é o xogador que leva máis tempo nese equipo.
 team_elimination_mode_help  Define como \g debe eliminar equipos cando hai máis equipos que TEAMS_MAX: Se se pon a 0, tentará manter o máximo de xogadores posible, expulsando equipos coa puntuación máis baixa se os equipos están equilibrados; Se se pon a 1, tentará manter as cores dos mellores equipos (Equipo azul, logo Equipo dourado, logo Equipo vermello, etc.); Se se pon a 2, expulsará os equipos coa puntuación máis baixa sen importar o equilibrio.
 
@@ -284,14 +285,14 @@ team_blue_7_help compoñente azul da cor do equipo 7
 team_blue_8_help compoñente azul da cor do equipo 8
 
 # wall length modification
-cycle_dist_wall_shrink_help   Multiplicador de distancia no cálculo da lonxitude do muro. Todos os valores son legais. Consultar a documentación en settings.cfg
+cycle_dist_wall_shrink_help   Multiplicador de distancia no cálculo da lonxitude do muro. Tódolos valores son legais. Consultar a documentación en settings.cfg
 cycle_dist_wall_shrink_offset_help Desfasamento de distancia no cálculo da lonxitude do muro. Todos os valores son legais. Consultar a documentación en settings.cfg
 
 # respawn relevant settings (non server supports respawning yet, but the client is prepared)
-cycle_blink_frequency_help    Frecuencia en Hz á que unha moto invulnerable parpadea.
-cycle_invulnerable_time_help  Tempo en segundos que unha moto é invulnerable tras un respawn.
-cycle_wall_time_help          Tempo en segundos que unha moto non deixa muros tras un respawn.
-cycle_first_spawn_protection_help Colocar a 1 se a invulnerabilidade e o atraso de muro debería estar xa activo nun spawn inicial ao comezo dunha rolda.
+cycle_blink_frequency_help    Frecuencia en Hz á cunha moto invulnerable pestanexa.
+cycle_invulnerable_time_help  Tempo en segundos cunha moto é invulnerable despois de reaparecer.
+cycle_wall_time_help          Tempo en segundos cunha moto non deixa muros despois de reaparecer.
+cycle_first_spawn_protection_help poñer en 1 se a invulnerabilidade e o atraso dos muro deben activarse na aparición inicial ao comezo dunha rolda.
 
 #********************************************
 #********************************************
@@ -305,8 +306,8 @@ cycle_first_spawn_protection_help Colocar a 1 se a invulnerabilidade e o atraso 
 map_file_help                 Arquivo que contén o mapa usado para xogar
 map_uri_help                  ANTIGO - utiliza no seu lugar RESOURCE_REPOSITORY_SERVER e MAP_FILE
 area_axes_help               En cantas direccións unha moto pode virar 4 é por defecto, 6 é hexatron
-resource_repository_client_help URI que o cliente utiliza para buscar os arquivos de mapa se non están almacenados localmente. Mellor deixalo baleiro
-resource_repository_server_help URI que os clientes e o servidor utilizan para buscar os arquivos de mapa se non están almacenados localmente
+resource_repository_client_help URI que o cliente utiliza para buscar os arquivos de mapas se non están almacenados localmente. Mellor deixalo baleiro
+resource_repository_server_help URI que os clientes e o servidor utilizan para buscar os arquivos de mapas se non están almacenados localmente
 
 # limits
 speed_factor_help             Modificador de velocidade para as motos
@@ -317,42 +318,42 @@ sp_size_factor_help           Modificador do tamaño da area
 # single player settings (used by dedicated server only)
 sp_ais_help                   Número de bots en modo de xogo local
 
-start_new_match_help          Iniciar unha nova partida
+start_new_match_help          Comezar unha nova partida
 
 # ladder and highscore rules
-ladder_min_bet_help           Puntuación mínima que engades á táboa
-ladder_percent_bet_help       Porcentaxe da túa puntuación que engades á táboa
-ladder_tax_help               Porcentaxe da táboa que o IRS toma
-ladder_lose_percent_on_load_help Porcentaxe da túa puntuación na táboa que perdes en cada carga
-ladder_lose_min_on_load_help  Puntuación mínima da táboa que perdes en cada carga
+ladder_min_bet_help           Puntuación mínima que achegas ao bote da clasificación
+ladder_percent_bet_help       Porcentaxe da túa puntuación que achegas ao bote da clasificación
+ladder_tax_help               Porcentaxe do bote da clasificación que leva Facenda
+ladder_lose_percent_on_load_help Porcentaxe da túa puntuación de clasificación que se desconta en cada carga
+ladder_lose_min_on_load_help  Mínimo da túa puntuación de clasificación que se desconta en cada carga
 
-ladder_gain_extras_help        Puntos extras na táboa para o gañador, en función do ping
+ladder_gain_extras_help        Puntos extra de clasificación para o gañador en función do ping
 
-real_area_size_factor_help   O tamaño actual da area activa. Non o cambies; mellor cambia size_factor.
-real_cycle_speed_factor_help  O multiplicador de velocidade das motos activo. Non o cambies; mellor cambia speed_factor.
+real_area_size_factor_help   O tamaño actual da area activa. Non o troques; mellor troca size_factor.
+real_cycle_speed_factor_help  O multiplicador de velocidade das motos activo. Non o troques; mellor troca speed_factor.
 
 sp_win_zone_min_round_time_help Número mínimo (en segundos) a partir do cal a Zona de Vitoria Instantánea actívase
-sp_win_zone_min_last_death_help Número mínimo (en segundos) desde a última morte antes da activación da Zona de Vitoria Instantánea
+sp_win_zone_min_last_death_help Número mínimo (en segundos) desde a derradeira morte antes da activación da Zona de Vitoria Instantánea
 win_zone_min_round_time_help  Número mínimo (en segundos) a partir do cal a Zona de Vitoria Instantánea actívase
-win_zone_min_last_death_help  Número mínimo (en segundos) desde a última morte antes da activación da Zona de Vitoria Instantánea
+win_zone_min_last_death_help  Número mínimo (en segundos) desde a derradeira morte antes da activación da Zona de Vitoria Instantánea
 win_zone_expansion_help       Velocidade de expansión da Zona de Vitoria Instantánea
 win_zone_initial_size_help    Tamaño inicial da Zona de Vitoria Instantánea
 win_zone_deaths_help          Un valor de 1 convértea nunha Zona da Morte
 win_zone_randomness_help      Factor de aleatoriedad para a posición inicial da zona de vitoria. 0 a fixa no centro da area, 1 coloca a zona en calquera posición da area.
 win_zone_player_win_help            Se está en 1, o primeiro xogador en entrar na zona de vitoria gaña.
-win_zone_custom_spawn_msg_help      Mensaxe personalizada ao xurdir cando WIN_ZONE_PLAYER_WIN está desactivado.
+win_zone_custom_spawn_msg_help      Mensaxe de aparición personalizada se WIN_ZONE_PLAYER_WIN está desactivado
 
-condense_conquest_output_help       Saída da conquista de zonas condensada nunha soa liña
+condense_conquest_output_help       Resultado da conquista de zona condensada nunha soa liña
 
 game_timeout_help             Tempo base para a sincronización do estado do xogo; dá aproximadamente o tempo máximo entre as roldas
-last_chat_break_time_help     Tempo da última rolda que un xogador en modo de chat é capaz de pausar o tempo
+last_chat_break_time_help     Tempo da derradeira rolda cun xogador en modo de charla é capaz de pausar o tempo
 extras_round_time_help         Lonxitude dunha pausa adicional ao comezo da rolda
-player_chat_wait_max_help     Tempo máximo en segundos para esperar a que un xogador pare de chatear.
-player_chat_wait_fraction_help Fracción máxima de tempo para esperar a que un xogador pare de chatear.
-player_chat_wait_single_help  Poñer a 1 se só un xogador debería ter o seu tempo de espera de chat reducido en calquera momento.
-player_chat_wait_teamleader_help Poñer a 1 se só os líders do equipo, ou a 0 se todos os xogadores, poderán pausar o tempo.
+player_chat_wait_max_help     Tempo máximo en segundos que se agarda a cun xogador deixe de charlar.
+player_chat_wait_fraction_help Fracción máxima de tempo que se agarda a cun xogador deixe de chalar.
+player_chat_wait_single_help  Establecer a 1 se só un xogador debe ter reducido o seu tempo de espera de charla en cada momento.
+player_chat_wait_teamleader_help Poñer a 1 se só os líders do equipo, ou a 0 se tódolos xogadores, poderán pausar o tempo.
 
-wait_for_external_script_help Deixa que o servidor espere por un script externo entre dúas roldas ata que o script cambie esta opción de novo a 0.
+wait_for_external_script_help Deixa que o servidor espere por un script externo entre dúas roldas ata co script troque esta opción de novo a 0.
 wait_for_external_script_timeout_help Se o servidor foi pausado por WAIT_FOR_EXTERNAL_SCRIPT por máis segundos que este, reinicia o xogo automaticamente.
 
 spawn_script_help                   Executa un script externo desde un subdirectorio scripts/ na ruta de datos.
@@ -362,10 +363,10 @@ kill_script_help                    Finaliza un script. O argumento debe coincid
 list_scripts_help                   Lista os scripts activos.
 script_env_help                     Configura variables de entorno personalizadas para scripts. Uso: SCRIPT_ENV <variable name> <value>
 
-chatter_remove_time_help      Tempo en segundos tras o cal un chateador permanente é eliminado do xogo
+chatter_remove_time_help      Tempo en segundos tras o cal un charlador permanente é eliminado do xogo
 idle_remove_time_help         Tempo en segundos tras o cal un xogador inactivo é eliminado do xogo
 idle_kick_time_help           Tempo en segundos tras o cal un xogador inactivo é expulsado
-keep_player_slot_help         Se está en 1, cada vez que o servidor se encha, un espectador non merecente será expulsado.
+keep_player_slot_help         Se está en 1, cada vez co servidor se encha, un espectador non merecente será expulsado.
 
 #********************************************
 #********************************************
@@ -384,11 +385,11 @@ camcenter_help                Centrar a cámara interna na dirección de conduci
 start_cam_help                Cámara inicial
 start_fov_help                Campo de visión inicial
 allow_cam_help                Permitir/prohibir os diferentes modos de cámara
-instant_chat_string_help      Chat dispoñible con certas teclas
+instant_chat_string_help      Charla dispoñible con certas teclas
 name_team_after_player_help   Se está activo, o equipo leva o nome do líder
 fav_num_per_team_player_help  O número favorito de xogadores por equipo para este xogador
 spectator_mode_help           Fai deste xogador un espectador
-auto_incam_help               Cambiar automaticamente á cámara interna nun labirinto
+auto_incam_help               Trocar automaticamente á cámara interna nun labirinto
 camwobble_help                Permite mover a cámara interna coa túa moto
 
 color_b_help                  Cor da moto e muro, compoñente azul.
@@ -404,8 +405,8 @@ color_r_help                  Cor da moto e muro, compoñente vermella.
 #********************************************
 
 history_size_console_help     Número de liñas que permanecen no histórico da consola.
-history_size_chat_help        Número de liñas que parmanecen no histórico do chat.
-enable_name_hilighting_help  Resaltar o teu nome nos chats que envían outros xogadores?
+history_size_chat_help        Número de liñas que permanecen no histórico da charla.
+enable_name_hilighting_help  Resaltar o teu nome nas charlas que envían outros xogadores?
 
 #********************************************
 #********************************************
@@ -419,25 +420,25 @@ ping_flood_time_10_help       Tempo mínimo para que cheguen 10 paquetes de ping
 ping_flood_time_20_help       Tempo mínimo para que cheguen 20 paquetes de ping dunha máquina.
 ping_flood_time_50_help       Tempo mínimo para que cheguen 50 paquetes de ping dunha máquina.
 ping_flood_time_100_help      Tempo mínimo para que cheguen 100 paquetes de ping dunha máquina.
-ping_flood_global_help        As veces que PING_FLOOD_TIME_X, multiplicado por este valor, conta para todos os pings de todas as máquinas. Valores negativos desactivan a protección global de flood.
-connection_flood_sensitivity_help   O número de veces PING_FLOOD_TIME_X, multiplicado por este valor, conta para todas as mensaxes entrantes de clientes aínda non conectados. Unha saturación activa o modo turtle. Valores negativos desactivan a protección global contra saturación.
+ping_flood_global_help        As veces que PING_FLOOD_TIME_X, multiplicado por este valor, conta para tódolos pings de tódalas máquinas. Valores negativos desactivan a protección global de flood.
+connection_flood_sensitivity_help   O número de veces PING_FLOOD_TIME_X, multiplicado por este valor, conta para tódalas mensaxes entrantes de clientes aínda non conectados. Unha saturación activa o modo turtle. Valores negativos desactivan a protección global contra saturación.
 connection_limit_help               Número máximo de paquetes de peers descoñecidos a procesar nunha execución do bucle principal; mensaxes adicionais serán ignoradas.
 anti_spoof_help                     Se está en 1, comproba que os clientes que se conectan non teñan IPs suplantadas. Só se permiten os clientes que pasen unha proba de conectividade. Isto faise automaticamente en modo turtle, pero pode ser útil telo activado sempre.
 turtle_mode_activated               O servidor está baixo alta carga. Modo turtle activado. A comunicación con novos clientes está limitada.\n
 turtle_mode_deactivated             Parece que a carga elevada se normalizou por agora. Modo turtle desactivado.\n
 
 shuffle_spam_messages_per_round_help Por rolda, límite por xogador no número de mensaxes de shuffle mostradas. Un valor negativo ou cero desactiva esta comprobación.
-spam_protection_repeat_help   Tempo mínimo entre mensaxes de chat idénticos.
+spam_protection_repeat_help   Tempo mínimo entre mensaxes de charla idénticos.
 spam_protection_help          Determina a potencia do filtro antispam: determina o retardo mínimo entre 2 mensaxes.
 spam_protection_vote_help     Factor adicional do SPAM_PROTECTION para os votos.
-spam_protection_chat_help     Factor adicional do SPAM_PROTECTION para as mensaxes de chat.
-spam_penalty_help             Número de segundos de silencio contra un spammer.
-spam_maxlen_help              Lonxitude máxima das mensaxes no chat.
+spam_protection_chat_help     Factor adicional do SPAM_PROTECTION para as mensaxes de charla.
+spam_penalty_help             Número de segundos para acalar un usuario que fai spam.
+spam_maxlen_help              Lonxitude máxima das mensaxes na charla.
 spam_autokick_help            Os puntos de spam que provocan a expulsión inmediata dun servidor.
-spam_autokick_count_help			Número de advertencias por spam antes de que un xogador sexa expulsado por spam.
-silence_default_help				Se está en 1, os novos xogadores serán silenciados.
-enable_chat_help					Se está en 0, todo o chat será suprimido (se se restablece no servidor, aínda se amosan mensaxes de xogadores conectados e mensaxes privadas/de equipo).
-allow_team_change_help				Se está en 1, todos os xogadores poden cambiar de equipo. Se está en 0, os xogadores só poden cambiar de equipo se se lles permite especificamente mediante ALLOW_TEAM_CHANGE_PLAYER.
+spam_autokick_count_help			Número de advertencias por spam antes de cun xogador sexa expulsado por spam.
+silence_default_help				Se está en 1, os novos xogadores serán acalados.
+enable_chat_help					Se está en 0, toda a charla será suprimida (se se restablece no servidor, aínda se amosan mensaxes de xogadores conectados e mensaxes privadas/de equipo).
+allow_team_change_help				Se está en 1, tódolos xogadores poden trocar de equipo. Se está en 0, os xogadores só poden trocar de equipo se se lles permite especificamente mediante ALLOW_TEAM_CHANGE_PLAYER.
 
 # spam prefix settings
 prefix_spam_enable_help                           Debe activarse a comprobación de prefixos de spam? Poñer 1 para activar, 0 para desactivar.
@@ -450,14 +451,14 @@ prefix_spam_timeout_multiplier_help               Multiplicador aplicado ao cál
 
 
 # spam kick messages
-spam_chat                   Falaches demasiado no chat.
-spam_teamchage              Cambiaches de equipo con demasiada frecuencia.
+spam_chat                   Falaches demasiado na charla.
+spam_teamchage              Trocaches de equipo con demasiada frecuencia.
 spam_vote_kick_issue        Emitiches demasiados votos de expulsión.
 spam_vote_rejected          Demasiados dos teus votos foron rexeitados.
 
 # default shouting
-default_shout_spectator_help 1 se a acción de chat por defecto para espectadores debe ser gritar, 0 se debe ser chat de espectadores. 2 se a acción por defecto debe ser gritar e se debe ignorar o nivel de acceso requerido.
-default_shout_player_help    1 se a acción de chat por defecto para xogadores debe ser gritar, 0 se debe ser chat de equipo. 2 se a acción por defecto debe ser gritar e se debe ignorar o nivel de acceso requerido.
+default_shout_spectator_help 1 se a acción de charla por defecto para espectadores debe ser gritar, 0 se debe ser charla de espectadores. 2 se a acción por defecto debe ser gritar e se debe ignorar o nivel de acceso requerido.
+default_shout_player_help    1 se a acción de charla por defecto para xogadores debe ser gritar, 0 se debe ser charla de equipo. 2 se a acción por defecto debe ser gritar e se debe ignorar o nivel de acceso requerido.
 
 #********************************************
 #********************************************
@@ -467,22 +468,22 @@ default_shout_player_help    1 se a acción de chat por defecto para xogadores d
 #********************************************
 #********************************************
 
-allow_enemies_same_ip_help    Se vale 1, permite que dous xogadores que aparentemente utilizan a mesma máquina loiten por puntos con cada outro.
-allow_enemies_same_client_help Se vale 1, permite que dous xogadores que xogan no mesmo cliente loiten por puntos con cada outro.
+allow_enemies_same_ip_help    Se se pon en 1, permite que dous xogadores que aparentemente utilizan a mesma máquina loiten por puntos con cada outro.
+allow_enemies_same_client_help Se se pon en 1, permite que dous xogadores que xogan no mesmo cliente loiten por puntos con cada outro.
 whitelist_enemies_username_help    Permite que xogadores da mesma dirección IP sexan inimigos se un deles está autenticado e está nesta lista. WHITELIST_ENEMIES_USERNAME <authenticated name1> <authenticated name2> ...
 whitelist_enemies_ip_help          Permite que calquera xogador da dirección IP especificada sexa inimigo. Uso: WHITELIST_ENEMIES_IP <ip1> ...
 whitelist_enemies_success          Engadíronse \1 entradas á lista branca.
 
-allow_control_during_chat_help Se vale 1, permite que un xogador lance comandos de control da moto e da cámara mentres chatea (perdendo o modo de bot no chat e por tanto a pirámide amarela que indica o modo).
+allow_control_during_chat_help Se se pon en 1, permite cun xogador emita comandos de control da moto e da cámara durante a charla (perdendo o modo bot na charla e, por tanto, a indicación amarela).
 
-allow_imposters_help          Se vale 1, tolérase xogadores con nomes idénticos. Se vale 0, renomearanse todos menos un.
-allow_impostors_help          Se vale 1, tolérase xogadores con nomes idénticos. Se vale 0, renomearanse todos menos un.
+allow_imposters_help          Se se pon en 1, tolérase xogadores con nomes idénticos. Se se pon en 0, renomearanse todos menos un.
+allow_impostors_help          Se se pon en 1, tolérase xogadores con nomes idénticos. Se se pon en 0, renomearanse todos menos un.
 
 timebot_kick_severity_help         Se os xogadores son expulsados pola detección de timebot, faise con este nivel de gravidade.
 timebot_sensitivity_help           Sensibilidade do código de detección de timebot. 1.0 é o valor predeterminado e probablemente non deberías desviarte máis de 0.5.
-timebot_action_medium_help         Acción a tomar ante sospeita media de uso de timebot. 0: non facer nada, 1: rexistralo, 2: avisar aos moderadores, 3: avisar a todos os xogadores, 4: expulsar ao xogador infractor.
-timebot_action_high_help           Acción a tomar ante sospeita alta de uso de timebot. 0: non facer nada, 1: rexistralo, 2: avisar aos moderadores, 3: avisar a todos os xogadores, 4: expulsar ao xogador infractor.
-timebot_action_max_help            Acción a tomar ante sospeita moi alta de uso de timebot. 0: non facer nada, 1: rexistralo, 2: avisar aos moderadores, 3: avisar a todos os xogadores, 4: expulsar ao xogador infractor.
+timebot_action_medium_help         Acción a tomar ante sospeita media de uso de timebot. 0: non facer nada, 1: rexistralo, 2: avisar aos moderadores, 3: avisar a tódolos xogadores, 4: expulsar ao xogador infractor.
+timebot_action_high_help           Acción a tomar ante sospeita alta de uso de timebot. 0: non facer nada, 1: rexistralo, 2: avisar aos moderadores, 3: avisar a tódolos xogadores, 4: expulsar ao xogador infractor.
+timebot_action_max_help            Acción a tomar ante sospeita moi alta de uso de timebot. 0: non facer nada, 1: rexistralo, 2: avisar aos moderadores, 3: avisar a tódolos xogadores, 4: expulsar ao xogador infractor.
 
 timebot_action_medium              \1 está a mostrar unha habilidade de temporización excelente, case demasiado boa para un humano.\n
 timebot_action_high                \1 está a mostrar unha habilidade de temporización sospeitosamente sobrehumana.\n
@@ -528,7 +529,7 @@ network_autoban_offset_help   Autobanear xogadores por NETWORK_AUTOBAN_FACTOR * 
 network_autoban_factor_help   Autobanear xogadores por NETWORK_AUTOBAN_FACTOR * ( kph - NETWORK_AUTOBAN_OFFSET ) minutos cando sexan expulsados; kph é o número medio de expulsións por hora.
 network_autoban_max_kph_help  Valor máximo de expulsións por hora.
 
-network_spectator_time_help   Se se coloca a maior que cero, este é o tempo máximo en segundos que un cliente sen xogadores é tolerado.
+network_spectator_time_help   Se se coloca a maior que cero, este é o tempo máximo en segundos cun cliente sen xogadores é tolerado.
 
 #********************************************
 #********************************************
@@ -545,14 +546,14 @@ allow_voting_help             Se vale 1, permitirá votar aos xogadores.
 allow_voting_spectator_help   Se vale 1, permitirá votar aos espectadores.
 min_voters_help               Número de votantes conectados necesarios para realizar unha votación.
 max_votes_help                Número máximo de votos totais que poden estar activos nun determinado momento.
-votes_cancel_help                   Cancela todas as votacións en curso.
+votes_cancel_help                   Cancela tódalas votacións en curso.
 max_votes_per_voter_help      Número máximo de votos aconsellado por votante que poden estar activos nun determinado momento.
 voting_start_decay_help       Número de segundos tras os que se ignoran aos non votantes.
 voting_decay_help             Cada vez que pasan estes segundos un non votante é ignorado.
-voting_bias_help              Engadir votantes virtuais que se opoñan a cada cambio.
+voting_bias_help              Engadir votantes virtuais que se opoñan a cada troco.
 voting_bias_kick_help				Engade votantes virtuais que se opoñen a cada voto de expulsión.
 voting_bias_suspend_help			Engade votantes virtuais que se opoñen a cada voto de suspensión.
-voting_bias_silence_help			Engade votantes virtuais que se opoñen a cada voto de silencio.
+voting_bias_silence_help			Engade votantes virtuais que se opoñen a cada voto de acalar.
 voting_bias_voice_help			Engade votantes virtuais que se opoñen a cada voto de voz.
 voting_bias_include_help			Engade votantes virtuais que se opoñen a cada voto de inclusión.
 voting_bias_command_help			Engade votantes virtuais que se opoñen a cada voto de comando.
@@ -562,9 +563,9 @@ voting_spam_issue_help        O nivel de spam ao someter un voto.
 voting_spam_reject_help       O nivel de spam de rexeitamento de voto.
 voting_harm_time_help               Tempo mínimo en segundos entre dous votos daniños contra o mesmo xogador.
 voting_kick_time_help         Tempo mínimo en segundos entre dous votos de expulsión contra no mesmo xogador.
-voting_maturity_help                Tempo mínimo en segundos que un xogador necesita estar en liña co mesmo nome antes de poder emitir votos.
+voting_maturity_help                Tempo mínimo en segundos cun xogador precisa estar en liña co mesmo nome antes de poder emitir votos.
 voting_suspend_rounds_help          Número de roldas que "/vote suspend <player>" suspende a un xogador.
-voting_kick_minharm_help            Número mínimo de votos daniños (suspensión, expulsión,...) que deben emitirse (non é necesario que teñan éxito) contra un xogador antes de que un voto de expulsión emitido desde o menú realmente resulte nunha expulsión; doutro xeito, o resultado é unha simple suspensión.
+voting_kick_minharm_help            Número mínimo de votos daniños (suspensión, expulsión,...) que deben emitirse (non é necesario que teñan éxito) contra un xogador antes de cun voto de expulsión emitido desde o menú realmente resulte nunha expulsión; doutro xeito, o resultado é unha simple suspensión.
 votes_suspend_help		   Suspende a votación durante n minutos.
 votes_suspend_default_help	    Valor predeterminado para VOTES_SUSPEND.
 votes_unsuspend_help		    Permite votar de novo.
@@ -607,17 +608,17 @@ expect_ack_on_client_playback_help  Se está en 1, un cliente que reproduce unha
 #********************************************
 #********************************************
 
-camera_forbid_smart_help      Prohibe o uso da cámara interna para todos os clientes
-camera_forbid_in_help         Prohibe o uso da cámara interna para todos os clientes
-camera_forbid_free_help       Prohibe o uso da cámara libre en todos os clientes
-camera_forbid_follow_help     Prohibe o uso da cámara externa fixa en todos os clientes
-camera_forbid_custom_help     Prohibe o uso da cámara personalizada en todos os clientes
+camera_forbid_smart_help      Prohibe o uso da cámara interna para tódolos clientes
+camera_forbid_in_help         Prohibe o uso da cámara interna para tódolos clientes
+camera_forbid_free_help       Prohibe o uso da cámara libre en tódolos clientes
+camera_forbid_follow_help     Prohibe o uso da cámara externa fixa en tódolos clientes
+camera_forbid_custom_help     Prohibe o uso da cámara personalizada en tódolos clientes
 camera_forbid_server_custom_help Prohibe o uso da cámara personalizada do servidor?
 camera_forbid_mer_help		Prohíbe o uso da cámara de Meriton.
 
-camera_forbid_custom_glance_help                 Prohíbe o uso de configuracións especiais da cámara glance.
-camera_override_custom_glance_help               Sobrescribe as configuracións personalizadas de glance cos valores do servidor.
-camera_override_custom_glance_server_custom_help Sobrescribe as configuracións personalizadas de glance cos valores do servidor só para a cámara personalizada do servidor.
+camera_forbid_custom_glance_help                 Prohíbe o uso de configuracións especiais da cámara de mirada.
+camera_override_custom_glance_help               Sobrescribe as configuracións personalizadas de mirada cos valores do servidor.
+camera_override_custom_glance_server_custom_help Sobrescribe as configuracións personalizadas de mirada cos valores do servidor só para a cámara personalizada do servidor.
 
 camera_follow_start_x_help    Determina a posición (x) da cámara externa fixa
 camera_follow_start_y_help    Determina a posición (e) da cámara externa fixa
@@ -636,7 +637,7 @@ camera_free_start_rotate_help Comeza a rotación da cámara libre (relativa a mi
 camera_free_start_pitch_help Comeza o ángulo de inclinación da cámara libre (se é 0, inclinarase para mirar á moto).
 
 save_cameras_help           Imprime comandos que restauran máis tarde as posicións actuais das cámaras.
-warp_camera_help            Cambia instantaneamente a posición dunha cámara. Formato: WARP_CAMERA camera_id posx posy dirx diry height pitch fov.
+warp_camera_help            Troca instantaneamente a posición dunha cámara. Formato: WARP_CAMERA camera_id posx posy dirx diry height pitch fov.
 
 camera_custom_back_help       Posición da cámara personalizada: canto pode afastarse cara atrás da moto?
 camera_custom_rise_help       Posición da cámara personalizada: canto pode afastarse cara arriba da moto?
@@ -656,24 +657,24 @@ camera_server_custom_pitch_help Posición da cámara personalizada: canto mira c
 camera_server_custom_turn_speed_help Velocidade á que vira a cámara personalizada do servidor. Se é negativa, os valores de xiro se cojerán da configuración do cliente
 camera_server_custom_turn_speed_180_help Factor adicional a CAMERA_SERVER_CUSTOM_TURN_SPEED tras un xiro rápido
 
-camera_glance_back_help		Posición da cámara glance: canto se move cara atrás desde a moto?
-camera_glance_rise_help		Posición da cámara glance: canto se move cara arriba desde a moto?
+camera_glance_back_help		Posición da cámara de mirada: canto se move cara atrás desde a moto?
+camera_glance_rise_help		Posición da cámara de mirada: canto se move cara arriba desde a moto?
 camera_glance_back_fromspeed_help		Este valor multiplícase pola velocidade actual e engádese a CAMERA_GLANCE_BACK.
 camera_glance_rise_fromspeed_help		Este valor multiplícase pola velocidade actual e engádese a CAMERA_GLANCE_RISE.
-camera_glance_pitch_help	Posición da cámara glance: canto mira arriba/abaixo?
+camera_glance_pitch_help	Posición da cámara de mirada: canto mira arriba/abaixo?
 
-camera_glance_mode_help           Forma na que a cámara cambia a glance. Os valores válidos van de 0 a 3.
-camera_glance_stacking_help       Se está activado, os glances apílase, as direccións de glance son relativas á vista actual.
-camera_glance_return_help         Se liberas todas as teclas de glance e isto está activado, ordénase mirar directamente na dirección na que conduces. Isto pode restaurar a vista á normalidade máis rápido que deixar que o faga o código de cámara por defecto.
-camera_glance_return_stop_help    Cosseno do ángulo entre a dirección de conducción e a dirección de glance no que se aborta o comando de retorno e o control volve á cámara normal (non intelixente).
-camera_glance_return_stop_smart_help Cando se usa a cámara intelixente: cosseno do ángulo entre a dirección de conducción e a dirección de glance no que se aborta o comando de retorno e o control volve á cámara normal.
-camera_glance_snap_help          Se o cosseno entre a dirección de glance desexada e a actual é menor que este valor, a glance salta directamente ao obxectivo desexado, independentemente de CAMERA_GLANCE_MODE.
+camera_glance_mode_help           Forma na que a cámara troca as miradas. Os valores válidos van de 0 a 3.
+camera_glance_stacking_help       Se está activado, as miradas acumúlanse e as súas direccións son relativas á vista actual.
+camera_glance_return_help         Se soltas tódalas teclas de mirada e isto está activado, envíase a orde de mirar cara adiante na dirección na que conduces. Isto pode devolver a vista ao normal máis rápido que o sistema de cámara predeterminado.
+camera_glance_return_stop_help    Coseno do ángulo entre a dirección de condución e a dirección da mirada no que se interrompe a orde de retorno da mirada e se devolve o control á cámara normal (non intelixente).
+camera_glance_return_stop_smart_help Cando se usa a cámara intelixente: coseno do ángulo entre a dirección de condución e a dirección da mirada no que se interrompe a orde de retorno da mirada e se devolve o control á cámara normal.
+camera_glance_snap_help          Se o coseno entre a dirección desexada e a dirección actual da mirada é menor que este valor, a mirada axústase directamente ao obxectivo desexado, independentemente de CAMERA_GLANCE_MODE.
 
-camera_server_glance_back_help		Posición da cámara glance do servidor: canto se move cara atrás desde a moto?
-camera_server_glance_rise_help		Posición da cámara glance do servidor: canto se move cara arriba desde a moto?
+camera_server_glance_back_help		Posición da cámara de mirada do servidor: canto se despraza cara atrás desde a moto?
+camera_server_glance_rise_help		Posición da cámara de mirada do servidor: canto se despraza cara arriba desde a moto?
 camera_server_glance_back_fromspeed_help		Este valor multiplícase pola velocidade actual e engádese a CAMERA_SERVER_GLANCE_BACK.
 camera_server_glance_rise_fromspeed_help		Este valor multiplícase pola velocidade actual e engádese a CAMERA_SERVER_GLANCE_RISE.
-camera_server_glance_pitch_help		Posición da cámara glance do servidor: canto mira arriba/abaixo?
+camera_server_glance_pitch_help		Posición da cámara de mirada do servidor: canto mira cara arriba/abaixo?
 
 camera_visibility_recovery_speed_help a velocidade á que os focos de visibilidade recupéranse ao chocar un muro
 camera_visibility_wall_distance_help a distancia á que os focos de visibilidade mantéñense dos muros
@@ -682,7 +683,7 @@ camera_visibility_extension_help distancia (medida en segundos, multiplícase po
 camera_visibility_sideskew_help compoñente dianteiro adicional dos focos oblicuos da visibilidade
 camera_visibility_lower_wall_help se vale 1, os muros báixanse cando bloquean a vista e a cámara non se move
 camera_visibility_lower_wall_smart_help como CAMERA_VISIBILITY_LOWER_WALL, pero configuración especial para a cámara intelixente
-bug_transparency_help         non soportado: facer todos os muros da area semitransparentes debuxándoos sen realizar comprobacións de obstrución
+bug_transparency_help         non soportado: facer tódolos muros da area semitransparentes debuxándoos sen realizar comprobacións de obstrución
 bug_transparency_demand_help  non soportado: usar transparencia en lugar de baixar os muros
 
 #red/green 3D rendering settings
@@ -723,18 +724,18 @@ max_in_rate_help              Transferencia máxima de descarga da rede
 message_cache_size_help       Tamaño da caché de mensaxes de rede en número de mensaxes.
 message_cache_effort_help     Esforzo aplicado para comprimir as mensaxes de rede.
 ping_charity_help             Canto ping pode garantir que terá o seu adversario?
-ping_charity_max_help	      Opción do servidor: valor máximo de compensación de ping. Pon a 0 para evitar mortes instantáneas. Activo só se todos os clientes son 0.2.8.3 ou superior.
-ping_charity_min_help	      Opción do servidor: valor mínimo de compensación de ping. Úsase para garantir xustiza. Activo só se todos os clientes son 0.2.8.3 ou superior.
+ping_charity_max_help	      Opción do servidor: valor máximo de compensación de ping. Pon a 0 para evitar mortes instantáneas. Activo só se tódolos clientes son 0.2.8.3 ou superior.
+ping_charity_min_help	      Opción do servidor: valor mínimo de compensación de ping. Úsase para garantir xustiza. Activo só se tódolos clientes son 0.2.8.3 ou superior.
 ping_charity_server_help      Non tocar: o servidor indica que este é o máximo de compensación de ping.
 big_brother_help              Xa se enviou a información ao "Gran Irmán"?
 server_name_help              Nome deste servidor
 server_options_help           Curta descrición das opcións neste servidor
 server_ip_help                IP pola que o servidor escoita
-server_dns_help               Se o teu servidor ten IP dinámica e colocas un DNS dinámico que sempre apunta a ela, podes poñer esta variable ao nome do DNS para axudar aos clientes para lembrar o teu servidor a través dos cambios de IP.
+server_dns_help               Se o teu servidor ten IP dinámica e colocas un DNS dinámico que sempre apunta a ela, podes poñer esta variable ao nome do DNS para axudar aos clientes para lembrar o teu servidor a través dos trocos de IP.
 server_port_help              Porto que utiliza este servidor
 client_port_help              Porto ao que se tentase conectar
 max_clients_help              Número máximo de clientes que se aceptan
-max_clients_limit             Aviso: MAX_CLIENTS non pode ser maior que \1. Configuración non cambiada.
+max_clients_limit             Aviso: MAX_CLIENTS non pode ser maior que \1. Configuración non trocada.
 max_clients_same_ip_soft_help Número máximo de clientes que se aceptan da mesma IP; os que se conecten despois serán expulsados cando o servidor estea cheo
 max_clients_same_ip_hard_help Número máximo de clientes que se aceptan da mesma IP; os que se tenten conectar despois serán ignorados
 max_players_same_ip_help      número máximo de xogadores coa mesma IP (legalmente cada cliente pode utilizar ata 4 xogadores)
@@ -750,12 +751,12 @@ setting_legacy_behavior_visual_help Comportamento por defecto para configuració
 
 # server browser
 
-browser_query_filter_help            Filtro de consulta. Pon a 0 para consultar todos os servidores, 1 para consultar servidores con sesgo de puntuación non negativo, 2 para consultar só aqueles con sesgo positivo e 3 para non consultar en absoluto. Os servidores non consultados aparecerán con ping 999; a información dos xogadores provén indirectamente do servidor principal.
+browser_query_filter_help            Filtro de consulta. Pon a 0 para consultar tódolos servidores, 1 para consultar servidores con sesgo de puntuación non negativo, 2 para consultar só aqueles con sesgo positivo e 3 para non consultar en absoluto. Os servidores non consultados aparecerán con ping 999; a información dos xogadores provén indirectamente do servidor principal.
 browser_queries_simultaneous_help    Número máximo de mensaxes de consulta simultáneas enviadas.
 browser_query_delay_single_help      Retraso entre consultas ao mesmo servidor.
-browser_query_delay_global_help      Retraso entre todas as consultas.
+browser_query_delay_global_help      Retraso entre tódalas consultas.
 browser_num_queries_help             Número de consultas por intento.
-browser_contactloss_help             Número de intentos de contacto fallidos antes de que un servidor poida considerarse perdido.
+browser_contactloss_help             Número de intentos de contacto fallidos antes de cun servidor poida considerarse perdido.
 browser_sort_key_help                Clave de ordenación actual no explorador de servidores.
 browser_bookmark_priority_ping_help  Prioridade dos marcadores para ordenar por ping.
 browser_bookmark_priority_users_help Prioridade dos marcadores para ordenar por usuarios.
@@ -783,7 +784,7 @@ hud_max_width_help               Ancho máximo do HUD inferior en relación coa 
 
 #floor
 grid_size_help                Distancia entre as liñas da reixa
-grid_size_moviepack_help      Distancia entre as liñas da reixa cando o moviepack está activo
+grid_size_moviepack_help      Distancia entre as liñas da reixa cando o paquete visual está activo
 floor_red_help                Cor do chan (compoñente vermella)
 floor_green_help              Cor do chan (compoñente verde)
 floor_blue_help               Cor do chan (compoñente azul)
@@ -794,8 +795,8 @@ UPPER_SKY_BLUE_help      Cor azul do ceo superior
 
 UPPER_SKY_SCALE_help     Escala do ceo superior (reducir para facer as características máis grandes)
 
-UPPER_SKY_HEIGHT_help    Altura do ceo superior (cambios durante o xogo poden causar erros gráficos)
-LOWER_SKY_HEIGHT_help    Altura do ceo inferior (cambios durante o xogo poden causar erros gráficos)
+UPPER_SKY_HEIGHT_help    Altura do ceo superior (trocos durante o xogo poden causar erros gráficos)
+LOWER_SKY_HEIGHT_help    Altura do ceo inferior (trocos durante o xogo poden causar erros gráficos)
 
 rim_wall_stretch_x_help       Extensión da textura do muro exterior na dirección horizontal
 rim_wall_stretch_y_help       Extensión da textura do muro exterior na dirección vertical
@@ -809,9 +810,9 @@ rim_wall_blue_help       Compoñente azul das paredes do aro cando non se usan t
 moviepack_floor_red_help      Cor do chan (compoñente vermella)
 moviepack_floor_green_help    Cor do chan (compoñente verde)
 moviepack_floor_blue_help     Cor do chan (compoñente azul)
-moviepack_wall_stretch_help   Distancia entre as liñas verticais nos muros do moviepack
-moviepack_rim_wall_stretch_x_help Extensión dun cadrado da textura do muro exterior na dirección horizontal para o moviepack
-moviepack_rim_wall_stretch_y_help Extensión da textura do muro exterior na dirección vertical para o moviepack
+moviepack_wall_stretch_help   Distancia entre as liñas verticais nos muros do paquete visual
+moviepack_rim_wall_stretch_x_help Extensión dun cadrado da textura do muro exterior na dirección horizontal para o paquete visual
+moviepack_rim_wall_stretch_y_help Extensión da textura do muro exterior na dirección vertical para o paquete visual
 
 #detail settings
 swapmode_text                 Modo de sincronización:
@@ -819,7 +820,7 @@ swapmode_help                 Determina a función usada para sincronizar gráfi
 swapoptimize_latency_text   Baixa latencia
 swapoptimize_latency_help   Optimiza para baixa latencia entre a entrada e a visualización (tamén coñecida como input lag). Isto só é efectivo se VSYNC está activado.
 swapoptimize_auto_text       Automático
-swapoptimize_auto_help       Escolla o modo de baixa latencia se a taxa de fotogramas parece estable e suficientemente alta, e cambia ao modo de rendemento se se perden moitos fotogramas ou a taxa de fotogramas é tan alta que a latencia non é un problema. Configuración recomendada.
+swapoptimize_auto_help       Escolla o modo de baixa latencia se a taxa de fotogramas parece estable e suficientemente alta, e troca ao modo de rendemento se se perden moitos fotogramas ou a taxa de fotogramas é tan alta ca latencia non é un problema. Configuración recomendada.
 swapoptimize_throughput_text Rendemento
 swapoptimize_throughput_help Optimiza para altas taxas de FPS e baixo número de fotogramas perdidos, pero mantén a latencia de entrada por debaixo dun fotograma en calquera caso.
 swapoptimize_throughput_flush_text Rendemento+Flush
@@ -873,17 +874,17 @@ console_decorate_id_help      Decora cada liña de saída da consola co IDE do c
 console_decorate_ip_help      Decora cada liña de saída da consola coa IP do cliente
 console_decorate_timestamp_help			Decora cada liña de saída da consola coa data e hora actual.
 ladderlog_decorate_timestamp_help		Decora cada liña de saída do ladderlog coa data e hora actual.
-ladderlog_write_all_help         Activar ou desactivar todos os escritores de ladderlog para saída en arquivo e script. Uso: LADDERLOG_WRITE_ALL 0|1
-ladderlog_script_write_all_help  Activar ou desactivar todos os escritores de ladderlog para saída en script. Uso: LADDERLOG_SCRIPT_WRITE_ALL 0|1
+ladderlog_write_all_help         Activar ou desactivar tódolos escritores de ladderlog para saída en arquivo e script. Uso: LADDERLOG_WRITE_ALL 0|1
+ladderlog_script_write_all_help  Activar ou desactivar tódolos escritores de ladderlog para saída en script. Uso: LADDERLOG_SCRIPT_WRITE_ALL 0|1
 ladderlog_script_write_help      Activar ou desactivar escritores de ladderlog para saída en script. Uso: LADDERLOG_SCRIPT_WRITE 0|1 <evento1> [<evento2> ...]
 ladderlog_script_write_enabled   Activados \1 escritores de ladderlog para saída en script.
 ladderlog_script_write_disabled  Desactivados \1 escritores de ladderlog para saída en script.
-ladderlog_write_all_enabled Activados todos os escritores de ladderlog.
-ladderlog_write_all_disabled Desactivados todos os escritores de ladderlog.
+ladderlog_write_all_enabled Activados tódolos escritores de ladderlog.
+ladderlog_write_all_disabled Desactivados tódolos escritores de ladderlog.
 ladderlog_game_time_interval_help Se é non negativo, escribir unha liña co tempo actual do xogo no ladderlog cada n segundos.
 ladderlog_write_template Debería estar activado o evento de ladderlog \1 para saída en arquivo e script? Especificación: \1 \2
-chat_log_help			Escribir mensaxes de chat analizables por máquina en var/chatlog.txt
-console_log_help		Escribir todas as mensaxes da consola en var/consolelog.txt
+chat_log_help			Escribir mensaxes de charla analizables por máquina en var/chatlog.txt
+console_log_help		Escribir tódalas mensaxes da consola en var/consolelog.txt
 show_fps_help                 Activa a visualización dos FPS
 floor_mirror_help             O chan reflicte como un espello
 floor_detail_help             Detalles do chan
@@ -1010,7 +1011,7 @@ reset_rotation_message                  A rotación de mapas e configuracións f
 word_delimiters_help          Caracteres que contan como delimitadores de palabras cando cando saltan palabras nun campo de entrada de texto.
 
 mouse_grab_help               Bloquea o punteiro do rato; para que non saia da xanela
-moviepack_help                Utilizar moviepack se está dispoñible
+moviepack_help                Utilizar paquete visual se está dispoñible
 armagetron_version_help       A túa versión de \g
 message_of_day_help           Mensaxe enviada aos clientes
 title_of_day_help		Se se admite a visualización a pantalla completa, este será o título enriba de message_of_day
@@ -1034,16 +1035,16 @@ exit_help                     Deter o servidor dedicado e abandonar
 # manning and kicking commands
 only_works_on_server        O comando da consola \1 só funciona no servidor. Probablemente queiras escribir "/admin \1 \2".\n
 players_help                  Mostra a lista dos xogadores actualmente activos
-teams_help                  Obtén unha lista de todos os equipos cunha representación algo gráfica da súa formación. O mesmo que dicir /teams
+teams_help                  Obtén unha lista de tódolos equipos cunha representación algo gráfica da súa formación. O mesmo que dicir /teams
 kill_help                     Mata a un xogador específico (como aviso antes dunha expulsión)
-silence_help                Silencia a un xogador específico para que non poida usar o chat público máis (/msg e /team seguen funcionando)
+silence_help                Acala a un xogador específico para que non poida usar a charla pública máis (/msg e /team seguen funcionando)
 unsilence_help              Reverte un comando SILENCE
 suspend_help                Suspende a un xogador de xogar durante os seguintes N roldas (o valor por defecto establécese en SUSPEND_DEFAULT_ROUNDS)
 unsuspend_help              Elimina a suspensión dun xogador.
 suspend_list_help           Amosar a lista dos xogadores actualmente suspendidos.
 suspend_default_rounds_help Define o tempo de suspensión por defecto en roldas para SUSPEND.
 voice_help                  O contrario de SILENCE
-allow_team_change_player_help Permite que un xogador específico cambie de equipo mesmo se ALLOW_TEAM_CHANGE está desactivado
+allow_team_change_player_help Permite cun xogador específico troque de equipo mesmo se ALLOW_TEAM_CHANGE está desactivado
 disallow_team_change_player_help O contrario de ALLOW_TEAM_CHANGE_PLAYER
 kick_help                     Expulsa do servidor ao xogador indicado
 default_kick_reason_help    A razón que se lle dá a un xogador expulsado con KICK se non se especifica ningunha.
@@ -1069,7 +1070,7 @@ player_list_search          \1: A cadea de busca "\2" coincide con:\n
 player_list_search_no_results \1: A cadea de busca "\2" non devolveu resultados.\n
 player_list_search_end      \1: Fin da busca (\2 coincidencias).\n
 player_list_end             \1: Listados \2 xogadores.\n
-player_list_disconnected    Xogadores pasados e o seu último chat:\n
+player_list_disconnected    Xogadores anteriores e a súa derradeira mensaxe na charla:\n
 
 admins_help                 Lista os administradores do servidor. Deberías usar /admins ou /listadmins en lugar disto.
 
@@ -1086,15 +1087,15 @@ admin_list_colors_worst_blue_help  Compoñente azul da cor para o peor nivel de 
 admin_list_min_access_level_help   Nivel mínimo de acceso que se amosa en /admins
 
 # communication
-console_message_help          Mostra unha mensaxe na consola para todos os clientes conectados
-center_message_help           Mostra unha mensaxe grande en pantalla para todos os clientes conectados
+console_message_help          Amosa unha mensaxe na consola para tódolos clientes conectados
+center_message_help           Amosa unha mensaxe grande en pantalla para tódolos clientes conectados
 fullscreen_message_help     Amosa unha mensaxe grande por toda a pantalla, interrompendo a partida durante un tempo configurable. Úsase con coidado.
 say_help                      Só servidor dedicado: permite ao administrador do servidor dicir algo
-rename_help		    Cambia o nome do xogador dado.
-allow_rename_player_help    Dá ao xogador dado a capacidade de cambiar o seu nome.
-disallow_rename_player_help Impide que o xogador dado poida cambiar o seu nome.
+rename_help		    Troca o nome do xogador dado.
+allow_rename_player_help    Dá ao xogador dado a capacidade de trocar o seu nome.
+disallow_rename_player_help Impide co xogador dado poida trocar o seu nome.
 
-silence_enemies_help        Se está activado, o chat enviado polos inimigos non se mostra no teu cliente se estás vivo. Se estás morto, amósase todo o chat.
+silence_enemies_help        Se está activado, a charla enviada polos inimigos non se amosa no teu cliente se estás vivo. Se estás morto, amósase toda a charla.
 
 #********************************************
 #********************************************
@@ -1151,25 +1152,25 @@ input_console_input_help      Permíteche escribir unha mensaxe na consola.
 input_screenshot_text         Captura de pantalla
 input_screenshot_help         Realiza unha captura de pantalla e a garda en screenshot_X.bmp
 
-input_chat_tooltip                  Preme \1 para chatear.
-input_chat_text               Chat
+input_chat_tooltip                  Preme \1 para abrir a charla.
+input_chat_text               Charla
 input_chat_help               Permíteche falar con outros xogadores conectados.
 
 input_toggle_spectator_tooltip	    Preme \1 para activar/desactivar o modo espectador.
-input_toggle_spectator_text   Cambiar a Espectador
-input_toggle_spectator_help   Cambia a modo espectador, sacándoche fóra do xogo con tal de que poidas atender unha chamada (da natureza, posiblemente) e volver ao xogo cando finalizases.
+input_toggle_spectator_text   Trocar a Espectador
+input_toggle_spectator_help   Troca a modo espectador, sacándoche fóra do xogo con tal de que poidas atender unha chamada (da natureza, posiblemente) e volver ao xogo cando rematases.
 
 input_score_text              Puntuación
 input_score_help              Mostra a táboa de puntuacións
 
-input_toggle_fullscreen_text  Cambiar a pantalla completa
-input_toggle_fullscreen_help  Cambia entre xanela e pantalla completa
+input_toggle_fullscreen_text  Trocar a pantalla completa
+input_toggle_fullscreen_help  Troca entre xanela e pantalla completa
 
 input_toggle_mousegrab_text   Atrapar rato
 input_toggle_mousegrab_help   Libera o punteiro do rato ou atrápao na xanela do programa
 
 input_reload_textures_text    Recargar texturas
-input_reload_textures_help    Recarga todas as texturas. Útil para os creadores de contido.
+input_reload_textures_help    Recarga tódalas texturas. Útil para os creadores de contido.
 
 input_ingame_menu_tooltip           Preme \1 para acceder ao menú dentro do xogo.
 input_ingame_menu_text        Menú en xogo
@@ -1313,9 +1314,9 @@ input_look_right_help         Xira a cámara cara á dereita, ou desprázaa se a
 input_look_left_text          Vista cara á esquerda
 input_look_left_help          Xira a cámara cara á esquerda, ou desprázaa se a dirección da cámara é fixa.
 
-input_switch_view_tooltip     Preme \1 para cambiar os modos de cámara.
-input_switch_view_text        Cambio de vista
-input_switch_view_help        Cambia a perspectiva da cámara. Vistas dispoñibles: Cámara externa intelixente (por defecto) e cámara externa (ambas as fixas para ver a túa moto), flotación libre e cámara interna (fixada sobre a túa moto)
+input_switch_view_tooltip     Preme \1 para trocar os modos de cámara.
+input_switch_view_text        Troco de vista
+input_switch_view_help        Troca a perspectiva da cámara. Vistas dispoñibles: Cámara externa intelixente (por defecto) e cámara externa (ambas as fixas para ver a túa moto), flotación libre e cámara interna (fixada sobre a túa moto)
 
 #********************************************
 #********************************************
@@ -1326,7 +1327,7 @@ input_switch_view_help        Cambia a perspectiva da cámara. Vistas dispoñibl
 #********************************************
 
 input_instant_chat_text		  Entrada:
-input_instant_chat_help       Activa unha macro rápida de chat
+input_instant_chat_help       Activa unha macro de charla intantánea
 
 #********************************************
 #********************************************
@@ -1421,13 +1422,13 @@ help_menu_doc_help		Abre a documentación HTML incluída nun navegador externo
 help_menu_doc_file	    index.html
 
 help_menu_discord_text	Abrir Discord
-help_menu_discord_help	Abre un convite ao noso Discord… chat… cousa. Seguimos negándonos a chamarlle “Servidor”, porque non é iso.\nÉ o lugar máis probable onde atoparás a alguén disposto a axudar.
+help_menu_discord_help	Abre un convite ao noso Discord… charla… cousa. Seguimos negándonos a chamarlle “Servidor”, porque non é iso.\nÉ o lugar máis probable onde atoparás a alguén disposto a axudar.
 
 help_menu_forums_text	Abrir Foros
 help_menu_forums_help	Abre os nosos foros web. Requírese rexistro para publicar. O acceso de lectura non está restrinxido.
 
-help_menu_irc_text	    Abrir IRC Chatroom
-help_menu_irc_help		Abre unha interface web ao noso chat IRC onde adoitan estar os vellos usuarios.
+help_menu_irc_text	    Abrir sala de charla IRC
+help_menu_irc_help		Abre unha interface web a nosa charla IRC onde adoitan estar os vellos usuarios.
 
 help_menu_directories_text Abrir Directorios
 help_menu_directories_help Dá acceso rápido a datos do xogo e menús de configuración.
@@ -1442,10 +1443,10 @@ help_menu_screenshots_text Abrir Capturas de Pantalla
 help_menu_screenshots_help Abre o directorio onde se gardan as capturas de pantalla.
 
 help_menu_systemdata_text Abrir Datos do Sistema
-help_menu_systemdata_help Abre o directorio de Datos do Sistema onde podes gardar modificacións do xogo que afecten a todos os usuarios desta máquina; probablemente require permisos de administrador para modificar, pode sobrescribirse na seguinte actualización e as modificacións poden romper cousas. Recoméndase xeralmente tratalo como só lectura.
+help_menu_systemdata_help Abre o directorio de Datos do Sistema onde podes gardar modificacións do xogo que afecten a tódolos usuarios desta máquina; probablemente require permisos de administrador para modificar, pode sobrescribirse na seguinte actualización e as modificacións poden romper cousas. Recoméndase xeralmente tratalo como só lectura.
 
 help_menu_systemconfig_text Abrir Configuración do Sistema
-help_menu_systemconfig_help Abre o directorio de Configuración do Sistema onde podes gardar modificacións da configuración do xogo que afecten a todos os usuarios desta máquina; probablemente require permisos de administrador para modificar, pode sobrescribirse na seguinte actualización e as modificacións poden romper cousas. Recoméndase xeralmente tratalo como só lectura.
+help_menu_systemconfig_help Abre o directorio de Configuración do Sistema onde podes gardar modificacións da configuración do xogo que afecten a tódolos usuarios desta máquina; probablemente require permisos de administrador para modificar, pode sobrescribirse na seguinte actualización e as modificacións poden romper cousas. Recoméndase xeralmente tratalo como só lectura.
 
 main_help_menu_text      Axuda
 main_help_menu_help     Tes problemas ou só queres consultar algo? Este é o lugar.
@@ -1457,11 +1458,11 @@ main_menu_exit_help           Ata a vista!
 #ingame menu
 ingame_menu_text              Menú
 
-game_menu_ingame_text         Cambiar xogo
+game_menu_ingame_text         Trocar xogo
 game_menu_ingame_help         Configuración do xogo
 
-ingame_menu_exit_text         Volver ao xogo
-ingame_menu_exit_help         Volver á reixa de xogo!
+ingame_menu_exit_text         Voltar ao xogo
+ingame_menu_exit_help         Voltar á reixa de xogo!
 
 game_menu_shutdown_text       Finalizar o servidor
 game_menu_shutdown_help       Finaliza o proceso do servidor e volve ao menú principal.
@@ -1487,7 +1488,7 @@ version_info_misc_stuff         \n0xff8888Official website:0xRESETT https://arma
 path_info_user_cfg              Localización de user.cfg:
 path_info_config                Directorios de configuración:
 path_info_resource              Directorios de recursos (mapas, cabinas):
-path_info_data                  Directorios de datos (texturas, moviepack, ...):
+path_info_data                  Directorios de datos (texturas, paquete visual, ...):
 path_info_screenshot            Directorios de capturas de pantalla:
 path_info_var                   Directorios Var:
 
@@ -1519,11 +1520,11 @@ game_settings_menu_help       Elixir modo de xogo e número de adversarios
 
 
 game_menu_reset_text          Empezar nova partida
-game_menu_reset_help          Despois de finalizar a rolda actual, empezar unha nova partida con todas as puntuacións a 0.
+game_menu_reset_help          Despois de finalizar a rolda actual, empezar unha nova partida con tódalas puntuacións a 0.
 
 #game settings
 game_menu_finish_text         Tipo de final:
-game_menu_finish_help         Que ocorre se todos os humanos morren?
+game_menu_finish_help         Que ocorre se tódolos humanos morren?
 
 game_menu_finish_expr_text    Restablezo rápido
 game_menu_finish_expr_help    Inicia a rolda seguinte o máis rápido posible
@@ -1541,13 +1542,13 @@ game_menu_mode_text           Modo de xogo:
 game_menu_mode_help           Selecciona as regras coas que queres xogar
 
 game_menu_mode_free_text      Estilo libre
-game_menu_mode_free_help      Sen regras, sen vencedores. O xogo finaliza cando todos os humanos morren.
+game_menu_mode_free_help      Sen regras, sen vencedores. O xogo finaliza cando tódolos humanos morren.
 
 game_menu_mode_lms_text       Combate a matar
 game_menu_mode_lms_help       O último humano en vida gaña. Se ningún humano resiste, é o computador quen gana.
 
 game_menu_mode_team_text      Humanos contra Bots
-game_menu_mode_team_help      Os humanos forman un equipo, os bots outro. Cando todos os membros dun equipo morren, o outro gana a rolda.
+game_menu_mode_team_help      Os humanos forman un equipo, os bots outro. Cando tódolos membros dun equipo morren, o outro gana a rolda.
 
 game_menu_autoai_text         Auto Bot:
 game_menu_autoai_help         Determina automaticamente o número de bots ao que te enfrontarás dependendo dos teus éxitos.
@@ -1755,7 +1756,7 @@ tutorial_menu_speedkilldefense_animation textures/tutorials/speedkilldefense/spe
 
 tutorial_menu_congratulations_text     Palabras finais
 tutorial_menu_congratulations_help     Non todo se pode ensinar nos titoriais.
-tutorial_menu_congratulations_instructions Parabéns, agora deberías ter completado todos os titoriais esenciais. O que segue son desafíos opcionais. Xa estás listo para entrar no xogo propiamente dito, que é a parte multixogador en liña. Antes de mergullarte, hai un par de cousas que debes saber sobre a comunidade en liña e os servidores:\n\nPodes desprazarte por esta e outras mensaxes deste tipo cara arriba e abaixo usando as teclas de cursor.\n\nModo Sumo: Aquí ensináronche os fundamentos do modo Fortaleza; Sumo usa a mesma mecánica básica, pero normalmente para xogadores individuais e non para equipos, e as zonas de varios xogadores competindo colócanse unhas enriba das outras. Ademais, encollem.\n\nCaptura a Bandeira (CTF): Algúns servidores ofrecen este modo clásico, cunha pequena zona representando a bandeira e unha maior como base para devolver a bandeira.\n\nTamén é recomendable ler a documentación incluída (usa o menú Axuda para abrila nun navegador). E definitivamente deberías comezar cos modos de xogo básicos e coas configuracións próximas ás predeterminadas. O navegador de servidores axuda con isto ocultando inicialmente os servidores avanzados; aínda así podes acceder a eles cedo se te atreves.
+tutorial_menu_congratulations_instructions Parabéns, agora deberías ter completado tódolos titoriais esenciais. O que segue son desafíos opcionais. Xa estás listo para entrar no xogo propiamente dito, que é a parte multixogador en liña. Antes de mergullarte, hai un par de cousas que debes saber sobre a comunidade en liña e os servidores:\n\nPodes desprazarte por esta e outras mensaxes deste tipo cara arriba e abaixo usando as teclas de cursor.\n\nModo Sumo: Aquí ensináronche os fundamentos do modo Fortaleza; Sumo usa a mesma mecánica básica, pero normalmente para xogadores individuais e non para equipos, e as zonas de varios xogadores competindo colócanse unhas enriba das outras. Ademais, encollem.\n\nCaptura a Bandeira (CTF): Algúns servidores ofrecen este modo clásico, cunha pequena zona representando a bandeira e unha maior como base para devolver a bandeira.\n\nTamén é recomendable ler a documentación incluída (usa o menú Axuda para abrila nun navegador). E definitivamente deberías comezar cos modos de xogo básicos e coas configuracións próximas ás predeterminadas. O navegador de servidores axuda con isto ocultando inicialmente os servidores avanzados; aínda así podes acceder a eles cedo se te atreves.
 
 tutorial_menu_bullies_text     Desafío do Labirinto
 tutorial_menu_bullies_help     Labirinto: dous inimigos atrapáronte entre os seus muros. Podes sobrevivir?
@@ -1852,7 +1853,7 @@ tutorial_menu_ai8_instructions Logra quince mortes.
 
 tutorial_menu_highrubber_text         Exhibición: Alta Elasticidade
 tutorial_menu_highrubber_help         Prepárate para algunhas configuracións estrañas que atoparás.
-tutorial_menu_highrubber_instructions Lembras como nos primeiros tutoriais podías tocar muros sen explotar de inmediato? Chamámoslle "elasticidade" por razóns históricas. Algúns servidores aumentan esa configuración de forma moi alta e tamén reducen o retraso entre xiros da bici, facendo máis difícil morrer.\n\nOutros xogadores que atopes nestes servidores farán movementos moi axustados preto dos muros en corredores estreitos; é imposible anticipalos e saír despois de que estean construídos, así que debes observar aos xogadores.\n\nPode ser útil (pero non necesario se tes dedos rápidos) usar 'doble atado': vai á configuración de entrada e asigna os comandos de xiro a dúas teclas, logo prema ambas ao mesmo tempo durante o xogo. Farás un xiro instantáneo de 180 graos.\n\nComo sempre, mata todas as IAs.
+tutorial_menu_highrubber_instructions Lembras como nos primeiros tutoriais podías tocar muros sen explotar de inmediato? Chamámoslle "elasticidade" por razóns históricas. Algúns servidores aumentan esa configuración de forma moi alta e tamén reducen o retraso entre xiros da bici, facendo máis difícil morrer.\n\nOutros xogadores que atopes nestes servidores farán movementos moi axustados preto dos muros en corredores estreitos; é imposible anticipalos e saír despois de que estean construídos, así que debes observar aos xogadores.\n\nPode ser útil (pero non necesario se tes dedos rápidos) usar 'doble atado': vai á configuración de entrada e asigna os comandos de xiro a dúas teclas, logo prema ambas ao mesmo tempo durante o xogo. Farás un xiro instantáneo de 180 graos.\n\nComo sempre, mata tódalas IAs.
 
 tutorial_menu_brakeboost_text         Exhibición: Impulso de Freo
 tutorial_menu_brakeboost_help         Prepárate para algunhas das configuracións estrañas.
@@ -1868,14 +1869,14 @@ tutorial_menu_turbo_instructions Algúns servidores farán que corras a velocida
 
 tutorial_menu_map_text         Exhibición: Mapas
 tutorial_menu_map_help         Prepárate para algunhas das configuracións estrañas.
-tutorial_menu_map_instructions Non todas as batallas se loitan en arenas rectangulares. Algunhas teñen obstáculos, pasaxes e trampas. Esta é unha delas.\n\nElimina as IAs.
+tutorial_menu_map_instructions Non tódalas batallas se loitan en arenas rectangulares. Algunhas teñen obstáculos, pasaxes e trampas. Esta é unha delas.\n\nElimina as IAs.
 
 tutorial_menu_axes_text         Exhibición: Traizón
 tutorial_menu_axes_help         Prepárate para algunhas das configuracións estrañas.
 tutorial_menu_axes_instructions Cando dixemos que só podías xirar 90 graos, mentimos. Nesta exhibición, fas xiros de 45 graos.\n\nSobrevive ás IAs. Curiosamente, a forma máis fácil de facelo é deixar que intenten atraparte e fracasen.
 
-tutorial_complete_all_help      Marca todos os titoriais como completados.
-tutorial_incomplete_all_help    Marca todos os titoriais e desafíos como non completados.
+tutorial_complete_all_help      Marca tódolos titoriais como completados.
+tutorial_incomplete_all_help    Marca tódolos titoriais e desafíos como non completados.
 
 #********************************************
 #********************************************
@@ -1915,7 +1916,7 @@ network_opts_outrate_help     O número máximo de quilobytes que a túa rede po
 
 
 network_opts_deletepw_text    Borrar contrasinais
-network_opts_deletepw_help    Esta función borrará todos os contrasinais almacenados. 
+network_opts_deletepw_help    Esta función borrará tódolos contrasinais almacenados. 
 network_opts_deletepw_complete Contrasinais eliminados!
 
 network_opts_minport_text     Porto mínimo:
@@ -2005,10 +2006,10 @@ misc_menuwrap_text            Axuste de menú:
 misc_menuwrap_help            Que ocorre se estas arriba do todo no menú e pulsas arriba?
 
 misc_textout_text             Visualización texto:
-misc_textout_help             Visualizar ou non os textos en pantalla (chat, informacións, etc.). Sempre activado para xogos en rede.
+misc_textout_help             Visualizar ou non os textos en pantalla (charla, informacións, etc.). Sempre activado para xogos en rede.
 
-misc_moviepack_text           Moviepack:
-misc_moviepack_help           Se esta opción esta activa e hai un moviepack instalado, \g aplicará os gráficos correspondentes a ese moviepack.
+misc_moviepack_text           Paquete visual:
+misc_moviepack_help           Se esta opción esta activa e hai un paquete visual (moviepack) instalado, \g aplicará os gráficos correspondentes a ese paquete visual.
 
 misc_initial_menu_title Repetir Primeira Configuración
 misc_initial_menu_help Reinicia o menú de primeira configuración, onde podes seleccionar plantillas de cores e disposición do teclado.
@@ -2025,15 +2026,15 @@ language_first_help           O idioma que \g utilizará
 language_second_help          O segundo idioma que utilizará se o primeiro idioma non está dispoñible
 
 language_menu_title           Configuración do idioma
-language_menu_help            Elixe o idioma utilizado para amosar todos os textos na pantalla
+language_menu_help            Elixe o idioma utilizado para amosar tódolos textos na pantalla
 
 language_firstchoice_help Preme Enter, Return ou Espazo para seleccionar este idioma.
 
 language_menu_item_fist       Idioma principal:
-language_menu_item_first_help \g amosará a maioría das mensaxes de textos neste idioma. Utiliza as frechas esquerda/dereita para cambialo
+language_menu_item_first_help \g amosará a maioría das mensaxes de textos neste idioma. Utiliza as frechas esquerda/dereita para trocalo
 
 language_menu_item_second     Idioma secundario:
-language_menu_item_second_help Se o idioma principal non está dispoñible para certos textos, \g amosaraos no segundo idioma (ou en inglés como último recurso). Utiliza as frechas esquerda/dereita para cambialo
+language_menu_item_second_help Se o idioma principal non está dispoñible para certos textos, \g amosaraos no segundo idioma (ou en inglés como último recurso). Utiliza as frechas esquerda/dereita para trocalo
 
 #*************************************
 #*************************************
@@ -2044,13 +2045,13 @@ language_menu_item_second_help Se o idioma principal non está dispoñible para 
 #*************************************
 
 player_police_text            Moderar
-player_police_help            Permite silenciar a outros xogadores ou lanzar un voto de expulsión
+player_police_help            Permite acalar a outros xogadores ou lanzar un voto de expulsión
 
-player_police_silence_text    Silenciar
-player_police_silence_help    Permite silenciar un spammer neste servidor
+player_police_silence_text    Acalar
+player_police_silence_help    Permite acalar un spammer neste servidor
 
-ignorar_player_help            Se esta opción está activa, todas as mensaxes de chat deste xogador omitiranse.
-ignorar_player_text            Silenciar a \1
+ignorar_player_help            Se esta opción está activa, tódalas mensaxes da charla deste xogador omitiranse.
+ignorar_player_text            Acalar a \1
 
 player_police_kick_text       Expulsar
 player_police_kick_help       Permite lanzar un voto de expulsión contra un xogador
@@ -2067,10 +2068,10 @@ referee_player_text                 Nomear \1 como árbitro
 demotereferee_player_details_text   Se se acepta, \1 deixará de ser árbitro: non poderá administrar equipos.
 demotereferee_player_text           Retirar \1 como árbitro
 
-silence_player_details_text			Se se acepta, \1 será silenciado.
-silence_player_text					Silenciar \1
+silence_player_details_text			Se se acepta, \1 será acalado.
+silence_player_text					Acalar \1
 
-voice_player_details_text			Se se acepta, \1 deixará de estar silenciado.
+voice_player_details_text			Se se acepta, \1 deixará de estar acalado.
 voice_player_text					Voz de \1
 
 vote_include_details_text			Se se acepta, o ficheiro \1 será incluído como ficheiro de configuración.
@@ -2082,7 +2083,7 @@ vote_command_details_text			Se se acepta, o comando de consola "\1" será execut
 vote_command_text					Comando \1
 vote_command_message				Executando comando "\1".\n
 
-vote_scramble_details                           Se se acepta, todos os xogadores serán retirados do seu equipo e asignados a un novo de forma aleatoria.
+vote_scramble_details                           Se se acepta, tódolos xogadores serán retirados do seu equipo e asignados a un novo de forma aleatoria.
 vote_scramble_text                              Repartir os equipos
 
 #*************************************
@@ -2146,10 +2147,10 @@ player_authenticate_action  As solicitudes de autenticación foron enviadas ao s
 #player setup
 
 player_name_text              Nome:
-player_name_help              Os ... en "Gañador: ... ". Usa o cursor <izda>/<dcha>, suprimir, retroceso e todas as demais teclas.
+player_name_help              Os ... en "Gañador: ... ". Usa o cursor <izda>/<dcha>, suprimir, retroceso e tódalas demais teclas.
 
 player_teamname_text            Nome do equipo:
-player_teamname_help            Usa os cursores <esquerda>/<dereita>, eliminar, retroceso e todas as outras teclas.
+player_teamname_help            Usa os cursores <esquerda>/<dereita>, eliminar, retroceso e tódalas outras teclas.
 
 player_global_id_text		ID Global:
 player_global_id_help		Se tes un, introduce aquí o teu ID global de xogador. Se tes unha conta nos foros en forums3.armagetronad.net, o teu ID será o nome da conta seguido de "@forums". As contas doutros sitios da comunidade poden darlle un ID diferente.
@@ -2167,10 +2168,10 @@ camera_controls               Controis de cámara de \1
 player_camera_text            Configuración de cámara
 player_camera_help            Configura as túas preferencias para a cámara.
 
-player_chat_text              Configuración do chat
+player_chat_text              Configuración da charla
 
-player_chat_chat		Chat:
-player_chat_chat_help         Configura as macros rápidas de chat que podes dicir ao pulsar unha tecla.
+player_chat_chat		Charla:
+player_chat_chat_help         Configura as macros rápidas de charla que podes dicir ao premer unha tecla.
 
 player_blue_text              Azul:
 player_blue_help              Permíteche elixir a compoñente azul da túa cor.
@@ -2185,7 +2186,7 @@ player_autologin_text		Inicio automático:
 player_autologin_help		Se está activado, iniciarás automaticamente o procedemento de inicio de sesión (xeralmente completamente opcional) usando o ID Global anterior tan pronto como entres nun servidor.
 
 player_stealth_text		Ocultar ID Global:
-player_stealth_help		Normalmente o teu ID global móstrase a todos cando inicias sesión ou cando alguén usa o comando /players no chat. Activar isto indica ao servidor que prefires permanecer anónimo. O servidor aínda poderá amosar o teu ID aos moderadores e administradores ou incluso decidir ignorar a túa petición.
+player_stealth_help		Normalmente o teu ID global amosase a todos cando inicias sesión ou cando alguén usa o comando /players na charla. Activar isto indica ao servidor que prefires permanecer anónimo. O servidor aínda poderá amosar o teu ID aos moderadores e administradores ou incluso decidir ignorar a túa petición.
 
 player_spectator_text         Modo Espectador:
 player_spectator_help         No modo espectador, non controlas a moto; ves o xogo coma se estiveses morto. Os outros xogadores non saben que estás conectado xa que non apareces na táboa de puntuacións.
@@ -2194,7 +2195,7 @@ player_name_team_text         Nomear equipo segundo xogador:
 player_name_team_help         Podes elixir a maneira favorita de nomear o teu equipo: con Activado poñerás como nome do equipo o do líder, Desactivado nomeará o teu equipo cunha cor.
 
 player_num_per_team_text      Xogadores por equipo:
-player_num_per_team_help      Configura aquí o número preferido de xogadores por equipo. Cando te unes a un xogo e o equipo máis pequeno ten menos xogadores que os especificados aquí, uniraste a ese equipo. En caso contrario, crearás un equipo novo. Só afecta o comportamento por defecto; podes cambiar de equipo máis adiante.
+player_num_per_team_help      Configura aquí o número preferido de xogadores por equipo. Cando te unes a un xogo e o equipo máis pequeno ten menos xogadores que os especificados aquí, uniraste a ese equipo. En caso contrario, crearás un equipo novo. Só afecta o comportamento por defecto; podes trocar de equipo máis adiante.
 
 
 #camera prefs menu
@@ -2227,25 +2228,25 @@ player_camera_fov_text        FOV inicial:
 player_camera_fov_help        Elixe o teu campo de visión favorito.
 
 player_camera_incam_text      Permitir cam.interna:
-player_camera_incam_help      Cando se pulsa a tecla de cambio de cámara, permite cambiar á cámara de vista interna.
+player_camera_incam_help      Cando se preme a tecla de troco de cámara, permite trocar á cámara de vista interna.
 
 player_camera_free_text       Permitir cam.libre:
-player_camera_free_help       Cando se pulsa a tecla de cambio de cámara, permite cambiar á cámara libre.
+player_camera_free_help       Cando se preme a tecla de troco de cámara, permite trocar á cámara libre.
 
 player_camera_fixed_text      Permitir cam.fixa:
-player_camera_fixed_help      Cando se pulsa a tecla de cambio de cámara, permite cambiar á cámara fixa.
+player_camera_fixed_help      Cando se preme a tecla de troco de cámara, permite trocar á cámara fixa.
 
 player_camera_smartcam_text   Permitir cam.intelig.:
-player_camera_smartcam_help   Cando se pulsa a tecla de cambio de cámara, permite cambiar á cámara intelixente (unha cámara externa que tenta adiviñar que perspectiva da túa moto é a máis útil).
+player_camera_smartcam_help   Cando se prema a tecla de troco de cámara, permite trocar á cámara intelixente (unha cámara externa que tenta adiviñar que perspectiva da túa moto é a máis útil).
 
 player_camera_custom_text     Permitir cam.person.:
-player_camera_custom_help     Cando se pulsa a tecla de cambio de cámara, permite cambiar á cámara personalizada (configurable no servidor mediante o ficheiro "settings.cfg")
+player_camera_custom_help     Cando se preme a tecla de troco de cámara, permite trocar á cámara personalizada (configurable no servidor mediante o ficheiro "settings.cfg")
 
 player_camera_server_custom_text Permitir cam.servidor:
-player_camera_server_custom_help Cando se pulsa a tecla de cambio de cámara, permite cambiar á cámara personalizada polo administrador do servidor (configurable no servidor mediante o ficheiro "settings.cfg")
+player_camera_server_custom_help Cando se preme a tecla de troco de cámara, permite trocar á cámara personalizada polo administrador do servidor (configurable no servidor mediante o ficheiro "settings.cfg")
 
 player_camera_server_custom_text	Permitir Mercam:
-player_camera_server_custom_help	Ao premer o botón de cambio de cámara, isto permite cambiar ao modo de cámara de Meriton.
+player_camera_server_custom_help	Ao premer o botón de troco de cámara, isto permite trocar ao modo de cámara de Meriton.
 
 
 player_camera_center_int_text Centrar cam.interna:
@@ -2255,11 +2256,11 @@ player_camera_wobble_text     Movemento cam.interna:
 player_camera_wobble_help     Activado = a cámara interna xira e balancea coa moto; pódeche provocar mareos... \nDesactivado = a cámara interna queda fixa, na posición á que a coloco a moto.
 
 player_camera_autoin_text     Auto cam.interna:
-player_camera_autoin_help     Activado: a cámara intelixente cambia á cámara interna se estás nun túnel. \nDesactivado: a cámara intelixente móvese ata ter unha vista superior se estás nun túnel.
+player_camera_autoin_help     Activado: a cámara intelixente troca á cámara interna se estás nun túnel. \nDesactivado: a cámara intelixente móvese ata ter unha vista superior se estás nun túnel.
 
 # team menu
 team_menu_title               Menú de equipo
-team_menu_help                Permite aos xogadores cambiar de equipos ou crear equipos novos
+team_menu_help                Permite aos xogadores trocar de equipos ou crear equipos novos
 
 team_menu_player_title        Elixir equipo para \1
 team_menu_player_help         Permite a este xogador tomar decisións relacionadas co equipo
@@ -2268,8 +2269,8 @@ team_menu_join                Unirse a \1
 team_menu_join_help           O xogador actual unirase ao equipo especificado na próxima rolda
 
 # values of these "configuration items" are inserted in "\3" at team_menu_join 
-team_menu_color_team_full_help	Permite cambiar o prefixo/cor para equipos nos que non se pode unir.
-team_menu_color_team_ok_help	Permite cambiar o prefixo/cor para equipos nos que se pode unir.
+team_menu_color_team_full_help	Permite trocar o prefixo/cor para equipos nos que non se pode unir.
+team_menu_color_team_ok_help	Permite trocar o prefixo/cor para equipos nos que se pode unir.
 
 team_menu_info_current_team	Equipo actual: \1
 team_menu_info_next_team	Próximo equipo: \1
@@ -2352,7 +2353,7 @@ sound_menu_buffer_vhigh_help  Latencia de aproximadamente 0.4s.
 
 #display menu
 display_settings_menu         Configuración de visualización
-display_settings_menu_help    Cambia as opcións dependendo da túa tarxeta gráfica.
+display_settings_menu_help    Troca as opcións dependendo da túa tarxeta gráfica.
 
 screen_mode_menu              Modo de pantalla
 screen_mode_menu_help         Resolución da pantalla e outras configuracións.
@@ -2367,10 +2368,10 @@ detail_settings_menu          Configuración do detalle
 detail_settings_menu_help     Permíteche axustar os detalles gráficos dependendo do rendemento do teu sistema
 
 performance_tweaks_menu       Rendemento
-performance_tweaks_menu_help  Configuracións que permiten mellorar a execución do xogo, aínda que non funcionan en todos os sistemas.
+performance_tweaks_menu_help  Configuracións que permiten mellorar a execución do xogo, aínda que non funcionan en tódolos sistemas.
 
 graphics_load_defaults_text   Por defecto
-graphics_load_defaults_help   Isto inicializará todas as opcións para que se axusten mellor ao teu sistema (segundo este programa estúpido)
+graphics_load_defaults_help   Isto inicializará tódalas opcións para que se axusten mellor ao teu sistema (segundo este programa estúpido)
 
 #feature menuitem
 feature_disabled_text         Desactivado
@@ -2383,7 +2384,7 @@ feature_enabled_text          Activado
 feature_enabled_help          Actualmente activado.
 
 #texture menuitem
-texture_menuitem_help         Cambia o modo de texturizado; nota como afecta o fondo do menú. O estado actual é:
+texture_menuitem_help         Troca o modo de texturizado; nota como afecta o fondo do menú. O estado actual é:
 
 texture_off_text              Sen texturas
 texture_off_help              Sen texturas
@@ -2406,25 +2407,25 @@ texture_mipmap_trilinear_help Filtrado e interpolación entre os niveis de detal
 
 #screen mode menu
 screen_resolution_text        Resolución de pantalla:
-screen_resolution_help        Cambia a resolución da pantalla. Os cambios serán aplicados a próxima vez que executes \g, ou cando seleccións Aplicar os cambios.
+screen_resolution_help        Selecciona a resolución da pantalla. Os trocos aplicaranse a vindeira vez que inicies \g ou cando selecciones «Aplicar trocos» embaixo.
 
 window_size_text              Tamaño de xanela:
-window_size_help              Cambia o tamaño da xanela. Os cambios serán aplicados a próxima vez que executes \g, ou cando seleccións Aplicar os cambios.
+window_size_help              Troca o tamaño da xanela. Os trocos serán aplicados a vindeira vez que executes \g, ou cando seleccións Aplicar os trocos.
 
 screen_custom_text            Personalizado
 screen_custom_help            Modifica as variables CUSTOM_SCREEN_WIDTH e CUSTOM_SCREEN_HEIGHT no ficheiro artr.cfg (Windows) ou ~/.ArmageTronrc (Linux) para elixir unha resolución de pantalla personalizada.
 
 screen_fullscreen_text        Pantalla completa:
-screen_fullscreen_help        Cambia entre modo de xanela e modo de pantalla completa. Como ocorre cos cambios de resolución, os cambios serán aplicados a próxima vez que executes \g, ou cando seleccións Aplicar os cambios.
+screen_fullscreen_help        Troca entre modo de xanela e modo de pantalla completa. Como ocorre cos trocos de resolución, os trocos aplicaranse a vindeira vez que executes \g, ou cando escollas Aplicar os trocos.
 
 screen_lowdpi_text		Baixa DPI:
 screen_lowdpi_help		Só para modo fiestra en pantallas Retina, activar isto usa unha resolución máis baixa para renderizar. Aforra recursos, pero produce unha imaxe algo máis borrosa.
 
 screen_colordepth_text        Profundidade de cor:
-screen_colordepth_help        Elixe a profundidade de cor que \g utilizará. Os cambios serán aplicados a próxima vez que executes \g, ou cando seleccións Aplicar os cambios.
+screen_colordepth_help        Elixe a profundidade de cor que \g utilizará. Os trocos serán aplicados a vindeira vez que executes \g, ou cando seleccións Aplicar os trocos.
 
 screen_colordepth_16_text     16 bits
-screen_colordepth_16_help     Xeralmente considerado de baixa calidade; pero \g non utiliza moito efectos de blending, polo que se ve bastante ben
+screen_colordepth_16_help     Xeralmente considérase de baixa calidade; pero \g non usa moitos efectos de mestura, así que vese bastante ben.
 
 screen_colordepth_desk_text   Por defecto
 screen_colordepth_desk_help   A profundidade de cor por defecto do teu sistema: normalmente a mesma que hai seleccionada no escritorio.
@@ -2433,7 +2434,7 @@ screen_colordepth_32_text     32 bits
 screen_colordepth_32_help     Alta calidade.
 
 screen_zdepth_text            Profundidade buffer Z:
-screen_zdepth_help            Profundidade do buffer Z; determina a calidade da ordenación en profundidade. Os cambios serán aplicados a próxima vez que executes \g, ou cando seleccións Aplicar os cambios.
+screen_zdepth_help            Profundidade do buffer Z; determina a calidade da ordenación en profundidade. Os trocos aplicaranse a vindeira vez que executes \g, ou cando seleccións Aplicar os trocos.
 
 screen_zdepth_16_text         16 bits
 screen_zdepth_16_help         Non recomendado, xa que non funcionará a maioría do tempo.
@@ -2448,7 +2449,7 @@ screen_check_errors_text      Verificación de erros:
 screen_check_errors_help      Debemos poñer atención ás advertencias referentes aos modos de vídeo que non existen durante a inicialización? Normalmente, debes deixar esta opción tal e como está
 
 screen_use_sdl_text           Utilizar SDL OpenGL:
-screen_use_sdl_help           Utilizar o método limpo para a inicialización de OpenGL? En caso contrario, \g utilizará o método sucio, necesario para SDL 1.0
+screen_use_sdl_help           Utilizar o método limpo para a inicialización de OpenGL? En caso contrario, \g utilizará o método sucio, preciso para SDL 1.0
 
 screen_vsync_text		VSync:
 screen_vsync_help		Que facer co sinal de sincronización vertical do monitor.
@@ -2470,14 +2471,14 @@ screen_vsync_motionblur_unsupported	Borrado de movemento non soportado no teu si
 screen_grab_mouse_text        Atrapar rato:
 screen_grab_mouse_help        Se esta opción actívase, o punteiro do rato centrarase na xanela despois de cada movemento. Desta maneira, non poderá abandonar a xanela do xogo. Esta opción só é útil en modo xanela
 
-screen_apply_changes_text     Aplicar os cambios
+screen_apply_changes_text     Aplicar os trocos
 screen_apply_changes_help     Tenta aplicar as modificacións sen abandonar \g. Utilízao baixo a túa responsabilidade!
 
 screen_keep_window_active_text Manter xanela activa:
-screen_keep_window_active_help Cambia se \g debe permanecer activo cando está en modo xanela e \g perde o foco.
+screen_keep_window_active_help Troca se \g debe permanecer activo cando está en modo xanela e \g perde o foco.
 
 screen_mode_advanced		Avanzado
-screen_mode_advanced_help	Configuración para taxa de refresco personalizada, configuración multimonitor, profundidade de cor e outras cousas que normalmente non necesitas cambiar.
+screen_mode_advanced_help	Configuración para taxa de refresco personalizada, configuración multimonitor, profundidade de cor e outras cousas que normalmente non precisas trocar.
 
 screen_displayindex_text    pantalla:
 screen_displayindex_help    Índice da pantalla a usar en modo pantalla completa. 0 é a túa pantalla principal.
@@ -2496,7 +2497,7 @@ detail_floor_mirror_off_text  Ningún
 detail_floor_mirror_off_help  Ningún
 
 detail_floor_mirror_obj_text  Só obxectos
-detail_floor_mirror_obj_help  Todos os obxectos que se moven
+detail_floor_mirror_obj_help  Tódolos obxectos que se moven
 
 detail_floor_mirror_ow_text   Obxectos e muros
 detail_floor_mirror_ow_help   Todo o que é importante no xogo
@@ -2508,7 +2509,7 @@ detail_simple_trail_text    Traxectorias simples:
 detail_simple_trail_help    Se está activado, as traxectorias das bicis móstranse de forma simplificada, sen acumulación tras a moto.
 
 detail_dither_text            Dithering:
-detail_dither_help            Se a profundidade de cor actual non permite que unha cor sexa directamente representado, simúlase mesturando outras cores. Deixándoo como "Desactivado" mellorará o rendemento nalgúns sistemas; en modos de baixa resolución, desactivándoo mellorará a calidade visual
+detail_dither_help            Se a profundidade de cor actual non permite cunha cor sexa directamente representado, simúlase mesturando outras cores. Deixándoo como "Desactivado" mellorará o rendemento nalgúns sistemas; en modos de baixa resolución, desactivándoo mellorará a calidade visual
 
 detail_floor_text             Detalles do chan:
 detail_floor_help             \g dispón de varios modos de amosar o chan e a reixa; o mellor modo consumirá varios FPS
@@ -2603,7 +2604,7 @@ tweaks_displaylists_cae_text Crear e Executar
 tweaks_displaylists_cae_help Usar listas de despregamento; créaas e deixa que se executen mentres se enchen. Os expertos din que isto é máis lento que Crear e Chamar.
 
 tweaks_infinity_text          Infinito:
-tweaks_infinity_help          Algúns planos (ceo, chan, etc.) teñen unha prolongación infinita. Se se activa esta opción, realmente serán debuxados como planos infinitos. A algúns renderers de OpenGL non lles agrada isto (en principio o de todas as versións de Windows). Desactivar se as texturas do chan e/ou do ceo están deformadas.
+tweaks_infinity_help          Algúns planos (ceo, chan, etc.) teñen unha prolongación infinita. Se se activa esta opción, realmente serán debuxados como planos infinitos. A algúns renderers de OpenGL non lles agrada isto (en principio o de tódalas versións de Windows). Desactivar se as texturas do chan e/ou do ceo están deformadas.
 
 # not in the detail menu any more, but in the preferences menu
 detail_zone_style_text          Modo de renderizado da zona:
@@ -2650,8 +2651,8 @@ menuitem_exit_help            Abandona este menú e volve ao nivel previo
 menuitem_accept               Aceptar
 menuitem_accept_help          Acepta as configuracións neste menú e continúa.
 
-input_item_help               Para cambiar, pulsa INTRO ou ESPAZO. Despois pulsa a tecla ou o botón que queres asignar a este control. Movendo o rato tamén funciona
-input_press_any_key           Pulsa calquera tecla! 
+input_item_help               Para trocar, preme INTRO ou ESPAZO. Despois preme a tecla ou o botón que queres asignar a este control. Movendo o rato tamén funciona
+input_press_any_key           Preme calquera tecla! 
 
 menuitem_toggle_on            Activado
 menuitem_toggle_off           Desactivado
@@ -2686,7 +2687,7 @@ timer_hickup                Detectouse un salto do temporizador de \1 segundos e
 
 welcome_message_heading       Benvido a \g!
 
-welcome_message		        Agora serás lanzado directamente a un xogo local para collerlle o pulso á cousa. Está configurado a unha velocidade máis lenta que un xogo habitual. A túa tarefa é facer que a outra moto choque cunha parede. Non te preocupes, boa sorte e divírtete!
+welcome_message		        Agora serás lanzado directamente a un xogo local para collerlle o pulso á cousa. Está configurado a unha velocidade máis lenta cun xogo habitual. A túa tarefa é facer que a outra moto choque cunha parede. Non te preocupes, boa sorte e divírtete!
 
 welcome_message_2_heading   Agardamos que o estés a disfrutar ata agora.
 welcome_message_2           Agora entrarás no menú principal normal. Xa podes acceder a xogos locais a través do camiño de menú "Xogar Xogo"/"Xogo Local".\n\nPero a verdadeira acción atópase en liña; moitas persoas traballadoras teñen servidores interesantes con variantes de xogo que non están dispoñibles se xogas só.\nPara conectarte en liña, selecciona "Xogar Xogo"/"Multiplayer"/"Multiplayer en Liña".
@@ -2716,10 +2717,10 @@ first_setup_color_white     0xffffffWhite0xRESETT
 first_setup_color_dark      0x000000Dark0xRESETT
 
 first_setup_leave           Manter Como Está
-first_setup_leave_help      Non cambies isto.
+first_setup_leave_help      Non troques isto.
 
 first_setup_keys            Controis:
-first_setup_keys_help       Selecciona aquí a configuración inicial do teclado. Máis tarde poderá personalizarse e cambiar as ligazóns individuais. Selecciona co cursor esquerda/dereita.
+first_setup_keys_help       Selecciona aquí a configuración inicial do teclado. Máis tarde poderá personalizarse e trocar as ligazóns individuais. Selecciona co cursor esquerda/dereita.
 first_setup_keys_cursor     Teclas Cursor
 first_setup_keys_cursor_help Controla a túa ciclo coas teclas de cursor; o resto do teclado serve para controlar a cámara, accións especiais e o segundo xogador. Recomendado para dereitistas e en xeral.
 first_setup_keys_cursor_single     Teclas Cursor, Un Xogador
@@ -2755,7 +2756,7 @@ first_setup_net_dsl_help    Estás conectado a internet mediante DSL, ADSL, Cabl
 setting_legacy_clientblock    A configuración \1 (Grupo: \2) difire do seu valor por defecto; non permitirá a entrada a clientes máis antigos que \3.\n 
 setting_legacy_revert         A configuración \1 (Grupo: \2) difire do seu valor por defecto; volverá ao seu valor cando se conecten clientes máis antigos que \3.\n
 setting_legacy_ignore         A configuración \1 (Grupo: \2) difire do seu valor por defecto; clientes máis antigos que \3 poden experimentar problemas.\n
-setting_legacy_change_blocked A configuración \1 (Grupo: \2) non se pode cambiar agora; clientes máis antigos que \3 están conectados.\n
+setting_legacy_change_blocked A configuración \1 (Grupo: \2) non se pode trocar agora; clientes máis antigos que \3 están conectados.\n
 
 #********************************************
 #********************************************
@@ -2785,7 +2786,7 @@ highscore_message_move_pos    e desprázase á posición \4.
 highscore_message_stay_top    e permanece na primeira posición.
 highscore_message_stay_pos    pero permanece na posición \4.
 
-ladder_description            táboa de puntuacións
+ladder_description            clasificación
 ladder_message_entered        \1 entra en \2 con \3 puntos 
 ladder_message_gained         \1 gana \5 puntos na \2 
 ladder_message_lost           \1 perde \5 puntos na \2 
@@ -2825,7 +2826,7 @@ gamestate_newround_console    adiante (rolda \1 de \2)!\n
 gamestate_newround_goldengoal adiante (rolda extras; quen consiga o liderado vencerá)!\n
 gamestate_newround_warmup   Vaia (Precalentamento; a partida comezará cando suficientes xogadores estean listos)!\n
 gamestate_newround_log        Nova Rolda\n
-gamestate_chat_wait           Esperando ata \2 segundos para que \1 finalice de chatear.\n
+gamestate_chat_wait           Agardando ata \2 segundos a que \1 remate de charlar.\n
 
 gamestate_scramble_teams        Reiniciando puntuacións e mesturando os equipos tras esta rolda.\n
 gamestate_scramble_teams_center Mesturando os equipos...\n
@@ -2897,41 +2898,41 @@ zone_collapse_harmless      A zona de \1 colapsa sen dano por falta de contacto 
 #********************************************
 
 player_teamleave_disallowed Síntoo, non funciona coa asignación automática de equipos.\n
-player_teamchanges_disallowed Síntoo, o administrador desactivou os cambios de equipo.\n
+player_teamchanges_disallowed Síntoo, o administrador desactivou os trocos de equipo.\n
 player_teamchanges_suspended Síntoo, aínda estás suspendido para xogar durante as próximas \1 rolda(s).\n
 player_teamchanges_accesslevel Síntoo, o teu nivel de acceso non é suficiente para xogar. Tes \1, requírese \2.\n
 player_vote_accesslevel Síntoo, o teu nivel de acceso non é suficiente para emitir un voto deste tipo. Tes \1, requírese \2.\n
-player_pingcharity_changed    O ping de caridade cambia de \1 a \2.\n
+player_pingcharity_changed    A caridade do ping trocada de \1 a \2.\n
 spam_protection_repeat        PROTECCION CONTRA SPAM: xa dixeches: \1\n
-spam_protection               PROTECCION CONTRA SPAM: estarás silenciado nos próximos \1 segundos.\n
+spam_protection               PROTECCION CONTRA SPAM: estarás acalado nos vindeiros \1 segundos.\n
 spam_protection_prefix  PROTECCIÓN CONTRA SPAM: as túas mensaxes teñen un prefixo común: \1\nPROTECCIÓN CONTRA SPAM: as mensaxes con este prefixo estarán permitidas de novo en \2 segundos\n
 
-spam_protection_silenceall PROTECCIÓN CONTRA SPAM: o chat público está desactivado.\n
-spam_protection_silenced PROTECCIÓN CONTRA SPAM: o administrador do servidor silencioute.\n
+spam_protection_silenceall PROTECCIÓN CONTRA SPAM: a charla pública está desactivada.\n
+spam_protection_silenced PROTECCIÓN CONTRA SPAM: o administrador do servidor acaloute.\n
 spam_protection_silenced_default PROTECCIÓN CONTRA SPAM: debes recibir voz para poder falar en público.\n
-vote_silenced Non tes permitido iniciar unha nova votación mentres esteas silenciado.\n
-player_rename_silenced Non tes permitido cambiar o nome mentres esteas silenciado.\n
-player_silenced         \10xff7777 foi silenciado.\n
-player_silenced_local   \10xff7777 foi silenciado localmente.\n
+vote_silenced Non tes permitido iniciar unha nova votación mentres esteas acalado.\n
+player_rename_silenced Non tes permitido trocar o nome mentres esteas acalado.\n
+player_silenced         \10xff7777 foi acalado.\n
+player_silenced_local   \10xff7777 foi acalado localmente.\n
 player_voiced_local     \10x77ff77 recibiu voz localmente.\n
 player_voiced           \10x77ff77 recuperou a súa voz.\n
-player_allowed_teamchange \10x77ff77 recibiu permiso para cambiar de equipo.\n
-player_disallowed_teamchange \10xff7777 xa non pode cambiar de equipo.\n
+player_allowed_teamchange \10x77ff77 recibiu permiso para trocar de equipo.\n
+player_disallowed_teamchange \10xff7777 xa non pode trocar de equipo.\n
 vote_spam_protection          PROTECCION CONTRA SPAM DE VOTO: non poderás votar nos próximos \1 segundos.\n
-chat_title_text               Chat:
+chat_title_text               Charla:
 player_entered_game           \1 0x7fff7fentra na reixa de xogo.\n
 player_entered_spectator      \1 0x7fff7fentrou como espectador.\n
 player_left_spectator    0xff7f7fO espectador \1 0xff7f7fsaiu.\n
 player_left_game              \1 0xff7f7ffue descartado con \2 puntos.\n
 player_leaving_game           \1 0xff7f7fabandona a reixa de xogo.\n
 player_renamed                \2 renomea a \1.\n
-player_renamed_teamname	\2 cambiou o nome do equipo a \1.\n
+player_renamed_teamname	\2 trocou o nome do equipo a \1.\n
 player_got_renamed		\2 foi renomeado a \1.\n
 player_will_be_renamed		\2 será renomeado a \1.\n
-player_rename_rejected_votekick  \1 0xffffffnon pode cambiar o nome a \2 0xffffffneste momento para evitar confusión cos votos de expulsión.\n
-player_rename_rejected_admin    \1 0xffffffnon pode cambiar o nome a \20xffffff, xa que o seu nome foi bloqueado polo administrador.\n
-player_allowed_rename		\1 0x7fff7ften permiso de novo para cambiar o nome.\n
-player_disallowed_rename	\1 0xff7f7fnon ten permiso para cambiar o nome máis.\n
+player_rename_rejected_votekick  \1 0xffffffnon pode trocar o nome a \2 0xffffffneste momento para evitar confusión cos votos de expulsión.\n
+player_rename_rejected_admin    \1 0xffffffnon pode trocar o nome a \20xffffff, xa que o seu nome foi bloqueado polo administrador.\n
+player_allowed_rename		\1 0x7fff7ften permiso de novo para trocar o nome.\n
+player_disallowed_rename	\1 0xff7f7fnon ten permiso para trocar o nome máis.\n
 player_welcome                \n\nBienvenido \1! Este servidor está a executar a versión \2.\n
 player_win_default            \1 consegue \2 puntos por unha razón moi estraña.\n
 player_lose_default           \1 perde \2 puntos por unha razón moi estraña.\n
@@ -2954,13 +2955,13 @@ player_leave_team_wish  \1 quere deixar \2 no próximo respawn.\n
 player_leave_game_wish  \1 non quere xogar a próxima rolda.\n
 player_joins_team_start       \1 0x7fff7flucha por \2.\n
 #player_joins_team_now         \1 0x7fff7fahora loita por \2.\n
-player_changes_team     \1 0x7f7fffcambia de \3 a \2.\n
+player_changes_team     \1 0x7f7ffftroca de \3 a \2.\n
 player_leaves_team            \1 0xff7f7fabandona \2.\n
 player_creates_team           \1 crea un novo equipo.\n
 player_nocreate_team          \1 actualmente non pode crear un novo equipo.\n
 player_nojoin_team            \1 actualmente non pode unirse a \2.\n
 player_not_on_team      Non estás en ningún equipo.\n
-team_renamed            \1 cambiou o nome do seu equipo a \2.\n
+team_renamed            \1 trocou o nome do seu equipo a \2.\n
 player_team_message     Compañeiros de equipo
 player_spectator_message Espectadores
 no_real_teams           Non hai equipos con máis dun xogador.\n
@@ -2971,7 +2972,7 @@ team_preshuffle         \1 unirase na posición \2.
 team_shuffle_suppress   As mensaxes futuras de barallado deste xogador serán suprimidas.\n
 player_noshuffleup      Non tes permiso para subir na baralla.\n
 player_noshuffle        O teu desexo de barallado non ten efecto.\n
-player_shuffle_error    /shuffle espera un número como argumento; un signo explícito (+/-) cambiará a túa posición polos pasos indicados, sen signo colocarate directamente na posición dada.\n
+player_shuffle_error    /shuffle espera un número como argumento; un signo explícito (+/-) trocará a túa posición polo número de pasos indicados, sen signo colocarate directamente na posición indicada.\n
 
 player_referee          0x7fff7fPor orde de \10x7fff7f, \20x7fff7f é agora árbitro.\n
 player_referee_anon     \10x7fff7f é agora árbitro.\n
@@ -2996,14 +2997,14 @@ player_ready_onlywarmup Este comando só funciona en modo quecemento.\n
 player_ready_noteam     Debes estar nun equipo para usar este comando.\n
 player_ready            \1 0x7fff7festá listo!\n
 player_ready_not        \1 0xff7f7fxa non está listo.\n
-player_allready         Todos os xogadores marcados como listos.\n
-player_allready_not     Todos os xogadores marcados como non listos.\n
-allready_help           Fai coma se todos os xogadores estivesen listos.
+player_allready         Tódolos xogadores marcados como listos.\n
+player_allready_not     Tódolos xogadores marcados como non listos.\n
+allready_help           Fai coma se tódolos xogadores estivesen listos.
 warmup_needmoreplayers  A partida non comeza porque precisamos polo menos \1 xogadores.\n
 warmup_finished         Abonda con xogadores listos! Comezando a partida.\n
-warmup_finished_allready Forzouse a todos os xogadores a estar listos! Comezando a partida.\n
+warmup_finished_allready Forzouse a tódolos xogadores a estar listos! Comezando a partida.\n
 warmup_finished_center  Quecemento rematado!
-warmup_rup_compat       0xff3333Por favor escribe /ready no chat
+warmup_rup_compat       0xff3333Por favor escribe /ready na charla
 
 add_help_topic_help     Engade un novo tema de axuda para usar con /help. Uso: ADD_HELP_TOPIC <tema> <descrición curta> <texto>
 add_help_topic_usage    Uso: ADD_HELP_TOPIC <tema> <descrición curta> <texto>\n
@@ -3020,39 +3021,39 @@ help_message_help       Alias obsoleto de HELP_INTRODUCTORY_BLURB
 help_topics_list_start  Di /help TEMA para obter axuda sobre os seguintes temas.\n
 help_topic_not_found    Tema de axuda \1 non atopado. Proba /help sen argumentos para ver unha lista de temas dispoñibles.\n
 
-help_commands_shortdesc Lista de todos os comandos de chat
+help_commands_shortdesc Lista de tódolos comandos da charla
 help_commands_text      Este tema de axuda está baleiro. Usa un dos seguintes subtemas:
 
-help_commands_chat_shortdesc Comandos básicos de chat
-help_commands_chat_text      0x88ff88/me <mensaxe>0xffff88: Transmite unha acción, como en "/me é novato."\n0x88ff88/msg <parte dun alcume> <mensaxe>0xffff88: Envía unha mensaxe privada que só pode ver un xogador específico\n0x88ff88/team <mensaxe>0xffff88: Envía unha mensaxe aos teus compañeiros, ou a todos os espectadores se non estás nun equipo
+help_commands_chat_shortdesc Comandos básicos da charla
+help_commands_chat_text      0x88ff88/me <mensaxe>0xffff88: Transmite unha acción, como en "/me é novato."\n0x88ff88/msg <parte dun alcume> <mensaxe>0xffff88: Envía unha mensaxe privada que só pode ver un xogador específico\n0x88ff88/team <mensaxe>0xffff88: Envía unha mensaxe aos teus compañeiros, ou a tódolos espectadores se non estás nun equipo
 
 help_commands_team_shortdesc Comandos básicos de xestión de equipos
-help_commands_team_text 0x88ff88/teamshuffle0xffff88: Colócate no extremo da formación do teu equipo\n0x88ff88/teamshuffle <posición>0xffff88: Colócate nunha posición específica\n0x88ff88/teamshuffle [+|-]<desprazamento>0xffff88: Sobe/baixa un certo número de posicións\n0x88ff88/teamleave0xffff88: Abandona o teu equipo actual. Só funciona nalgúns servidores\n0x88ff88/teams0xffff88: Obtén unha lista de todos os equipos cunha representación gráfica aproximada da súa formación.\n0x88ff88/myteam0xffff88: Obtén a formación e a lista de membros do teu equipo actual
+help_commands_team_text 0x88ff88/teamshuffle0xffff88: Colócate no extremo da formación do teu equipo\n0x88ff88/teamshuffle <posición>0xffff88: Colócate nunha posición específica\n0x88ff88/teamshuffle [+|-]<desprazamento>0xffff88: Sobe/baixa un certo número de posicións\n0x88ff88/teamleave0xffff88: Abandona o teu equipo actual. Só funciona nalgúns servidores\n0x88ff88/teams0xffff88: Obtén unha lista de tódolos equipos cunha representación gráfica aproximada da súa formación.\n0x88ff88/myteam0xffff88: Obtén a formación e a lista de membros do teu equipo actual
 
 help_commands_pp_shortdesc Comandos de policía de xogadores
-help_commands_pp_text 0x88ff88/players [<procura>]0xffff88: Obtén unha lista de todos os xogadores, xunto con outra información. Tamén podes filtrar por un usuario concreto co argumento de busca.\n0x88ff88/admins [<nivel de acceso> [<nivel de acceso>]]0xffff88: Obtén a lista de administradores. Se se especifica o primeiro parámetro, só se amosarán os que teñan ese nivel exacto. Se se poñen dous valores, amosaranse todos os admins nese rango.\n0x88ff88/vote kick|suspend <xogador>0xffff88: Inicia unha votación para expulsar ou suspender un xogador
+help_commands_pp_text 0x88ff88/players [<procura>]0xffff88: Obtén unha lista de tódolos xogadores, xunto con outra información. Tamén podes filtrar por un usuario concreto co argumento de busca.\n0x88ff88/admins [<nivel de acceso> [<nivel de acceso>]]0xffff88: Obtén a lista de administradores. Se se especifica o primeiro parámetro, só se amosarán os que teñan ese nivel exacto. Se se poñen dous valores, amosaranse tódolos admins nese rango.\n0x88ff88/vote kick|suspend <xogador>0xffff88: Inicia unha votación para expulsar ou suspender un xogador
 
 help_commands_auth_shortdesc Comandos relacionados coa autenticación
 help_commands_auth_text 0x88ff88/login [<usuario>]@<autoridade>0xffff88: Autentícate usando unha autoridade dada. Proba @forums se tes conta en https://forums3.armagetronad.net/\n0x88ff88/logout0xffff88: Péchase a sesión para que poidas entrar de novo con outro usuario\n0x88ff88/vote include <ficheiro>0xffff88: Inicia unha votación para incluír un ficheiro\n0x88ff88/vote command <comando>0xffff88: Inicia unha votación para executar un comando de admin\n0x88ff88/admin <comando>0xffff88: Executa un comando na consola do servidor se tes suficientes permisos\n0x88ff88/op <xogador> [+|-]<nivel opcional>0xffff88: Dá a outro xogador un nivel de acceso maior ou menor; por defecto un por debaixo do teu nivel\n0x88ff88/deop <xogador>0xffff88: Reverte /op; quítalle o nivel de acceso a un xogador, converténdoo de novo en non autenticado. Só funciona en xogadores con nivel máis baixo ca o teu.\n
-help_commands_auth_levels_shortdesc Lista de todos os niveis de acceso
+help_commands_auth_levels_shortdesc Lista de tódolos niveis de acceso
 help_commands_auth_levels_text 0x88ff880 (Propietario)0xffff88: O propietario do servidor. Os comandos escritos na consola execútanse con estes dereitos.\n0x88ff881 (Admin)0xffff88: Administrador do servidor. Case tan poderoso coma o propietario.\n0x88ff882 (Moderador)0xffff88: Moderador do servidor. Pode usar /admin, pero só para xestión de xogadores.\n0x88ff887 (Líder de equipo)0xffff88: Líder dun equipo. Por defecto, sen dereitos de admin.\n0x88ff888 (Membro de equipo)0xffff88: Membro dun equipo. As contas locais de equipo teñen este nivel.\n0x88ff8812 (Usuario local)0xffff88: Xogadores con contas locais.\n0x88ff8815 (Usuario remoto)0xffff88: Xogadores con contas remotas por defecto.\n0x88ff8816 (Caído en desgraza)0xffff88: Xogadores que abusaron dos dereitos por defecto.\n0x88ff8817 (Rexeitado)0xffff88: O mesmo, pero peor :)\n0x88ff8819 (Autenticado)0xffff88: Nivel mínimo de xogadores autenticados.\n0x88ff8820 (Programa)0xffff88: Xogadores non autenticados.
 
 help_commands_ra_shortdesc Comandos de administración remota
 help_commands_ra_text 0x88ff88/login <contrasinal>0xffff88: Identifícate como admin do servidor co contrasinal específico\n0x88ff88/logout0xffff88: Péchase a sesión de admin para que non se vexa\n0x88ff88/admin <comando>0xffff88: Executa un comando na consola coma se fose o servidor
 
 help_commands_misc_shortdesc Comandos varios
-help_commands_misc_text 0x88ff88/help0xffff88: Acabas de descubrir este :-)\n0x88ff88/teach <xogador> <tema>0xffff88: igual que /help, pero o resultado envíase a outro xogador.\n0x88ff88/rtfm0xffff88: alias de /teach\n0x88ff88/command <comando>0xffff88: Executa un comando no teu propio cliente. Útil para chats instantáneos
+help_commands_misc_text 0x88ff88/help0xffff88: Acabas de descubrir este :-)\n0x88ff88/teach <xogador> <tema>0xffff88: igual que /help, pero o resultado envíase a outro xogador.\n0x88ff88/rtfm0xffff88: alias de /teach\n0x88ff88/command <comando>0xffff88: Executa un comando no teu propio cliente. Útil para charlas instantáneas
 
 help_commands_tourney_shortdesc Comandos relacionados con torneos
 help_commands_tourney_text 0x88ff88/lock0xffff88: Bloquea o teu equipo actual. Xa ninguén pode entrar sen invitación. Para permitir a alguén, tes que usar\n0x88ff88/invite <xogador>0xffff88: Dende ese momento, o xogador pode unirse. Outra consecuencia é que pode ler as mensaxes /team. A invitación é permanente ata revogala. Se saen, non se lles reinvita automaticamente.\n0x88ff88/uninvite <xogador>0xffff88: Revoga a invitación. Xa non pode unirse e, se está no equipo, será expulsado.\n0x88ff88/unlock0xffff88: Fai que o teu equipo estea dispoñible para todos de novo.\n0x88ff88/ready0xffff88: Alterna o teu estado de listo no quecemento.
 
 help_version_shortdesc  Versión deste servidor
-help_version_text       0xffff7fIsto está a executar:\n0x7fff7f    \g \v\n0xffff7fFoi construído o 0x7fff7f\d0xffff7f, da revisión 0x7fff7fr\o0xffff7f(0x7fff7fz\z0xffff7f), que ten a revisión 0x7fff7fr\l0xffff7f(0x7fff7fz\m0xffff7f) como último ancestro común coa rama 0x7fff7f\p0xffff7f, que se atopa en:\n0x7fff7f    \b\n0xffff7fO ID desta revisión é:\n0x7fff7f    \i\n0xffff7fEtiquetado (baleiro se non hai):\n0x7fff7f    \t\n0xffff7fCambios na fonte:\n0x7fff7f    \c
+help_version_text       0xffff7fIsto está a executar:\n0x7fff7f    \g \v\n0xffff7fFoi construído o 0x7fff7f\d0xffff7f, da revisión 0x7fff7fr\o0xffff7f(0x7fff7fz\z0xffff7f), que ten a revisión 0x7fff7fr\l0xffff7f(0x7fff7fz\m0xffff7f) como último ancestro común coa rama 0x7fff7f\p0xffff7f, que se atopa en:\n0x7fff7f    \b\n0xffff7fO ID desta revisión é:\n0x7fff7f    \i\n0xffff7fEtiquetado (baleiro se non hai):\n0x7fff7f    \t\n0xffff7fTrocos na fonte:\n0x7fff7f    \c
 
 invite_no_team          Non podes usar \1 se non estás nun equipo.\n
 invite_team_locked      \1 bloqueado, precisarás unha invitación dun líder de equipo co comando /invite para unirte a partir de agora.\n
 invite_team_unlocked    \1 desbloqueado, podes unirte libremente de novo.\n
-unlock_all_teams_help   Desbloquea todos os equipos.
+unlock_all_teams_help   Desbloquea tódolos equipos.
 invite_team_can_join      \10xRESETT pode agora unirse a \2.\n
 invite_team_invite      \10xRESETT foi invitado a unirse a \2.\n
 invite_team_kick        \10xRESETT foi expulsado de \2.\n
@@ -3069,7 +3070,7 @@ msg_nomatch 0xff0000Non se atoparon coincidencias que contivesen \1.\n
 
 
 
-player_toggle_spectator_on    \1 cambia a modo espectador e non xogará a partir da seguinte rolda.\n
+player_toggle_spectator_on    \1 troca a modo espectador e non xogará a partir da seguinte rolda.\n
 player_toggle_spectator_off   \1 abandona o modo espectador e entra de novo no xogo.\n
 
 #camera messages
@@ -3213,7 +3214,7 @@ network_kill_unknown          Non foi dada ningunha razón.
 network_kill_spamkick         Fuches autoexpulsado por spamming.
 voted_kill_kick               Fuches expulsado por unha multitude anoxada de xogadores; por favor permanece fóra.
 network_kill_spectator        Estiveches en modo espectador durante moito tempo.
-network_kill_unworthy       O servidor está cheo; fuches retirado para facer sitio a potenciais xogadores. Só volvas se é realmente necesario.
+network_kill_unworthy       O servidor está cheo; fuches retirado para facer sitio a potenciais xogadores. Só volve se é realmente necesario.
 network_kill_unworthy_banreason O servidor está sobrecargado e cómpre limitar novas conexións. Sentimos as molestias.
 network_kill_unworthy_ban   O servidor está cheo; fuches retirado para facer sitio a potenciais xogadores. Só volvas se é realmente necesario, e agarda \1 minutos.
 network_kill_unworthy_log   Expulsando espectador innecesario \1 durante \2 minutos.\n
@@ -3236,7 +3237,7 @@ network_ban_noreason          Ningunha dada.
 vote_accepted                 A votación "\1" foi aceptada.\n
 vote_rejected                 A votación "\1" foi rexeitada.\n
 vote_timeout                  A votación "\1" expirou.\n
-vote_cancel_all                     Todas as enquisas foron canceladas por un administrador.\n
+vote_cancel_all                     Tódalas enquisas foron canceladas por un administrador.\n
 vote_new                      Nova votación: "\1". Entra no menú principal para votar.\n
 vote_redundant                Votación rexeitada, xa se pediu unha votación.\n
 vote_maturity                       Voto rexeitado, non tes idade suficiente para emitir votos, agarda \1 segundos.\n
@@ -3270,7 +3271,7 @@ network_master_score          Puntuación
 network_master_users          Usuarios
 network_master_ping           Ping
 network_master_filter         Filtro:
-network_master_browserhelp    Preme "Enter" para conectarte a este servidor, "p" para actualizar un único servidor, "r" para actualizar toda a lista, "+/-" para establecer o sesgo de puntuación para este servidor, "cursor esquerda/dereita" para cambiar a clave de ordenación, ou "b" para engadir o servidor aos teus marcadores. "m" activa/desactiva o filtrado de colegas.
+network_master_browserhelp    Preme "Enter" para conectarte a este servidor, "p" para actualizar un único servidor, "r" para actualizar toda a lista, "+/-" para establecer o sesgo de puntuación para este servidor, "cursor esquerda/dereita" para trocar a clave de ordenación, ou "b" para engadir o servidor aos teus marcadores. "m" activa/desactiva o filtrado de colegas.
 network_master_connecting     Conectando ao servidor mestre \1...\n
 network_master_send           Enviando a miña información ao servidor...\n
 network_master_reqlist        Solicitando lista de servidores...\n
@@ -3421,18 +3422,18 @@ config_command_unknown        Comando \1 descoñecido.\n
 config_command_other          Probablemente querías dicir:\n
 config_command_more           Hai máis comandos que conteñen a túa cadea de procura que se descartaron con tal de evitar saturar a túa terminal.\n
 config_file_write_error        Non se puido escribir o arquivo de configuración\n
-config_value_changed          \1 cambia de \2 a \3.\n
-config_value_not_changed	\1 non cambiou de \2 a \3: a función de gardián obxectou.\n
+config_value_changed          \1 troca de \2 a \3.\n
+config_value_not_changed	\1 non trocou de \2 a \3: a función de gardián obxectou.\n
 config_error_read              erro de lectura de \1: formato non válido.\n
 config_message_info           \1 é actualmente \2.\n
 config_sighup           SIGHUP recibido, recargando a configuración.\n
 config_abort               A carga do arquivo/fluído de configuración foi abortada.\n
 
-nconfig_error_protected        Non é posible. Só o servidor pode cambiar \1.\n
+nconfig_error_protected        Non é posible. Só o servidor pode trocar \1.\n
 nconfig_error_unknown          Mensaxe recibida para configuración descoñecida \1\n\n\n\nPROBABLEMENTE DEBERIAS ACTUALIZAR \G!!!\n
 nconfig_error_nonet            Recibido mensaxe de conf descoñecido para o parámetro \1.\n\nPROBABLEMENTE DEBERIAS ACTUALIZAR \G!!!\n
 nconfig_error_ignoreold        Ignorando antiga mensaxe de conf para o parámetro \1.
-nconfig_value_changed         \1 cambia de \2 a \3 por orde do servidor.\n
+nconfig_value_changed         \1 troca de \2 a \3 por orde do servidor.\n
 
 config_accesslevel_0        Propietario
 config_accesslevel_1        Administrador
@@ -3448,11 +3449,11 @@ config_accesslevel_17       Rexeitado
 config_accesslevel_19       Autenticado
 config_accesslevel_20       Programa
 
-access_level_help           Cambia o nivel de acceso dun elemento de configuración para facelo dispoñible a usuarios de menor rango.
+access_level_help           Troca o nivel de acceso dun elemento de configuración para facelo dispoñible a usuarios de menor rango.
 access_level_usage          Uso: ACCESS_LEVEL <comando de configuración> <nivel mínimo de acceso (numérico)>\n
-access_level_change         Nivel de acceso requirido para o comando \1 cambiado a "\2".\n
-access_level_nochange_now   Non se pode cambiar o nivel de acceso de \1: actualmente é "\2", só tes "\3", intentarías roubar acceso.\n
-access_level_nochange_later   Non se pode cambiar o nivel de acceso de \1 a "\2", só tes "\3" e non poderías cambialo de volta.\n
+access_level_change         Nivel de acceso requirido para o comando \1 trocado a "\2".\n
+access_level_nochange_now   Non se pode trocar o nivel de acceso de \1: actualmente é "\2", só tes "\3", intentarías roubar acceso.\n
+access_level_nochange_later   Non se pode trocar o nivel de acceso de \1 a "\2", só tes "\3" e non poderías trocalo de volta.\n
 access_level_error          Nivel de acceso requirido para o comando \1 é "\2", só tes "\3".\n
 
 casacl_help                   Durante o resto do arquivo de configuración onde esta directiva aparece, eleva o nivel de acceso.
@@ -3462,13 +3463,13 @@ casacl_not_allowed            Uso de CASACL non permitido neste contexto.\n
 abort_loading_name          Abortando Carga
 abort_loading_description   A carga do arquivo/fluído de configuración actual foi abortada polo comando \1.
 
-user_level_help             Cambia o nivel de acceso dun usuario.
+user_level_help             Troca o nivel de acceso dun usuario.
 user_level_usage            Uso: USER_LEVEL <nome autenticado> <nivel de acceso do usuario (numérico)>\n
-user_level_change           Nivel de acceso do usuario \1 cambiado a "\2".\n
+user_level_change           Nivel de acceso do usuario \1 trocado a "\2".\n
 
-authority_level_help             Cambia o nivel de acceso para todos os usuarios da mesma autoridade. Principalmente útil para autoridades privadas.
+authority_level_help             Troca o nivel de acceso para tódolos usuarios da mesma autoridade. Principalmente útil para autoridades privadas.
 authority_level_usage            Uso: AUTHORITY_LEVEL <autoridade> <novo nivel de acceso (numérico)>\n
-authority_level_change           Nivel de acceso dos usuarios da autoridade \1 cambiado a "\2".\n
+authority_level_change           Nivel de acceso dos usuarios da autoridade \1 trocado a "\2".\n
 
 toggle_help                 Alterna entre 0 e 1 para un elemento de configuración booleano e localmente modificable. Exemplo: TOGGLE PREDICT_OBJECTS\n
 toggle_usage_error          TOGGLE require un nome de elemento de configuración. Uso: TOGGLE config_item\n
@@ -3512,7 +3513,7 @@ login_request_failed_dup	Dous inicios de sesión coa mesma conta non están perm
 login_not_supported         Este servidor non admite o tipo de autenticación que solicitou, desculpe.\n
 login_request               Iniciar sesión con Autoridade \1\n
 login_request_local         Iniciar sesión con Conta Local\n
-login_request_namechange      O nome cambiou; é necesaria unha autenticación
+login_request_namechange      O nome trocou; é precisa unha autenticación
 login_request_master          O servidor mestre require autenticación
 
 hud_fastest Máis rápido:
@@ -3526,13 +3527,13 @@ hud_rubber Rebote:
 
 # access level messages
 access_level_hide_of_help      Nivel mínimo de acceso para poder ocultar a información da súa propia conta de usuario.
-access_level_hide_to_help      Nivel mínimo de acceso para ver a información de todas as contas de usuario.
+access_level_hide_to_help      Nivel mínimo de acceso para ver a información de tódalas contas de usuario.
 access_level_team_help         Nivel mínimo de acceso para /lock, /unlock, /invite e /uninvite na xestión de equipos.
 access_level_op_help           Nivel mínimo de acceso para os comandos de co-admin /op e /deop.
 access_level_op_max_help       Nivel máximo de acceso directamente alcanzable cos comandos /op.
 access_level_admin_help        Nivel mínimo de acceso para o comando /admin.
 access_level_rtfm_help         Nivel mínimo de acceso para os comandos /teach ou /rtfm.
-access_level_chat_help         Nivel mínimo de acceso para chatear.
+access_level_chat_help         Nivel mínimo de acceso para charlar.
 access_level_shout_help        Nivel mínimo de acceso para berrar.
 access_level_ips_help          Nivel mínimo de acceso necesario para ver os IPs doutros xogadores co comando /players.
 access_level_autokick_immunity_help Nivel mínimo de acceso para estar protexido contra auto expulsións.
@@ -3544,10 +3545,10 @@ access_level_play_help         Nivel mínimo de acceso para xogar.
 access_level_shuffle_up_help   Nivel mínimo de acceso para subir posición.
 access_level_play_sliding_help Nivel mínimo de acceso deslizante para xogar; se hai suficientes xogadores cun nivel de acceso superior ao definido por ACCESS_LEVEL_PLAY en liña, ese nivel será o mínimo para xogar; non obstante, nunca será superior a ACCESS_LEVEL_PLAY_SLIDING.
 access_level_play_sliders_help O nivel de acceso requerido para xogar só aumentará se hai polo menos este número de xogadores de nivel superior en liña.
-access_level_play_changed      Nivel de acceso requerido para xogar cambiado de \1 a \2.\n
+access_level_play_changed      Nivel de acceso requerido para xogar trocado de \1 a \2.\n
 
 access_level_vote_suspend_help    Nivel mínimo de acceso requerido para emitir votacións de suspensión.
-access_level_vote_silence_help    Nivel mínimo de acceso requerido para emitir votacións de silencio e de voz.
+access_level_vote_silence_help    Nivel mínimo de acceso requerido para emitir votacións de acalar e de voz.
 access_level_vote_kick_help    Nivel mínimo de acceso requerido para emitir votacións de expulsión.
 access_level_vote_include_help    Nivel mínimo de acceso requerido para emitir votacións de inclusión.
 access_level_vote_include_execute_help    Nivel mínimo de acceso necesario para que se executen con éxito as votacións de inclusión.
@@ -3556,7 +3557,7 @@ access_level_vote_command_execute_help    Nivel mínimo de acceso necesario para
 
 access_level_chat_timeout_help   Tempo en segundos entre anuncios públicos de que alguén quere falar, pero non pode. Pon a 0 para desactivar os avisos públicos.
 access_level_chat_request   \10xRESETT quere falar, pero aínda non está autorizado. Alguén podería amablemente dicir "/op \2"?\n
-access_level_chat_denied    0xff7f7fChat denegado,0xffffff nivel de acceso insuficiente.\n
+access_level_chat_denied    0xff7f7fCharla denegada,0xffffff nivel de acceso insuficiente.\n
 access_level_shout_denied    0xff7f7fGrito denegado,0xffffff nivel de acceso insuficiente.\n
 access_level_op_denied      0xff7f7f\1 denegado,0xffffff nivel de acceso insuficiente.\n
 access_level_op_overpowered 0xff7f7f\1 denegado,0xffffff necesitas dereitos máis altos que a túa vítima.\n
@@ -3581,10 +3582,10 @@ access_level_list_admins_see_everyone_help Usuarios con este nivel de acceso ou 
 
 access_level_announce_login_help Nivel máximo de acceso que determina se se pode anunciar a mensaxe de conexión/desconexión dun xogador.
 
-intercept_commands_help     Lista de comandos de chat que se aceptarán e rexistrarán en stdout.
-intercept_unknown_commands_help Se é 1, acepta e rexistra todos os comandos de chat descoñecidos.
+intercept_commands_help     Lista de comandos da charla que se aceptarán e rexistrarán en stdout.
+intercept_unknown_commands_help Se é 1, acepta e rexistra tódolos comandos da charla descoñecidos.
 
-chat_command_unknown        Comando de chat descoñecido "\1".\n
+chat_command_unknown        Comando da charla descoñecido "\1".\n
 chat_command_accesslevel    Sentímolo, o teu nivel de acceso non é suficientemente alto para usar o comando "\1". Tes \2, sería necesario \3.\n
 
 read_reports_count                 Hai \1 informes.\n
@@ -3627,7 +3628,7 @@ login_error_blacklist                A autoridade \1 está na lista negra deste 
 login_error_whitelist                A autoridade \1 non está na lista branca deste servidor.
 login_error_pharm                    Discrepancia na dirección do servidor, \1 (enviado polo cliente) != \2 (nosa dirección). Posible pharming. Se te conectas desde a LAN e obtés este erro, activa "TRUST_LAN" no servidor (só se podes confiar completamente na túa LAN). Se te conectas desde internet, usa "SERVER_DNS" para que a súa IP real sexa coñecida polo servidor.
 login_error_pharm_cheap              Problema coa dirección do servidor. O cliente enviou unha dirección de servidor non específica.
-login_error_methodmismatch  O método local usado para autenticación foi modificado desde que estableciches a túa contrasinal. Nos ficheiros de configuración do servidor, pon todos os comandos que definen métodos de autenticación antes de todas as definicións de contrasinais locais.
+login_error_methodmismatch  O método local usado para autenticación foi modificado desde que estableciches a túa contrasinal. Nos ficheiros de configuración do servidor, pon tódolos comandos que definen métodos de autenticación antes de tódalas definicións de contrasinais locais.
 login_error_nomethod        Non se puido atopar ningún método de autenticación. O teu cliente soporta \1, este servidor soporta \2, e o servidor de autenticación soporta \3.
 login_error_nomethodlist    A URL de autenticación \1 non devolve unha lista de métodos soportados, recibíuse o código de erro \2, contido "\3".
 login_error_nomethodproperties    A URL de autenticación \1 non devolve unha lista de propiedades dos métodos, recibíuse o código de erro \2, contido "\3".
@@ -3657,7 +3658,7 @@ reserve_screen_name_help      Reserva un nome de pantalla para un usuario rexist
 reserve_screen_name_usage   Uso: RESERVE_SCREEN_NAME <nome de pantalla (entre comiñas se contén espazos)> <usuario>\n
 reserve_screen_name_change   Nome de pantalla "\1" reservado para o usuario \2.\n
 
-user_alias_help               Permite cambiar nomes autenticados: un xogador autenticado como X pode aparecer como Y.
+user_alias_help               Permite trocar nomes autenticados: un xogador autenticado como X pode aparecer como Y.
 user_alias_usage              Uso: USER_ALIAS <usuario> <alias do usuario>\n
 alias_change                  O usuario \1 será coñecido como \2.\n
 
