@@ -397,7 +397,7 @@ void Map::DrawMap(bool rimWalls, bool cycleWalls,
 }
 
 void Map::DrawRimWalls( tList<eWallRim> &list ) {
-    if(sr_alphaBlend && m_mode == MODE_STD) {
+    if(sr_alphaBlend && m_bg_defined && m_mode == MODE_STD) {
         const eRectangle &bounds = eWallRim::GetBounds();
         const tCoord dims = bounds.GetHigh() - bounds.GetLow();
         const float max = fmax(dims.x, dims.y); // make sure we get a square
