@@ -92,8 +92,11 @@ void Map::ClipperRect::Begin(Map &map, tCoord const &e1, tCoord const &e2) {
     map.m_foreground.DrawPoint(tCoord(e1.x, e2.y));
     map.m_foreground.DrawPoint(e1);
     glEnd();
+    if( map.m_bg_defined )
+    {
     map.m_background.SetGradientEdges(e1, e2);
     map.m_background.DrawRect(e1, e2);
+    }
 }
 
 void Map::ClipperRect::End() {
@@ -141,6 +144,8 @@ void Map::ClipperCircle::Begin(Map &map, tCoord const &e1, tCoord const &e2) {
     ab.x = fabs(ab.x); ab.y = fabs(ab.y);
     float stepsize=M_PI*2/m_edges;
 
+    if( map.m_bg_defined )
+    {
 	map.m_background.BeginDraw();
 	map.m_background.SetGradientEdges(centre - ab, centre + ab);
 	glBegin(GL_POLYGON);
@@ -150,6 +155,7 @@ void Map::ClipperCircle::Begin(Map &map, tCoord const &e1, tCoord const &e2) {
         map.m_background.DrawPoint(next);
     }
 	glEnd();
+    }
 	glDisable(GL_TEXTURE_2D);
     tCoord last = centre + tCoord(ab.x, 0);
 	map.m_foreground.SetGradientEdges(centre - ab, centre + ab);
