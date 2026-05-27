@@ -4090,6 +4090,7 @@ void ePlayerNetID::SetShuffleWish( int pos )
     if ( GetShuffleSpam().ShouldAnnounce() )
     {
         sn_ConsoleOut( GetShuffleSpam().ShuffleMessage( this, pos+1 ) );
+        GetShuffleSpam().Shuffle();
     }
 
     teamListID = pos;
