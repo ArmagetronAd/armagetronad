@@ -350,7 +350,7 @@ if test @enable_desktop@ = yes; then
     if test -z "${DESTDIR}" && xdg-icon-resource --help > /dev/null 2>&1; then
         # systemwide installation, use xdg-tools
         # add standard icons
-        for icontype in "16" "32" "48 128"
+        for icontype in "16" "32" "48" "128"
         do
             icon_source_dir=${icontype}x${icontype}
             xdg-icon-resource ${MODE} --novendor --size ${icontype} "${DESTDIR}${DESKTOPSOURCE}/icons/${icon_source_dir}/@prognamebase@.png" @progid@ || exit $?
