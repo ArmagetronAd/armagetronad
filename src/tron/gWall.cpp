@@ -990,6 +990,8 @@ void gNetPlayerWall::RenderList(bool list, gWallRenderMode renderMode ){
                         continue;
                     }
 
+                    ClearDisplayList();
+
                     REAL s=((time-gBEG_LEN_GIVEUP)-ta)/denom;
                     eCoord pm=p1+(p2-p1)*s;
                     RenderNormal(p1,pm,ta,ta+(te-ta)*s,r,g,b,a,renderMode);
