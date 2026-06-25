@@ -473,6 +473,7 @@ bool WithForeground::Process(tXmlParser::node cur) {
 bool WithBackground::Process(tXmlParser::node cur) {
     if(cur.IsOfType("Background")) {
         m_background = ProcessGradient(cur);
+        m_bg_defined = true;
         return true;
     }
     return WithColorFunctions::Process(cur);

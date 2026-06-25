@@ -92,8 +92,11 @@ void Map::ClipperRect::Begin(Map &map, tCoord const &e1, tCoord const &e2) {
     map.m_foreground.DrawPoint(tCoord(e1.x, e2.y));
     map.m_foreground.DrawPoint(e1);
     glEnd();
-    map.m_background.SetGradientEdges(e1, e2);
-    map.m_background.DrawRect(e1, e2);
+    if( map.m_bg_defined )
+    {
+        map.m_background.SetGradientEdges(e1, e2);
+        map.m_background.DrawRect(e1, e2);
+    }
 }
 
 void Map::ClipperRect::End() {
@@ -141,15 +144,19 @@ void Map::ClipperCircle::Begin(Map &map, tCoord const &e1, tCoord const &e2) {
     ab.x = fabs(ab.x); ab.y = fabs(ab.y);
     float stepsize=M_PI*2/m_edges;
 
-	map.m_background.BeginDraw();
-	map.m_background.SetGradientEdges(centre - ab, centre + ab);
-	glBegin(GL_POLYGON);
-    for(int i = 0; i < m_edges; ++i) {
-        float t = (i+1)*stepsize;
-        tCoord next(centre.x+ab.x*cos(t), centre.y-ab.y*sin(t));
-        map.m_background.DrawPoint(next);
+    if( map.m_bg_defined )
+    {
+        map.m_background.BeginDraw();
+        map.m_background.SetGradientEdges(centre - ab, centre + ab);
+        glBegin(GL_POLYGON);
+        for (int i = 0; i < m_edges; ++i)
+        {
+            float t = (i + 1) * stepsize;
+            tCoord next(centre.x + ab.x * cos(t), centre.y - ab.y * sin(t));
+            map.m_background.DrawPoint(next);
+        }
+        glEnd();
     }
-	glEnd();
 	glDisable(GL_TEXTURE_2D);
     tCoord last = centre + tCoord(ab.x, 0);
 	map.m_foreground.SetGradientEdges(centre - ab, centre + ab);
@@ -397,7 +404,7 @@ void Map::DrawMap(bool rimWalls, bool cycleWalls,
 }
 
 void Map::DrawRimWalls( tList<eWallRim> &list ) {
-    if(sr_alphaBlend && m_mode == MODE_STD) {
+    if(sr_alphaBlend && m_bg_defined && m_mode == MODE_STD) {
         const eRectangle &bounds = eWallRim::GetBounds();
         const tCoord dims = bounds.GetHigh() - bounds.GetLow();
         const float max = fmax(dims.x, dims.y); // make sure we get a square

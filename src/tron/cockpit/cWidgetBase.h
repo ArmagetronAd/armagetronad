@@ -181,6 +181,7 @@ public:
 class WithBackground : virtual public WithColorFunctions {
 protected:
     rGradient m_background; //!< Stores the resulting background
+    bool m_bg_defined = false;
 public:
     bool Process(tXmlParser::node cur); //!< Calls WithColorFunctions::ProcessGradient() for Background nodes or passes on to WithColorFunctions::Process()
 };
