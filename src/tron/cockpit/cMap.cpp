@@ -94,8 +94,8 @@ void Map::ClipperRect::Begin(Map &map, tCoord const &e1, tCoord const &e2) {
     glEnd();
     if( map.m_bg_defined )
     {
-    map.m_background.SetGradientEdges(e1, e2);
-    map.m_background.DrawRect(e1, e2);
+        map.m_background.SetGradientEdges(e1, e2);
+        map.m_background.DrawRect(e1, e2);
     }
 }
 
@@ -146,15 +146,16 @@ void Map::ClipperCircle::Begin(Map &map, tCoord const &e1, tCoord const &e2) {
 
     if( map.m_bg_defined )
     {
-	map.m_background.BeginDraw();
-	map.m_background.SetGradientEdges(centre - ab, centre + ab);
-	glBegin(GL_POLYGON);
-    for(int i = 0; i < m_edges; ++i) {
-        float t = (i+1)*stepsize;
-        tCoord next(centre.x+ab.x*cos(t), centre.y-ab.y*sin(t));
-        map.m_background.DrawPoint(next);
-    }
-	glEnd();
+        map.m_background.BeginDraw();
+        map.m_background.SetGradientEdges(centre - ab, centre + ab);
+        glBegin(GL_POLYGON);
+        for (int i = 0; i < m_edges; ++i)
+        {
+            float t = (i + 1) * stepsize;
+            tCoord next(centre.x + ab.x * cos(t), centre.y - ab.y * sin(t));
+            map.m_background.DrawPoint(next);
+        }
+        glEnd();
     }
 	glDisable(GL_TEXTURE_2D);
     tCoord last = centre + tCoord(ab.x, 0);
