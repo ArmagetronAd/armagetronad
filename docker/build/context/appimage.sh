@@ -47,7 +47,7 @@ rm -f $1
 ZSYNC=`echo $1 | sed -e s,-${PACKAGE_VERSION},,`.zsync
 SIGN=""
 test ${SIGN_POSSIBLE} = 0 && SIGN=--sign
-ARCH=${ARCH} appimagetool-${ARCH}.AppImage --appimage-extract-and-run -u "zsync|https://download.armagetronad.org/appimage/${ZSYNC}" appdir $1 ${SIGN} || exit $?
+ARCH=${ARCH} appimagetool-${ARCH}.AppImage --appimage-extract-and-run ${VALIDATE_ARG} -u "zsync|https://download.armagetronad.org/appimage/${ZSYNC}" appdir $1 ${SIGN} || exit $?
 
 # test that the package runs with and without system libraries
 ./$1 --appimage-extract-and-run --version || exit $?
