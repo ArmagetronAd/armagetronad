@@ -331,7 +331,7 @@ if test @enable_desktop@ = yes; then
     DESKTOPSOURCE=@aa_datadir@/desktop
     DESKTOPDESTDIR="${PREFIX}/share/applications"
     DESKTOPDEST="${DESKTOPDESTDIR}/@progid@.desktop"
-    METADEST="${PREFIX}/share/appdata"
+    METADEST="${PREFIX}/share/metainfo"
 
     # rebrand icons and desktop file
     if test "$MODE" = "install"; then

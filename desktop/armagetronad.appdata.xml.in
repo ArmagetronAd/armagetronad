@@ -4,9 +4,9 @@
   
   <name>@progtitle@</name>
   <summary>3D Lightcycle Game</summary>
-  <x-flatpak-developer id="org.armagetronad">
+  <developer id="org.armagetronad">
     <name>Armagetron Advanced Development Team</name>
-  </x-flatpak-developer>
+  </developer>
 
   <categories>
     <category>Game</category>
@@ -31,7 +31,7 @@
 
   <icon type="stock">@progid@</icon>
 
-  <x-flatpak-launchable type="desktop-id">@progid@.desktop</x-flatpak-launchable>
+  <launchable type="desktop-id">@progid@.desktop</launchable>
   <screenshots>
     <screenshot type="default">
       <image>https://www.armagetronad.org/screenshots/ss_fort_1.png</image>
@@ -55,8 +55,8 @@
     <release version="@version@" date="@date_iso@"/>
   </releases>
 
-  <x-flatpak-content_rating type="oars-1.1">
+  <content_rating type="oars-1.1">
     <content_attribute id="social-chat">moderate</content_attribute>
-  </x-flatpak-content_rating>
+  </content_rating>
 
 </component>
