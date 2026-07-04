@@ -55,8 +55,8 @@
     <release version="@version@" date="@date_iso@"/>
   </releases>
 
-  <x-flatpak-content_rating type="oars-1.1">
+  <content_rating type="oars-1.1">
     <content_attribute id="social-chat">moderate</content_attribute>
-  </x-flatpak-content_rating>
+  </content_rating>
 
 </component>
