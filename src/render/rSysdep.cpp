@@ -1077,8 +1077,6 @@ static rSwapTime & sr_SwapTime()
 
 #endif // DEDICATED
 
-int sr_maxFPS = 360;
-
 // buffer swap:
 #ifndef DEDICATED
 // for setting breakpoints in optimized mode, too
@@ -1375,7 +1373,7 @@ bool sr_MotionBlur( double time, std::unique_ptr< rTextureRenderTarget > & blurT
     return true;
 }
 
-int sr_maxFPS = 0;
+int sr_maxFPS = 360;
 static tConfItem<int> sr_maxFPSConf("MAX_FPS", sr_maxFPS,
                                     [](const int& val) { return (val >= 0); });
 

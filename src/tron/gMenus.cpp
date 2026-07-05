@@ -483,6 +483,7 @@ static void sg_ScreenModeAdvanced()
      "$screen_check_errors_text",
      "$screen_check_errors_help",
      currentScreensetting.checkErrors);
+#endif
 
     // frame rate limit
     std::unique_ptr<uMenuItem> zfm_t;
