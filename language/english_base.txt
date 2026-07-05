@@ -2316,22 +2316,13 @@ sound_menu_quality_off_text	Off
 sound_menu_quality_off_help	Disables sound output completely.
 
 sound_menu_quality_low_text	Low
-sound_menu_quality_low_help	Sound output is 16 bit 11025 Hz.
+sound_menu_quality_low_help	Sound output is 16 bit 11025 Hz stereo.
 
 sound_menu_quality_medium_text	Medium
-sound_menu_quality_medium_help	Sound output is 16 bit 22050 Hz.
+sound_menu_quality_medium_help	Sound output is 16 bit 22050 Hz stereo.
 
 sound_menu_quality_high_text	High
-sound_menu_quality_high_help	Sound output is 16 bit 44100 Hz.
-
-sound_menu_channels_text 	Type:
-sound_menu_channels_help 	Sound setup. Mono (1 channel) or Stereo (2 channels)?
-
-sound_menu_channels_mono_text 	Mono
-sound_menu_channels_mono_help 	Rough mono sound for broken headphones and loudspeakers with only a single audio channel.
-
-sound_menu_channels_stereo_text Stereo
-sound_menu_channels_stereo_help 2-channel stereo sound with position-dependant output for the left and the right speaker. Standard setting.
+sound_menu_quality_high_help	Sound output is 16 bit 44100 Hz stereo.
 
 sound_menu_buffer_text		Buffer Length:
 sound_menu_buffer_help		Selects the size of the sound buffer.

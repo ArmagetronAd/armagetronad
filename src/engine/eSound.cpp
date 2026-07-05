@@ -58,8 +58,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define SOUND_LOW 1
 #define SOUND_MED 2
 #define SOUND_HIGH 3
-#define SOUND_MONO 1
-#define SOUND_STEREO 2
 
 #if 0
 #ifdef WIN32
@@ -73,9 +71,6 @@ static tConfItem<int> bs("SOUND_BUFFER_SHIFT",buffer_shift);
 int sound_quality=SOUND_MED;
 static tConfItem<int> sq("SOUND_QUALITY",sound_quality);
 #endif
-
-static int sound_channels=SOUND_STEREO;
-static tConfItem<int> sc("SOUND_CHANNELS",sound_channels);
 
 static int sound_sources=10;
 static tConfItem<int> ss("SOUND_SOURCES",sound_sources);
@@ -692,26 +687,11 @@ static uMenuItemInt sources_men
  "$sound_menu_sources_help",
  sound_sources,2,20,2);
 
-
-static uMenuItemSelection<int> sc_men
-(&Sound_menu,"$sound_menu_channels_text",
- "$sound_menu_channels_help",
- sound_channels);
-
-static uSelectEntry<int> e(sc_men,
-                           "$sound_menu_channels_mono_text",
-                           "$sound_menu_channels_mono_help",
-                           SOUND_MONO);
-static uSelectEntry<int> f(sc_men,
-                           "$sound_menu_channels_stereo_text",
-                           "$sound_menu_channels_stereo_help",
-                           SOUND_STEREO);
-
-
 static uMenuItemSelection<int> sq_men
 (&Sound_menu,"$sound_menu_quality_text",
  "$sound_menu_quality_help",
  sound_quality);
+
 
 static uSelectEntry<int> a(sq_men,
                            "$sound_menu_quality_off_text",
@@ -729,7 +709,6 @@ static uSelectEntry<int> d(sq_men,
                            "$sound_menu_quality_high_text",
                            "$sound_menu_quality_high_help",
                            SOUND_HIGH);
-
 
 static uMenuItemSelection<int> bm_men
 (&Sound_menu,
@@ -766,10 +745,10 @@ static uSelectEntry<int> be(bm_men,
 void se_SoundMenu(){
     //	se_SoundPause(true);
     //	se_SoundLock();
-    int oldsettings=sound_quality + 8 * sound_channels;
+    int oldsettings=sound_quality;
     int oldshift=buffer_shift;
     Sound_menu.Enter();
-    if (oldsettings!=sound_quality + 8 * sound_channels || oldshift!=buffer_shift){
+    if (oldsettings!=sound_quality || oldshift!=buffer_shift){
         se_SoundExit();
         se_SoundInit();
     }
