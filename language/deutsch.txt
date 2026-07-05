@@ -2435,6 +2435,9 @@ screen_vsync_motionblur_text  Bewegungsunschärfe
 screen_vsync_motionblur_help  Ignoriere es und benutze zusätzliche Frames um Bewegungsunschärfe zu simulieren. Dadurch werden die Tearing-Artefakte (sog. Einzelbild-Zerreißen) weniger deutlich sichtbar. Powergamern empfohlen.
 
 screen_vsync_motionblur_unsupported Bewegungsunschärfe wird von deinem System nicht unterstützt und ist folglich deaktiviert.\n
+screen_max_fps_text           FPS-Begrenzung:
+screen_max_fps_off_text       Unbegrenzt
+screen_max_fps_off_help       Keine Bremse, soviele Frames wie das System ausgeben kann.
 
 screen_grab_mouse_text        Maus einfangen:
 screen_grab_mouse_help        Wenn das hier aktiviert ist, so kann der Mauszeiger das Fenster nicht verlassen. Nur so lässt sich die Maus im Fenstermodus richtig nutzen.
