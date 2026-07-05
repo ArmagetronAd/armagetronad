@@ -47,6 +47,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <set>
 #include <ctime>
 #include <vector>
+#include <array>
 #include <memory>
 
 #ifndef DEDICATED
@@ -482,7 +483,44 @@ static void sg_ScreenModeAdvanced()
      "$screen_check_errors_text",
      "$screen_check_errors_help",
      currentScreensetting.checkErrors);
-#endif
+
+    // frame rate limit
+    std::unique_ptr<uMenuItem> zfm_t;
+    {
+        // list of hand-picked MAX_FPS values
+        std::array<int, 17> pickableLimits{0, 20, 30, 40, 60, 80, 100, 120, 180, 240, 300, 360, 480, 600, 720, 900, 1200};
+        bool pickable = false;
+        for (auto const limit : pickableLimits)
+        {
+            if (limit == sr_maxFPS)
+                pickable = true;
+        }
+
+        if (pickable)
+        {
+            // current value is in pickable list. create selection menu item
+            auto zmf_t_p = new uMenuItemSelection<int>(&screen_menu_mode,
+                                                       "$screen_max_fps_text",
+                                                       "$max_fps_help",
+                                                       sr_maxFPS);
+            zfm_t.reset(zmf_t_p);
+
+            zmf_t_p->NewChoice("$screen_max_fps_off_text", "$screen_max_fps_off_help", 0);
+            for (auto const limit : pickableLimits)
+            {
+                if (!limit)
+                    continue;
+                std::stringstream s;
+                s << limit;
+                zmf_t_p->NewChoice(s.str().c_str(), "", limit);
+            }
+        }
+        else
+        {
+            // fallback to ranged item
+            zfm_t.reset(new uMenuItemInt(&screen_menu_mode, "$screen_max_fps_text", "$max_fps_help", sr_maxFPS, 0, 9990, 10));
+        }
+    }
 
 #ifdef SDL_OPENGL
 #if SDL_VERSION_ATLEAST(1, 2, 10)

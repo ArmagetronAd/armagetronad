@@ -1077,6 +1077,8 @@ static rSwapTime & sr_SwapTime()
 
 #endif // DEDICATED
 
+int sr_maxFPS = 360;
+
 // buffer swap:
 #ifndef DEDICATED
 // for setting breakpoints in optimized mode, too

@@ -2316,13 +2316,22 @@ sound_menu_quality_off_text	Off
 sound_menu_quality_off_help	Disables sound output completely.
 
 sound_menu_quality_low_text	Low
-sound_menu_quality_low_help	Sound output is 16 bit 11025 Hz stereo.
+sound_menu_quality_low_help	Sound output is 16 bit 11025 Hz.
 
 sound_menu_quality_medium_text	Medium
-sound_menu_quality_medium_help	Sound output is 16 bit 22050 Hz stereo.
+sound_menu_quality_medium_help	Sound output is 16 bit 22050 Hz.
 
 sound_menu_quality_high_text	High
-sound_menu_quality_high_help	Sound output is 16 bit 44100 Hz stereo.
+sound_menu_quality_high_help	Sound output is 16 bit 44100 Hz.
+
+sound_menu_channels_text 	Type:
+sound_menu_channels_help 	Sound setup. Mono (1 channel) or Stereo (2 channels)?
+
+sound_menu_channels_mono_text 	Mono
+sound_menu_channels_mono_help 	Rough mono sound for broken headphones and loudspeakers with only a single audio channel.
+
+sound_menu_channels_stereo_text Stereo
+sound_menu_channels_stereo_help 2-channel stereo sound with position-dependant output for the left and the right speaker. Standard setting.
 
 sound_menu_buffer_text		Buffer Length:
 sound_menu_buffer_help		Selects the size of the sound buffer.
@@ -2455,7 +2464,7 @@ screen_vsync_text		VSync:
 screen_vsync_help		What to do with the monitor's vertical sync signal.
 
 screen_vsync_on_text	Wait
-screen_vsync_on_help	Wait for it every frame. This usually results in very smooth animations at a frame rate limited by your monitor's refresh rate, and is the only way to make this game not use 100% CPU time. Recommended.
+screen_vsync_on_help	Wait for it every frame. This usually results in very smooth animations at a frame rate limited by your monitor's refresh rate, and is the best way to make this game not use 100% CPU time. Recommended.
 
 screen_vsync_default_text	Default
 screen_vsync_default_help	Do not touch the system defaults.
@@ -2467,6 +2476,9 @@ screen_vsync_motionblur_text	Motion Blur
 screen_vsync_motionblur_help	Ignore it and make use of the additional frames for motion blurring, which makes the tearing artefacts less prominent. Recommended for power gamers.
 
 screen_vsync_motionblur_unsupported	Motion Blur unsupported on your system, disabling it.\n
+screen_max_fps_text     FPS Limit:
+screen_max_fps_off_text Unlimited
+screen_max_fps_off_help No limit on the framerate.
 
 screen_grab_mouse_text		Grab Mouse:
 screen_grab_mouse_help		If activated, the mouse pointer is centered after every move; thus, it is unable to leave the window. This option is only useful when you play \g in a window.

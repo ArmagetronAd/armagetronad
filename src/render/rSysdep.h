@@ -81,5 +81,6 @@ public:
 };
 
 extern tString sr_screenshotName;
+extern int sr_maxFPS;
 
 #endif

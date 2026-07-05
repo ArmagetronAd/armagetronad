@@ -2283,16 +2283,25 @@ sound_menu_quality_off_text   Aus
 sound_menu_quality_off_help   Gar kein Sound
 
 sound_menu_quality_low_text   Niedrig
-sound_menu_quality_low_help   Soundausgabe ist in 16 bit 11025 Hz stereo.
+sound_menu_quality_low_help   Soundausgabe ist in 16 bit 11025 Hz.
 
 sound_menu_quality_medium_text Mittel
-sound_menu_quality_medium_help Soundausgabe ist in 16 bit 22050 Hz stereo.
+sound_menu_quality_medium_help Soundausgabe ist in 16 bit 22050 Hz.
 
 sound_menu_quality_high_text  Hoch
-sound_menu_quality_high_help  Soundausgabe ist in 16 bit 44100 Hz stereo.
+sound_menu_quality_high_help  Soundausgabe ist in 16 bit 44100 Hz.
 
-sound_menu_buffer_text        Puffer:
-sound_menu_buffer_help        Regelt die Grösse des Datenbereichs, in dem gemischte Sounds vorgehalten werden. Kleine Puffer erzeugen manchmal Knattern, grosse eine spürbare Verzögerung zwischen Grafik und Sound.
+sound_menu_channels_text 	Art:
+sound_menu_channels_help 	Sound-Setup. Mono (1 Soundkanal) oder Stereo (2 Soundkanäle)?
+
+sound_menu_channels_mono_text 	Mono
+sound_menu_channels_mono_help 	Grober Mono-Sound für kaputte Kopfhörer und Einzel-Lautsprecher mit nur einem Soundkanal.
+
+sound_menu_channels_stereo_text Stereo
+sound_menu_channels_stereo_help 2-Kanal-Stereo-Sound mit positionsabhängiger Ausgabe für den linken und den rechten Lautsprecher. Standard.
+
+sound_menu_buffer_text        	Puffer:
+sound_menu_buffer_help        	Regelt die Grösse des Datenbereichs, in dem gemischte Sounds vorgehalten werden. Kleine Puffer erzeugen manchmal Knattern, grosse eine spürbare Verzögerung zwischen Grafik und Sound.
 
 sound_menu_buffer_vsmall_text Sehr klein
 sound_menu_buffer_vsmall_help Verzögerung: etwa 0.02s, aber fast sicher mit Knattern.
@@ -2435,6 +2444,9 @@ screen_vsync_motionblur_text  Bewegungsunschärfe
 screen_vsync_motionblur_help  Ignoriere es und benutze zusätzliche Frames um Bewegungsunschärfe zu simulieren. Dadurch werden die Tearing-Artefakte (sog. Einzelbild-Zerreißen) weniger deutlich sichtbar. Powergamern empfohlen.
 
 screen_vsync_motionblur_unsupported Bewegungsunschärfe wird von deinem System nicht unterstützt und ist folglich deaktiviert.\n
+screen_max_fps_text           FPS-Begrenzung:
+screen_max_fps_off_text       Unbegrenzt
+screen_max_fps_off_help       Keine Bremse, soviele Frames wie das System ausgeben kann.
 
 screen_grab_mouse_text        Maus einfangen:
 screen_grab_mouse_help        Wenn das hier aktiviert ist, so kann der Mauszeiger das Fenster nicht verlassen. Nur so lässt sich die Maus im Fenstermodus richtig nutzen.
