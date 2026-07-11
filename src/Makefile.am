@@ -59,6 +59,7 @@ libtools_a_SOURCES=	${tools_extra} tools/tArray.cpp tools/tArray.h tools/tCallba
 	tools/tRecorderInternal.cpp tools/tRecorderInternal.h\
 	tools/tCommandLine.cpp tools/tCommandLine.h\
 	tools/tRandom.cpp tools/tRandom.h\
+	tools/tZThread.h tools/pthread-binding.h\
 	defs.h\
     thirdparty/binreloc/prefix.c thirdparty/binreloc/prefix.h\
 	tools/tMemManager.cpp tools/tMemManager.h
