@@ -1052,6 +1052,7 @@ export CXXFLAGS
 export LIBS
 
 AC_OUTPUT(src/Makefile
+conan/Makefile
 src/first/Makefile
 Makefile
 batch/Makefile

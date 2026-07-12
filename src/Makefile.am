@@ -15,15 +15,7 @@ tUniversalVariables.h: Makefile tUniversalVariables.h.in ${top_builddir}/univers
 
 ${srcdir}/tools/tDirectories.cpp: tUniversalVariables.h
 
-EXTRA_DIST = render/rConsoleCout.cpp \
-conan/README.md \
-conan/conanfile.py \
-conan/conanoptions.ini \
-conan/prerequisites/build.sh \
-conan/prerequisites/clean.sh \
-conan/prerequisites/sdl/conanfile.py \
-conan/prerequisites/sdl_image/conanfile.py
-
+EXTRA_DIST = render/rConsoleCout.cpp
 dist-hook:
 	cp -R ${srcdir}/config_ide.h ${srcdir}/macosx ${srcdir}/win32 ${srcdir}/win32_ded $(distdir)
 
