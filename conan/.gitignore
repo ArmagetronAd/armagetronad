@@ -1,7 +1,8 @@
 *conan*
 !conanfile.py
 !conan.lock
+!conanoptions.ini
 *.pc
 bin
 lib
-
+*_env.sh

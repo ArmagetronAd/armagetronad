@@ -16,7 +16,6 @@ tUniversalVariables.h: Makefile tUniversalVariables.h.in ${top_builddir}/univers
 ${srcdir}/tools/tDirectories.cpp: tUniversalVariables.h
 
 EXTRA_DIST = render/rConsoleCout.cpp
-
 dist-hook:
 	cp -R ${srcdir}/config_ide.h ${srcdir}/macosx ${srcdir}/win32 ${srcdir}/win32_ded $(distdir)
 
@@ -59,6 +58,7 @@ libtools_a_SOURCES=	${tools_extra} tools/tArray.cpp tools/tArray.h tools/tCallba
 	tools/tRecorderInternal.cpp tools/tRecorderInternal.h\
 	tools/tCommandLine.cpp tools/tCommandLine.h\
 	tools/tRandom.cpp tools/tRandom.h\
+	tools/tZThread.h tools/pthread-binding.h\
 	defs.h\
     thirdparty/binreloc/prefix.c thirdparty/binreloc/prefix.h\
 	tools/tMemManager.cpp tools/tMemManager.h

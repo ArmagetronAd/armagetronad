@@ -1,4 +1,4 @@
-/dnl I would like to do this to generate the version number...
+dnl I would like to do this to generate the version number...
 dnl AC_DEFUN([AUTOMATIC_VERSION],syscmd([sh batch/make/version .]))
 
 dnl but have to do this with version generated in bootstrap.sh instead for some reason
@@ -613,6 +613,7 @@ AC_CACHE_SAVE
 
 dnl load conan settings if they exist
 test -r $(dirname $0)/conan/conanautotoolstoolchain.sh && source $(dirname $0)/conan/conanautotoolstoolchain.sh
+test -r $(dirname $0)/conan/conanbuildenv.sh && source $(dirname $0)/conan/conanbuildenv.sh
 
 dnl *************************************************
 dnl         libxml2
@@ -653,20 +654,23 @@ dnl *************************************************
 
 if test x$enable_armathentication = xyes; then
 
-dnl ACX_PTHREAD([
-
-dnl LIBS="${PTHREAD_LIBS} ${LIBS}"
-dnl CXXFLAGS="${CXXFLAGS} ${PTHREAD_CFLAGS}"
-dnl CC="${PTHREAD_CC}"
-dnl AC_DEFINE(HAVE_PTHREAD,1,[Define if you have POSIX threads libraries and header files.])
-
-dnl ],[
-
-AM_PATH_ZTHREAD_AA(2.3.2)
+dnl AM_PATH_ZTHREAD_AA(2.3.2)
 CXXFLAGS="${CXXFLAGS} ${ZTHREAD_CXXFLAGS}"
 LIBS="${LIBS} ${ZTHREAD_LIBS}"
 
-dnl ])
+AC_LANG([C++])
+
+if test "x$ZTHREAD_LIB" = x; then
+
+dnl if z-thread is unavailable, make do with pthread
+ACX_PTHREAD([
+LIBS="${PTHREAD_LIBS} ${LIBS}"
+CXXFLAGS="${CXXFLAGS} ${PTHREAD_CFLAGS}"
+CC="${PTHREAD_CC}"
+AC_DEFINE(HAVE_PTHREAD,1,[Define if you have POSIX threads libraries and header files.])
+],
+)
+fi
 
 fi # krawall
 fi # armamain
@@ -709,18 +713,23 @@ dnl *************************************************
 dnl         SDL
 dnl *************************************************
 
-AC_MSG_CHECKING(whether SDL is installed)
-if SDLLIBS=`${SDL_CONFIG} --libs`; then
-    AC_MSG_RESULT(yes)
-fi
+PKG_CHECK_MODULES([SDL], [sdl < 2], [
+    CPPFLAGS="$CPPFLAGS $SDL_CFLAGS"
+    LIBS="$LIBS $SDL_LIBS"
+    ], [
+    AC_MSG_CHECKING(whether SDL is installed)
+    if SDLLIBS=`${SDL_CONFIG} --libs`; then
+        AC_MSG_RESULT(yes)
+    fi
 
-CPPFLAGS="$CPPFLAGS `${SDL_CONFIG} --cflags`"
-LIBS="${SDLLIBS} $LIBS"
+    CPPFLAGS="$CPPFLAGS `${SDL_CONFIG} --cflags`"
+    LIBS="${SDLLIBS} $LIBS"
 
-AC_CHECK_FUNC(SDL_Init,
-AC_DEFINE(HAVE_LIBSDL,,[Define if you have the library SDL]),
-AC_MSG_ERROR([You need the library SDL to compile ${progtitle}. Read the file doc/install_linux.html.])
-,)
+    AC_CHECK_FUNC(SDL_Init,
+    AC_DEFINE(HAVE_LIBSDL,,[Define if you have the library SDL]),
+    AC_MSG_ERROR([You need the library SDL to compile ${progtitle}. Read the file doc/install_linux.html.])
+    ,)
+])
 
 dnl *************************************************
 dnl         SDL_Mixer
@@ -815,26 +824,32 @@ dnl	libjpeg not found. Expect small graphical errors ( missing moviepack title s
 dnl	)
 dnl )
 
-AC_CHECK_LIB(SDL_image, IMG_Load,,
-dnl AC_CHECK_LIB(IMG, main,,
-AC_MSG_ERROR([You need the library SDL_image to compile ${progtitle}.]
-dnl )
-))
+PKG_CHECK_MODULES([SDL_IMAGE], [SDL_image], [
+    CPPFLAGS="$CPPFLAGS $SDL_IMAGE_CFLAGS"
+    LIBS="$LIBS $SDL_IMAGE_LIBS"
+    ], [
+    AC_CHECK_LIB(SDL_image, IMG_Load,,
+    dnl AC_CHECK_LIB(IMG, main,,
+    AC_MSG_ERROR([You need the library SDL_image to compile ${progtitle}.]
+    dnl )
+    ))
 
-dnl look for the right header for SDL_image
-AC_CHECK_HEADERS(SDL_image.h,,
-[
-AC_MSG_WARN([SDL_image header not found where it should be ( the SDL include directory ).
-Trying fallback.])
-AC_CHECK_HEADERS(SDL/SDL_image.h,,
-[AC_MSG_WARN([
-SDL_image header not found. The library is there, so something must be unusual
-in your setup: SDL_image.h does not reside in the same folder as the rest of the SDL
-inlcudes and not in any SDL subdirectory in the inclue path. If you know the
-correct path to it, edit src/render/rTexture.cpp and enter it there.])]
-)
-]
-)
+    dnl look for the right header for SDL_image
+    AC_CHECK_HEADERS(SDL_image.h,,
+    [
+    AC_MSG_WARN([SDL_image header not found where it should be ( the SDL include directory ).
+    Trying fallback.])
+    AC_CHECK_HEADERS(SDL/SDL_image.h,,
+    [AC_MSG_WARN([
+    SDL_image header not found. The library is there, so something must be unusual
+    in your setup: SDL_image.h does not reside in the same folder as the rest of the SDL
+    inlcudes and not in any SDL subdirectory in the inclue path. If you know the
+    correct path to it, edit src/render/rTexture.cpp and enter it there.])]
+    )
+    ]
+    )
+])
+
 
 ifelse(,,,
 [
@@ -1037,6 +1052,7 @@ export CXXFLAGS
 export LIBS
 
 AC_OUTPUT(src/Makefile
+conan/Makefile
 src/first/Makefile
 Makefile
 batch/Makefile

@@ -19,7 +19,7 @@ models sound textures bootstrap.sh accustomdir.m4 fingerprint Dockerfile languag
 
 # resource is included as a subdir for the purpose of keeping this makefile short and delegating
 # resource management to a more appropriate place anyway
-SUBDIRS = src resource batch config desktop docker/build
+SUBDIRS = src resource batch config desktop docker/build conan
 
 # special tasks to do if we're building the master server
 if BUILDMASTER
