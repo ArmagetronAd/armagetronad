@@ -37,6 +37,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "config.h"
 
 #include <math.h>
+#include <ctype.h>
 #include <iosfwd>
 
 // Includes required for GCC 4.3 only. Remove them as soon as some of 
@@ -107,11 +108,6 @@ inline REAL fabsf( REAL x ) throw() { return REAL(fabs( x )); }
 
 #ifndef HAVE_FLOORF
 inline REAL floorf( REAL x ) throw() { return REAL(floor( x )); }
-#endif
-
-#ifndef HAVE_ISBLANK
-// this function does not seem to exist in windows and solaris 2.8
-inline bool isblank(int x){ return ((x == ' ') || (x == '\t')); }
 #endif
 
 // use this function to explicitly ignore return values
