@@ -102,7 +102,7 @@ cycle_rubber_timebased_help   O uso da elasticidade baséase na distancia percor
 cycle_rubber_speed_help       Velocidade logarítmica de aproximación á parede cando a elasticidade está activa (cada segundo achégaste á parede por un factor de ~0.4^{este valor}).
 cycle_rubber_mindistance_help Distancia mínima co código de elasticidade mantén entre ti e a parede dianteira.
 cycle_rubber_mindistance_gap_help		Se > 0, CYCLE_RUBBER_MINDISTANCE nunca se considera maior que este valor multiplicado polo tamaño de calquera fenda detectada pola ca moto poida pasar. Para xogabilidade "Aberta".
-cycle_rubber_mindistance_gap_backdoor_help Se > 0, CYCLE_RUBBER_MINDISTANCE nunca se considera maior que este valor multiplicado polo tamaño de calquera fenda traseira detectada pola que a moto poida pasar. Para xogabilidade "Aberta"". Se = 0, CYCLE_RUBBER_MINDISTANCE_GAP aplícase tamén as fendas traseiras.
+cycle_rubber_mindistance_gap_backdoor_help Se > 0, CYCLE_RUBBER_MINDISTANCE nunca se considera maior que este valor multiplicado polo tamaño de calquera fenda traseira detectada pola que a moto poida pasar. Para xogabilidade "Aberta". Se = 0, CYCLE_RUBBER_MINDISTANCE_GAP aplícase tamén as fendas traseiras.
 cycle_rubber_mindistance_gap_side_help A detección de fendas só considera aquelas ás que a moto pode chegar en non menos de este número de segundos.
 cycle_rubber_mindistance_ratio_help	Distancia adicional a CYCLE_RUBBER_MINDISTANCE por cada unidade de lonxitude da parede que tes diante.
 cycle_rubber_mindistance_reservoir_help Distancia adicional se tes o medidor de elasticidade baleiro (desvanece gradualmente a medida que consumes elasticidade).
