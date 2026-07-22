@@ -101,8 +101,8 @@ cycle_rubber_legacy_help      Reverte ao código antigo de elasticidade se está
 cycle_rubber_timebased_help   O uso da elasticidade baséase na distancia percorrida se é 0 (por defecto) e no tempo transcorrido se é 1. Tamén son posibles valores intermedios e fóra destes límites.
 cycle_rubber_speed_help       Velocidade logarítmica de aproximación á parede cando a elasticidade está activa (cada segundo achégaste á parede por un factor de ~0.4^{este valor}).
 cycle_rubber_mindistance_help Distancia mínima co código de elasticidade mantén entre ti e a parede dianteira.
-cycle_rubber_mindistance_gap_help		Se > 0, CYCLE_RUBBER_MINDISTANCE nunca se considera maior que este valor multiplicado polo tamaño de calquera fenda detectada pola ca moto poida pasar. Para xogo Open.
-cycle_rubber_mindistance_gap_backdoor_help Se > 0, CYCLE_RUBBER_MINDISTANCE nunca se considera maior que este valor multiplicado polo tamaño de calquera fenda traseira detectada pola que a moto poida pasar. Para xogo Open. Se = 0, CYCLE_RUBBER_MINDISTANCE_GAP aplícase tamén as fendas traseiras.
+cycle_rubber_mindistance_gap_help		Se > 0, CYCLE_RUBBER_MINDISTANCE nunca se considera maior que este valor multiplicado polo tamaño de calquera fenda detectada pola ca moto poida pasar. Para xogabilidade "Aberta".
+cycle_rubber_mindistance_gap_backdoor_help Se > 0, CYCLE_RUBBER_MINDISTANCE nunca se considera maior que este valor multiplicado polo tamaño de calquera fenda traseira detectada pola que a moto poida pasar. Para xogabilidade "Aberta"". Se = 0, CYCLE_RUBBER_MINDISTANCE_GAP aplícase tamén as fendas traseiras.
 cycle_rubber_mindistance_gap_side_help A detección de fendas só considera aquelas ás que a moto pode chegar en non menos de este número de segundos.
 cycle_rubber_mindistance_ratio_help	Distancia adicional a CYCLE_RUBBER_MINDISTANCE por cada unidade de lonxitude da parede que tes diante.
 cycle_rubber_mindistance_reservoir_help Distancia adicional se tes o medidor de elasticidade baleiro (desvanece gradualmente a medida que consumes elasticidade).
@@ -1422,7 +1422,7 @@ help_menu_doc_help		Abre a documentación HTML incluída nun navegador externo
 help_menu_doc_file	    index.html
 
 help_menu_discord_text	Abrir Discord
-help_menu_discord_help	Abre un convite ao noso Discord charla cousa. Seguimos negándonos a chamarlle Servidor, porque non é iso.\nÉ o lugar máis probable onde atoparás a alguén disposto a axudar.
+help_menu_discord_help	Abre un convite ao noso Discord... charla... cousa. Seguimos negándonos a chamarlle "Servidor", porque non é iso.\nÉ o lugar máis probable onde atoparás a alguén disposto a axudar.
 
 help_menu_forums_text	Abrir Foros
 help_menu_forums_help	Abre os nosos foros web. Requírese rexistro para publicar. O acceso de lectura non está restrinxido.
@@ -1716,7 +1716,7 @@ tutorial_menu_navigation_animation textures/tutorials/navigation/navigation.txt
 
 tutorial_menu_survival_text     Supervivencia
 tutorial_menu_survival_help     Titorial de Supervivencia: aprende a sobrevivir.
-tutorial_menu_survival_instructions As paredes son mortais en \g, incluíndo o teu propio rastro. A túa tarefa neste titorial é evitar esnafrarte nunha pequena arena durante 30 segundos, despois aparecerá unha zona verde de vitoria. Conduce ata ela para rematar o titorial.\n\nAs rodas de adestramento están activadas, tocar as paredes non te mata de inmediato.\n\nPreme Escape para abortar este titorial e tamén os seguintes, a maioría das outras teclas deixaranche continuar.
+tutorial_menu_survival_instructions As paredes son mortais en \g, incluíndo o teu propio rastro. A túa tarefa neste titorial é evitar esnafrarte nunha pequena arena durante 30 segundos, despois aparecerá unha zona verde de vitoria. Conduce ata ela para rematar o titorial.\n\nAs "rodas de adestramento" están activadas, tocar as paredes non te mata de inmediato.\n\nPreme Escape para abortar este titorial e tamén os seguintes, a maioría das outras teclas deixaranche continuar.
 tutorial_menu_survival_animation textures/tutorials/survival/survival.txt
 
 tutorial_menu_grind_text     Rozamento
@@ -1857,7 +1857,7 @@ tutorial_menu_highrubber_instructions Lembras como nos primeiros tutoriais podí
 
 tutorial_menu_brakeboost_text         Exhibición: Impulso de Freo
 tutorial_menu_brakeboost_help         Prepárate para algunhas das configuracións estrañas.
-tutorial_menu_brakeboost_instructions Unha das fortalezas de \g son as diferentes configuracións de xogo que permite. Estas exhibicións prepárante para un pouco da insanidade que atoparás en liña.\n\nPrimeiro, algo simple: o freo pode ser reconfigurado para actuar como impulso de velocidade. Úsao para eliminar as IAs.
+tutorial_menu_brakeboost_instructions Unha das fortalezas de \g son as diferentes configuracións de xogo que permite. Estas exhibicións prepárante para un pouco da "insanidade" que atoparás en liña.\n\nPrimeiro, algo simple: o freo pode ser reconfigurado para actuar como impulso de velocidade. Úsao para eliminar as IAs.
 
 tutorial_menu_open_text         Exhibición: Xogo Libre
 tutorial_menu_open_help         Prepárate para algunhas das configuracións estrañas.
