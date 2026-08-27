@@ -674,7 +674,7 @@ if test ${HAVE_BASH} = no; then
 fi
 
 dnl Boost
-AX_BOOST_BASE([1.33.1])
+AX_BOOST_BASE([1.33.1], [], [AC_MSG_ERROR(You need boost to build this.)])
 
 dnl Ruby
 
