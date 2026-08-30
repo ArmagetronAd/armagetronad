@@ -5,9 +5,10 @@ Maintainer: Debian Games Team <pkg-games-devel@lists.alioth.debian.org>
 Uploaders:
  Markus Koschany <apo@debian.org>
 Build-Depends:
- autotools-dev,
- debhelper (>= 9),
- libgl1-mesa-dev,
+ debhelper-compat (= 13),
+ dh-sequence-cruft,
+ dh-sequence-installsysusers,
+ libgl-mesa-dev,
  libglu1-mesa-dev,
  libpng-dev,
  libsdl2-dev,
@@ -23,15 +24,16 @@ Build-Depends:
  protobuf-compiler,
  libxml2-dev,
  libcurl4-openssl-dev | libcurl4-gnutls-dev | libcurl-dev,
- pkg-config,
+ pkgconf,
  libzthread-dev,
  zlib1g-dev
-Standards-Version: 4.0.0
-Homepage: http://armagetronad.org
-Vcs-Git: https://anonscm.debian.org/git/pkg-games/armagetronad.git
-Vcs-Browser: https://anonscm.debian.org/cgit/pkg-games/armagetronad.git
+Standards-Version: 4.7.4
+Homepage: https://armagetronad.org
+Vcs-Git: https://salsa.debian.org/games-team/armagetronad.git
+Vcs-Browser: https://salsa.debian.org/games-team/armagetronad
 
 Package: armagetronad-common
+Multi-Arch: foreign
 Recommends:
  armagetronad | armagetronad-dedicated
 Depends:
@@ -70,9 +72,7 @@ Description: 3D Tron-like high speed game
 Package: armagetronad-dedicated
 Architecture: any
 Depends:
- adduser,
  armagetronad-common (= ${source:Version}),
- lsb-base (>= 3.0-6),
  ${misc:Depends},
  ${shlibs:Depends}
 Description: dedicated game server for Armagetron Advanced

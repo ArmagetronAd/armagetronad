@@ -1,11 +1,11 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: Armagetron Advanced
-Source: http://sourceforge.net/projects/armagetronad/
+Source: https://sourceforge.net/projects/armagetronad/
 
 Files: *
 Copyright: 1998,      David K. McAllister
            2000-2008, Manuel Moos <z-man@users.sourceforge.net>
-           2000-2015, Armagetron Advanced development team
+           2000-2023, Armagetron Advanced development team
 License: GPL-2+
 
 Files: src/thirdparty/binreloc/*
@@ -20,7 +20,7 @@ Copyright: 2000-2002, Marcelo E. Magallon <mmagallo@debian.org>
            2002-2004, Andreas Bombe <aeb@debian.org>
            2005.      Petter Reinholdtsen <pere@debian.org>
            2007-2011, Christine Spang <christine@debian.org>
-           2014-2017, Markus Koschany <apo@debian.org>
+           2014-2023, Markus Koschany <apo@debian.org>
 License: GPL-2+
 
 
