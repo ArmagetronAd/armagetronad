@@ -3253,7 +3253,7 @@ static void se_ChatTeamLeave( ePlayerNetID * p )
     }
     if(!p->TeamChangeAllowed())
     {
-        sn_ConsoleOut(tOutput("$player_disallowed_teamchange"), p->Owner() );
+        sn_ConsoleOut(tOutput("$player_disallowed_teamchange", p->GetColoredName()), p->Owner() );
         return;
     }
 
