@@ -2631,6 +2631,14 @@ void se_OpConf( std::istream &s )
                 sn_ConsoleOut( tOutput( "$access_level_op_unclear", "OP" ), 0 );
             }
         }
+        else if( tCasaclPreventer::InRInclude() && tCurrentAccessLevel::GetAccessLevel() > 0 && 
+            (   victim->GetAccessLevel() < tCurrentAccessLevel::GetAccessLevel() || 
+                accessLevel <= tCurrentAccessLevel::GetAccessLevel()
+            )
+        )
+        {
+            sn_ConsoleOut( tOutput( "$access_level_op_overpowered", "OP" ), 0 );
+        }
         else
         {
             se_AnonOp( victim, accessLevel );
@@ -2653,6 +2661,14 @@ static void se_DeOpFunc(std::istream &s)
 
     ePlayerNetID *player = ePlayerNetID::FindPlayerByName(params);
     if (!player) return;
+    
+    if( tCasaclPreventer::InRInclude() && tCurrentAccessLevel::GetAccessLevel() > 0 && 
+        player->GetAccessLevel() <= tCurrentAccessLevel::GetAccessLevel()
+    )
+    {
+        sn_ConsoleOut( tOutput( "$access_level_op_overpowered", "DEOP" ), 0 );
+        return;
+    }
 
     se_AdminLogout(player, "DEOP");
 }
