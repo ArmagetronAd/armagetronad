@@ -20,11 +20,20 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // FYI This file demonstrates the *ideal* coding style (hah!)
 // and, on the other end, demonstrates some idiosyncrasies of the code base.
 
-// FYI Comments starting with `FYI` in them are meant as comments just to describe
-// what is going on HERE, they are not meant as templates to include in actual code.
+/*
+FYI Comments starting with `FYI` in them are meant as comments just to describe
+what is going on HERE, they are not meant as templates to include in actual code.
+*/
 
-// FYI Code should be CLEAN and DRY if appropriate.
-// FYI Everything here is functional code, it is included in our automated tests; it is completely useless, of course.
+/*
+FYI Code should be CLEAN, SOLID and DRY if appropriate.
+Do not be a zealot about it, though. Really important is that
+code should be readable, maintainable, changeable and testable,
+in that priority order.
+
+FYI Everything here is functional code, it is included in our
+automated tests; it is completely useless, of course.
+*/
 
 // FYI include guards
 #ifndef ArmageTron_CODING_STYLE_H
@@ -36,6 +45,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 // FYI reference counted objects and their smart pointers
 #include "tSafePTR.h"
+
+// FYI for using enums as flag bit collections
+#include "tFlagEnums.h"
 
 // FYI classes get a single lowercase letter prefix indicating the library they are in: t for tools, e for enginge, n for network, g for game.
 // FYI we pick 'c' here for Coding Style.
@@ -56,7 +68,7 @@ public:
 
     /* FYI slightly longer functions should be defined out-of-line later in the header;
     that gives you room to put their documenting comment after the declaration.
-    consider putting "Try" at the start of a function name if the function can fail in
+    Consider putting "Try" at the start of a function name if the function can fail in
     regular operation and communicates success in the return value.
     */
     bool TryCountDown() noexcept; // try to count down, but do not go below zero
@@ -201,5 +213,28 @@ private:
 
     tRefPtr<cReferenceCounted> target_{};
 };
+
+// FYI value class for the rest of the style
+class cRandomStuff
+{
+public:
+    // FYI rule of zero: No custom constructor, assignment, or destructor
+
+    // FYI methods that accept mutliple switches should define them in a
+    // custom enum, indicating their flag nature by writing values as hex
+    enum LightTypes
+    {
+        None = 0x0,
+        HeadLights = 0x1,
+        TailLights = 0x2,
+        Underlighting = 0x4,
+    };
+    void SetLights(LightTypes lights) noexcept { /*... */ }
+    // FYI NOT: void SetLights(bool head, bool tail, bool under) noexcept { /*... */ }
+private:
+};
+
+// FYI to make enums usable as flag enums with bitwise operators, use this macro at the top of a header file
+MARK_FLAG_ENUM(cRandomStuff::LightTypes);
 
 #endif // ArmageTron_CODING_STYLE_H
