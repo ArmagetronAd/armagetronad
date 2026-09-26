@@ -138,3 +138,7 @@ wget-log*
 # visual studio code things
 /.vscode
 /.devcontainer
+
+# code coverage artifacts
+/.coverage_available
+/coverage
