@@ -32,6 +32,7 @@ Build produces `libtools.a` static library. Includes `defs.h` for global definit
 ├── tConsole.h            # Console system header
 ├── tCrypt.cpp             # Cryptographic utilities
 ├── tCrypt.h              # Cryptographic utilities header
+├── tDefer.h               # Deferred execution utilities
 ├── tDirectories.cpp       # Directory management
 ├── tDirectories.h        # Directory management header
 ├── tError.cpp             # Error handling
@@ -40,6 +41,7 @@ Build produces `libtools.a` static library. Includes `defs.h` for global definit
 ├── tEventQueue.h         # Event queue header
 ├── tException.cpp         # Exception handling
 ├── tException.h          # Exception handling header
+├── tFlagEnums.h           # Flag enum support with bitwise operators
 ├── tHeap.cpp              # Memory heap
 ├── tHeap.h               # Memory heap header
 ├── tInitExit.h            # Initialization/exit handling
@@ -60,10 +62,13 @@ Build produces `libtools.a` static library. Includes `defs.h` for global definit
 ├── tRecorderInternal.cpp  # Internal recording utilities
 ├── tRecorderInternal.h   # Internal recording utilities header
 ├── tReferenceHolder.h     # Reference counting base
+├── tResourceManager.cpp   # Resource manager
+├── tResourceManager.h    # Resource manager header
 ├── tRing.cpp              # Ring buffer
 ├── tRing.h               # Ring buffer header
 ├── tSafePTR.cpp           # Safe pointer implementation
 ├── tSafePTR.h            # Safe pointer header
+├── tSafePTRBase.cpp       # Safe pointer base implementation
 ├── tString.cpp            # String class
 ├── tString.h             # String class header
 ├── tSysTime.cpp           # System time
@@ -72,7 +77,8 @@ Build produces `libtools.a` static library. Includes `defs.h` for global definit
 ├── tToDo.h               # TODO task management header
 ├── tZThread.h             # Thread support
 ├── pthread-binding.h      # POSIX thread binding
-└── defs.h                 # Global definitions
+├── memtest.cpp            # Memory test
+└── transfab.cpp           # Transfer fabric
 ```
 
 ## Technologies
@@ -87,6 +93,7 @@ Build produces `libtools.a` static library. Includes `defs.h` for global definit
 - **Naming**: `t` prefix for custom classes, `st_` prefix for static/utility functions, `s_` prefix for static variables
 - **Smart Pointers**: `tJUST_CONTROLLED_PTR`, `tCONTROLLED_PTR`, `tSafePTR` for reference counting
 - **Error Handling**: Debug levels (high, normal, low, very_low) and channels (flow, dump)
+- **Flag Enums**: `MARK_FLAG_ENUM` macro enables bitwise operations on enum types via `tFlagEnums.h`
 - **Configuration**: Hierarchical config system with access control and network sync support
 - **Memory**: Custom allocators, memory pools, stack-based allocation (`tMemStack`)
 - **Header Guards**: `#ifndef ArmageTron_<NAME>_H` pattern
@@ -107,5 +114,5 @@ Build produces `libtools.a` static library. Includes `defs.h` for global definit
 - Includes `-iquote @srcdir@/thirdparty/binreloc` for binreloc headers
 - `tResourceManager.cpp` only included when `BUILDMAIN` is defined
 - Test: `chat_prefix_test.cpp` in `src/test/` uses libtools
-- Unit tests: `tArray_test.cpp`, `tList_test.cpp`, `tString_test.cpp`, `tLinkedList_test.cpp`, `tRing_test.cpp`, `tHeap_test.cpp`, `tMemStack_test.cpp` (from fn-1)
-- Unit tests: `tColor_test.cpp`, `tException_test.cpp`, `tCallback_test.cpp`, `tCallbackString_test.cpp`, `tRandomizer_test.cpp`, `tReferenceHolder_test.cpp` (from fn-3)
+- Unit tests: `tArray_test.cpp`, `tColor_test.cpp`, `tCallback_test.cpp`, `tCallbackString_test.cpp`, `tCrypt_test.cpp`, `tDirectories_test.cpp`, `tEventQueue_test.cpp`, `tException_test.cpp`, `tHeap_test.cpp`, `tLinkedList_test.cpp`, `tList_test.cpp`, `tLocale_test.cpp`, `tMath_test.cpp`, `tMemStack_test.cpp`, `tRandomizer_test.cpp`, `tReferenceHolder_test.cpp`, `tRing_test.cpp`, `tString_test.cpp`, `tSysTime_test.cpp`
+- Integration tests in `src/test/` use tools from this library

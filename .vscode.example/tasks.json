@@ -12,7 +12,7 @@
         "base": "$gcc",
         "fileLocation": [
           "relative",
-          "${workspaceFolder}/build/test_server_debug/src"
+          "${workspaceFolder}/build/test_vs_server_debug/src"
         ]
       },
       "group": {
@@ -31,7 +31,7 @@
         "base": "$gcc",
         "fileLocation": [
           "relative",
-          "${workspaceFolder}/build/test_client_debug/src"
+          "${workspaceFolder}/build/test_vs_client_debug/src"
         ]
       },
       "group": {
@@ -50,7 +50,7 @@
         "base": "$gcc",
         "fileLocation": [
           "relative",
-          "${workspaceFolder}/build/test_server_debug/src"
+          "${workspaceFolder}/build/test_vs_server_debug/src"
         ]
       },
       "group": {
@@ -69,7 +69,7 @@
         "base": "$gcc",
         "fileLocation": [
           "relative",
-          "${workspaceFolder}/build/test_server_debug/src"
+          "${workspaceFolder}/build/test_vs_server_debug/src"
         ]
       },
       "group": {
@@ -100,7 +100,7 @@
         "base": "$gcc",
         "fileLocation": [
           "relative",
-          "${workspaceFolder}/build/test_server_debug/src"
+          "${workspaceFolder}/build/test_vs_server_debug/src"
         ]
       },
       "group": {

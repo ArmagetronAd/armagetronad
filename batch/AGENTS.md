@@ -15,13 +15,14 @@ Key subdirectories include `make/` which contains build helpers and utilities. T
 
 At the root of the batch directory, `rcd_startstop.in` is a template for init scripts that handle starting and stopping Armagetron servers. This is used for system service integration on Unix-like systems.
 
-For AI and CI use, `test_builds.sh` provides a canonical way to build and test the project with multiple configurations.
+For AI and CI use, `test_builds.sh` provides a canonical way to build and test the project with multiple configurations. The `llvm-gcov.sh` wrapper script enables lcov code coverage analysis when using the Clang compiler, which produces coverage data in a format incompatible with the standard gcov tool.
 
 ## Directory Structure
 
 ```
 .
 ├── Dockerfile              # Docker build configuration
+├── llvm-gcov.sh           # LLVM gcov wrapper for lcov compatibility
 ├── rcd_startstop.in       # Init script template for server/services
 ├── test_builds.sh         # Multi-configuration test build script for AI/CI
 └── make/                  # Build helper scripts
@@ -60,7 +61,7 @@ For AI and CI use, `test_builds.sh` provides a canonical way to build and test t
 ## Test Build Automation
 
 - `test_builds.sh` - Canonical script for building and testing with multiple configurations
-  - Environment variables for customization: TEST_ONLY, BUILD_ONLY, FORCE_RECONFIGURE, VERBOSE, JOBS
+  - Environment variables for customization: TEST_ONLY, BUILD_ONLY, FORCE_RECONFIGURE, VERBOSE, COVERAGE, JOBS
   - Each configuration builds in a separate `/build/test_<name>` directory
   - Returns exit code equal to number of failed configurations
   

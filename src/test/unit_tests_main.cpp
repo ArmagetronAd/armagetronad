@@ -26,28 +26,22 @@ int main(int argc, char** argv)
         // std::cout << program << "\n";
 
         // go two levels up to find build directory
-        int levelsToGo = 2;
         for (int i = program.Len() - 2; i >= 0; --i)
         {
             if (program[i] == '/' || program[i] == '\\')
             {
-                levelsToGo--;
-                if (levelsToGo <= 0)
-                {
-                    // arrived, construct build dir and chdir to it
-                    auto const buildDir = program.SubStr(0, i);
-                    // std::cout << buildDir << "\n";
-                    auto const res = chdir(buildDir);
-                    std::ignore = res;
+                // arrived, construct build/src dir and chdir to it
+                auto const buildDir = program.SubStr(0, i);
+                // std::cout << buildDir << "\n";
+                auto const res = chdir(buildDir);
+                std::ignore = res;
 
-                    break;
-                }
+                break;
             }
         }
 
-        if(levelsToGo > 0)
         {
-            // must be in builddir/src, go one level up
+            // must be in builddir/src now, go one level up
             auto const res = chdir("..");
             std::ignore = res;
         }

@@ -217,6 +217,35 @@ TEST_SUITE("CodingStyle")
         }
     }
 
+    TEST_CASE("Flag Enums")
+    {
+        SUBCASE("Enum flag combinations are valid enum values")
+        {
+            cRandomStuff stuff;
+            stuff.SetLights(cRandomStuff::TailLights | cRandomStuff::Underlighting);
+            stuff.SetLights(~cRandomStuff::TailLights);
+            stuff.SetLights(~cRandomStuff::TailLights & cRandomStuff::HeadLights);
+            // no check, just see that it compiles
+        }
+
+        SUBCASE("'or' works")
+        {
+            auto const combo1 = cRandomStuff::TailLights | cRandomStuff::HeadLights;
+            CHECK(3 == combo1);
+            CHECK((cRandomStuff::HeadLights & combo1));
+            CHECK((cRandomStuff::TailLights & combo1));
+            CHECK_FALSE((cRandomStuff::Underlighting & combo1));
+        }
+        SUBCASE("'and' and 'complement' work")
+        {
+            auto const combo2 = (cRandomStuff::TailLights | cRandomStuff::HeadLights) & ~(cRandomStuff::HeadLights | cRandomStuff::Underlighting);
+            CHECK(2 == combo2);
+            CHECK(!(cRandomStuff::HeadLights & combo2));
+            CHECK((cRandomStuff::TailLights & combo2));
+            CHECK_FALSE((cRandomStuff::Underlighting & combo2));
+        }
+    }
+
     TEST_CASE("Time")
     {
         // FYI this test demonstrates how to advance time in tests without actually adding delays.

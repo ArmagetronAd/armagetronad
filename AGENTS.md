@@ -96,8 +96,9 @@ The game features:
 
 ### Development Tools
 - **Version Control**: Git
-- **Testing**: Custom test harness
+- **Testing**: Custom test harness, doctest framework
 - **Documentation**: Doxygen
+- **Code Coverage**: lcov, genhtml, gcov (GCC), llvm-cov (Clang)
 
 ## Coding Conventions
 
@@ -250,6 +251,17 @@ class gGame : public nNOInitialisator<gGame> {
 **Development:**
 - `DEBUGLEVEL=0-5` - Debug verbosity (0=none, 5=maximum)
 - `CODELEVEL=0-4` - Code checking strictness (0=none, 4=strict)
+- `COVERAGE=1` or `COVERAGE=2` - Enable code coverage collection
+
+### Code Coverage
+The project supports code coverage analysis with both GCC and Clang compilers:
+- **GCC**: Uses standard gcov tool for coverage data generation
+- **Clang**: Uses llvm-cov gcov via `batch/llvm-gcov.sh` wrapper script that filters lcov-specific flags incompatible with llvm-cov
+- **Coverage Data**: `.gcno` and `.gcda` files are automatically cleaned before test runs
+- **Processing**: lcov and genhtml generate HTML reports in `coverage/` directory
+- **Targets**: `make coverage` runs tests and processes coverage, `make process_coverage` generates reports from existing data
+
+The `batch/llvm-gcov.sh` script enables seamless integration with lcov when using clang++.
 
 ### Platform Detection
 ```bash
@@ -301,28 +313,9 @@ Each subdirectory has its own `Makefile.am` defining:
 
 ## Automated Tests
 
-**Test Location:** `src/test/`
+**Test Location:** `src/test/` (see `src/test/AGENTS.md` for details)
 
-**Current Tests:**
-- `unit_tests` - Main test suite using doctest framework
-  - `eAxis_test.cpp` - Axis class geometry tests
-  - `eCoord_test.cpp` - Coordinate system tests
-  - `eRectangle_test.cpp` - Rectangle geometry tests
-  - `tArray_test.cpp` - Dynamic array tests
-  - `tCallback_test.cpp` - Callback system tests
-  - `tCallbackString_test.cpp` - String callback tests
-  - `tColor_test.cpp` - Color handling tests
-  - `tException_test.cpp` - Exception system tests
-  - `tHeap_test.cpp` - Heap memory tests
-  - `tLinkedList_test.cpp` - Linked list tests
-  - `tList_test.cpp` - List container tests
-  - `tMemStack_test.cpp` - Memory stack tests
-  - `tRandomizer_test.cpp` - Randomization tests
-  - `tRing_test.cpp` - Ring buffer tests
-  - `tString_test.cpp` - String class tests
-  - `unit_tests_main.cpp` - Test harness entry point
-- `chat_prefix_test` - Legacy standalone test
-  - `chat_prefix_test.cpp` - Tests XML parsing for chat prefixes
+The test suite includes unit tests using the doctest framework and a legacy standalone test. Details about individual test files, test organization, coding style examples, and test coverage are documented in `src/test/AGENTS.md`.
 
 **Test Framework:**
 - **Primary**: doctest framework for most tests
@@ -639,6 +632,7 @@ consider this branch legacy.
 - Many of the coding practices you find in the code are archaic or were never a good idea at any time. If on doubt, follow well know best general practices.
 - Avoid sweeping changes in legacy branches. We regularly merge them into `trunk`, which is far ahead, and want to avoid conflicts.
 - Unless specifically ordered otherwise, put analysis and planning markdown files you generate for your future use into the folder `ai_docs`. Keep them out of the main git.
+- `.memory` is the place to store project specific memory files. Also, keep them out of git.
 - Keep code comments and commit messages terse as appropriate. Ideally, the code should speak for itself.
 
 ### Development Method
@@ -647,13 +641,12 @@ consider this branch legacy.
   - Try `batch/test_builds.sh full` before you start modifications to see if that works. Fall back to less complete tests only after consulting the user.
   - For quick iterations, `batch/test_builds.sh debug` suffices, or even `batch/test_builds.sh server_debug` for just one configuration.
   - Before committing, run `batch/test_builds.sh full` or the user sanctioned alternative again. Only commit if that runs without error.
-- After `batch/test_builds.sh debug`, debug executables of the full game are `build/test_server_debug/armagetronad-dedicated` and `build/test_client_debug/armagetronad`.
-  They need to run in their respective directories. The unit test executable are `build/test_server_debug/src/unit_tests` and `build/test_client_debug/src/unit_tests`.
+- After `batch/test_builds.sh debug`, debug executables of the full game are `build/test_vs_server_debug/armagetronad-dedicated` and `build/test_vs_client_debug/armagetronad`.
+  They need to run in their respective directories. The unit test executable are `build/test_vs_server_debug/src/unit_tests` and `build/test_vs_client_debug/src/unit_tests`.
 - Unit tests are in `src/test`, see `src/test/AGENTS.md` for details.
+- Always use the `batch/test_builds.sh` scripts or make your own build directories inside `build/`. **AVOID** building in the root source directory. 
 
 ### Coding Style
 
 - Use the top level `.clang-format` file for whitespace decisions. Most existing code was formatted with a different tool, if at all; only format code you touch. If available, just use `git clang-format`. 
-- Boolean parameters to methods are only allowed if the function name clearly indicates what 'true' or 'false' means, like `EnableHeadlights(true)`. Otherwise, define a custom enum so code reads like `SetLights(gEnableHeadlights | gEnableTaillights)` instead of `SetLights(true, true, false)`.
-- The name of methods reporting success or failure in a `bool` or `optional<T>` return begin with `Try`.
 - Check the `src/test/CodingStyle*` files for detailed samples of what we are aiming at.

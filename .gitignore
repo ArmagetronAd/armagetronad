@@ -5,6 +5,10 @@ Armagetron Advanced.app
 /desktop/armagetronad.appdata.xml
 .gdbinit
 .cache
+.dirstamp
+*.gcda
+*.gcno
+*.profraw
 .lock.*
 docker/images/context
 docker/deploy/*.gpg
@@ -88,8 +92,8 @@ src/armagetronad-serverquery
 ./rubbish
 __pycache__
 /src/armagetronad_serverquery
-src/armagetronad_main_master
-src/doc/COPYING.txt
+/src/armagetronad_main_master
+/src/doc/COPYING.txt
 rubbish
 desktop/armagetronad-armagetronad-handler.desktop
 desktop/armagetronad-link.xml
@@ -97,9 +101,12 @@ desktop/armagetronad-link.xml
 /version.h
 *~
 *.pyc
-src/.cproject
-src/.project
-src/.settings
+/src/.cproject
+/src/.project
+/src/.settings
+/src/chat_prefix_test
+/src/unit_tests
+
 autogen.sh
 *.o
 *.a
@@ -130,3 +137,7 @@ wget-log*
 # visual studio code things
 /.vscode
 /.devcontainer
+
+# code coverage artifacts
+/.coverage_available
+/coverage

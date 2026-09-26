@@ -9,6 +9,14 @@
 #undef BAD_CAST
 #define BAD_CAST(x) reinterpret_cast<xmlChar const *>(x)
 
+// Dummy SDL_main for macOS SDL 1.2 compatibility
+// chat_prefix_test doesn't actually use SDL, but links against libraries that do
+#ifdef __APPLE__
+extern "C" int SDL_main(int argc, char **argv) {
+    return 0;
+}
+#endif
+
 struct Stats
 {
     Stats() : sessions( 0 ), chats( 0 ), chatsThrough( 0 ), foundPrefixes( 0 ) { }

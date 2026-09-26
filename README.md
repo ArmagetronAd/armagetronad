@@ -32,7 +32,7 @@ Better documentation is on our [Wiki](https://wiki.armagetronad.org/index.php?ti
 
 This project uses autoconf/automake. Run `.\bootstrap.sh` to generate the scripts, then `configure` as appropriate. The most important argument is `--enable-dedicated`, which switches compilation from the default client to the dedicated server.
 
-If you do do not mind opinionated builds, run `./batch/test_builds.sh default`, this makes server and client builds in the `build` subdirectory.
+If you do do not mind opinionated builds, run `./batch/test_builds.sh default`, this makes server and client builds in the `build` subdirectory. Check the script for more options.
 
 Read more on dependencies you may need [Wiki](https://wiki.armagetronad.org/index.php?title=Linux_Development).
 
@@ -46,7 +46,7 @@ You don't need any specific IDE for development, builds can be done from the com
 
 #### Visual Studio Code/Codium
 
-Check the sample configuration in `.vscode.example`, the `README.md` in there explains how to activate it.
+Check the sample configuration in `.vscode.example/`, the `README.md` in there explains how to activate it.
 
 There is also a `devcontainer` setup that includes everything needed to develop the game [in a separate git](https://gitlab.com/zmanuel/armagetron-advanced-devcontainer). Running the client is probably not possible in there, but it can serve as a playpen for AI coding agents.
 

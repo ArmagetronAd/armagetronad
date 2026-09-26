@@ -11,6 +11,7 @@
 #   TEST_ONLY=1 ./batch/test_builds.sh debug    # Skip build, just test existing build
 #   FORCE_RECONFIGURE=1 ./batch/test_builds.sh  # Force re-run of configure
 #   VERBOSE=1 ./batch/test_builds.sh            # Show full build output
+#   COVERAGE=1 ./batch/test_builds.sh server_debug # build debug server, run tests, generate coverage report
 #   MAKEFLAGS                                   # Flags passed on to make
 #
 # Available configurations (use 'list' or 'help' to see more):
@@ -33,19 +34,19 @@ ROOT="$(pwd)"
 
 # Define configurations: name:configure_flags
 DEBUG_CONFIGURATIONS=(
-    "client_debug:DEBUGLEVEL=3 --disable-dedicated --enable-glout"
-    "server_debug:DEBUGLEVEL=3 --enable-master --enable-dedicated --disable-glout"
+    "client_debug:DEBUGLEVEL=3 --enable-coverage"
+    "server_debug:DEBUGLEVEL=3 --enable-master --enable-dedicated --disable-glout --enable-coverage"
 )
 
 CONFIGURATIONS=(
-    "client:--disable-dedicated --enable-glout"
+    "client:"
     "server:--enable-master --enable-dedicated --disable-glout"
     "${DEBUG_CONFIGURATIONS[@]}"
     "minimal:--disable-music --disable-authentication --disable-krawall --disable-respawn --disable-memmanager"
 )
 
 # -Wno-error=deprecated-declarations currently required because libxml deprecated some things
-CXXFLAGS_COMMON='-fmessage-length=0 -D__OPTIMIZE__=1 -Wno-error=deprecated-declarations'
+CXXFLAGS_COMMON='-fmessage-length=0 -Wno-error=deprecated-declarations'
 
 # variations of code strictness flags, the goal is to move down the list
 #PEDANTIC_FLAGS=''
@@ -64,7 +65,7 @@ fi
 WORKSPACE_KEY=""
 if [[ $ROOT == /work* ]]; then
     # looks like we are in a devcontainer
-    WORKSPACE_KEY="_devcnt"
+    WORKSPACE_KEY="_pod"
 fi
 
 # Common configure flags for all test builds
@@ -98,6 +99,8 @@ elif [ "$1" = "help" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     echo "  BUILD_ONLY=1       - Skip testing, only build"
     echo "  FORCE_RECONFIGURE=1 - Force re-run of configure step"
     echo "  VERBOSE=1          - Show full build output (not just summary)"
+    echo "  COVERAGE=1         - Generate human readable code coverage report (requires lcov)"
+    echo "  COVERAGE=2         - Silently generate code coverage report, do not fail on error (for AI Agents)"
     echo "  JOBS=N             - Number of parallel jobs (default: auto)"
     exit 0
 elif [ "$1" = "list" ]; then
@@ -120,7 +123,7 @@ elif [ "$1" = "full" ]; then
     # we compare compilers by their version output
     DEFAULT_V=`$DEFAULT_CXX -v 2>&1`
     # identify possible compilers
-    for COMPILER in g++ clang c++ `ls /usr/bin/g++-* /usr/bin/clang++-* 2>/dev/null | sed -e s,/usr/bin/,,g`; do
+    for COMPILER in g++ clang++ c++ `ls /usr/bin/g++-* /usr/bin/clang++-* 2>/dev/null | sed -e s,/usr/bin/,,g`; do
         # see if they differ from the default; if yes, build with them
         COMPILER_V=`$COMPILER -v 2>&1` || continue
         if [ "$DEFAULT_V" = "$COMPILER_V" ]; then continue; fi
@@ -226,7 +229,7 @@ for config in "${SELECTED_CONFIGS[@]}"; do
 	if echo $config | grep _debug > /dev/null; then
         cd "${ROOT}/build"
         # link output directory to canonical build directory where VS code will be able to find it
-        CANONICAL_BUILD_DIR_BASE="./test_${NAME}"
+        CANONICAL_BUILD_DIR_BASE="./test_vs_${NAME}"
         rm -rf "${CANONICAL_BUILD_DIR_BASE}" # it's a directory link, if we do not remove it, ln below will create a link inside of it
         ln -sf "${BUILD_DIR_BASE}" "${CANONICAL_BUILD_DIR_BASE}"
 	fi
@@ -296,6 +299,10 @@ for config in "${SELECTED_CONFIGS[@]}"; do
         # Run tests
         echo "[3/3] Testing..."
         TEST_PASSED=false
+
+        # clear previous coverage data
+        find src -name "*.gcda" -exec rm -f \{\} \;
+        rm -f coverage/*.info
         
         # Run unit_tests directly
         if [ -x ./src/unit_tests ] && ./src/unit_tests -ni -o=/tmp/test_${NAME}.log; then
@@ -306,7 +313,33 @@ for config in "${SELECTED_CONFIGS[@]}"; do
             if [ "$VERBOSE" = "1" ]; then
                 cat /tmp/test_${NAME}.log
             fi
-            echo "✓ All tests PASSED for $NAME"
+            # Verify coverage data files were generated, if we support the configuration
+        	if test -f .coverage_available; then
+                if find . -name "*.gcda" -o -name "*.gcno" | grep -q .; then
+                    echo "✓ All tests PASSED, coverage data files (.gcda/.gcno) generated for $NAME"
+                    if [ "$COVERAGE" != "" ]; then
+                        rm -f coverage/*.info coverage/html/index.html
+                        if ! make -j"$JOBS" process_coverage > /dev/null 2>&1; then
+                            if [ "$COVERAGE" = "1" ]; then
+                                if ! make -j"$JOBS" coverage; then
+                                    echo "✗ Coverage processing did not work for $NAME"
+                                    FAILURES=$((FAILURES + 1))
+                                    FAILED_CONFIGS+=("$NAME")
+                                fi
+                            fi
+                        fi
+                        if [ -r coverage/html/index.html ]; then
+                            echo "✓ Test coverage data reviewable at file://`pwd`/coverage/html/index.html"
+                        fi
+                    fi
+                else
+                    echo "✗ Tests passed, but coverage data files (.gcda/.gcno) NOT found for $NAME"
+                    FAILURES=$((FAILURES + 1))
+                    FAILED_CONFIGS+=("$NAME")
+                fi
+            else
+                echo "✓ All tests PASSED for $NAME"
+            fi
         else
             echo "✗ Tests FAILED for $NAME"
             echo "Test log:"

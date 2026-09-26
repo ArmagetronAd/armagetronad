@@ -43,3 +43,8 @@ Debugging individual tests from the test explorer works, but the extension will 
 You get debug configurations that run the debug client/server in either record or playback mode.
 
 The idea there is, since debugging a running game or even a client/server session is hard, that you just record the session without debugger, then play it back with the debugger.
+
+## Code coverage
+
+The debug builds also collect coverage data. With `make coverage`, you can create a html digest using lcov. Its intermediate files also
+are consumed by the "Coverage Gutters" extension that can display coverage directly in the source editor.

@@ -41,7 +41,8 @@ libtools_a_SOURCES = ${tools_extra} tools/tVersion.cpp tools/tVersion.h tTrueVer
 	tools/tArray.cpp tools/tArray.h \
 	tools/tCallback.cpp tools/tCallback.h tools/tCallbackString.h tools/tColor.cpp tools/tColor.h\
 	tools/tConfiguration.cpp tools/tConfiguration.h tools/tConsole.cpp tools/tConsole.h \
-	tools/tDefer.h tools/tDirectories.cpp tools/tDirectories.h tools/tError.cpp tools/tError.h tools/tEventQueue.cpp\
+	tools/tDefer.h tools/tFlagEnums.h\
+	tools/tDirectories.cpp tools/tDirectories.h tools/tError.cpp tools/tError.h tools/tEventQueue.cpp\
 	tools/tEventQueue.h tools/tHeap.cpp tools/tHeap.h tools/tInitExit.h tools/tLinkedList.cpp tools/tLinkedList.h\
 	tools/tList.h tools/tLocale.cpp tools/tLocale.h tools/tMath.h \
 	tools/tMemStack.cpp tools/tMemStack.h tools/tReferenceHolder.h \
@@ -327,12 +328,12 @@ unit_tests_CXXFLAGS =$(libtron_a_CXXFLAGS) -iquote @srcdir@/thirdparty/doctest
 unit_tests_LDADD=libtron.a libengine.a libnetwork.a libui.a librender.a libtools.a protobuf/libprotobuf.a thirdparty/mathexpr/libmathexpr.a ${extralibs}
 
 chat_prefix_test_SOURCES = test/chat_prefix_test.cpp
-chat_prefix_test_CXXFLAGS = $(libengine_a_CXXFLAGS)
+chat_prefix_test_CXXFLAGS = $(libtron_a_CXXFLAGS)
 chat_prefix_test_LDADD=libtron.a libengine.a libnetwork.a libui.a librender.a libtools.a protobuf/libprotobuf.a thirdparty/mathexpr/libmathexpr.a ${extralibs}
 
 # At least my AI seems to be stubborn about adding these nonsense patterns
 all-local:
-	if grep -n "CHECK(true)\|VERIFY(true)" ${srcdir}/test/*.cpp; then echo "ERROR: No tautological tests! Check grep output above."; false; fi
+	@if grep -n "CHECK(true)\|VERIFY(true)" ${srcdir}/test/*.cpp; then echo "ERROR: No tautological tests! Check grep output above."; false; fi
 
 endif # BUILDTESTS
 
