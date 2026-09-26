@@ -650,6 +650,7 @@ consider this branch legacy.
 - After `batch/test_builds.sh debug`, debug executables of the full game are `build/test_vs_server_debug/armagetronad-dedicated` and `build/test_vs_client_debug/armagetronad`.
   They need to run in their respective directories. The unit test executable are `build/test_vs_server_debug/src/unit_tests` and `build/test_vs_client_debug/src/unit_tests`.
 - Unit tests are in `src/test`, see `src/test/AGENTS.md` for details.
+- Always use the `batch/test_builds.sh` scripts or make your own build directories inside `build/`. **AVOID** building in the root source directory. 
 
 ### Coding Style
 
