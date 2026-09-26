@@ -96,8 +96,9 @@ The game features:
 
 ### Development Tools
 - **Version Control**: Git
-- **Testing**: Custom test harness
+- **Testing**: Custom test harness, doctest framework
 - **Documentation**: Doxygen
+- **Code Coverage**: lcov, genhtml, gcov (GCC), llvm-cov (Clang)
 
 ## Coding Conventions
 
@@ -250,6 +251,17 @@ class gGame : public nNOInitialisator<gGame> {
 **Development:**
 - `DEBUGLEVEL=0-5` - Debug verbosity (0=none, 5=maximum)
 - `CODELEVEL=0-4` - Code checking strictness (0=none, 4=strict)
+- `COVERAGE=1` or `COVERAGE=2` - Enable code coverage collection
+
+### Code Coverage
+The project supports code coverage analysis with both GCC and Clang compilers:
+- **GCC**: Uses standard gcov tool for coverage data generation
+- **Clang**: Uses llvm-cov gcov via `batch/llvm-gcov.sh` wrapper script that filters lcov-specific flags incompatible with llvm-cov
+- **Coverage Data**: `.gcno` and `.gcda` files are automatically cleaned before test runs
+- **Processing**: lcov and genhtml generate HTML reports in `coverage/` directory
+- **Targets**: `make coverage` runs tests and processes coverage, `make process_coverage` generates reports from existing data
+
+The `batch/llvm-gcov.sh` script enables seamless integration with lcov when using clang++.
 
 ### Platform Detection
 ```bash
@@ -305,6 +317,7 @@ Each subdirectory has its own `Makefile.am` defining:
 
 **Current Tests:**
 - `unit_tests` - Main test suite using doctest framework
+  - `CodingStyle_test.cpp` - Tests for coding style patterns and flag enum operations
   - `eAxis_test.cpp` - Axis class geometry tests
   - `eCoord_test.cpp` - Coordinate system tests
   - `eRectangle_test.cpp` - Rectangle geometry tests
@@ -312,17 +325,34 @@ Each subdirectory has its own `Makefile.am` defining:
   - `tCallback_test.cpp` - Callback system tests
   - `tCallbackString_test.cpp` - String callback tests
   - `tColor_test.cpp` - Color handling tests
+  - `tCommandLine_test.cpp` - Command line parsing tests
+  - `tConfiguration_test.cpp` - Configuration system tests
+  - `tConsole_test.cpp` - Console tests
+  - `tCrypt_test.cpp` - Cryptography tests
+  - `tDirectories_test.cpp` - Directory management tests
+  - `tEventQueue_test.cpp` - Event queue tests
   - `tException_test.cpp` - Exception system tests
   - `tHeap_test.cpp` - Heap memory tests
   - `tLinkedList_test.cpp` - Linked list tests
   - `tList_test.cpp` - List container tests
+  - `tLocale_test.cpp` - Localization tests
+  - `tMath_test.cpp` - Math utilities tests
   - `tMemStack_test.cpp` - Memory stack tests
   - `tRandomizer_test.cpp` - Randomization tests
+  - `tResourceManager_test.cpp` - Resource manager tests
   - `tRing_test.cpp` - Ring buffer tests
   - `tString_test.cpp` - String class tests
+  - `tSysTime_test.cpp` - System time tests
+  - `time_system_test.cpp` - Time system tests
   - `unit_tests_main.cpp` - Test harness entry point
+  - Additional engine and network tests (eGrid, ePath, ePlayer, eTeam, ePlayerNetID, nMessage, nNetObject, nNetwork, nServerInfo, nSocket)
 - `chat_prefix_test` - Legacy standalone test
   - `chat_prefix_test.cpp` - Tests XML parsing for chat prefixes
+
+**New Test Files:**
+- `src/test/CodingStyle.h` - Demonstrates ideal coding style with functional examples (cCounter, cReferenceCounted, smart pointers, enum flags)
+- `src/test/CodingStyle_test.cpp` - BDD-style tests for coding style components
+- `src/tools/tFlagEnums.h` - Template-based flag enum support enabling bitwise operations
 
 **Test Framework:**
 - **Primary**: doctest framework for most tests
