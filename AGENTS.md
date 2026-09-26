@@ -313,46 +313,9 @@ Each subdirectory has its own `Makefile.am` defining:
 
 ## Automated Tests
 
-**Test Location:** `src/test/`
+**Test Location:** `src/test/` (see `src/test/AGENTS.md` for details)
 
-**Current Tests:**
-- `unit_tests` - Main test suite using doctest framework
-  - `CodingStyle_test.cpp` - Tests for coding style patterns and flag enum operations
-  - `eAxis_test.cpp` - Axis class geometry tests
-  - `eCoord_test.cpp` - Coordinate system tests
-  - `eRectangle_test.cpp` - Rectangle geometry tests
-  - `tArray_test.cpp` - Dynamic array tests
-  - `tCallback_test.cpp` - Callback system tests
-  - `tCallbackString_test.cpp` - String callback tests
-  - `tColor_test.cpp` - Color handling tests
-  - `tCommandLine_test.cpp` - Command line parsing tests
-  - `tConfiguration_test.cpp` - Configuration system tests
-  - `tConsole_test.cpp` - Console tests
-  - `tCrypt_test.cpp` - Cryptography tests
-  - `tDirectories_test.cpp` - Directory management tests
-  - `tEventQueue_test.cpp` - Event queue tests
-  - `tException_test.cpp` - Exception system tests
-  - `tHeap_test.cpp` - Heap memory tests
-  - `tLinkedList_test.cpp` - Linked list tests
-  - `tList_test.cpp` - List container tests
-  - `tLocale_test.cpp` - Localization tests
-  - `tMath_test.cpp` - Math utilities tests
-  - `tMemStack_test.cpp` - Memory stack tests
-  - `tRandomizer_test.cpp` - Randomization tests
-  - `tResourceManager_test.cpp` - Resource manager tests
-  - `tRing_test.cpp` - Ring buffer tests
-  - `tString_test.cpp` - String class tests
-  - `tSysTime_test.cpp` - System time tests
-  - `time_system_test.cpp` - Time system tests
-  - `unit_tests_main.cpp` - Test harness entry point
-  - Additional engine and network tests (eGrid, ePath, ePlayer, eTeam, ePlayerNetID, nMessage, nNetObject, nNetwork, nServerInfo, nSocket)
-- `chat_prefix_test` - Legacy standalone test
-  - `chat_prefix_test.cpp` - Tests XML parsing for chat prefixes
-
-**New Test Files:**
-- `src/test/CodingStyle.h` - Demonstrates ideal coding style with functional examples (cCounter, cReferenceCounted, smart pointers, enum flags)
-- `src/test/CodingStyle_test.cpp` - BDD-style tests for coding style components
-- `src/tools/tFlagEnums.h` - Template-based flag enum support enabling bitwise operations
+The test suite includes unit tests using the doctest framework and a legacy standalone test. Details about individual test files, test organization, coding style examples, and test coverage are documented in `src/test/AGENTS.md`.
 
 **Test Framework:**
 - **Primary**: doctest framework for most tests
