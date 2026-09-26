@@ -144,7 +144,9 @@ install-first:
 	test -n "$(uninstall_location)" && test -x "$(uninstall_location)" && "$(uninstall_location)" || true
 
 distclean-local:
-	rm -f uninstall.sh batch/relocate.in universal_variable* extrapaths src/tUniversalVariables.h* src/nTrueVersion.h* .changetag
+	rm -rf uninstall.sh batch/relocate.in universal_variable* extrapaths src/tUniversalVariables.h* src/nTrueVersion.h* .changetag .coverage_available coverage
+	find . -name *.gcda -exec rm \{\} \;
+	find . -name *.gcno -exec rm \{\} \;
 
 # remove files left over by distcheck
 distcheck-clean:
