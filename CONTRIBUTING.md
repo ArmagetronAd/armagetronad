@@ -58,7 +58,7 @@ The coding style is provided as verbosely commented samples in `src/test/CodingS
 If it's not in there, it's not terribly important. Not everythin IN there is terribly important. Really important:
  - indentation: 4 spaces
  - curly braces on their own lines
- - in general, classes and methods are CamelCase, variables camelCase, member variables with a _ at the end
+ - in general, classes are CamelCase with a single lowercase letter prefix designating the library they are from, methods are CamelCase, variables camelCase, member variables with a _ at the end
 
 ## Submitting
 
