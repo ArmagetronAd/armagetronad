@@ -1,6 +1,9 @@
 #include "doctest.h"
 #include "tConfiguration.h"
 
+#include "MockConsole.h"
+#include "ConfItemTempSetter.h"
+
 // Tests for tConfiguration system
 // Purpose: Document the status quo behavior and detect regressions
 
@@ -98,6 +101,46 @@ TEST_SUITE("tConfiguration")
                 AND_THEN("It is not empty")
                 {
                     CHECK(100 < map.size()); // and in fact quite full, all the confitems in all the libraries self-register
+                }
+            }
+        }
+    }
+
+    // This test also demonstrates how you can change setting values during a test;
+    // just put a tConfItemTempValue<> on the stack, call SetValue, stop worrying
+    TEST_CASE("tConfItemTempValue basic functionality")
+    {
+        MockConsole con;
+
+        GIVEN("a configuration item temporary setter")
+        {
+            ConfItemTempValue<int> setter{"SERVER_PORT"};
+
+            THEN("it has a default value")
+            {
+                CHECK(setter.GetOldValue() == 4534);
+            }
+
+            WHEN("it gets modified")
+            {
+                setter.SetValue(4535);
+
+                THEN("the value changed")
+                {
+                    CHECK(setter.GetCurrentValue() == 4535);
+                }
+            }
+
+            WHEN("another setter modifies the value")
+            {
+                {
+                    ConfItemTempValue<int> otherSetter{"SERVER_PORT"};
+                    otherSetter.SetValue(4555);
+                    CHECK(otherSetter.GetCurrentValue() == 4555);
+                }
+                THEN("the value is reset afterwards")
+                {
+                    CHECK(setter.GetCurrentValue() == 4534);
                 }
             }
         }

@@ -50,7 +50,7 @@ automated tests; it is completely useless, of course.
 #include "tFlagEnums.h"
 
 // FYI classes get a single lowercase letter prefix indicating the library they are in: t for tools, e for enginge, n for network, g for game.
-// FYI we pick 'c' here for Coding Style.
+// FYI we pick 'c' here for Coding Style. Classes defined just for tests don't get a prefix; the choices t for Test or u for UnitTests.
 
 // A class that can count up
 class cCounter
