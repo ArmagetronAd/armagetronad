@@ -64,6 +64,7 @@ src/tUniversalVariables.h
 src/tUniversalVariables.h.in
 .dummy.dep
 src/doc/Doxyfile
+src/doc/doxygen
 *.html
 html.m4
 *.dep

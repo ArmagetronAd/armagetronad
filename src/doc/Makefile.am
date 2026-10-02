@@ -47,3 +47,9 @@ localtest: all Howto-Maps.txt ${docfiles}
 
 Howto-Maps.txt:
 	ln -s ${srcdir}/Content_Creation/$@ $@
+
+doxygen:
+	rm -rf doxygen/*
+	doxygen
+
+.PHONY: doxygen
