@@ -1,10 +1,12 @@
 #include "ConfItemTempSetter.h"
 
+#include "doctest.h"
+
 /// @brief initialize to modify confitem of given name, read old value
 /// @param name name of the confitem
 ConfItemTempValueBase::ConfItemTempValueBase(char const* name) : item_{Find(tString{name})}
 {
-    tASSERT(item_);
+    REQUIRE(item_);
 
     if (item_)
     {
