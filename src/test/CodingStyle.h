@@ -52,7 +52,9 @@ automated tests; it is completely useless, of course.
 // FYI classes get a single lowercase letter prefix indicating the library they are in: t for tools, e for enginge, n for network, g for game.
 // FYI we pick 'c' here for Coding Style. Classes defined just for tests don't get a prefix; the choices t for Test or u for UnitTests.
 
-// A class that can count up
+// FYI Use Doxygen style comments to document things, keep them brief and clear.
+
+/// class that can count up
 class cCounter
 {
     // FYI rule of zero: whenever possible, rely on auto-generated destructor and move/copy constructor/assignment.
@@ -67,7 +69,7 @@ public:
     void CountUp() noexcept { count_++; }
 
     /* FYI slightly longer functions should be defined out-of-line later in the header;
-    that gives you room to put their documenting comment after the declaration.
+    that gives you room to put a short documenting comment after the declaration.
     Consider putting "Try" at the start of a function name if the function can fail in
     regular operation and communicates success in the return value.
     */
@@ -78,10 +80,15 @@ private:
     // FYI member variables are camelCase (lower case start letter),
     // get an underscore at the end and, whenever possible, are initialized with brace initializers
 
-    // the counter
+    /// the counter
     int count_{};
 };
 
+// FYI On separate implementation and declaration, use Doxygen style comments on a function's implementation.
+// FYI On the declaration, still leave a short non-Doxygen comment.
+
+/// @brief Try to decrease the counter
+/// @return true if it could be decreased, false if it already was at 0 and nothing happened
 inline bool cCounter::TryCountDown() noexcept
 {
     // FYI if one of the branches is nontritival, use braces for both.
@@ -98,7 +105,7 @@ inline bool cCounter::TryCountDown() noexcept
 
 // FYI Reference counted objects are derived from tReferencable, which uses CRTP to cast itself to the correct leaf type
 
-// class of reference counted objects that counts how many of them are alive at every given time
+/// class of reference counted objects that counts how many of them are alive at every given time
 class cReferenceCounted : public tReferencable<cReferenceCounted>
 {
 public:
@@ -137,7 +144,7 @@ private:
     static cCounter s_numberOfObjects_;
 };
 
-// a derived class
+/// a derived class
 class cReferenceCountedDerived : public cReferenceCounted
 {
 public:
@@ -148,7 +155,7 @@ private:
     cReferenceCounted* DoClone() const noexcept override { return new cReferenceCountedDerived{*this}; }
 };
 
-// class that holds a refernce to cReferenceCounted, doing shallow copies
+/// class that holds a refernce to cReferenceCounted, doing shallow copies
 class cShallowCopy final
 {
 public:
@@ -174,7 +181,7 @@ private:
     tRefPtr<cReferenceCounted> target_{};
 };
 
-// class that holds a refernce to cReferenceCounted and makes deep copies on copy
+/// class that holds a refernce to cReferenceCounted and makes deep copies on copy
 class cDeepCopy final
 {
 public:
