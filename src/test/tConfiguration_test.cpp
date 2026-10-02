@@ -145,6 +145,18 @@ TEST_SUITE("tConfiguration")
             }
         }
     }
+
+    TEST_CASE("ConfItemTempValue expected fails" * doctest::should_fail())
+    {
+        GIVEN("a wrong confitem name")
+        {
+            auto const* const name = "NO_SUCH_ITEM";
+            THEN("creating value setter with it should fail")
+            {
+                ConfItemTempValue<int>{name};
+            }
+        }
+    }
 }
 
 // TODO: More comprehensive tConfiguration tests could be added, but the system
