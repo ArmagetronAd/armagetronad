@@ -64,8 +64,10 @@ public:
     // FYI method names are CamelCase. Default to 'constexpr const noexcept', remove as needed.
 
     // FYI trival functions where the function name is all the documentation one needs can stay comment-less
+
     constexpr int GetCount() const noexcept { return count_; }
     // FYI trivial implementations can also be single line.
+
     void CountUp() noexcept { count_++; }
 
     /* FYI slightly longer functions should be defined out-of-line later in the header;
@@ -109,6 +111,8 @@ inline bool cCounter::TryCountDown() noexcept
 class cReferenceCounted : public tReferencable<cReferenceCounted>
 {
 public:
+    /// @brief returns the number of currently existing objects of this type
+    /// @return the count
     static int GetNumberOfObjects() noexcept { return s_numberOfObjects_.GetCount(); }
 
     // FYI Rule of Three: Implement destructor, copy constructor and assignment operator together
@@ -119,6 +123,7 @@ public:
         std::ignore = success;
     } // FYI if this is a leaf class, mark it with 'final', then you can make the destructor non-virtual
 
+    // FYI standard functions (destructor, default constructor, copy/move constructor/assignment) need no doxygen docu, unless they do something unusual
     cReferenceCounted(cReferenceCounted const& that) noexcept
         : tReferencable<cReferenceCounted>(that)
     {
@@ -133,10 +138,14 @@ public:
     The virtual function itself is private or public and starts with `Do` for actions and `On` for reactions (event handlers).
     Rationale: If we change the function signature later, we don't have to adapt all implementations and call sites together, at once.
     */
-    // make a copy of this
+
+    /// @brief makes a copy of this
+    /// @return the copy
     cReferenceCounted* Clone() const noexcept { return DoClone(); }
 
 private:
+    /// @brief makes a copy of this
+    /// @return the copy
     virtual cReferenceCounted* DoClone() const noexcept { return new cReferenceCounted{*this}; }
 
 private:
@@ -229,13 +238,16 @@ public:
 
     // FYI methods that accept mutliple switches should define them in a
     // custom enum, indicating their flag nature by writing values as hex
-    enum LightTypes
+    enum LightTypes /// types of light
     {
-        None = 0x0,
-        HeadLights = 0x1,
-        TailLights = 0x2,
-        Underlighting = 0x4,
+        None = 0x0,          ///< no lights
+        HeadLights = 0x1,    ///< flag to activate headlights
+        TailLights = 0x2,    ///< flag to activate taillights
+        Underlighting = 0x4, ///< flag to activate fancy underlighting
     };
+
+    /// @brief activates the selected lights
+    /// @param lights lights to activate
     void SetLights(LightTypes lights) noexcept { /*... */ }
     // FYI NOT: void SetLights(bool head, bool tail, bool under) noexcept { /*... */ }
 private:
