@@ -2,8 +2,9 @@
 
 #include "doctest.h"
 
-/// @brief initialize to modify confitem of given name, read old value
+/// @brief Initializes to modify confitem of given name, reads old value.
 /// @param name name of the confitem
+/// @remark The value read at construction time is written back in the destructor.
 ConfItemTempValueBase::ConfItemTempValueBase(char const* name) : item_{Find(tString{name})}
 {
     REQUIRE(item_);
@@ -16,7 +17,7 @@ ConfItemTempValueBase::ConfItemTempValueBase(char const* name) : item_{Find(tStr
     }
 }
 
-/// @brief Restores old value.
+/// Restores old value.
 ConfItemTempValueBase::~ConfItemTempValueBase()
 {
     SetCurrentStringValue(oldValue_);

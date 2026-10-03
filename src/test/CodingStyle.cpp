@@ -30,5 +30,5 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "defs.h"
 
-/// @brief The number of test reference counted objects in exsitence
+/// @brief the number of test reference counted objects in exsitence
 cCounter cReferenceCounted::s_numberOfObjects_{};

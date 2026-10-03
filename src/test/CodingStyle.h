@@ -110,12 +110,11 @@ inline bool cCounter::TryCountDown() noexcept
 
 // FYI Reference counted objects are derived from tReferencable, which uses CRTP to cast itself to the correct leaf type
 
-/// class of reference counted objects that counts how many of them are alive at every given time
+/// Class of reference counted objects that counts how many of them are alive at every given time.
 class cReferenceCounted : public tReferencable<cReferenceCounted>
 {
 public:
-    /// @brief returns the number of currently existing objects of this type
-    /// @return the count
+    /// Returns the number of currently existing objects of this type.
     static int GetNumberOfObjects() noexcept { return s_numberOfObjects_.GetCount(); }
 
     // FYI Rule of Three: Implement destructor, copy constructor and assignment operator together
@@ -142,12 +141,12 @@ public:
     Rationale: If we change the function signature later, we don't have to adapt all implementations and call sites together, at once.
     */
 
-    /// @brief makes a copy of this
+    /// @brief Makes a copy of this.
     /// @return the copy
     cReferenceCounted* Clone() const noexcept { return DoClone(); }
 
 private:
-    /// @brief makes a copy of this
+    /// @brief Makes a copy of this.
     /// @return the copy
     /// @remark this is the private implementation derived classes are supposed to override
     virtual cReferenceCounted* DoClone() const noexcept { return new cReferenceCounted{*this}; }
@@ -157,7 +156,7 @@ private:
     static cCounter s_numberOfObjects_;
 };
 
-/// a derived class
+/// A derived class.
 class cReferenceCountedDerived : public cReferenceCounted
 {
 public:
@@ -165,10 +164,12 @@ public:
     ~cReferenceCountedDerived() noexcept override = default;
 
 private:
-    cReferenceCounted* DoClone() const noexcept override { return new cReferenceCountedDerived{*this}; }
+    // FYI documentation inherited from base, no need to redocument.
+    // FYI use covariant returns where appropriate.
+    cReferenceCountedDerived* DoClone() const noexcept override { return new cReferenceCountedDerived{*this}; }
 };
 
-/// class that holds a refernce to cReferenceCounted, doing shallow copies
+/// Class that holds a refernce to cReferenceCounted, doing shallow copies.
 class cShallowCopy final
 {
 public:
@@ -191,6 +192,7 @@ private:
         tControlledPTR<T> reference counting pointer like tRefPtr, but uses a tCheckedPTR as a base for extra safety.
     */
 
+    /// the wrapped object
     tRefPtr<cReferenceCounted> target_{};
 };
 
@@ -251,7 +253,7 @@ public:
         Underlighting = 0x4, ///< flag to activate fancy underlighting
     };
 
-    /// Activates the selected lights.
+    /// @brief Activates the selected lights.
     /// @param lights lights to activate
     void SetLights(LightTypes lights) noexcept { /*... */ }
     // FYI NOT: void SetLights(bool head, bool tail, bool under) noexcept { /*... */ }
