@@ -79,7 +79,7 @@ TEST_SUITE("ePlayerNetID")
         GIVEN("a player with default score")
         {
             auto player = tRefPtr<ePlayerNetID>::Make(0);
-            
+
             WHEN("checking initial score")
             {
                 THEN("Score() returns 0")
@@ -87,44 +87,44 @@ TEST_SUITE("ePlayerNetID")
                     CHECK(player->Score() == 0);
                 }
             }
-            
+
             WHEN("adding points to score")
             {
                 tOutput reasonWin, reasonLose;
                 player->AddScore(10, reasonWin, reasonLose);
-                
+
                 THEN("Score() returns the added points")
                 {
                     CHECK(player->Score() == 10);
                 }
-                
+
                 THEN("TotalScore() returns the total")
                 {
                     CHECK(player->TotalScore() >= 10);
                 }
             }
-            
+
             WHEN("adding negative points")
             {
                 tOutput reasonWin, reasonLose;
                 player->AddScore(-5, reasonWin, reasonLose);
-                
+
                 THEN("Score() returns the reduced score")
                 {
                     CHECK(player->Score() == -5);
                 }
             }
         }
-        
+
         GIVEN("multiple players with different scores")
         {
             auto player1 = tRefPtr<ePlayerNetID>::Make(0);
             auto player2 = tRefPtr<ePlayerNetID>::Make();
-            
+
             tOutput reasonWin, reasonLose;
             player1->AddScore(100, reasonWin, reasonLose);
             player2->AddScore(50, reasonWin, reasonLose);
-            
+
             WHEN("comparing scores")
             {
                 THEN("players have different scores")
@@ -133,13 +133,13 @@ TEST_SUITE("ePlayerNetID")
                 }
             }
         }
-        
+
         GIVEN("players for score difference tracking")
         {
             WHEN("resetting score differences")
             {
                 ePlayerNetID::ResetScoreDifferences();
-                
+
                 THEN("no crash occurs")
                 {
                     // TODO lastScore_ is private and we have no way of reading it
@@ -155,34 +155,34 @@ TEST_SUITE("ePlayerNetID")
         GIVEN("a newly created player")
         {
             auto player = tRefPtr<ePlayerNetID>::Make(0);
-            
+
             WHEN("checking default state")
             {
                 THEN("IsSpectating returns false")
                 {
                     CHECK_FALSE(player->IsSpectating());
                 }
-                
+
                 THEN("IsChatting returns false")
                 {
                     CHECK_FALSE(player->IsChatting());
                 }
-                
+
                 THEN("IsActive returns true")
                 {
                     CHECK(player->IsActive());
                 }
-                
+
                 THEN("IsSilenced returns false")
                 {
                     CHECK_FALSE(player->IsSilenced());
                 }
-                
+
                 THEN("IsSuspended returns false")
                 {
                     CHECK_FALSE(player->IsSuspended());
                 }
-                
+
                 THEN("CanRespawn returns current state")
                 {
                     // CanRespawn requires currentTeam, suspended_ == 0, and !spectating_
@@ -192,13 +192,13 @@ TEST_SUITE("ePlayerNetID")
                 }
             }
         }
-        
+
         GIVEN("a player in spectator mode")
         {
-            // Note: Spectator mode is controlled by the game, 
+            // Note: Spectator mode is controlled by the game,
             // we can only check the getter in default state
             auto player = tRefPtr<ePlayerNetID>::Make();
-            
+
             WHEN("checking spectator status")
             {
                 THEN("IsSpectating returns current state")
@@ -208,24 +208,24 @@ TEST_SUITE("ePlayerNetID")
                 }
             }
         }
-        
+
         GIVEN("a player in chat mode")
         {
             auto player = tRefPtr<ePlayerNetID>::Make();
-            
+
             WHEN("setting chat state")
             {
                 player->SetChatting(ePlayerNetID::ChatFlags_Chat, true);
-                
+
                 THEN("IsChatting returns true")
                 {
                     CHECK(player->IsChatting());
                 }
-                
+
                 WHEN("clearing chat state")
                 {
                     player->SetChatting(ePlayerNetID::ChatFlags_Chat, false);
-                    
+
                     THEN("IsChatting returns false")
                     {
                         CHECK_FALSE(player->IsChatting());
@@ -233,44 +233,44 @@ TEST_SUITE("ePlayerNetID")
                 }
             }
         }
-        
+
         GIVEN("a suspended player")
         {
             auto player = tRefPtr<ePlayerNetID>::Make();
-            
+
             WHEN("suspending player")
             {
                 player->Suspend(3);
-                
+
                 THEN("IsSuspended returns true")
                 {
                     CHECK(player->IsSuspended());
                 }
-                
+
                 THEN("CanRespawn returns false")
                 {
                     CHECK_FALSE(player->CanRespawn());
                 }
             }
         }
-        
+
         GIVEN("a silenced player")
         {
             auto player = tRefPtr<ePlayerNetID>::Make();
-            
+
             WHEN("silencing player")
             {
                 player->SetSilenced(true);
-                
+
                 THEN("IsSilenced returns true")
                 {
                     CHECK(player->IsSilenced());
                 }
-                
+
                 WHEN("unsilencing player")
                 {
                     player->SetSilenced(false);
-                    
+
                     THEN("IsSilenced returns false")
                     {
                         CHECK_FALSE(player->IsSilenced());
@@ -294,12 +294,12 @@ TEST_SUITE("ePlayerNetID")
                 }
             }
         }
-        
+
         GIVEN("players created")
         {
             auto player1 = tRefPtr<ePlayerNetID>::Make(0);
             auto player2 = tRefPtr<ePlayerNetID>::Make();
-            
+
             WHEN("checking player list")
             {
                 THEN("se_PlayerNetIDs contains created players")
@@ -311,16 +311,16 @@ TEST_SUITE("ePlayerNetID")
                 }
             }
         }
-        
+
         GIVEN("players with scores for ranking")
         {
             auto player2 = tRefPtr<ePlayerNetID>::Make();
             auto player1 = tRefPtr<ePlayerNetID>::Make(0);
-            
+
             tOutput reasonWin, reasonLose;
             player1->AddScore(100, reasonWin, reasonLose);
             player2->AddScore(50, reasonWin, reasonLose);
-            
+
             WHEN("sorting by score")
             {
                 // players start ordered as we put them
@@ -328,25 +328,25 @@ TEST_SUITE("ePlayerNetID")
                 CHECK(player2.get() == se_PlayerNetIDs(0));
 
                 ePlayerNetID::SortByScore();
-                
+
                 THEN("players are sorted")
                 {
                     CHECK(player1.get() == se_PlayerNetIDs(0));
                     CHECK(player2.get() == se_PlayerNetIDs(1));
                 }
             }
-            
+
             WHEN("getting ranking")
             {
                 tString ranking = ePlayerNetID::Ranking(5, false);
-                
+
                 THEN("ranking string is not empty")
                 {
                     CHECK(ranking.Len() >= 0);
                 }
             }
         }
-        
+
         GIVEN("ClearAll functionality")
         {
             WHEN("clearing all players")
@@ -372,87 +372,87 @@ TEST_SUITE("ePlayerNetID")
         GIVEN("a player with default name")
         {
             auto player = tRefPtr<ePlayerNetID>::Make(0);
-            
+
             WHEN("getting name")
             {
                 tString name;
                 player->GetName(name);
-                
+
                 THEN("name is not empty")
                 {
                     CHECK(name.Len() > 0);
                 }
             }
-            
+
             WHEN("getting colored name")
             {
                 tColoredString coloredName;
                 player->GetColoredName(coloredName);
-                
+
                 THEN("colored name is not empty")
                 {
                     CHECK(coloredName.Len() > 0);
                 }
             }
-            
+
             WHEN("getting user name")
             {
                 tString userName;
                 player->GetUserName(userName);
-                
+
                 THEN("user name is not empty")
                 {
                     CHECK(userName.Len() > 0);
                 }
             }
         }
-        
+
         GIVEN("name filtering")
         {
             WHEN("filtering a name with color codes")
             {
                 tString input("Player\x03\x03Name"); // With color codes
                 tString output = ePlayerNetID::FilterName(input);
-                
+
                 THEN("color codes are removed")
                 {
                     // Color code 0x03 should be removed
                     CHECK(output.Len() > 0);
                 }
             }
-            
+
             WHEN("filtering a name with special characters")
             {
                 tString input("Player\x01\x02\x03Name");
                 tString output = ePlayerNetID::FilterName(input);
-                
+
                 THEN("unprintables are removed")
                 {
                     CHECK(output.Len() > 0);
                 }
             }
-            
+
             WHEN("filtering a name with spaces")
             {
                 tString input("Player Name");
                 tString output = ePlayerNetID::FilterName(input);
-                
+
                 THEN("spaces are converted to underscores and case is normalized")
                 {
                     // FilterName converts spaces to underscores and lowercases
                     CHECK(output == tString("player_name"));
                 }
             }
-            
+
             WHEN("setting player name")
             {
                 auto player = tRefPtr<ePlayerNetID>::Make();
                 tString newName("TestPlayer");
                 player->SetName(newName);
-                
+
                 tString actualName;
                 player->GetName(actualName);
-                
+
                 THEN("name is set correctly")
                 {
                     CHECK(actualName == newName);
@@ -466,22 +466,22 @@ TEST_SUITE("ePlayerNetID")
         GIVEN("a newly created player")
         {
             auto player = tRefPtr<ePlayerNetID>::Make(0);
-            
+
             WHEN("getting creation time")
             {
                 nTimeAbsolute creationTime = player->GetTimeCreated();
-                
+
                 THEN("creation time is valid")
                 {
                     // Just verify it doesn't crash and returns a value
                     CHECK(creationTime >= doctest::Approx(0));
                 }
             }
-            
+
             WHEN("checking last activity")
             {
                 REAL lastActivity = player->LastActivity();
-                
+
                 THEN("last activity time is valid")
                 {
                     // Should be 0 or positive for newly created player
@@ -489,7 +489,7 @@ TEST_SUITE("ePlayerNetID")
                 }
             }
         }
-        
+
         GIVEN("a player with activity")
         {
             auto player = tRefPtr<ePlayerNetID>::Make();
@@ -527,7 +527,7 @@ TEST_SUITE("ePlayerNetID")
         GIVEN("a player")
         {
             auto player = tRefPtr<ePlayerNetID>::Make(0);
-            
+
             WHEN("checking initial chat state")
             {
                 THEN("IsChatting returns false")
@@ -535,17 +535,17 @@ TEST_SUITE("ePlayerNetID")
                     CHECK_FALSE(player->IsChatting());
                 }
             }
-            
+
             WHEN("setting chat state for console")
             {
                 player->SetChatting(ePlayerNetID::ChatFlags_Console, true);
-                
+
                 THEN("IsChatting returns true")
                 {
                     CHECK(player->IsChatting());
                 }
             }
-            
+
             WHEN("sending chat message")
             {
                 player->Chat(tString("Test message"));
@@ -560,57 +560,57 @@ TEST_SUITE("ePlayerNetID")
         GIVEN("a player")
         {
             auto player = tRefPtr<ePlayerNetID>::Make(0);
-            
+
             WHEN("getting access level")
             {
                 tAccessLevel level = player->GetAccessLevel();
-                
+
                 THEN("access level is valid")
                 {
                     // Default should be tAccessLevel_Program or similar
                     CHECK(level >= tAccessLevel_Program);
                 }
             }
-            
+
             WHEN("checking login status")
             {
                 bool isLoggedIn = player->IsLoggedIn();
-                
+
                 THEN("login status is reported")
                 {
                     // Player is not logged in by default
                     CHECK_FALSE(isLoggedIn);
                 }
             }
-            
+
             WHEN("setting logged in state")
             {
                 // this is the old remote admin system, it requires elevated base access rights
-                tCurrentAccessLevel elevator( tAccessLevel_Owner, true );
+                tCurrentAccessLevel elevator(tAccessLevel_Owner, true);
                 // the old system is no longer usable in default builds.
 
                 player->BeLoggedIn();
-                
+
                 THEN("IsLoggedIn returns true")
                 {
                     CHECK(player->IsLoggedIn());
                 }
-                
+
                 WHEN("setting logged out state")
                 {
                     player->BeNotLoggedIn();
-                    
+
                     THEN("IsLoggedIn returns false")
                     {
                         CHECK_FALSE(player->IsLoggedIn());
                     }
                 }
             }
-            
+
             WHEN("getting last access level")
             {
                 tAccessLevel lastLevel = player->GetLastAccessLevel();
-                
+
                 THEN("last access level is valid")
                 {
                     CHECK(lastLevel >= tAccessLevel_Program);

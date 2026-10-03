@@ -11,7 +11,7 @@ TEST_SUITE("tEventQueue")
         GIVEN("a default tEventQueue")
         {
             tEventQueue queue;
-            
+
             THEN("it can be constructed without crashing")
             {
             }

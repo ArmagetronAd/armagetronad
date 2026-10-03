@@ -39,7 +39,7 @@ TEST_SUITE("tResourceManager")
             {
                 CHECK(tResourceManager::resRepoServer.Len() > 5);
             }
-            
+
             THEN("resRepoClient exists")
             {
                 CHECK(tResourceManager::resRepoClient.Len() > 5);
@@ -57,19 +57,19 @@ TEST_SUITE("tResourceManager")
             {
                 std::ostringstream oss;
                 tResourceManager::Result result = tResourceManager::FetchURI(nullptr, oss);
-                
+
                 THEN("returns an error code")
                 {
                     // Should return an error for NULL URI
                     CHECK(result != tResourceManager::RESULT_Ok);
                 }
             }
-            
+
             WHEN("FetchURI is called with empty URI")
             {
                 std::ostringstream oss;
                 tResourceManager::Result result = tResourceManager::FetchURI("", oss);
-                
+
                 THEN("returns an error code")
                 {
                     // Should return an error for empty URI

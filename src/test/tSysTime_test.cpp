@@ -30,27 +30,27 @@ TEST_SUITE("tSysTime")
             {
                 double sysTime = tSysTimeFloat();
                 double realSysTime = tRealSysTimeFloat();
-                
+
                 // Time should be non-negative (assuming system time is set correctly)
                 CHECK(sysTime >= 0.0);
                 CHECK(realSysTime >= 0.0);
             }
-            
+
             THEN("time functions return finite values")
             {
                 double sysTime = tSysTimeFloat();
                 double realSysTime = tRealSysTimeFloat();
-                
+
                 // Time should be finite
                 CHECK(std::isfinite(sysTime));
                 CHECK(std::isfinite(realSysTime));
             }
-            
+
             THEN("time increases between calls")
             {
                 double time1 = tRealSysTimeFloat();
                 double time2 = tRealSysTimeFloat();
-                
+
                 // Time should generally increase (though this might occasionally fail
                 // if the calls happen in the same time quantum)
                 // We use a weak check here
@@ -67,7 +67,7 @@ TEST_SUITE("tSysTime")
             {
                 // Test with default delay
                 tAdvanceFrame();
-                
+
                 // Test with explicit delay
                 tAdvanceFrame(0);
                 tAdvanceFrame(1000); // 1000 microseconds = 1ms
@@ -84,7 +84,7 @@ TEST_SUITE("tSysTime")
                 // Test with small delay
                 tDelay(100); // 100 microseconds
             }
-            
+
             THEN("tDelayForce can be called without crashing")
             {
                 // Test with small delay

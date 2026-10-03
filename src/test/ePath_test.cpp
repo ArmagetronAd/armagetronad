@@ -11,12 +11,12 @@ TEST_SUITE("ePath")
         GIVEN("ePath system")
         {
             // we can only properly fill ePath with data from an eGrid
-            
+
             THEN("ePath can be constructed")
             {
                 ePath path;
             }
-            
+
             THEN("ePath can be destroyed")
             {
                 ePath* path = new ePath();
@@ -30,12 +30,12 @@ TEST_SUITE("ePath")
         GIVEN("an ePath instance")
         {
             ePath path;
-            
+
             THEN("Valid returns false for empty path")
             {
                 CHECK(path.Valid() == false);
             }
-            
+
             THEN("Clear can be called")
             {
                 path.Clear();
@@ -43,8 +43,8 @@ TEST_SUITE("ePath")
         }
     }
 
-// Note: RenderLast requires DEBUG to be defined           
-#ifdef DEBUG    
+// Note: RenderLast requires DEBUG to be defined
+#ifdef DEBUG
     TEST_CASE("ePath static methods")
     {
         GIVEN("ePath static methods")

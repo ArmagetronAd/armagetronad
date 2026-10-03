@@ -39,13 +39,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 namespace
 {
-static BOOLRETFUNC *pMoviePack;
+static BOOLRETFUNC* pMoviePack;
 }
 bool se_MoviePack()
 {
     return pMoviePack && (*pMoviePack)();
 }
-void se_RegisterMoviePackFunc(BOOLRETFUNC *pFunc)
+void se_RegisterMoviePackFunc(BOOLRETFUNC* pFunc)
 {
     pMoviePack = pFunc;
 }

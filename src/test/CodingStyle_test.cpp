@@ -36,7 +36,7 @@ TEST_SUITE("CodingStyle")
     // FYI TEST_SUITE and TEST_CASE use Title Case
     TEST_CASE("Counting Works")
     {
-       // FYI The BDD macros use regular sentence case, starting with lower case
+        // FYI The BDD macros use regular sentence case, starting with lower case
         GIVEN("a counter")
         {
             // FYI local varaibles are camelCase.
@@ -139,8 +139,8 @@ TEST_SUITE("CodingStyle")
 
                 cDeepCopy holder{std::move(referenceCounted)};
 
-                // FYI the moved-from pointer should be zero now, 
-                // but do not rely on that in production code, 
+                // FYI the moved-from pointer should be zero now,
+                // but do not rely on that in production code,
                 // it is not strictly guaranteed (moved-from must be destructible, that is all)
                 CHECK(!referenceCounted);
                 referenceCounted = nullptr;

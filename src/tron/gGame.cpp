@@ -108,7 +108,7 @@ namespace
 {
 void (*sg_StartupPlayerMenu)();
 }
-void sg_RegisterStartupPlayerMenu(VOIDFUNC *pFunc)
+void sg_RegisterStartupPlayerMenu(VOIDFUNC* pFunc)
 {
     sg_StartupPlayerMenu = pFunc;
 }

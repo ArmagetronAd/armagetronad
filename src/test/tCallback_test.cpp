@@ -6,7 +6,8 @@
 
 // Helper functions for testing
 bool testFlag = false;
-void testVoidFunc() {
+void testVoidFunc()
+{
     testFlag = true;
 }
 

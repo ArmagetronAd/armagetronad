@@ -51,14 +51,14 @@ TEST_SUITE("tConfiguration")
             }
         }
     }
-    
-    #if false // requires language initialization, would be language dependent
+
+#if false // requires language initialization, would be language dependent
     TEST_CASE("GetName works")
     {
         auto name = tCurrentAccessLevel::GetName(tAccessLevel::tAccessLevel_Admin);
         CHECK(name == "Administrator");
     }
-    #endif
+#endif
 
     TEST_CASE("tCasaclPreventer basic functionality")
     {

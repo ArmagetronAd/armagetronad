@@ -227,10 +227,10 @@ TEST_SUITE("tArray")
         {
             struct CustomType
             {
-            int value;
-            CustomType() : value(0) {}
-            CustomType(int v) : value(v) {}
-            bool operator==(const CustomType& other) const { return value == other.value; }
+                int value;
+                CustomType() : value(0) {}
+                CustomType(int v) : value(v) {}
+                bool operator==(const CustomType& other) const { return value == other.value; }
             };
 
             tArray<CustomType> arr;

@@ -104,7 +104,7 @@ private:
 static tString se_EscapeColors( const tString & s )
 {
     tString ret;
-    
+
     int size = s.Len();
     for ( int i = 0; i < size; i++ )
     {
@@ -417,7 +417,7 @@ bool eChatSpamTester::CheckSpam( REAL factor, tOutput const & message ) const
  */
 size_t CommonPrefix(const tString & a, const tString & b)
 {
-    size_t n = std::min( a.Len(), b.Len() );
+    size_t n = std::min(a.Len(), b.Len());
     for (size_t i = 0; i < n; i++)
         if (a[i] != b[i])
             return i;

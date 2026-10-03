@@ -53,18 +53,18 @@ public:
           alive_(true)
     {
     }
-    
+
     void Kill() override
     {
         alive_ = false;
         // Don't actually delete ourselves - we want to inspect the state
     }
-    
-    bool EdgeIsDangerous(const eWall *w, REAL, REAL) const override
+
+    bool EdgeIsDangerous(const eWall* w, REAL, REAL) const override
     {
         return w && w->Massive();
     }
-    
+
     bool Alive() const override { return alive_; }
 };
 
@@ -75,14 +75,17 @@ public:
     // reference counting pointer
     tJUST_CONTROLLED_PTR<eGrid> grid;
 
-    TestGridHelper() {
+    TestGridHelper()
+    {
         grid = new eGrid();
         grid->Create();
     }
-    ~TestGridHelper() {
+    ~TestGridHelper()
+    {
         grid->Clear();
     }
-    eFace* GetFace() {
+    eFace* GetFace()
+    {
         eCoord startPos(20, 100);
         return grid->FindSurroundingFace(startPos);
     }
@@ -95,70 +98,70 @@ TEST_SUITE("eGameObject")
         GIVEN("A test game object with a minimal grid")
         {
             TestGridHelper gridHelper;
-            eFace *face = gridHelper.GetFace();
+            eFace* face = gridHelper.GetFace();
             REQUIRE(face != nullptr);
-            
+
             eCoord startPos(20, 100);
             eCoord direction(1, 0);
-            
+
             TestGameObject obj(gridHelper.grid, startPos, direction, face);
-            
+
             THEN("The object starts alive")
             {
                 CHECK(obj.Alive() == true);
             }
-            
+
             WHEN("The object passes through a harmless wall")
             {
                 MockHarmlessWall harmlessWall;
                 obj.PassEdge(&harmlessWall, 1.0, 0.5, 1);
-                
+
                 THEN("The object remains alive")
                 {
                     CHECK(obj.Alive() == true);
                 }
             }
-            
+
             WHEN("The object passes through a deadly wall")
             {
                 TestGameObject obj2(gridHelper.grid, startPos, direction, face);
-                
+
                 MockDeadlyWall deadlyWall;
                 obj2.PassEdge(&deadlyWall, 1.0, 0.5, 1);
-                
+
                 THEN("The object is killed")
                 {
                     CHECK(obj2.Alive() == false);
                 }
             }
         }
-        
+
         GIVEN("A test game object with EdgeIsDangerous checking")
         {
             TestGridHelper gridHelper;
-            eFace *face = gridHelper.GetFace();
+            eFace* face = gridHelper.GetFace();
             REQUIRE(face != nullptr);
-            
+
             eCoord startPos(20, 100);
             eCoord direction(1, 0);
-            
+
             TestGameObject obj(gridHelper.grid, startPos, direction, face);
-            
+
             WHEN("Checking if walls are dangerous")
             {
                 MockHarmlessWall harmlessWall;
                 MockDeadlyWall deadlyWall;
-                
+
                 THEN("Harmless wall is not dangerous")
                 {
                     CHECK(obj.EdgeIsDangerous(&harmlessWall, 1.0, 0.5) == false);
                 }
-                
+
                 THEN("Deadly wall is dangerous")
                 {
                     CHECK(obj.EdgeIsDangerous(&deadlyWall, 1.0, 0.5) == true);
                 }
-                
+
                 THEN("NULL wall is not dangerous")
                 {
                     CHECK(obj.EdgeIsDangerous(nullptr, 1.0, 0.5) == false);
@@ -166,29 +169,29 @@ TEST_SUITE("eGameObject")
             }
         }
     }
-    
+
     TEST_CASE("Game object default behavior with walls")
     {
         GIVEN("A standard eReferencableGameObject (using default EdgeIsDangerous)")
         {
             TestGridHelper gridHelper;
-            eFace *face = gridHelper.GetFace();
+            eFace* face = gridHelper.GetFace();
             REQUIRE(face != nullptr);
-            
+
             eCoord startPos(20, 100);
             eCoord direction(1, 0);
-            
+
             eReferencableGameObject obj(gridHelper.grid, startPos, direction, face, false);
-            
+
             WHEN("Checking default EdgeIsDangerous behavior")
             {
                 MockDeadlyWall deadlyWall;
-                
+
                 THEN("Default EdgeIsDangerous returns true for non-null walls")
                 {
                     CHECK(obj.EdgeIsDangerous(&deadlyWall, 1.0, 0.5) == true);
                 }
-                
+
                 THEN("Default EdgeIsDangerous returns false for null walls")
                 {
                     CHECK(obj.EdgeIsDangerous(nullptr, 1.0, 0.5) == false);

@@ -133,7 +133,7 @@ public:
     void NetFilter();                           //!< filters strings from the net for strange things like newlines
 
 private:
-    int  Size() const = delete; // disable confusing function inherited from base; here, it would returns the reserved memory size. On trunk, it is the true string length.
+    int Size() const = delete; // disable confusing function inherited from base; here, it would returns the reserved memory size. On trunk, it is the true string length.
 };
 
 //! proxy class for inserting color markings

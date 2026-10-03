@@ -311,12 +311,12 @@ public:
     tJUST_CONTROLLED_PTR(T *x):target(x){AddRef();}
     tJUST_CONTROLLED_PTR(const tCheckedPTR<T> &x):target(x.operator->()){AddRef();}
     tJUST_CONTROLLED_PTR(const tJUST_CONTROLLED_PTR<T> &x):target(x.target){AddRef();}
-    template<typename S>
+    template <typename S>
     tJUST_CONTROLLED_PTR(tJUST_CONTROLLED_PTR<S>&& x) : target(x.Drop()) {}
     tJUST_CONTROLLED_PTR():target(NULL){}
 
     // like std::make_shared, directly create a filled smart pointer
-    template<typename... ARGS>
+    template <typename... ARGS>
     static tJUST_CONTROLLED_PTR<T> Make(ARGS&&... args) noexcept
     {
         return new T(std::forward<ARGS>(args)...);
@@ -336,8 +336,9 @@ public:
         return *this;
     }
 
-    template<typename S>
-    tJUST_CONTROLLED_PTR<T> &operator=(tJUST_CONTROLLED_PTR<S> &&x){
+    template <typename S>
+    tJUST_CONTROLLED_PTR<T>& operator=(tJUST_CONTROLLED_PTR<S>&& x)
+    {
         tASSERT(&x != this); // self move assignment is illegal
         Release();
 
