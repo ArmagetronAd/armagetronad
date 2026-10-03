@@ -48,7 +48,7 @@ localtest: all Howto-Maps.txt ${docfiles}
 Howto-Maps.txt:
 	ln -s ${srcdir}/Content_Creation/$@ $@
 
-doxygen:
+doxygen: Doxyfile
 	rm -rf doxygen/*
 	doxygen
 
