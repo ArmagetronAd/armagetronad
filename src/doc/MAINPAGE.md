@@ -27,6 +27,5 @@
 
 ## Experimentation Zone
 
-Math formulas: \f$c \over b\f$ X
-
+Math formulas: $c \over b$
 $$a \over b $$
