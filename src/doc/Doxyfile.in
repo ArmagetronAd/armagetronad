@@ -407,7 +407,7 @@ INPUT                  = @top_srcdir@
 # and *.h) to filter out the source-files in the directories. If left 
 # blank the following patterns are tested: 
 # *.c *.cc *.cxx *.cpp *.c++ *.java *.ii *.ixx *.ipp *.i++ *.inl *.h *.hh *.hxx *.hpp 
-# *.h++ *.idl *.odl *.cs *.php *.php3 *.inc *.m *.mm
+# *.h++ *.idl *.odl *.cs *.php *.php3 *.inc *.m *.mm *.md
 
 FILE_PATTERNS          = 
 
@@ -1073,6 +1073,10 @@ GENERATE_LEGEND        = YES
 # the various graphs.
 
 DOT_CLEANUP            = YES
+
+# enable math in HTML output
+
+USE_MATHJAX            = YES
 
 #---------------------------------------------------------------------------
 # Configuration::additions related to the search engine   
