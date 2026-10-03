@@ -1,4 +1,4 @@
-#include "ConfItemTempSetter.h"
+#include "ConfItemTempValue.h"
 
 #include "doctest.h"
 
@@ -16,14 +16,12 @@ ConfItemTempValueBase::ConfItemTempValueBase(char const* name) : item_{Find(tStr
     }
 }
 
-/// @brief restores old value
+/// @brief Restores old value.
 ConfItemTempValueBase::~ConfItemTempValueBase()
 {
     SetCurrentStringValue(oldValue_);
 }
 
-/// @brief returns the current value
-/// @return the current value as string
 std::string ConfItemTempValueBase::GetCurrentStringValue() const noexcept
 {
     if (item_)
@@ -36,8 +34,6 @@ std::string ConfItemTempValueBase::GetCurrentStringValue() const noexcept
     return {};
 }
 
-/// @brief sets the value
-/// @param value the value to set as string
 void ConfItemTempValueBase::SetCurrentStringValue(std::string const& value) noexcept
 {
     if (item_)
@@ -47,7 +43,7 @@ void ConfItemTempValueBase::SetCurrentStringValue(std::string const& value) noex
     }
 }
 
-/// @brief finds the configuration item to modify
+/// @brief Finds the configuration item to modify.
 /// @param name name of the config item
 /// @return pointer to the config item, or nullptr if not found
 tConfItemBase* ConfItemTempValueBase::Find(tString const& name)

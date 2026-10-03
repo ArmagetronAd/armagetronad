@@ -53,8 +53,12 @@ automated tests; it is completely useless, of course.
 // FYI we pick 'c' here for Coding Style. Classes defined just for tests don't get a prefix; the choices t for Test or u for UnitTests.
 
 // FYI Use Doxygen style comments to document things, keep them brief and clear.
+// Omit trivial documentation. It is clear **what** `eGameObject::MoveTo(eCoord const &targetPosition)` does.
+// Just document any edge cases and the non-obvious stuff. How do we move? Do we teleport, or do we collide with things on the way?
+// What happens if the target position is outside of the grid? Now are collisions or errors reported? Use @remark for that.
+// Avoid keyword spam; use @brief only if there are other @ commands.
 
-/// class that can count up
+/// Class that can count up (and down).
 class cCounter
 {
     // FYI rule of zero: whenever possible, rely on auto-generated destructor and move/copy constructor/assignment.
@@ -89,8 +93,7 @@ private:
 // FYI On separate implementation and declaration, use Doxygen style comments on a function's implementation.
 // FYI On the declaration, still leave a short non-Doxygen comment.
 
-/// @brief Try to decrease the counter
-/// @return true if it could be decreased, false if it already was at 0 and nothing happened
+/// @return True if the counter could be decreased, false if it already was at 0 and nothing happened.
 inline bool cCounter::TryCountDown() noexcept
 {
     // FYI if one of the branches is nontritival, use braces for both.
@@ -146,6 +149,7 @@ public:
 private:
     /// @brief makes a copy of this
     /// @return the copy
+    /// @remark this is the private implementation derived classes are supposed to override
     virtual cReferenceCounted* DoClone() const noexcept { return new cReferenceCounted{*this}; }
 
 private:
@@ -190,16 +194,16 @@ private:
     tRefPtr<cReferenceCounted> target_{};
 };
 
-/// class that holds a refernce to cReferenceCounted and makes deep copies on copy
+/// Class that holds a refernce to cReferenceCounted and makes deep copies on copy.
 class cDeepCopy final
 {
 public:
-    cReferenceCounted* GetTarget() const noexcept { return target_; }
-    void SetTarget(cReferenceCounted* target) noexcept { target_ = target; }
+    cReferenceCounted* GetTarget() const noexcept { return target_; }        //!< Returns the referenced object. @remark May return nullptr.
+    void SetTarget(cReferenceCounted* target) noexcept { target_ = target; } //!< Sets a new target.
 
-    explicit cDeepCopy(cReferenceCounted* target) noexcept : target_{target} {}
+    explicit cDeepCopy(cReferenceCounted* target) noexcept : target_{target} {} //!< Constructs with target.
     template<typename T>
-    explicit cDeepCopy(tRefPtr<T>&& target) noexcept : target_{std::move(target)} {}
+    explicit cDeepCopy(tRefPtr<T>&& target) noexcept : target_{std::move(target)} {}//!< Constructs with target from smart pointer.
 
     // FYI Rule of Five: default would be shallow copy, avoid that
     ~cDeepCopy() noexcept = default; // FYI except the destructor, the default is fine
@@ -218,7 +222,7 @@ public:
     // by making copy (and optionally move) operations explicitly deleted.
 
 private:
-    // helper function: Clone from other
+    //! Helper function: Clone from other
     static cReferenceCounted* CloneFrom(cDeepCopy const& that)
     {
         if (auto const target = that.GetTarget())
@@ -227,6 +231,7 @@ private:
             return nullptr; // FYI prefer nullptr over NULL
     }
 
+    /// the referenced object
     tRefPtr<cReferenceCounted> target_{};
 };
 
@@ -246,14 +251,14 @@ public:
         Underlighting = 0x4, ///< flag to activate fancy underlighting
     };
 
-    /// @brief activates the selected lights
+    /// Activates the selected lights.
     /// @param lights lights to activate
     void SetLights(LightTypes lights) noexcept { /*... */ }
     // FYI NOT: void SetLights(bool head, bool tail, bool under) noexcept { /*... */ }
 private:
 };
 
-// FYI to make enums usable as flag enums with bitwise operators, use this macro at the top of a header file
+// FYI to make enums usable as flag enums with bitwise operators, use this macro as soon as possible after the enum declaration.
 MARK_FLAG_ENUM(cRandomStuff::LightTypes);
 
 #endif // ArmageTron_CODING_STYLE_H

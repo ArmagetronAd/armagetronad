@@ -2,7 +2,7 @@
 #include "tConfiguration.h"
 
 #include "MockConsole.h"
-#include "ConfItemTempSetter.h"
+#include "ConfItemTempValue.h"
 
 // Tests for tConfiguration system
 // Purpose: Document the status quo behavior and detect regressions

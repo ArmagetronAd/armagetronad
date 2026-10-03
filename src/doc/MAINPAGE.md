@@ -25,3 +25,8 @@
 ## More to Read
  - [How to Contribute](../../CONTRIBUTING.md)
 
+## Experimentation Zone
+
+Math formulas: \f$c \over b\f$ X
+
+$$a \over b $$

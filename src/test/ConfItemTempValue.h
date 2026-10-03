@@ -30,18 +30,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "tConfiguration.h"
 
-/// @brief Class to temporarily set a configuration item to a specific value (stringly typed base)
+/// Class to temporarily set a configuration item to a specific value (stringly typed base).
 class ConfItemTempValueBase
 {
 public:
     explicit ConfItemTempValueBase(char const* name); // set up modification of config item 'name', store old value
     ~ConfItemTempValueBase();                         // restore old value
 
-    /// @brief returns the old value
-    /// @return the old value as string
-    std::string const& GetOldStringValue() const noexcept { return oldValue_; }
-    std::string GetCurrentStringValue() const noexcept;
-    void SetCurrentStringValue(std::string const& value) noexcept;
+    std::string const& GetOldStringValue() const noexcept { return oldValue_; } ///< Returns the old value as string.
+    std::string GetCurrentStringValue() const noexcept;                         ///< Returns the current value as string.
+    void SetCurrentStringValue(std::string const& value) noexcept;              ///< Sets the current value as string.
 
 private:
     tConfItemBase* item_;  ///< pointer to confitem to modify
@@ -53,15 +51,14 @@ private:
     ConfItemTempValueBase& operator=(ConfItemTempValueBase const&) = delete;
 };
 
-/// @brief Class to temporarily set a configuration item to a specific value
+/// Class to temporarily set a configuration item to a specific value.
 template <typename T>
 class ConfItemTempValue : ConfItemTempValueBase
 {
 public:
     using ConfItemTempValueBase::ConfItemTempValueBase;
 
-    /// @brief temporarily sets a new value
-    /// @tparam T type of value
+    /// @brief Remporarily sets a new value.
     /// @param value value to set
     void SetValue(T const& value)
     {
@@ -70,15 +67,13 @@ public:
         SetCurrentStringValue(os.str());
     }
 
-    /// @brief returns the old value
-    /// @return the old value
+    /// Returns the old value.
     T GetOldValue() const noexcept
     {
         return DoRead(GetOldStringValue());
     }
 
-    /// @brief returns the current value
-    /// @return the current value
+    /// Returns the current value.
     T GetCurrentValue() const noexcept
     {
         return DoRead(GetCurrentStringValue());

@@ -32,27 +32,3 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 /// @brief The number of test reference counted objects in exsitence
 cCounter cReferenceCounted::s_numberOfObjects_{};
-
-// FYI you can put doxygen structured commands at the end of .cpp files if, for
-// one reason or another, you don't want them near the definitions.
-// Disadvantage: Code editors usually can't pick them up and they
-// do not appear in autocomplete. And they're harder to write. Advice: Stick to
-// documentation next to the definition.
-
-// *** cCounter ***
-
-/// @fn cCounter::GetCount()
-/// @brief returns the current counter value
-/// @return the value
-
-/// @fn cCounter::CountUp()
-/// @brief increase the counter
-
-// *** cDeepCopy ***
-
-/// @fn cDeepCopy::GetTarget()
-/// @brief returns the wrapped object
-
-/// @fn cDeepCopy::cDeepCopy(cDeepCopy const &that)
-/// @brief copy constructor
-/// @param that the source of the copy

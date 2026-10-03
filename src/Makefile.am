@@ -173,7 +173,7 @@ armagetronad_main_master_LDADD=libnetwork.a libtools.a
 if BUILDTESTS
 unit_tests_SOURCES = thirdparty/doctest/doctest.h \
 	test/MockConsole.h test/Statics.h \
-	test/ConfItemTempSetter.h test/ConfItemTempSetter.cpp \
+	test/ConfItemTempValue.h test/ConfItemTempValue.cpp \
 	test/eCoord_test.cpp test/eGameObject_test.cpp test/tArray_test.cpp \
 	test/tList_test.cpp test/tString_test.cpp test/tLinkedList_test.cpp \
 	test/tRing_test.cpp test/tHeap_test.cpp test/tMemStack_test.cpp \
