@@ -39,6 +39,9 @@ PointerAlignment: Left
 AllowShortFunctionsOnASingleLine: true
 AllowShortBlocksOnASingleLine: true
 
+# not yet suppored widely enough
+# AllowShortRecordOnASingleLine: SRS_EmptyAndAttached
+
 # Alignment options
 
 # leave to individual choice for now
