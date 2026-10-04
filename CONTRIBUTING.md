@@ -52,7 +52,7 @@ Ten crashfixes in one submission are fine. Fixing all translation errors you can
 ## Coding Style
 
 Don't worry too much about formatting. We have `.editorconfig` and `.clang-format` files that a decent code editor will respect, and it is
-reasonably easy to apply `clang-format` to all recent changes.
+reasonably easy to apply `clang-format` to all recent changes (check out `batch\git_clang_format.sh`).
 
 The coding style is provided as verbosely commented samples in `src/test/CodingStyle*`. 
 If it's not in there, it's not terribly important. Not everything IN there is terribly important. Really important:
