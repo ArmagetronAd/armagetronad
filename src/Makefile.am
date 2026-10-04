@@ -191,6 +191,7 @@ unit_tests_SOURCES = thirdparty/doctest/doctest.h \
 	test/tConsole_test.cpp \
 	test/tLocale_test.cpp \
 	test/tResourceManager_test.cpp \
+	test/nPriorizing_test.cpp \
 	test/network_integration_test.cpp test/engine_integration_test.cpp test/configuration_integration_test.cpp \
 	test/geometry_system_test.cpp test/memory_management_test.cpp test/time_system_test.cpp \
 	test/performance_test.cpp \
