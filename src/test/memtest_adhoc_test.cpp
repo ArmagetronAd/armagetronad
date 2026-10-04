@@ -2,6 +2,7 @@
 // This file contains doctest-based tests for memory manager functionality
 // Original: src/tools/memtest.cpp
 
+#include <cmath>  // for fabs
 #include "tMemManager.h"
 #include "tLinkedList.h"
 #include "tSysTime.h"
@@ -21,8 +22,6 @@ TEST_CASE("Memory: Linked List Node Creation") {
         test3() : tListItem<test3>() {}
     };
     
-    test3 *anchor = NULL;
-    
     // WHEN: create test3 instances
     test3 a, b, c, d;
     
@@ -30,7 +29,6 @@ TEST_CASE("Memory: Linked List Node Creation") {
     // In the original, test3 constructor takes ::anchor
     // We can't easily verify linking without access to private members
     // But if we get here without crashing, construction succeeded
-    SUCCEED("test3 instances created successfully");
 }
 
 // ============================================================================
@@ -115,7 +113,6 @@ TEST_CASE("Memory: Allocation and Deallocation") {
     }
     
     // THEN: no leaks (implicit - if we get here, no crashes)
-    SUCCEED("Memory allocation and deallocation completed without crashes");
 }
 
 // ============================================================================
@@ -140,7 +137,7 @@ TEST_CASE("Memory: MinMax Calculation A") {
     
     // WHEN: calculate min/max with method A
     // Simplified version - test with single iteration
-    int i, j;
+    int j;
     float max = -10000.0f;
     float min = 10000.0f;
     
@@ -149,14 +146,13 @@ TEST_CASE("Memory: MinMax Calculation A") {
         float ymi = min - y;
         float yma = y - max;
         
-        min -= (ymi + fabs(ymi)) * .5f;
-        max += (yma + fabs(yma)) * .5f;
+        min -= (ymi + std::fabs(ymi)) * .5f;
+        max += (yma + std::fabs(yma)) * .5f;
     }
     
     // THEN: correct results (verify against expected values)
     // With the initialization above, we can calculate expected min/max
     // But for now, just verify the calculation doesn't crash
-    SUCCEED("MinMax calculation A completed without crashes");
 }
 
 // ============================================================================
@@ -180,7 +176,7 @@ TEST_CASE("Memory: MinMax Calculation B") {
     }
     
     // WHEN: calculate min/max with method B (ternary operators)
-    int i, j;
+    int j;
     float max = -10000.0f;
     float min = 10000.0f;
     
@@ -195,6 +191,7 @@ TEST_CASE("Memory: MinMax Calculation B") {
     float expected_min = 75.0f; // min(100, 150, 75) = 75
     float expected_max = 150.0f; // max(100, 150, 75) = 150
     
-    CHECK(min == Approx(expected_min).epsilon(0.01f));
-    CHECK(max == Approx(expected_max).epsilon(0.01f));
+    // Use doctest::Approx since Approx alone is not in scope
+    CHECK(min == doctest::Approx(expected_min).epsilon(0.01f));
+    CHECK(max == doctest::Approx(expected_max).epsilon(0.01f));
 }
