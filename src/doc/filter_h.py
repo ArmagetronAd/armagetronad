@@ -29,23 +29,29 @@ def get_topic(filepath):
     else:
         return 'Misc'
 
+def is_class_line(line):
+    """Check if line matches class*, struct*, template*
 
-def is_special_line(line):
-    """Check if line matches class*, struct*, template*, ///*, or //!* patterns.
-    
-    This matches the bash case statement which checks the raw line (not stripped).
+    These are the cases we want to decorate with @ingroup
     """
     return (line.startswith('class') or
             line.startswith('struct') or
-            line.startswith('template') or
+            line.startswith('template'))
+
+def is_special_line(line):
+    """Check if line matches class*, struct*, template*, ///*, or //!* patterns.
+
+    Our added commends need to go BEFORE those lines.  
+    """
+    return (is_class_line(line) or
             line.startswith('///') or
             line.startswith('//!'))
 
 
 def filter_add_topic(input_file, topic):
     """Add @ingroup comments before class/struct/template definitions."""
-    decorate = True
     output_lines = []
+    pending_lines = []
     
     with open(input_file, 'r') as f:
         for line in f:
@@ -58,15 +64,30 @@ def filter_add_topic(input_file, topic):
                 output_lines.append(line_stripped)
             elif is_special_line(line_stripped):
                 # class, struct, template, or doxygen comment (at start of line)
-                if decorate:
+                # put them into pending_lines until we know what's up
+                if is_class_line(line_stripped):
+                    # it is a class, decorate and print stored
                     output_lines.append(f'/// @ingroup {topic}')
-                    decorate = False
-                output_lines.append(line_stripped)
+
+                    # turn first pending line into brief
+                    if pending_lines:
+                        if len(pending_lines[0]) > 3 and pending_lines[0].find("@brief") < 0:
+                            pending_lines[0] = "/// @brief" + pending_lines[0][3:]
+
+                    output_lines = output_lines + pending_lines
+                    pending_lines = []
+                    output_lines.append(line_stripped)
+                else:
+                    # store line for later
+                    pending_lines.append(line_stripped)
             else:
-                # Any other line - enable decoration for next matching line
-                decorate = True
+                # Any other line - flush pending lines
+                output_lines = output_lines + pending_lines
+                pending_lines = []
                 output_lines.append(line_stripped)
     
+
+    output_lines = output_lines + pending_lines
     return '\n'.join(output_lines)
 
 
