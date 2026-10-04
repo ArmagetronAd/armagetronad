@@ -33,9 +33,4 @@
 ## More to Read
  - [How to Contribute](../../CONTRIBUTING.md)
  - [Main README.md](assemble/MAIN_README.md)
- 
-## Experimentation Zone
-
-Math formulas: $c \over b$
-$$a \over b $$
 
