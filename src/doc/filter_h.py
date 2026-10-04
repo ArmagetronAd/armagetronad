@@ -74,7 +74,7 @@ def filter_add_topic(input_file, topic):
                         if len(pending_lines[0]) > 3 and pending_lines[0].find("@brief") < 0:
                             pending_lines[0] = "/// @brief" + pending_lines[0][3:]
 
-                    output_lines = output_lines + pending_lines
+                    output_lines.extend(pending_lines)
                     pending_lines = []
                     output_lines.append(line_stripped)
                 else:
@@ -82,12 +82,12 @@ def filter_add_topic(input_file, topic):
                     pending_lines.append(line_stripped)
             else:
                 # Any other line - flush pending lines
-                output_lines = output_lines + pending_lines
+                output_lines.extend(pending_lines)
                 pending_lines = []
                 output_lines.append(line_stripped)
     
 
-    output_lines = output_lines + pending_lines
+    output_lines.extend(pending_lines)
     return '\n'.join(output_lines)
 
 
