@@ -58,6 +58,13 @@ automated tests; it is completely useless, of course.
 // What happens if the target position is outside of the grid? Now are collisions or errors reported? Use @remark for that.
 // Avoid keyword spam; use @brief only if there are other @ commands.
 
+//  FYI If multiple classes form a unit and are only useful together, put them in a namespace or create a subgroup like so:
+/// @ingroup Tests
+/// @addtogroup CodingStyle Coding Style
+/// @brief Classes demonstrating our coding style
+/// @{
+//  FYI don't forget to close the group later.
+
 /// Class that can count up (and down).
 class cCounter
 {
@@ -89,24 +96,6 @@ private:
     /// the counter
     int count_{};
 };
-
-// FYI On separate implementation and declaration, use Doxygen style comments on a function's implementation.
-// FYI On the declaration, still leave a short non-Doxygen comment.
-
-/// @return True if the counter could be decreased, false if it already was at 0 and nothing happened.
-inline bool cCounter::TryCountDown() noexcept
-{
-    // FYI if one of the branches is nontritival, use braces for both.
-    if (count_ > 0)
-    {
-        --count_;
-        return true;
-    }
-    else // FYI for longer branches, consider adding a comment what the condition is now (here: "// count_ <= 0")
-    {
-        return false;
-    }
-}
 
 // FYI Reference counted objects are derived from tReferencable, which uses CRTP to cast itself to the correct leaf type
 
@@ -260,7 +249,27 @@ public:
 private:
 };
 
+/// @}
+
 // FYI to make enums usable as flag enums with bitwise operators, use this macro as soon as possible after the enum declaration.
 MARK_FLAG_ENUM(cRandomStuff::LightTypes);
+
+// FYI On separate implementation and declaration, use Doxygen style comments on a function's implementation.
+// FYI On the declaration, still leave a short non-Doxygen comment.
+
+/// @return True if the counter could be decreased, false if it already was at 0 and nothing happened.
+inline bool cCounter::TryCountDown() noexcept
+{
+    // FYI if one of the branches is nontritival, use braces for both.
+    if (count_ > 0)
+    {
+        --count_;
+        return true;
+    }
+    else // FYI for longer branches, consider adding a comment what the condition is now (here: "// count_ <= 0")
+    {
+        return false;
+    }
+}
 
 #endif // ArmageTron_CODING_STYLE_H
