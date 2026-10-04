@@ -146,7 +146,7 @@ private:
 };
 
 /// A derived class.
-class cReferenceCountedDerived : public cReferenceCounted
+class cReferenceCountedDerived final : public cReferenceCounted
 {
 public:
     // FYI always use `override` on overridden virtual functions, that way we notice when the base definition changes
@@ -271,5 +271,20 @@ inline bool cCounter::TryCountDown() noexcept
         return false;
     }
 }
+
+/* 
+
+FYI BAD IDEAS you find in the sourcecode that you can eliminate if you edit any part of them:
+
+Excessive alignment of function declaration parts, like
+
+void            LongFunctionName()    const     noexcept  ;
+LongReturnType  ShortFunc()                               ;
+
+Let clang-format do its thing on them.
+
+HUGE comment blocks before function declarations in cpp files with lots of whitespace and asterisks.
+
+*/
 
 #endif // ArmageTron_CODING_STYLE_H
