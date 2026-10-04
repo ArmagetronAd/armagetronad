@@ -22,6 +22,15 @@ case "$1" in
 	*/render/*)
 		TOPIC=Render
 		;;
+	*/test/*)
+		TOPIC=Tests
+		;;
+	*/thirdparty/*)
+		TOPIC=Thirdparty
+		;;
+	*/doc/*)
+		TOPIC=Doc
+		;;
 esac
 
 # Add @ingroup before class and structs

@@ -48,7 +48,11 @@ localtest: all Howto-Maps.txt ${docfiles}
 Howto-Maps.txt:
 	ln -s ${srcdir}/Content_Creation/$@ $@
 
-doxygen: Doxyfile
+assemble/MAIN_README.md: ${top_srcdir}/README.md
+	mkdir -p assemble
+	cp $< $@
+
+doxygen: Doxyfile assemble/MAIN_README.md
 	rm -rf doxygen/*
 	doxygen
 
