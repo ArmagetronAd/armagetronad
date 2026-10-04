@@ -13,7 +13,7 @@ Key subdirectories include `make/` which contains build helpers and utilities. T
 - `version` - A script for generating version information
 - `patchnotes.py` - Generates patch notes/changelog from git history
 
-At the root of the batch directory, `rcd_startstop.in` is a template for init scripts that handle starting and stopping Armagetron servers. This is used for system service integration on Unix-like systems.
+At the root of the batch directory, `rcd_startstop.in` is a template for init scripts that handle starting and stopping Armagetron servers. This is used for system service integration on Unix-like systems. `git_clang_format.sh` provides a convenient wrapper for formatting changed files with clang-format before committing.
 
 For AI and CI use, `test_builds.sh` provides a canonical way to build and test the project with multiple configurations. The `llvm-gcov.sh` wrapper script enables lcov code coverage analysis when using the Clang compiler, which produces coverage data in a format incompatible with the standard gcov tool.
 
@@ -22,6 +22,7 @@ For AI and CI use, `test_builds.sh` provides a canonical way to build and test t
 ```
 .
 ├── Dockerfile              # Docker build configuration
+├── git_clang_format.sh    # Git clang-format wrapper for code formatting
 ├── llvm-gcov.sh           # LLVM gcov wrapper for lcov compatibility
 ├── rcd_startstop.in       # Init script template for server/services
 ├── test_builds.sh         # Multi-configuration test build script for AI/CI

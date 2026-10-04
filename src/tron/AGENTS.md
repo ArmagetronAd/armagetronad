@@ -3,6 +3,8 @@
 ## Summary
 Game logic and main application layer implementing the Armagetron lightcycle game. Built as `libtron.a` and the main executables.
 
+**Doxygen Group**: `@defgroup Game` - Game library. Concrete classes for cycles, walls, score keeping (defined in README.md)
+
 ## Details
 
 This directory contains the high-level game logic that builds upon the engine layer. It implements the actual Tron/lightcycle gameplay, AI opponents, game modes, menus, and application flow. The library is built as `libtron.a` and includes the main entry points for both the client (`armagetronad_main`) and dedicated server (`armagetronad_main_master`).
@@ -15,6 +17,7 @@ The `gGame` class inherits from `nNetObject` for network synchronization. Game s
 
 ```
 .
+├── README.md             # Doxygen @defgroup Game definition
 ├── gAIBase.cpp            # AI base class
 ├── gAIBase.h             # AI base class header
 ├── gAICharacter.cpp       # AI character implementation

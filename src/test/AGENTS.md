@@ -3,6 +3,8 @@
 ## Summary
 Unit and integration tests for Armagetron Advanced components, including coding style demonstration.
 
+**Doxygen Group**: `@defgroup Tests` - Unit and integration tests (defined in README.md)
+
 ## Details
 
 The test directory contains test programs for verifying the correctness of Armagetron Advanced components. Tests cover parsing logic, data structures, geometry, memory management, and other critical functionality. **CodingStyle.h and CodingStyle_test.cpp demonstrate ideal coding style with functional, testable examples.**
@@ -13,7 +15,8 @@ Tests are compiled as separate programs that link against the relevant project l
 
 ```
 .
-├── TODO.md                     # Known bugs, oddities, and unwritten tests
+├── README.md                 # Doxygen @defgroup Tests definition
+├── TODO.md                   # Known bugs, oddities, and unwritten tests
 ├── CodingStyle.cpp             # Coding style demonstration implementation
 ├── CodingStyle.h               # Ideal coding style demonstration header
 ├── CodingStyle_test.cpp        # Tests for coding style examples

@@ -3,6 +3,8 @@
 ## Summary
 Core utility library providing foundational data structures, configuration management, error handling, and cross-cutting concerns for the entire codebase. Built as `libtools.a`.
 
+**Doxygen Group**: `@defgroup Tools` - Tools library. Basic stuff: Containers, file access (defined in README.md)
+
 ## Details
 
 This directory contains the lowest-level infrastructure used throughout Armagetron Advanced. The tools library has no external dependencies (except standard library and thirdparty/binreloc) and forms the base layer of the dependency hierarchy.
@@ -17,7 +19,8 @@ Build produces `libtools.a` static library. Includes `defs.h` for global definit
 
 ```
 .
-├── tArray.cpp              # Dynamic array implementation
+├── README.md             # Doxygen @defgroup Tools definition
+├── tArray.cpp             # Dynamic array implementation
 ├── tArray.h               # Dynamic array header
 ├── tCallback.cpp          # Callback system
 ├── tCallback.h           # Callback system header

@@ -3,6 +3,8 @@
 ## Summary
 Network communication layer implementing the custom Armagetron multiplayer protocol. Built as `libnetwork.a`.
 
+**Doxygen Group**: `@defgroup Network` - Network Library. Handles server/client connections, defines messages passed between them (defined in README.md)
+
 ## Details
 
 The network directory provides the multiplayer networking infrastructure for Armagetron Advanced. It implements a custom protocol for game synchronization, client-server communication, and peer-to-peer features. The system supports both client and server modes, with dedicated server capability.
@@ -15,6 +17,7 @@ The network layer uses a message descriptor system (`nDescriptor`) for registeri
 
 ```
 .
+├── README.md             # Doxygen @defgroup Network definition
 ├── md5.cpp                # MD5 hashing implementation
 ├── md5.h                 # MD5 hashing header
 ├── nAuthentication.cpp    # Player authentication system

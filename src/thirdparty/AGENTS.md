@@ -3,6 +3,13 @@
 ## Summary
 Third-party libraries integrated into the project. Contains binreloc for relocatable executables and a particle system for visual effects.
 
+**Doxygen Groups**: 
+- `@defgroup Thirdparty` - Third Party Components: Things from other sources we embed
+- `@defgroup Thirdparty_doctest` - Doctest unit testing framework (subgroup of Thirdparty)
+- `@defgroup Thirdparty_binreloc` - Binreloc: Reliable way to determine where the executable resides (subgroup of Thirdparty)
+- `@defgroup Thirdparty_particles` - Particles: Particle subsystem (subgroup of Thirdparty)
+  (all defined in README.md)
+
 ## Details
 
 The thirdparty directory contains external code integrated into Armagetron Advanced. These libraries are maintained within the project tree rather than as external dependencies.
@@ -17,6 +24,8 @@ The thirdparty code is generally kept unchanged from its original form, with min
 
 ```
 .
+├── README.md             # Doxygen @defgroup definitions for thirdparty components
+├── .clang-format        # Clang-format configuration for thirdparty code
 ├── binreloc/
 │   ├── prefix.c           # BinReloc implementation
 │   └── prefix.h          # BinReloc header
