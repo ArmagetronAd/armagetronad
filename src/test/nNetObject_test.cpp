@@ -22,7 +22,7 @@ public:
 };
 
 // static nNOInitialisator<MockNetObject> s_mockDescriptor(99, "MockNetObject");
-static nNetObjectDescriptor< MockNetObject, Network::NetObjectSync > s_mockDescriptor( 99 );
+static nNetObjectDescriptor<MockNetObject, Network::NetObjectSync> s_mockDescriptor(99);
 
 nNetObjectDescriptorBase& MockNetObject::DoGetDescriptor() const { return s_mockDescriptor; }
 } // namespace

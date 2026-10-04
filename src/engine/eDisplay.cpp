@@ -79,7 +79,8 @@ static rFileTexture & se_Sky()
     static rFileTexture sky(rTextureGroups::TEX_FLOOR,skyPath,1,1,true);
     static rFileTexture sky_moviepack(rTextureGroups::TEX_FLOOR,skyPathMoviepack,1,1,true);
 
-    if (se_MoviePack()){
+    if (se_MoviePack())
+    {
         // Since old movie packs usually don't include sky.png we need to
         // be nice and fall back to the default sky tecture. -k
         tString s = tDirectories::Data().GetReadPath( skyPathMoviepack );
@@ -113,7 +114,8 @@ static rFileTexture * se_UpperSky()
     static rFileTexture sky(rTextureGroups::TEX_FLOOR,skyPath,1,1,true);
     static rFileTexture sky_moviepack(rTextureGroups::TEX_FLOOR,skyPathMoviepack,1,1,true);
 
-    if (se_MoviePack()){
+    if (se_MoviePack())
+    {
         tString s = tDirectories::Data().GetReadPath( skyPathMoviepack );
         if(s.Len() > 1)
             return &sky_moviepack;

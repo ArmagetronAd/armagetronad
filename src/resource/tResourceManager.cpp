@@ -327,7 +327,7 @@ tString tResourceManager::locateResource(const char *file, const char *uri, bool
     tString filepath, a_uri = tString(), savepath, resourcepath;
     int rv;
 
-    if(!file)
+    if (!file)
         return tString{};
 
     char * to_free = NULL; // string to delete later

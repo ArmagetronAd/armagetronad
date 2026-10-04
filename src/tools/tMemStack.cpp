@@ -54,9 +54,8 @@ public:
         size   = 0;
     }
 
-    tMemStackItem(tMemStackItem &&that)
-    : memory{that.memory}
-    , size(that.size)
+    tMemStackItem(tMemStackItem&& that)
+        : memory{that.memory}, size(that.size)
     {
         that.memory = nullptr;
     }
@@ -67,9 +66,9 @@ public:
             free(memory);
     }
 
-    tMemStackItem(tMemStackItem const &) = delete;
-    tMemStackItem operator=(tMemStackItem const &) = delete;
-    tMemStackItem operator=(tMemStackItem &&) = delete;
+    tMemStackItem(tMemStackItem const&) = delete;
+    tMemStackItem operator=(tMemStackItem const&) = delete;
+    tMemStackItem operator=(tMemStackItem&&) = delete;
 
     void Alloc()
     {
@@ -138,7 +137,7 @@ tMemStack::tMemStack	(int minSize )
 
 tMemStack::~tMemStack	()
 {
-    if(index < 0)
+    if (index < 0)
         return;
 
     st_Pop();

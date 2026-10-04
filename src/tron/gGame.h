@@ -242,7 +242,7 @@ extern gGameSettings* sg_currentSettings;
 
 void rotate();
 // the 'start over' menu is defined in gArmagetron.cpp and needs to be injected
-void sg_RegisterStartupPlayerMenu(AA_VOIDFUNC *pFunc);
+void sg_RegisterStartupPlayerMenu(AA_VOIDFUNC* pFunc);
 
 #endif
 

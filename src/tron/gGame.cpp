@@ -133,7 +133,7 @@ namespace
 {
 void (*sg_StartupPlayerMenu)();
 }
-void sg_RegisterStartupPlayerMenu(AA_VOIDFUNC *pFunc)
+void sg_RegisterStartupPlayerMenu(AA_VOIDFUNC* pFunc)
 {
     sg_StartupPlayerMenu = pFunc;
 }
