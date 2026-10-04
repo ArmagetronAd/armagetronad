@@ -12,4 +12,4 @@
 
 # to reformat all changes that are new to your feature/bugfix branch
 
-git clang-format --extensions cpp,h "$*"
+git clang-format --extensions cpp,h "$@"
