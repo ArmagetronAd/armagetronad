@@ -272,7 +272,7 @@ inline bool cCounter::TryCountDown() noexcept
     }
 }
 
-/* 
+/*
 
 FYI BAD IDEAS you find in the sourcecode that you can eliminate if you edit any part of them:
 
