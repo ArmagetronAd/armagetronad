@@ -433,7 +433,7 @@ EXCLUDE_SYMLINKS       = NO
 # certain files from those directories.
 
 # these are clanker generated and for clanker consumption
-EXCLUDE_PATTERNS       = CLAUDE.md AGENTS.md CHANGELOG*.md *_test.cpp memtest.cpp
+EXCLUDE_PATTERNS       = CLAUDE.md AGENTS.md RELEASENOTES.md CHANGELOG*.md *_test.cpp memtest.cpp
 
 # The EXAMPLE_PATH tag can be used to specify one or more files or 
 # directories that contain example code fragments that are included (see 
