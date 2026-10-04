@@ -1085,4 +1085,9 @@ USE_MATHJAX            = YES
 # The SEARCHENGINE tag specifies whether or not a search engine should be 
 # used. If set to NO the values of all tags below this one will be ignored.
 
-SEARCHENGINE           = NO
+SEARCHENGINE           = YES
+
+# Allow processing files in parallel.
+# We are using filters to augment our files with missing information, so this helps a lot.
+
+NUM_PROC_THREADS       = 8
