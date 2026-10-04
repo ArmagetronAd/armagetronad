@@ -227,7 +227,7 @@ private:
 };
 
 // FYI value class for the rest of the style
-class cRandomStuff
+class cRandomStuff /// Anything that does not fit above
 {
 public:
     // FYI rule of zero: No custom constructor, assignment, or destructor
