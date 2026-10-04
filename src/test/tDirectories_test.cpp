@@ -49,7 +49,8 @@ TEST_SUITE("tDirectories")
         {
             tArray<tString> pathElements;
 
-            auto const testPaths = [](tPath const& path) {
+            auto const testPaths = [](tPath const& path)
+            {
                 auto paths = path.GetPaths();
                 CHECK(paths.Len() >= 5);
             };

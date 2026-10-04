@@ -127,89 +127,86 @@ TEST_SUITE("CodingStyle")
     {
         GIVEN("a filled deep copy holder")
         {
+            // we start and end with zero objects (alternative manual version)
+            CHECK(0 == cReferenceCounted::GetNumberOfObjects());
+            auto guard = tDefer([]
+                                { CHECK(0 == cReferenceCounted::GetNumberOfObjects()); });
+
+            // FYI the Make(...) function is the equivalent to std::make_shared or std::make_unique
+            auto referenceCounted = tRefPtr<cReferenceCountedDerived>::Make();
+
+            cDeepCopy holder{std::move(referenceCounted)};
+
+            // FYI the moved-from pointer should be zero now,
+            // but do not rely on that in production code,
+            // it is not strictly guaranteed (moved-from must be destructible, that is all)
+            CHECK(!referenceCounted);
+            referenceCounted = nullptr;
+
+            CHECK(1 == cReferenceCounted::GetNumberOfObjects());
+
+            WHEN("doing nothing")
             {
-                // we start and end with zero objects (alternative manual version)
-                CHECK(0 == cReferenceCounted::GetNumberOfObjects());
-                auto guard = tDefer([] {
-                    CHECK(0 == cReferenceCounted::GetNumberOfObjects());
-                });
-
-                // FYI the Make(...) function is the equivalent to std::make_shared or std::make_unique
-                auto referenceCounted = tRefPtr<cReferenceCountedDerived>::Make();
-
-                cDeepCopy holder{std::move(referenceCounted)};
-
-                // FYI the moved-from pointer should be zero now,
-                // but do not rely on that in production code,
-                // it is not strictly guaranteed (moved-from must be destructible, that is all)
-                CHECK(!referenceCounted);
-                referenceCounted = nullptr;
-
-                CHECK(1 == cReferenceCounted::GetNumberOfObjects());
-
-                WHEN("doing nothing")
+                THEN("we have one object")
                 {
-                    THEN("we have one object")
+                    CHECK(1 == cReferenceCounted::GetNumberOfObjects());
+                }
+            }
+
+            WHEN("making a copy")
+            {
+                cDeepCopy copy{holder};
+
+                THEN("we have two derived objects")
+                {
+                    CHECK(2 == cReferenceCounted::GetNumberOfObjects());
+                    CHECK(dynamic_cast<cReferenceCountedDerived*>(copy.GetTarget()));
+                }
+                AND_WHEN("resetting the original")
+                {
+                    holder.SetTarget(nullptr);
+
+                    THEN("we have one object left")
                     {
                         CHECK(1 == cReferenceCounted::GetNumberOfObjects());
                     }
-                }
-
-                WHEN("making a copy")
-                {
-                    cDeepCopy copy{holder};
-
-                    THEN("we have two derived objects")
+                    AND_WHEN("we also reset the copy")
                     {
-                        CHECK(2 == cReferenceCounted::GetNumberOfObjects());
-                        CHECK(dynamic_cast<cReferenceCountedDerived*>(copy.GetTarget()));
-                    }
-                    AND_WHEN("resetting the original")
-                    {
-                        holder.SetTarget(nullptr);
+                        copy.SetTarget(nullptr);
 
-                        THEN("we have one object left")
+                        THEN("we have no objects left")
                         {
-                            CHECK(1 == cReferenceCounted::GetNumberOfObjects());
-                        }
-                        AND_WHEN("we also reset the copy")
-                        {
-                            copy.SetTarget(nullptr);
-
-                            THEN("we have no objects left")
-                            {
-                                CHECK(0 == cReferenceCounted::GetNumberOfObjects());
-                            }
+                            CHECK(0 == cReferenceCounted::GetNumberOfObjects());
                         }
                     }
                 }
+            }
 
-                WHEN("moving the holder")
+            WHEN("moving the holder")
+            {
+                cDeepCopy copy{std::move(holder)};
+
+                THEN("we still have one object")
                 {
-                    cDeepCopy copy{std::move(holder)};
+                    CHECK(1 == cReferenceCounted::GetNumberOfObjects());
+                }
+                AND_WHEN("resetting the original")
+                {
+                    holder.SetTarget(nullptr);
 
-                    THEN("we still have one object")
+                    // FYI it is an implementation detail what would happen if we reset the copy instead.
+
+                    THEN("we still have the same object")
                     {
                         CHECK(1 == cReferenceCounted::GetNumberOfObjects());
                     }
-                    AND_WHEN("resetting the original")
+                    AND_WHEN("we also reset the copy")
                     {
-                        holder.SetTarget(nullptr);
+                        copy.SetTarget(nullptr);
 
-                        // FYI it is an implementation detail what would happen if we reset the copy instead.
-
-                        THEN("we still have the same object")
+                        THEN("we have no objects left")
                         {
-                            CHECK(1 == cReferenceCounted::GetNumberOfObjects());
-                        }
-                        AND_WHEN("we also reset the copy")
-                        {
-                            copy.SetTarget(nullptr);
-
-                            THEN("we have no objects left")
-                            {
-                                CHECK(0 == cReferenceCounted::GetNumberOfObjects());
-                            }
+                            CHECK(0 == cReferenceCounted::GetNumberOfObjects());
                         }
                     }
                 }
