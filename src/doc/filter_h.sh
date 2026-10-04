@@ -40,22 +40,28 @@ filter_add_topic()
 
 	while IFS= read -r line; do
 		case "$line" in
-		    *@ingroup*)
-				# already decorated, stop
-				DECORATE=false
-				;;
 			*\;*)
 				# forward declarations do not get decorated
 				;;
-			class*|struct*)
-				# class and struct get decorated
+			class*|struct*|template*|///*|//!*)
+				# class, struct and top level doc coments get decorated
 				if [ "$DECORATE" = "true" ]; then
 					echo /// @ingroup $TOPIC
+					DECORATE=false
 				fi
+				;;
+			*)
+				DECORATE=true;
 				;;
 		esac
 		echo "$line"
 	done
 }
+
+# no processing if groups are already used
+if grep '@ingroup' "$1" > /dev/null; then
+	cat "$1"
+	exit 0
+fi
 
 cat "$1" | filter_add_topic
