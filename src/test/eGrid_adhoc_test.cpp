@@ -5,6 +5,16 @@
 #include "eGrid.h"
 #include "doctest.h"
 
+/// Better cleanup than plain tStackObject<eGrid>
+class eStackGrid: public tStackObject<eGrid>
+{
+public:
+    ~eStackGrid()
+    {
+        Clear();
+    }
+};
+
 // ============================================================================
 // TEST_CASE: eGrid Creation and Initial Validation
 // BDD: GIVEN empty state, WHEN create grid, THEN check passes
@@ -12,7 +22,7 @@
 // ============================================================================
 TEST_CASE("eGrid: Creation and Initial Validation") {
     // GIVEN: empty state
-    tStackObject< eGrid > grid;
+    eStackGrid grid;
     
     // WHEN: create grid
     grid.Create();
@@ -30,7 +40,7 @@ TEST_CASE("eGrid: Creation and Initial Validation") {
 // ============================================================================
 TEST_CASE("eGrid: Simplification Operations") {
     // GIVEN: grid with some lines
-    tStackObject< eGrid > grid;
+    eStackGrid grid;
     grid.Create();
     
     ePoint *p = grid.Insert(eCoord(0, 0));
@@ -51,7 +61,7 @@ TEST_CASE("eGrid: Simplification Operations") {
 // ============================================================================
 TEST_CASE("eGrid: Line Drawing Operations") {
     // GIVEN: grid
-    tStackObject< eGrid > grid;
+    eStackGrid grid;
     grid.Create();
     
     // WHEN: draw lines for i=2 (first iteration)
