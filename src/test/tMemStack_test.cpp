@@ -52,9 +52,9 @@ TEST_SUITE("tMemStack")
             auto outerPtr = static_cast<char*>(stack.GetMem());
             *outerPtr = 42;
 
-            auto const defer = tDefer([outerPtr]() {
-                CHECK(42 == *outerPtr);
-            });
+            auto const defer = tDefer(
+                [outerPtr]()
+                { CHECK(42 == *outerPtr); });
 
             WHEN("An innter tMemStack is created and eleted")
             {
