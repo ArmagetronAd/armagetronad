@@ -1,9 +1,14 @@
 // eGrid_adhoc_test.cpp - Tests converted from src/engine/test.cpp
 // This file contains doctest-based tests for eGrid functionality
+// Purpose: Stress test the grid engine by drawing random patterns
+//   not very targeted...
 // Original: src/engine/test.cpp
 
-#include "eGrid.h"
 #include "doctest.h"
+
+#include "eGrid.h"
+
+#include "MockConsole.h"
 
 /// Better cleanup than plain tStackObject<eGrid>
 class eStackGrid: public tStackObject<eGrid>
@@ -60,68 +65,47 @@ TEST_CASE("eGrid: Simplification Operations") {
 // Note: This tests the line drawing loop with i=2,1,0
 // ============================================================================
 TEST_CASE("eGrid: Line Drawing Operations") {
+    MockConsole con;
+
     // GIVEN: grid
     eStackGrid grid;
     grid.Create();
     
-    // WHEN: draw lines for i=2 (first iteration)
-    ePoint *p = grid.Insert(eCoord(0, 0));
-    p = grid.DrawLine(p, eCoord(1000 + 2*2, 2), NULL);
-    REQUIRE(p != NULL);
-    
-    p = grid.DrawLine(p, eCoord(10 + 2*2, 10 + 2), NULL);
-    REQUIRE(p != NULL);
-    
-    p = grid.DrawLine(p, eCoord(-10 + 2*2, 10 + 2), NULL);
-    REQUIRE(p != NULL);
-    
-    p = grid.DrawLine(p, eCoord(-10 + 2*2, -10 + 2), NULL);
-    REQUIRE(p != NULL);
-    
-    p = grid.DrawLine(p, eCoord(-1000 + 2*2, 1000 + 2), NULL);
-    REQUIRE(p != NULL);
-    
-    p = grid.DrawLine(p, eCoord(10, 500 + 2), NULL);
-    REQUIRE(p != NULL);
-    
-    p = grid.DrawLine(p, eCoord(10, 0 + 2), NULL);
-    REQUIRE(p != NULL);
-    
-    p = grid.DrawLine(p, eCoord(10, 700 + 2), NULL);
-    REQUIRE(p != NULL);
-    
-    p = grid.DrawLine(p, eCoord(10, 10 + 2), NULL);
-    REQUIRE(p != NULL);
-    
-    // THEN: all operations succeed and grid is valid
-    CHECK_NOTHROW(grid.Check());
-    
-    // Repeat for i=1
-    grid.Clear();
-    p = grid.Insert(eCoord(0, 0));
-    p = grid.DrawLine(p, eCoord(1000 + 2*1, 1), NULL);
-    p = grid.DrawLine(p, eCoord(10 + 2*1, 10 + 1), NULL);
-    p = grid.DrawLine(p, eCoord(-10 + 2*1, 10 + 1), NULL);
-    p = grid.DrawLine(p, eCoord(-10 + 2*1, -10 + 1), NULL);
-    p = grid.DrawLine(p, eCoord(-1000 + 2*1, 1000 + 1), NULL);
-    p = grid.DrawLine(p, eCoord(10, 500 + 1), NULL);
-    p = grid.DrawLine(p, eCoord(10, 0 + 1), NULL);
-    p = grid.DrawLine(p, eCoord(10, 700 + 1), NULL);
-    p = grid.DrawLine(p, eCoord(10, 10 + 1), NULL);
-    CHECK_NOTHROW(grid.Check());
-    
-    // Repeat for i=0
-    grid.Clear();
-    p = grid.Insert(eCoord(0, 0));
-    p = grid.DrawLine(p, eCoord(1000 + 2*0, 0), NULL);
-    p = grid.DrawLine(p, eCoord(10 + 2*0, 10 + 0), NULL);
-    p = grid.DrawLine(p, eCoord(-10 + 2*0, 10 + 0), NULL);
-    p = grid.DrawLine(p, eCoord(-10 + 2*0, -10 + 0), NULL);
-    p = grid.DrawLine(p, eCoord(-1000 + 2*0, 1000 + 0), NULL);
-    p = grid.DrawLine(p, eCoord(10, 500 + 0), NULL);
-    p = grid.DrawLine(p, eCoord(10, 0 + 0), NULL);
-    p = grid.DrawLine(p, eCoord(10, 700 + 0), NULL);
-    p = grid.DrawLine(p, eCoord(10, 10 + 0), NULL);
+    for (int i=2;i>=0;i--)
+    {
+        grid.SimplifyAll(10);
+
+        ePoint *p =grid.Insert(eCoord(0,0));
+        p = grid.DrawLine(p, eCoord(1000+2*i,i), NULL);
+        REQUIRE(p);
+
+#ifdef DEBUG
+        if (i == -1)
+        {
+            grid.doCheck = true;
+            grid.Check();
+        }
+#endif
+
+
+        p = grid.DrawLine(p, eCoord(10+2*i,10+i), NULL);
+        REQUIRE(p);
+        p = grid.DrawLine(p, eCoord(-10+2*i,10+i), NULL);
+        REQUIRE(p);
+        p = grid.DrawLine(p, eCoord(-10+2*i,-10+i), NULL);
+        REQUIRE(p);
+        p = grid.DrawLine(p, eCoord(-1000+2*i,1000+i), NULL);
+        REQUIRE(p);
+        p = grid.DrawLine(p, eCoord(10,500+i), NULL);
+        REQUIRE(p);
+        p = grid.DrawLine(p, eCoord(10,0+i), NULL);
+        REQUIRE(p);
+        p = grid.DrawLine(p, eCoord(10,700+i), NULL);
+        REQUIRE(p);
+        p = grid.DrawLine(p, eCoord(10,10+i), NULL);
+        REQUIRE(p);
+    }
+
     CHECK_NOTHROW(grid.Check());
 }
 
@@ -132,7 +116,7 @@ TEST_CASE("eGrid: Line Drawing Operations") {
 // ============================================================================
 TEST_CASE("eGrid: Final State Validation") {
     // GIVEN: modified grid
-    tStackObject< eGrid > grid;
+    tStackObject<eGrid> grid;
     grid.Create();
     
     ePoint *p = grid.Insert(eCoord(0, 0));
