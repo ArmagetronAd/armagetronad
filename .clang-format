@@ -30,6 +30,14 @@ BreakBeforeBraces: Allman
 # GNU       : 231651
 #
 
+# body of short lambdas can be on one line
+AllowShortLambdasOnASingleLine: All
+# now, 'BreakBeforeBraces: Allman' will still force the lambdas to be on at least two lines because it enforces
+# a break before the opening brace... but the only alternative setting available, 'BreakBeforeBraces: Custom' and
+# 'BraceWrapping: BeforeLambdaBody: false', FORCES no break before the opening brace, which is worse,
+# (you can force the break with an extra empty comment, which is also worse) and you need
+# to specify all the other BraceWrapping settings.
+
 # leave line breaks alone
 ColumnLimit: 0
 # note: it is still recommended to leave lines short, ideally below 80; but
