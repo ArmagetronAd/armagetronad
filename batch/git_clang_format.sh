@@ -12,4 +12,9 @@
 
 # to reformat all changes that are new to your feature/bugfix branch
 
+# required for git clang-format to work; it will sometimes even
+# complain about pending changes when there are none
+git add .
+
 git clang-format --extensions cpp,h "$@"
+
