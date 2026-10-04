@@ -36,7 +36,6 @@ Makefile.in
 /missing
 /touch
 /version.m4
-src/doc/commands.txt
 ./.changetag
 Makefile
 /config.h
@@ -63,8 +62,6 @@ src/tTrueVersion.h
 src/tUniversalVariables.h
 src/tUniversalVariables.h.in
 .dummy.dep
-src/doc/Doxyfile
-src/doc/doxygen
 *.html
 html.m4
 *.dep
@@ -95,7 +92,6 @@ src/armagetronad-serverquery
 __pycache__
 /src/armagetronad_serverquery
 /src/armagetronad_main_master
-/src/doc/COPYING.txt
 rubbish
 desktop/armagetronad-armagetronad-handler.desktop
 desktop/armagetronad-link.xml
