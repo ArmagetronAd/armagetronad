@@ -50,9 +50,22 @@ automated tests; it is completely useless, of course.
 #include "tFlagEnums.h"
 
 // FYI classes get a single lowercase letter prefix indicating the library they are in: t for tools, e for enginge, n for network, g for game.
-// FYI we pick 'c' here for Coding Style.
+// FYI we pick 'c' here for Coding Style. Classes defined just for tests don't get a prefix; the choices t for Test or u for UnitTests.
 
-// A class that can count up
+// FYI Use Doxygen style comments to document things, keep them brief and clear.
+// Omit trivial documentation. It is clear **what** `eGameObject::MoveTo(eCoord const &targetPosition)` does.
+// Just document any edge cases and the non-obvious stuff. How do we move? Do we teleport, or do we collide with things on the way?
+// What happens if the target position is outside of the grid? Now are collisions or errors reported? Use @remark for that.
+// Avoid keyword spam; use @brief only if there are other @ commands.
+
+//  FYI If multiple classes form a unit and are only useful together, put them in a namespace or create a subgroup like so:
+/// @ingroup Tests
+/// @addtogroup CodingStyle Coding Style
+/// @brief Classes demonstrating our coding style
+/// @{
+//  FYI don't forget to close the group later.
+
+/// Class that can count up (and down).
 class cCounter
 {
     // FYI rule of zero: whenever possible, rely on auto-generated destructor and move/copy constructor/assignment.
@@ -62,12 +75,14 @@ public:
     // FYI method names are CamelCase. Default to 'constexpr const noexcept', remove as needed.
 
     // FYI trival functions where the function name is all the documentation one needs can stay comment-less
+
     constexpr int GetCount() const noexcept { return count_; }
     // FYI trivial implementations can also be single line.
+
     void CountUp() noexcept { count_++; }
 
     /* FYI slightly longer functions should be defined out-of-line later in the header;
-    that gives you room to put their documenting comment after the declaration.
+    that gives you room to put a short documenting comment after the declaration.
     Consider putting "Try" at the start of a function name if the function can fail in
     regular operation and communicates success in the return value.
     */
@@ -78,30 +93,17 @@ private:
     // FYI member variables are camelCase (lower case start letter),
     // get an underscore at the end and, whenever possible, are initialized with brace initializers
 
-    // the counter
+    /// the counter
     int count_{};
 };
 
-inline bool cCounter::TryCountDown() noexcept
-{
-    // FYI if one of the branches is nontritival, use braces for both.
-    if (count_ > 0)
-    {
-        --count_;
-        return true;
-    }
-    else // FYI for longer branches, consider adding a comment what the condition is now (here: "// count_ <= 0")
-    {
-        return false;
-    }
-}
-
 // FYI Reference counted objects are derived from tReferencable, which uses CRTP to cast itself to the correct leaf type
 
-// class of reference counted objects that counts how many of them are alive at every given time
+/// Class of reference counted objects that counts how many of them are alive at every given time.
 class cReferenceCounted : public tReferencable<cReferenceCounted>
 {
 public:
+    /// Returns the number of currently existing objects of this type.
     static int GetNumberOfObjects() noexcept { return s_numberOfObjects_.GetCount(); }
 
     // FYI Rule of Three: Implement destructor, copy constructor and assignment operator together
@@ -112,6 +114,7 @@ public:
         std::ignore = success;
     } // FYI if this is a leaf class, mark it with 'final', then you can make the destructor non-virtual
 
+    // FYI standard functions (destructor, default constructor, copy/move constructor/assignment) need no doxygen docu, unless they do something unusual
     cReferenceCounted(cReferenceCounted const& that) noexcept
         : tReferencable<cReferenceCounted>(that)
     {
@@ -126,10 +129,15 @@ public:
     The virtual function itself is private or public and starts with `Do` for actions and `On` for reactions (event handlers).
     Rationale: If we change the function signature later, we don't have to adapt all implementations and call sites together, at once.
     */
-    // make a copy of this
+
+    /// @brief Makes a copy of this.
+    /// @return the copy
     cReferenceCounted* Clone() const noexcept { return DoClone(); }
 
 private:
+    /// @brief Makes a copy of this.
+    /// @return the copy
+    /// @remark this is the private implementation derived classes are supposed to override
     virtual cReferenceCounted* DoClone() const noexcept { return new cReferenceCounted{*this}; }
 
 private:
@@ -137,18 +145,20 @@ private:
     static cCounter s_numberOfObjects_;
 };
 
-// a derived class
-class cReferenceCountedDerived : public cReferenceCounted
+/// A derived class.
+class cReferenceCountedDerived final : public cReferenceCounted
 {
 public:
     // FYI always use `override` on overridden virtual functions, that way we notice when the base definition changes
     ~cReferenceCountedDerived() noexcept override = default;
 
 private:
-    cReferenceCounted* DoClone() const noexcept override { return new cReferenceCountedDerived{*this}; }
+    // FYI documentation inherited from base, no need to redocument.
+    // FYI use covariant returns where appropriate.
+    cReferenceCountedDerived* DoClone() const noexcept override { return new cReferenceCountedDerived{*this}; }
 };
 
-// class that holds a refernce to cReferenceCounted, doing shallow copies
+/// Class that holds a refernce to cReferenceCounted, doing shallow copies.
 class cShallowCopy final
 {
 public:
@@ -158,7 +168,7 @@ public:
     // FYI avoid accidentally creating implicit conversions
     // FYI prefer direct member initialization instead of using SetTarget() here
     explicit cShallowCopy(cReferenceCounted* target) noexcept : target_{target} {}
-    template<typename T>
+    template <typename T>
     explicit cShallowCopy(tRefPtr<T>&& target) noexcept : target_{std::move(target)} {}
 
     // FYI Rule of Zero: tRefPtr does shallow copies, none of the three special functions needs implementing
@@ -171,19 +181,20 @@ private:
         tControlledPTR<T> reference counting pointer like tRefPtr, but uses a tCheckedPTR as a base for extra safety.
     */
 
+    /// the wrapped object
     tRefPtr<cReferenceCounted> target_{};
 };
 
-// class that holds a refernce to cReferenceCounted and makes deep copies on copy
+/// Class that holds a refernce to cReferenceCounted and makes deep copies on copy.
 class cDeepCopy final
 {
 public:
-    cReferenceCounted* GetTarget() const noexcept { return target_; }
-    void SetTarget(cReferenceCounted* target) noexcept { target_ = target; }
+    cReferenceCounted* GetTarget() const noexcept { return target_; }        //!< Returns the referenced object. @remark May return nullptr.
+    void SetTarget(cReferenceCounted* target) noexcept { target_ = target; } //!< Sets a new target.
 
-    explicit cDeepCopy(cReferenceCounted* target) noexcept : target_{target} {}
-    template<typename T>
-    explicit cDeepCopy(tRefPtr<T>&& target) noexcept : target_{std::move(target)} {}
+    explicit cDeepCopy(cReferenceCounted* target) noexcept : target_{target} {} //!< Constructs with target.
+    template <typename T>
+    explicit cDeepCopy(tRefPtr<T>&& target) noexcept : target_{std::move(target)} {} //!< Constructs with target from smart pointer.
 
     // FYI Rule of Five: default would be shallow copy, avoid that
     ~cDeepCopy() noexcept = default; // FYI except the destructor, the default is fine
@@ -202,7 +213,7 @@ public:
     // by making copy (and optionally move) operations explicitly deleted.
 
 private:
-    // helper function: Clone from other
+    //! Helper function: Clone from other
     static cReferenceCounted* CloneFrom(cDeepCopy const& that)
     {
         if (auto const target = that.GetTarget())
@@ -211,30 +222,69 @@ private:
             return nullptr; // FYI prefer nullptr over NULL
     }
 
+    /// the referenced object
     tRefPtr<cReferenceCounted> target_{};
 };
 
 // FYI value class for the rest of the style
-class cRandomStuff
+class cRandomStuff /// Anything that does not fit above
 {
 public:
     // FYI rule of zero: No custom constructor, assignment, or destructor
 
     // FYI methods that accept mutliple switches should define them in a
     // custom enum, indicating their flag nature by writing values as hex
-    enum LightTypes
+    enum LightTypes /// types of light
     {
-        None = 0x0,
-        HeadLights = 0x1,
-        TailLights = 0x2,
-        Underlighting = 0x4,
+        None = 0x0,          ///< no lights
+        HeadLights = 0x1,    ///< flag to activate headlights
+        TailLights = 0x2,    ///< flag to activate taillights
+        Underlighting = 0x4, ///< flag to activate fancy underlighting
     };
+
+    /// @brief Activates the selected lights.
+    /// @param lights lights to activate
     void SetLights(LightTypes lights) noexcept { /*... */ }
     // FYI NOT: void SetLights(bool head, bool tail, bool under) noexcept { /*... */ }
 private:
 };
 
-// FYI to make enums usable as flag enums with bitwise operators, use this macro at the top of a header file
+/// @}
+
+// FYI to make enums usable as flag enums with bitwise operators, use this macro as soon as possible after the enum declaration.
 MARK_FLAG_ENUM(cRandomStuff::LightTypes);
+
+// FYI On separate implementation and declaration, use Doxygen style comments on a function's implementation.
+// FYI On the declaration, still leave a short non-Doxygen comment.
+
+/// @return True if the counter could be decreased, false if it already was at 0 and nothing happened.
+inline bool cCounter::TryCountDown() noexcept
+{
+    // FYI if one of the branches is nontritival, use braces for both.
+    if (count_ > 0)
+    {
+        --count_;
+        return true;
+    }
+    else // FYI for longer branches, consider adding a comment what the condition is now (here: "// count_ <= 0")
+    {
+        return false;
+    }
+}
+
+/*
+
+FYI BAD IDEAS you find in the sourcecode that you can eliminate if you edit any part of them:
+
+Excessive alignment of function declaration parts, like
+
+void            LongFunctionName()    const     noexcept  ;
+LongReturnType  ShortFunc()                               ;
+
+Let clang-format do its thing on them.
+
+HUGE comment blocks before function declarations in cpp files with lots of whitespace and asterisks.
+
+*/
 
 #endif // ArmageTron_CODING_STYLE_H

@@ -28,24 +28,25 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #ifndef ArmageTron_tMemStack_H
 #define ArmageTron_tMemStack_H
 
-// class for temporary memory allocation; use it as a safe and flexible replacement for
-// stacked char[...] arrays. tMemStack Objects need to be destructed in opposite
-// construction order.
-
 class tMemStackItem;
+
+/// @brief Class for temporary memory allocation.
+/// @details Use it as a safe and flexible replacement for
+/// stacked char[...] arrays. tMemStack Objects need to be destructed in opposite
+/// construction order.
 
 class tMemStack
 {
 public:
-    tMemStack	(int minSize = 10);
-    ~tMemStack	();
+    tMemStack(int minSize = 10);
+    ~tMemStack();
 
-    void* 	GetMem()		const	;	// get the memory pointer
-    int	  	GetSize() 		const	;	// get the memory size
-    void  	IncreaseMem()			;	// recreate the buffer a bit larger (buffer contents will be gone)
+    void* GetMem() const; ///< get the memory pointer; usable size is given by GetSize()
+    int GetSize() const;  ///< get the memory size
+    void IncreaseMem();   ///< recreate the buffer a bit larger (buffer contents will be gone)
 
 private:
-    int    	index;
+    int index;
 
     tMemStackItem& Item() const;
 };

@@ -51,10 +51,10 @@ TEST_SUITE("tMath")
             {
                 CHECK(good(0.0) == true);
                 CHECK(good(1.0) == true);
-                
+
                 double inf = std::numeric_limits<double>::infinity();
                 CHECK(good(inf) == false);
-                
+
                 double nan = std::numeric_limits<double>::quiet_NaN();
                 CHECK(good(nan) == false);
             }
@@ -70,7 +70,7 @@ TEST_SUITE("tMath")
                 // Very small and very large finite values (REAL is float)
                 CHECK(good(std::numeric_limits<float>::min()) == true);
                 CHECK(good(std::numeric_limits<float>::max()) == true);
-                
+
                 // Zero and negative zero
                 CHECK(good(0.0f) == true);
                 CHECK(good(-0.0f) == true);

@@ -17,24 +17,24 @@ TEST_SUITE("tLocale")
                 tLanguage* lang = tLanguage::FirstLanguage();
                 CHECK(lang);
             }
-            
+
             THEN("FindStrict method exists")
             {
-                auto *english = tLanguage::FindStrict(tString("British English"));
+                auto* english = tLanguage::FindStrict(tString("British English"));
                 CHECK(english);
 
 #if false // this would log an error to console
                 auto *nope = tLanguage::FindStrict(tString("nope1"));
                 CHECK(!nope); // should be missing
-#endif                
-            }           
-            
+#endif
+            }
+
             THEN("FindSloppy method exists")
             {
-                auto *english = tLanguage::FindSloppy(tString("American English"));
+                auto* english = tLanguage::FindSloppy(tString("American English"));
                 CHECK(english);
 
-                auto *nope = tLanguage::FindSloppy(tString("nope3"));
+                auto* nope = tLanguage::FindSloppy(tString("nope3"));
                 CHECK(!nope); // should be missing
             }
 
@@ -43,7 +43,7 @@ TEST_SUITE("tLocale")
                 auto* german = tLanguage::Find(tString("Deutsch"));
                 CHECK(german);
 
-                auto *nope = tLanguage::Find(tString("nope2"));
+                auto* nope = tLanguage::Find(tString("nope2"));
                 CHECK(nope); // should be created
             }
         }

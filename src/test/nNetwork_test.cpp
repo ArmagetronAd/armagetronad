@@ -19,4 +19,3 @@ TEST_SUITE("nPingAverager")
 {
 }
 #endif
-

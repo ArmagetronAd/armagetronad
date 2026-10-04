@@ -34,7 +34,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 class tCommandLineAnalyzer;
 
-//! entry point for command line parsing
+/// @ingroup Tools
+/// @addtogroup Tools_CommandLine Command Line Parsing
+/// @brief Command Line Parsing Framework. Dispatches command line data to tCommandLineAnalyzer instances.
+/// @{
+
+//! @brief Entry point for command line parsing
 struct tCommandLineData
 {
     tCommandLineData( const tString & programVersion );
@@ -54,7 +59,7 @@ private:
     tCommandLineAnalyzer *commandLineAnalyzerAnchor_;
 };
 
-//! command line data
+//! @brief Command line data
 struct tCommandLineParser
 {
 public:
@@ -77,8 +82,7 @@ private:
     int index;                   //! the index currently analyzed option
 };
 
-
-//! command line analyzing object
+//! @brief command line analyzing object
 class tCommandLineAnalyzer: public tListItem< tCommandLineAnalyzer >
 {
 public:
@@ -111,6 +115,8 @@ private:
     bool docOption_;
     bool versioninfoOption_;
 };
+
+///@}
 
 // *******************************************************************************************
 // *

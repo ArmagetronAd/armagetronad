@@ -99,6 +99,7 @@ elif [ "$1" = "help" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     echo "  BUILD_ONLY=1       - Skip testing, only build"
     echo "  FORCE_RECONFIGURE=1 - Force re-run of configure step"
     echo "  VERBOSE=1          - Show full build output (not just summary)"
+    echo "  DOXYGEN=1          - Generate doxygen documentation"
     echo "  COVERAGE=1         - Generate human readable code coverage report (requires lcov)"
     echo "  COVERAGE=2         - Silently generate code coverage report, do not fail on error (for AI Agents)"
     echo "  JOBS=N             - Number of parallel jobs (default: auto)"
@@ -308,7 +309,11 @@ for config in "${SELECTED_CONFIGS[@]}"; do
         if [ -x ./src/unit_tests ] && ./src/unit_tests -ni -o=/tmp/test_${NAME}.log; then
             TEST_PASSED=true
         fi
-        
+
+        if [ "$DOXYGEN" = 1 ]; then
+            make -C src/doc doxygen
+        fi
+
         if [ "$TEST_PASSED" = true ]; then
             if [ "$VERBOSE" = "1" ]; then
                 cat /tmp/test_${NAME}.log

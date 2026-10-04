@@ -41,13 +41,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 namespace
 {
-static BOOLRETFUNC *pMoviePack;
+static BOOLRETFUNC* pMoviePack;
 }
 bool se_MoviePack()
 {
     return pMoviePack && (*pMoviePack)();
 }
-void se_RegisterMoviePackFunc(BOOLRETFUNC *pFunc)
+void se_RegisterMoviePackFunc(BOOLRETFUNC* pFunc)
 {
     pMoviePack = pFunc;
 }

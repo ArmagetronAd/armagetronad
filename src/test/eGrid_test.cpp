@@ -18,8 +18,8 @@ TEST_SUITE("eGrid")
 
             THEN("drawing works")
             {
-                auto firstPoint = grid->Insert(eCoord{0,0});
-                grid->DrawLine(firstPoint, eCoord{1,0});
+                auto firstPoint = grid->Insert(eCoord{0, 0});
+                grid->DrawLine(firstPoint, eCoord{1, 0});
             }
         }
     }

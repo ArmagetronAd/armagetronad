@@ -3,6 +3,8 @@
 ## Summary
 Rendering subsystem providing OpenGL-based 3D graphics, font rendering, and display management. Built as `librender.a`.
 
+**Doxygen Group**: `@defgroup Render` - Render library. Screen initialization and OpenGL utilities (defined in README.md)
+
 ## Details
 
 The render directory implements the graphical output layer of Armagetron Advanced. It provides an abstraction over OpenGL (`rRenderer` interface with `rGLRender` implementation) allowing for different rendering backends, though currently only OpenGL is used. The system handles all visual aspects: 2D/3D rendering, text display, textures, models, viewports, and screen management.
@@ -15,6 +17,7 @@ The renderer uses a state-stack pattern for managing OpenGL state changes (matri
 
 ```
 .
+├── README.md             # Doxygen @defgroup Render definition
 ├── rConsole.cpp           # Console system
 ├── rConsole.h            # Console system header
 ├── rConsoleGraph.cpp      # Graph-based console layout

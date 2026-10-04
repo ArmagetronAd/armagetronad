@@ -3,6 +3,8 @@
 ## Summary
 Core game engine components implementing the fundamental game simulation framework. Built as `libenginecore.a` and `libengine.a`.
 
+**Doxygen Group**: `@defgroup Engine` - Engine library containing Math, 2D Collisions, Game Objects, Players and Teams (defined in README.md)
+
 ## Details
 
 The engine directory contains the core simulation logic for Armagetron Advanced. It implements the game world model with grids, walls, paths, game objects, players, teams, and the physics of lightcycle movement. The library is divided into `libenginecore.a` (minimal core: `eGameObject`, `eGrid`) and `libengine.a` (full engine).
@@ -15,6 +17,7 @@ The engine heavily uses the tools library for data structures and utilities. It 
 
 ```
 .
+├── README.md             # Doxygen @defgroup Engine definition
 ├── eAdvWall.cpp           # Advanced wall features
 ├── eAdvWall.h            # Advanced wall features header
 ├── eAuthentication.cpp    # Player authentication system

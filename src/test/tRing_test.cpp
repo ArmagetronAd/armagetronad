@@ -2,7 +2,8 @@
 #include "tRing.h"
 
 // Mock class that inherits from tRing for testing
-class MockRingItem : public tRing {
+class MockRingItem : public tRing
+{
 public:
     int value;
     MockRingItem(int v = 0) : value(v) {}

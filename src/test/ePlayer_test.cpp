@@ -1,6 +1,6 @@
 #include "doctest.h"
 #include "ePlayer.h"
-#include "uInput.h"  // for uMAX_PLAYERS
+#include "uInput.h" // for uMAX_PLAYERS
 
 // Tests for ePlayer system
 // Purpose: Document the status quo behavior and detect regressions
@@ -21,7 +21,7 @@ TEST_SUITE("ePlayer")
         GIVEN("ePlayer exists")
         {
             // fetch player 0
-            ePlayer &player = *ePlayer::PlayerConfig(0);
+            ePlayer& player = *ePlayer::PlayerConfig(0);
 
             THEN("player has a name")
             {
@@ -35,7 +35,7 @@ TEST_SUITE("ePlayer")
 
             THEN("ids assigned")
             {
-                for(int i = 0; i < uMAX_PLAYERS; ++i)
+                for (int i = 0; i < uMAX_PLAYERS; ++i)
                 {
                     CHECK(ePlayer::PlayerConfig(i)->ID() == i);
                 }
@@ -44,87 +44,87 @@ TEST_SUITE("ePlayer")
     }
 }
 
-    TEST_CASE("ePlayer property accessors")
+TEST_CASE("ePlayer property accessors")
+{
+    GIVEN("accessing player properties")
     {
-        GIVEN("accessing player properties")
+        WHEN("checking all player IDs")
         {
-            WHEN("checking all player IDs")
+            THEN("each player has correct ID matching index")
             {
-                THEN("each player has correct ID matching index")
+                for (int i = 0; i < uMAX_PLAYERS; ++i)
                 {
-                    for(int i = 0; i < uMAX_PLAYERS; ++i)
-                    {
-                        CHECK(ePlayer::PlayerConfig(i)->ID() == i);
-                    }
+                    CHECK(ePlayer::PlayerConfig(i)->ID() == i);
+                }
+            }
+        }
+
+        WHEN("checking player names")
+        {
+            THEN("all players have non-empty names")
+            {
+                for (int i = 0; i < uMAX_PLAYERS; ++i)
+                {
+                    CHECK(0 != strlen(ePlayer::PlayerConfig(i)->Name()));
                 }
             }
 
-            WHEN("checking player names")
+            THEN("names are not all the same")
             {
-                THEN("all players have non-empty names")
+                // At least some players should have different names
+                bool allSame = true;
+                const char* firstName = ePlayer::PlayerConfig(0)->Name();
+                for (int i = 1; i < uMAX_PLAYERS; ++i)
                 {
-                    for(int i = 0; i < uMAX_PLAYERS; ++i)
+                    if (strcmp(firstName, ePlayer::PlayerConfig(i)->Name()) != 0)
                     {
-                        CHECK(0 != strlen(ePlayer::PlayerConfig(i)->Name()));
+                        allSame = false;
+                        break;
                     }
                 }
-
-                THEN("names are not all the same")
-                {
-                    // At least some players should have different names
-                    bool allSame = true;
-                    const char* firstName = ePlayer::PlayerConfig(0)->Name();
-                    for(int i = 1; i < uMAX_PLAYERS; ++i)
-                    {
-                        if (strcmp(firstName, ePlayer::PlayerConfig(i)->Name()) != 0)
-                        {
-                            allSame = false;
-                            break;
-                        }
-                    }
-                    CHECK_FALSE(allSame);
-                }
+                CHECK_FALSE(allSame);
             }
+        }
 
-            WHEN("checking player colors")
+        WHEN("checking player colors")
+        {
+            THEN("all players have valid RGB color values")
             {
-                THEN("all players have valid RGB color values")
+                for (int i = 0; i < uMAX_PLAYERS; ++i)
                 {
-                    for(int i = 0; i < uMAX_PLAYERS; ++i)
-                    {
-                        ePlayer* player = ePlayer::PlayerConfig(i);
-                        // RGB values should be in range [0, 255]
-                        CHECK(player->rgb[0] >= 0);
-                        CHECK(player->rgb[0] <= 255);
-                        CHECK(player->rgb[1] >= 0);
-                        CHECK(player->rgb[1] <= 255);
-                        CHECK(player->rgb[2] >= 0);
-                        CHECK(player->rgb[2] <= 255);
-                    }
+                    ePlayer* player = ePlayer::PlayerConfig(i);
+                    // RGB values should be in range [0, 255]
+                    CHECK(player->rgb[0] >= 0);
+                    CHECK(player->rgb[0] <= 255);
+                    CHECK(player->rgb[1] >= 0);
+                    CHECK(player->rgb[1] <= 255);
+                    CHECK(player->rgb[2] >= 0);
+                    CHECK(player->rgb[2] <= 255);
                 }
             }
         }
     }
+}
 
-    TEST_CASE("ePlayer static factory methods")
+TEST_CASE("ePlayer static factory methods")
+{
+    GIVEN("valid player indices")
     {
-        GIVEN("valid player indices")
+        WHEN("calling PlayerConfig with valid indices")
         {
-            WHEN("calling PlayerConfig with valid indices")
+            THEN("returns non-null pointers")
             {
-                THEN("returns non-null pointers")
+                for (int i = 0; i < uMAX_PLAYERS; ++i)
                 {
-                    for(int i = 0; i < uMAX_PLAYERS; ++i)
-                    {
-                        CHECK(ePlayer::PlayerConfig(i) != nullptr);
-                    }
+                    CHECK(ePlayer::PlayerConfig(i) != nullptr);
                 }
             }
+        }
 
-            // Note: PlayerConfig has assertions that prevent out-of-bounds access
-            // These tests would trigger assertion failures, so they are disabled
-            // as per the spec guidelines for tests blocked by uninitialized dependencies
-            #if false
+// Note: PlayerConfig has assertions that prevent out-of-bounds access
+// These tests would trigger assertion failures, so they are disabled
+// as per the spec guidelines for tests blocked by uninitialized dependencies
+#if false
             WHEN("calling PlayerConfig with out-of-bounds indices")
             {
                 THEN("handles negative indices")
@@ -139,28 +139,28 @@ TEST_SUITE("ePlayer")
                     ePlayer::PlayerConfig(uMAX_PLAYERS);
                 }
             }
-            #endif
+#endif
 
-            WHEN("checking PlayerIsInGame")
+        WHEN("checking PlayerIsInGame")
+        {
+            THEN("returns consistent results for all players")
             {
-                THEN("returns consistent results for all players")
+                // In test context, only player 0 is in game
+                for (int i = 0; i < uMAX_PLAYERS; ++i)
                 {
-                    // In test context, only player 0 is in game
-                    for(int i = 0; i < uMAX_PLAYERS; ++i)
-                    {
-                        bool inGame = ePlayer::PlayerIsInGame(i);
-                        CHECK(inGame == (i == 0));
-                    }
+                    bool inGame = ePlayer::PlayerIsInGame(i);
+                    CHECK(inGame == (i == 0));
                 }
             }
         }
     }
+}
 
-    // Camera settings tests disabled: startCamera, startFOV, and other camera-related
-    // properties are not initialized in test context and contain garbage values.
-    // As per spec guidelines, tests blocked by uninitialized dependencies are
-    // written but disabled.
-    #if false
+// Camera settings tests disabled: startCamera, startFOV, and other camera-related
+// properties are not initialized in test context and contain garbage values.
+// As per spec guidelines, tests blocked by uninitialized dependencies are
+// written but disabled.
+#if false
     TEST_CASE("ePlayer camera settings")
     {
         GIVEN("player camera configuration")
@@ -225,25 +225,25 @@ TEST_SUITE("ePlayer")
             }
         }
     }
-    #endif
+#endif
 
-    TEST_CASE("ePlayer preferences")
+TEST_CASE("ePlayer preferences")
+{
+    GIVEN("player preference settings")
     {
-        GIVEN("player preference settings")
+        WHEN("checking favoriteNumberOfPlayersPerTeam")
         {
-            WHEN("checking favoriteNumberOfPlayersPerTeam")
+            THEN("all players have positive values")
             {
-                THEN("all players have positive values")
+                for (int i = 0; i < uMAX_PLAYERS; ++i)
                 {
-                    for(int i = 0; i < uMAX_PLAYERS; ++i)
-                    {
-                        ePlayer* player = ePlayer::PlayerConfig(i);
-                        CHECK(player->favoriteNumberOfPlayersPerTeam >= 1);
-                    }
+                    ePlayer* player = ePlayer::PlayerConfig(i);
+                    CHECK(player->favoriteNumberOfPlayersPerTeam >= 1);
                 }
             }
         }
     }
+}
 
 // TODO: More comprehensive ePlayer tests could be added, but the system
 // has significant dependencies on the engine and network systems that make

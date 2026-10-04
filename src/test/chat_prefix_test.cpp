@@ -7,12 +7,13 @@
 #include "eGrid.h"
 
 #undef BAD_CAST
-#define BAD_CAST(x) reinterpret_cast<xmlChar const *>(x)
+#define BAD_CAST(x) reinterpret_cast<xmlChar const*>(x)
 
 // Dummy SDL_main for macOS SDL 1.2 compatibility
 // chat_prefix_test doesn't actually use SDL, but links against libraries that do
 #ifdef __APPLE__
-extern "C" int SDL_main(int argc, char **argv) {
+extern "C" int SDL_main(int argc, char** argv)
+{
     return 0;
 }
 #endif
@@ -43,7 +44,7 @@ struct Session
     void AddSaid( const tString & say , nTimeRolling time )
     {
         tString player{"me"};
-        eChatSaidEntry entry( say, player, time, eChatMessageType_Public );
+        eChatSaidEntry entry(say, player, time, eChatMessageType_Public);
         chatlog_.push_back( entry );
     }
     
@@ -82,7 +83,7 @@ void TestSession( const Session & session )
         else
         {
             Stats::stats.chatsThrough += 1;
-            player.GetLastSaid().AddSaid( entry );
+            player.GetLastSaid().AddSaid(entry);
         }
     }
 }
@@ -92,28 +93,28 @@ void ProcessNode( xmlTextReaderPtr reader )
     static Session currentSession( 0 );
     
     int type = xmlTextReaderNodeType( reader );
-    
-    if ( type == XML_READER_TYPE_END_ELEMENT && xmlStrEqual( xmlTextReaderConstName( reader ), BAD_CAST("Session") ) )
+
+    if (type == XML_READER_TYPE_END_ELEMENT && xmlStrEqual(xmlTextReaderConstName(reader), BAD_CAST("Session")))
     {
         TestSession( currentSession );
     }
     
     if ( type != XML_READER_TYPE_ELEMENT )
         return;
-    
-    if ( xmlStrEqual( xmlTextReaderConstName( reader ), BAD_CAST("Session") ) )
+
+    if (xmlStrEqual(xmlTextReaderConstName(reader), BAD_CAST("Session")))
     {
         currentSession = Session( xmlTextReaderGetParserLineNumber( reader ) );
     }
-    else if ( xmlStrEqual( xmlTextReaderConstName( reader ), BAD_CAST("Player") ) )
+    else if (xmlStrEqual(xmlTextReaderConstName(reader), BAD_CAST("Player")))
     {
         xmlChar *xmlPlayer = xmlTextReaderReadString( reader );
         currentSession.player_ = ConvertXMLString( xmlPlayer );
         xmlFree( xmlPlayer );
     }
-    else if ( xmlStrEqual( xmlTextReaderConstName( reader ), BAD_CAST("Said") ) )
+    else if (xmlStrEqual(xmlTextReaderConstName(reader), BAD_CAST("Said")))
     {
-        xmlChar *xmlTime = xmlTextReaderGetAttribute( reader, BAD_CAST("time") );
+        xmlChar* xmlTime = xmlTextReaderGetAttribute(reader, BAD_CAST("time"));
         xmlChar *xmlSaid = xmlTextReaderReadString( reader );
         
         long time = atol( (const char *)xmlTime );

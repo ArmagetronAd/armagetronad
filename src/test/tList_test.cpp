@@ -2,7 +2,8 @@
 #include "tList.h"
 
 // Mock class that inherits from tListMember for testing
-class MockListMember : public tListMember {
+class MockListMember : public tListMember
+{
 public:
     int value;
     MockListMember(int v = 0) : value(v) {}
@@ -63,13 +64,13 @@ TEST_SUITE("tList")
             bool found1 = false, found2 = false, found3 = false;
             for (int i = 0; i < list.Len(); i++)
             {
-            MockListMember* item = list[i];
-            if (item == &item1)
-            found1 = true;
-            if (item == &item2)
-            found2 = true;
-            if (item == &item3)
-            found3 = true;
+                MockListMember* item = list[i];
+                if (item == &item1)
+                    found1 = true;
+                if (item == &item2)
+                    found2 = true;
+                if (item == &item3)
+                    found3 = true;
             }
 
             THEN("all items are in the list")

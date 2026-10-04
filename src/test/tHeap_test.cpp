@@ -6,20 +6,22 @@
 
 namespace
 {
-class MockHeapElement: public tHeapElement
+class MockHeapElement : public tHeapElement
 {
-    public:
-    void SetVal(double val, tHeapBase &heap)
+public:
+    void SetVal(double val, tHeapBase& heap)
     {
         _heap = &heap;
         tHeapElement::SetVal(val, heap);
     }
+
 protected:
-    tHeapBase *Heap() const override { return _heap; };
+    tHeapBase* Heap() const override { return _heap; };
+
 private:
-    tHeapBase *_heap{};
+    tHeapBase* _heap{};
 };
-}
+} // namespace
 
 // For now, just test that we can include the header and basic types exist
 TEST_SUITE("tHeap")

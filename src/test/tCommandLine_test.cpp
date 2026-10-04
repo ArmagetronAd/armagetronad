@@ -18,11 +18,11 @@ TEST_SUITE("tCommandLine")
             WHEN("Analyse is called with minimal arguments")
             {
                 // Create minimal argv
-                char* argv[] = { const_cast<char*>("test_program") };
+                char* argv[] = {const_cast<char*>("test_program")};
                 int argc = 1;
-                
+
                 bool result = cmdData.Analyse(argc, argv);
-                
+
                 THEN("Analyse returns true")
                 {
                     CHECK(result == true);
@@ -39,22 +39,22 @@ TEST_SUITE("tCommandLine")
             char f[] = "-f";
             char option[] = "--option";
             char value[] = "value";
-            char* argv[] = { program, f, option, value };
+            char* argv[] = {program, f, option, value};
             int argc = 4;
-            
+
             tCommandLineParser parser(argc, argv);
-            
+
             THEN("parser can be constructed without crashing")
             {
             }
-            
+
             THEN("Executable returns the program name")
             {
                 const char* exec = parser.Executable();
                 CHECK(exec != nullptr);
                 CHECK(strcmp(exec, "program") == 0);
             }
-            
+
             THEN("Current initially points to first argument after executable")
             {
                 const char* current = parser.Current();
@@ -62,11 +62,11 @@ TEST_SUITE("tCommandLine")
                 // Should point to "-f" initially (index 0 is program name)
                 CHECK(strcmp(current, "program") == 0);
             }
-            
+
             WHEN("Advance is called")
             {
                 parser.Advance();
-                
+
                 THEN("Current moves to next argument")
                 {
                     const char* current = parser.Current();
@@ -74,24 +74,24 @@ TEST_SUITE("tCommandLine")
                     CHECK(strcmp(current, "-f") == 0);
                 }
             }
-            
+
             WHEN("Advance is called multiple times")
             {
                 parser.Advance(); // program
                 parser.Advance(); // -f
                 parser.Advance(); // --option
-                
+
                 THEN("Current moves through arguments")
                 {
                     const char* current = parser.Current();
                     CHECK(current != nullptr);
                     CHECK(strcmp(current, "value") == 0);
                 }
-                
+
                 AND_WHEN("Advance is called at the end")
                 {
                     parser.Advance(); // Move past last argument
-                    
+
                     THEN("End returns true when past last argument")
                     {
                         CHECK(parser.End() == true);
@@ -109,17 +109,17 @@ TEST_SUITE("tCommandLine")
             char f[] = "-f";
             char fullscreen[] = "--fullscreen";
             char w[] = "-w";
-            char* argv[] = { program, f, fullscreen, w };
+            char* argv[] = {program, f, fullscreen, w};
             int argc = 4;
-            
+
             tCommandLineParser parser(argc, argv);
             parser.Advance(); // Skip program name
-            
+
             THEN("GetSwitch can detect short switches")
             {
                 CHECK(parser.GetSwitch("-f") == true);
             }
-            
+
             AND_THEN("GetSwitch returns false for non-matching switches")
             {
                 CHECK(parser.GetSwitch("-x") == false);
@@ -134,12 +134,12 @@ TEST_SUITE("tCommandLine")
         {
             char program[] = "program";
             char fullscreen[] = "--fullscreen";
-            char* argv[] = { program, fullscreen };
+            char* argv[] = {program, fullscreen};
             int argc = 2;
-            
+
             tCommandLineParser parser(argc, argv);
             parser.Advance(); // Skip program name
-            
+
             THEN("GetSwitch can detect long switches")
             {
                 CHECK(parser.GetSwitch("--fullscreen") == true);
@@ -153,12 +153,12 @@ TEST_SUITE("tCommandLine")
         {
             char program[] = "program";
             char w[] = "-w";
-            char* argv[] = { program, w };
+            char* argv[] = {program, w};
             int argc = 2;
-            
+
             tCommandLineParser parser(argc, argv);
             parser.Advance(); // Skip program name
-            
+
             THEN("GetSwitch can detect switches with short alternatives")
             {
                 // Try to match -w with alternative --window
@@ -176,16 +176,16 @@ TEST_SUITE("tCommandLine")
             char program[] = "program";
             char config[] = "--config";
             char cfgfile[] = "config.cfg";
-            char* argv[] = { program, config, cfgfile };
+            char* argv[] = {program, config, cfgfile};
             int argc = 3;
-            
+
             tCommandLineParser parser(argc, argv);
-            
+
             WHEN("parser is created with option arguments")
             {
                 // Note: The parser starts at index 0 (program name), need to advance
                 parser.Advance(); // Skip program name
-                
+
                 THEN("GetOption works")
                 {
                     tString optionValue;

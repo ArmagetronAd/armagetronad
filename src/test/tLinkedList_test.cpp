@@ -5,13 +5,15 @@
 // Purpose: Document the status quo behavior and detect regressions
 
 // Mock class that inherits from tListItem for testing
-class MockLinkedListItem : public tListItem<MockLinkedListItem> {
+class MockLinkedListItem : public tListItem<MockLinkedListItem>
+{
 public:
     int value;
     MockLinkedListItem(int v = 0) : value(v) {}
-    
+
     // For sorting
-    static bool Compare(const MockLinkedListItem* a, const MockLinkedListItem* b) {
+    static bool Compare(const MockLinkedListItem* a, const MockLinkedListItem* b)
+    {
         return a->value < b->value;
     }
 };

@@ -3,6 +3,8 @@
 ## Summary
 User interface layer handling input, menus, and user interaction. Built as `libui.a`.
 
+**Doxygen Group**: `@defgroup UI` - User Interface. Menus and input handling (defined in README.md)
+
 ## Details
 
 The UI directory provides the user interaction layer for Armagetron Advanced. It manages input devices (keyboard, mouse, joystick) and the menu system. The UI layer is platform-agnostic, using SDL for input handling.
@@ -17,6 +19,7 @@ The layer integrates with the render system for displaying menus and with the co
 
 ```
 .
+├── README.md             # Doxygen @defgroup UI definition
 ├── uInput.cpp            # Input handling (keyboard, mouse, joystick)
 ├── uInput.h             # Input handling header
 ├── uInputQueue.cpp       # Buffered input processing and recording
