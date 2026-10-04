@@ -146,8 +146,10 @@ eGameObject::~eGameObject(){
 void eGameObject::InteractWith(eGameObject *,REAL,int){}
 
 // what happens if we pass eWall w?
-void eGameObject::PassEdge(const eWall *w,REAL,REAL,int){
-    if (w) Kill();
+void eGameObject::PassEdge(const eWall* w, REAL time, REAL alpha, int recursion)
+{
+    if (EdgeIsDangerous(w, time, alpha))
+        Kill();
 }
 
 static int se_moveTimeout = 100;

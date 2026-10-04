@@ -32,6 +32,11 @@ autoconf || { rm configure; exit 1; }
 echo "Running automake..."
 automake -a -Wno-portability || exit 1
 
+# check for unstable nixos links; use copies instead
+if ls install-sh -alt | grep /nix/store > /dev/null; then
+    automake -f -a -c -Wno-portability || exit 1
+fi
+
 echo "Flagging scripts as executable..."
 chmod a+x $MYDIR/*.sh || exit 1
 echo "Done!  You may now run configure and start building."

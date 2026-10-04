@@ -482,7 +482,7 @@ tString expand_home(tString const & pathname) {
         r = pathname;
 
 #ifdef DEBUG
-    printf("changed %s to %s\n", (const char *)pathname, (const char *)r);
+    // con << "changed " << pathname << " to " << r << "\n";
 #endif
     return r;
 }
@@ -1501,8 +1501,8 @@ private:
 
                 if ( buildDirectory.Len() <= 1 )
                     buildDirectory = ".";
-#ifdef DEBUG
-                std::cout << "BuildDirectory = " << buildDirectory << "\n";
+#ifdef DEBUG_PATH
+                con << "BuildDirectory = " << buildDirectory << "\n";
 #endif
 
                 // last fallback for debugging (activated only if there is data in the assumed build directory)

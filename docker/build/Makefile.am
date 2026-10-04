@@ -228,6 +228,8 @@ context.steam: context.64 gits_artifacts.tag
 		sed < $<.dir/$$f > $@.dir/$$f -e "s,textures/title.jpg,textures/title.png,"; \
 	done
 	cd $@.dir/source; ./bootstrap.sh
+#	extra configuration: no unit tests (too advanced C++ for the old steam SDK)
+	echo >> $@.dir/extra_configure_args --disable-tests
 #   done
 	echo > $@
 

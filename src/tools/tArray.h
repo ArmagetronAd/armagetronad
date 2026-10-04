@@ -30,6 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "defs.h"
 #include <new>
+#include <tuple> // for std::ignore
 #include "tError.h"
 #include "tSafePTR.h"
 
@@ -66,6 +67,7 @@ public:
     void SetLen(int i){len=i;}
     int Len()const {return len;}
     int  Size() const {return size;}
+    size_t capacity() const { return size; } // future compatibility
 };
 
 
@@ -171,8 +173,8 @@ public:
 
     const tArray<T> &operator=(const tArray<T> &A){
 
-        SetLen(A.Len());
         Clear();
+        SetLen(A.Len());
         CopyFrom(A);
 
         return *this;
@@ -182,6 +184,7 @@ public:
     {
         int newLen = this->Len()-1;
         T keep = (*this)[ index ];
+        std::ignore = keep; // purpose of keep is to keep reference counted objects alive for a bit
         if ( index < newLen )
             (*this)[ index ] = (*this)[ newLen ];
         this->SetLen( newLen );

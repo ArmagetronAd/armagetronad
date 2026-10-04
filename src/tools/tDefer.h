@@ -4,6 +4,7 @@
 
 ArmageTron -- Just another Tron Lightcycle Game in 3D.
 Copyright (C) 2000  Manuel Moos (manuel@moosnet.de)
+Copyright (C) 2004  Armagetron Advanced Team (http://sourceforge.net/projects/armagetronad/)
 
 **************************************************************************
 
@@ -20,51 +21,50 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-  
+
 ***************************************************************************
 
 */
 
-#include "eGrid.h"
-#include <iostream>
+#ifndef ArmageTron_tDefer_H
+#define ArmageTron_tDefer_H
 
-eHalfEdge *leak = NULL;
+#include <utility>
 
-int main(){
-    tStackObject< eGrid > grid;
-    grid.Create();
-    grid.Check();
-    grid.Check();
-
-#ifdef DEBUG
-    grid.doCheck = false;
-#endif
-    for (int i=2;i>=0;i--)
+// executes a function when it goes out of scope
+template <typename F>
+class tDeferrer
+{
+public:
+    tDeferrer(F&& f) : f_{std::forward<F>(f)}
     {
-        std::cout << i << "\n";
-        grid.SimplifyAll(10);
-
-        ePoint *p =grid.Insert(eCoord(0,0));
-        p = grid.DrawLine(p, eCoord(1000+2*i,i), NULL);
-
-#ifdef DEBUG
-        if (i == -1)
-        {
-            grid.doCheck = true;
-            grid.Check();
-        }
-#endif
-
-
-        p = grid.DrawLine(p, eCoord(10+2*i,10+i), NULL);
-        p = grid.DrawLine(p, eCoord(-10+2*i,10+i), NULL);
-        p = grid.DrawLine(p, eCoord(-10+2*i,-10+i), NULL);
-        p = grid.DrawLine(p, eCoord(-1000+2*i,1000+i), NULL);
-        p = grid.DrawLine(p, eCoord(10,500+i), NULL);
-        p = grid.DrawLine(p, eCoord(10,0+i), NULL);
-        p = grid.DrawLine(p, eCoord(10,700+i), NULL);
-        p = grid.DrawLine(p, eCoord(10,10+i), NULL);
     }
-    grid.Check();
-    grid.Clear();
+    ~tDeferrer() { std::move(f_)(); }
+
+private:
+    F f_;
+};
+
+template <typename F>
+// [[nodiscard]] // not yet
+tDeferrer<F> tDefer(F&& f)
+{
+    return tDeferrer<F>{std::forward<F>(f)};
 }
+
+#define MERGE_(a, b) a##b
+#define LABEL_(a) MERGE_(unique_name_, a)
+#define UNIQUE_LABEL LABEL_(__LINE__)
+
+// for tests: executes CODE once when the macro is used, and once again when the current scope ends
+// CODE needs to end with a semicolon
+#define INVARIANT(CODE) \
+    {                   \
+        CODE            \
+    }                   \
+    auto const UNIQUE_LABEL = tDefer([&]() { CODE });
+
+// for tests: check condition now and when the scope is exited
+#define INVARIANT_CHECK(CONDITION) INVARIANT(CHECK(CONDITION);)
+
+#endif

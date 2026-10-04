@@ -185,5 +185,8 @@ public:
 
 extern gGameSettings* sg_currentSettings;
 
+// the 'start over' menu is defined in gArmagetron.cpp and needs to be injected
+void sg_RegisterStartupPlayerMenu(VOIDFUNC* pFunc);
+
 #endif
 

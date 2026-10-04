@@ -25,7 +25,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
-
 #include "gStuff.h"
 #include "eSound.h"
 #include "eGrid.h"
@@ -104,6 +103,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifdef DEBUG
 //#define CONNECTION_STRESS
 #endif
+
+namespace
+{
+void (*sg_StartupPlayerMenu)();
+}
+void sg_RegisterStartupPlayerMenu(VOIDFUNC* pFunc)
+{
+    sg_StartupPlayerMenu = pFunc;
+}
 
 tCONFIG_ENUM( gGameType );
 tCONFIG_ENUM( gFinishType );
@@ -2505,8 +2513,6 @@ void sg_DisplayVersionInfo() {
     sg_ClientFullscreenMessage("$version_info_title", versionInfo, 1000);
 }
 
-void sg_StartupPlayerMenu();
-
 void MainMenu(bool ingame){
     //	update_settings();
 
@@ -2662,10 +2668,12 @@ void MainMenu(bool ingame){
 
     //  misc.SetCenter(.25);
 
-    uMenuItemFunction first_setup
-    (&misc,"$misc_initial_menu_title",
-     "$misc_initial_menu_help",
-     &sg_StartupPlayerMenu);
+    if (sg_StartupPlayerMenu)
+    {
+        uMenuItemFunction first_setup(&misc, "$misc_initial_menu_title",
+                                      "$misc_initial_menu_help",
+                                      sg_StartupPlayerMenu);
+    }
 
     uMenuItemFunction language
     (&misc,"$language_menu_title",

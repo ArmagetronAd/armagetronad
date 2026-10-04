@@ -1,3 +1,6 @@
+#ifndef ArmageTron_AXIS_H
+#define ArmageTron_AXIS_H
+
 #include "defs.h"
 
 #include <math.h>
@@ -41,3 +44,4 @@ protected:
     void SnapWinding(); //!< push axes that are really close to coordinate directions to them
 };
 
+#endif

@@ -38,7 +38,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "tLinkedList.h"
 
-//! entry point for command line parsing
+/// @ingroup Tools
+/// @addtogroup Tools_CommandLine Command Line Parsing
+/// @brief Command Line Parsing Framework. Dispatches command line data to tCommandLineAnalyzer instances.
+/// @{
+
+//! @brief Entry point for command line parsing
 struct tCommandLineData
 {
     tString* programVersion_;
@@ -58,7 +63,7 @@ private:
     bool doc_; //!< flag indicating whether documentation should be printed
 };
 
-//! command line data
+//! @brief Command line data
 struct tCommandLineParser
 {
 public:
@@ -80,8 +85,7 @@ private:
     int index;                   //! the index currently analyzed option
 };
 
-
-//! command line analyzing object
+//! @brief command line analyzing object
 class tCommandLineAnalyzer: public tListItem< tCommandLineAnalyzer >
 {
 public:
@@ -96,6 +100,8 @@ private:
     virtual bool DoAnalyze( tCommandLineParser & parser, int pass ) = 0; //! Analyzes the command line option
     virtual void DoHelp( std::ostream & s ) = 0;                  //! Prints option help
 };
+
+///@}
 
 // *******************************************************************************************
 // *

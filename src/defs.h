@@ -36,7 +36,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "config.h"
 
-#include <math.h>
+#include <cmath>
 #include <ctype.h>
 #include <iosfwd>
 
@@ -73,41 +73,44 @@ typedef bool BOOLRETFUNC();
 typedef VOIDFUNC *FUNCPTR;
 typedef INTFUNC *INTFUNCPTR;
 
-// replacements for float math functions
+// these are in std:: since C++ 11, which we are using.
+// Apparently, old ubuntus are not fully compliant there, so we still
+// need the configure checks and guards here.
+
 #ifndef HAVE_SINF
-inline REAL sinf( REAL angle ) throw() { return REAL(sin( angle )); }
+using std::sinf;
 #endif
 
 #ifndef HAVE_COSF
-inline REAL cosf( REAL angle ) throw() { return REAL(cos( angle )); }
+using std::cosf;
 #endif
 
 #ifndef HAVE_TANF
-inline REAL tanf( REAL angle ) throw() { return REAL(tan( angle )); }
+using std::tanf;
 #endif
 
 #ifndef HAVE_ATAN2F
-inline REAL atan2f( REAL y, REAL x ) throw() { return REAL(atan2( y, x )); }
+using std::atan2f;
 #endif
 
-#ifndef HAVE_SQRTF
-inline REAL sqrtf( REAL x ) throw() { return REAL(sqrt( x )); }
+#ifndef HAVE_ATAN2F
+using std::sqrtf;
 #endif
 
 #ifndef HAVE_LOGF
-inline REAL logf( REAL x ) throw() { return REAL(log( x )); }
+using std::logf;
 #endif
 
 #ifndef HAVE_EXPF
-inline REAL expf( REAL x ) throw() { return REAL(exp( x )); }
+using std::expf;
 #endif
 
 #ifndef HAVE_FABSF
-inline REAL fabsf( REAL x ) throw() { return REAL(fabs( x )); }
+using std::fabsf;
 #endif
 
 #ifndef HAVE_FLOORF
-inline REAL floorf( REAL x ) throw() { return REAL(floor( x )); }
+using std::floorf;
 #endif
 
 // use this function to explicitly ignore return values

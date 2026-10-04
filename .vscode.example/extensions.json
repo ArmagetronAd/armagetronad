@@ -1,0 +1,8 @@
+{
+  "recommendations": [
+    "ms-vscode.cpptools",
+    "ryanluker.vscode-coverage-gutters",
+    "MermaidChart.vscode-mermaid-chart",
+    "matepek.vscode-catch2-test-adapter"
+  ]
+}

@@ -72,10 +72,9 @@ REAL lower_height=50;
 static rFileTexture sky(rTextureGroups::TEX_FLOOR,"textures/sky.png",1,1,true);
 static rFileTexture sky_moviepack(rTextureGroups::TEX_FLOOR,"moviepack/sky.png",1,1,true);
 
-extern bool sg_MoviePack();
-
 static void sky_select(){
-    if (sg_MoviePack()){
+    if (se_MoviePack())
+    {
         // Since old movie packs usually don't include sky.png we need to
         // be nice and fall back to the default sky tecture. -k
         tString s = tDirectories::Data().GetReadPath( "moviepack/sky.png" );

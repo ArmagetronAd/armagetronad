@@ -1,9 +1,14 @@
 *.DS_Store
 Armagetron Advanced Dedicated
 Armagetron Advanced.app
-desktop/os-x/Info.plist
+/desktop/os-x/Info.plist
+/desktop/armagetronad.appdata.xml
 .gdbinit
 .cache
+.dirstamp
+*.gcda
+*.gcno
+*.profraw
 .lock.*
 docker/images/context
 docker/deploy/*.gpg
@@ -25,14 +30,12 @@ Makefile.in
 /config.h.in
 /config.sub
 /configure
-/builds
 /depcomp
 /install-sh
 /ylwrap
 /missing
 /touch
 /version.m4
-src/doc/commands.txt
 ./.changetag
 Makefile
 /config.h
@@ -59,7 +62,6 @@ src/tTrueVersion.h
 src/tUniversalVariables.h
 src/tUniversalVariables.h.in
 .dummy.dep
-src/doc/Doxyfile
 *.html
 html.m4
 *.dep
@@ -70,7 +72,6 @@ aa_config.h.in
 *.layout
 *.depend
 .objs
-/build
 .objs_release
 desktop/armagetronad.protocol
 src/vParser.cpp
@@ -90,8 +91,7 @@ src/armagetronad-serverquery
 ./rubbish
 __pycache__
 /src/armagetronad_serverquery
-src/armagetronad_main_master
-src/doc/COPYING.txt
+/src/armagetronad_main_master
 rubbish
 desktop/armagetronad-armagetronad-handler.desktop
 desktop/armagetronad-link.xml
@@ -99,11 +99,12 @@ desktop/armagetronad-link.xml
 /version.h
 *~
 *.pyc
-src/.cproject
-src/.project
-src/.settings
-autogen.sh
-.vscode
+/src/.cproject
+/src/.project
+/src/.settings
+/src/chat_prefix_test
+/src/unit_tests
+
 autogen.sh
 *.o
 *.a
@@ -119,3 +120,22 @@ src/nTrueVersion.h
 .changetag
 fingerprint
 wget-log*
+
+# possible test build locations
+/build
+/builds
+
+# AI work and config directories
+/.vibe
+/.claude
+/.flow
+/ai_docs # put your personal markdown files in here
+/.memory # project specific memory markdown files for AIs, some agents will use this automatically
+
+# visual studio code things
+/.vscode
+/.devcontainer
+
+# code coverage artifacts
+/.coverage_available
+/coverage

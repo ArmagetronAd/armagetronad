@@ -95,8 +95,8 @@ public:
         tArray<char>::Clear();
     }
 
-    //! makes this string exactly of length len.
-    void SetPos( int len, bool cut );
+    //! makes this string exactly of length len (not including the trailing zero). This is meant for output formatting; padding is done with spaces, and (unless len==0) the string always ends in a space.
+    void SetPos(int len, bool cut) noexcept;
 
     //! determines whether this string starts with the argument string
     bool StartsWith( const tString & other ) const;
@@ -131,6 +131,9 @@ public:
     tString Truncate( int truncateAt ) const;
 
     void NetFilter();                           //!< filters strings from the net for strange things like newlines
+
+private:
+    int Size() const = delete; // disable confusing function inherited from base; here, it would returns the reserved memory size. On trunk, it is the true string length.
 };
 
 //! proxy class for inserting color markings

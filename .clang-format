@@ -18,6 +18,26 @@ AccessModifierOffset: -4
 TabWidth: 4
 UseTab: Never
 
+BreakBeforeBraces: Allman
+# diff count trunk
+# none      : 189776
+# Attach    : 203028
+# Linux     : 198465
+# Mozilla   : 203028
+# Stroustrup: 198585 (Also WebKit)
+# Allman    : 189711 <-
+# Whitesmiths:234458
+# GNU       : 231651
+#
+
+# body of short lambdas can be on one line
+AllowShortLambdasOnASingleLine: All
+# now, 'BreakBeforeBraces: Allman' will still force the lambdas to be on at least two lines because it enforces
+# a break before the opening brace... but the only alternative setting available, 'BreakBeforeBraces: Custom' and
+# 'BraceWrapping: BeforeLambdaBody: false', FORCES no break before the opening brace, which is worse,
+# (you can force the break with an extra empty comment, which is also worse) and you need
+# to specify all the other BraceWrapping settings.
+
 # leave line breaks alone
 ColumnLimit: 0
 # note: it is still recommended to leave lines short, ideally below 80; but
@@ -38,6 +58,9 @@ PointerAlignment: Left
 
 AllowShortFunctionsOnASingleLine: true
 AllowShortBlocksOnASingleLine: true
+
+# not yet suppored widely enough
+# AllowShortRecordOnASingleLine: SRS_EmptyAndAttached
 
 # Alignment options
 
