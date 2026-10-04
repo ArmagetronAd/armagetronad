@@ -181,8 +181,8 @@ unit_tests_SOURCES = thirdparty/doctest/doctest.h \
 	test/tCallbackString_test.cpp test/tRandomizer_test.cpp \
 	test/eRectangle_test.cpp test/eAxis_test.cpp \
 	test/tMath_test.cpp test/tSysTime_test.cpp test/tCommandLine_test.cpp \
-	test/tEventQueue_test.cpp test/tDirectories_test.cpp test/md5_test.cpp \
-	test/eTimer_test.cpp test/eGrid_test.cpp \
+	test/tEventQueue_test.cpp test/tDirectories_test.cpp test/md5_test.cpp test/memtest_adhoc_test.cpp \
+	test/eTimer_test.cpp test/eGrid_test.cpp test/eGrid_adhoc_test.cpp \
 	test/ePath_test.cpp \
 	test/ePlayer_test.cpp test/ePlayerNetID_test.cpp test/eTeam_test.cpp \
 	test/nSocket_test.cpp test/nNetwork_test.cpp test/nMessage_test.cpp \
