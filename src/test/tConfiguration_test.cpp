@@ -146,6 +146,10 @@ TEST_SUITE("tConfiguration")
         }
     }
 
+#if false 
+// while this works and counts as success, with -v, it spams the failure to
+// the log anyway, and the failed assertion counts as failed assertion.
+
     TEST_CASE("ConfItemTempValue expected fails" * doctest::should_fail())
     {
         GIVEN("a wrong confitem name")
@@ -157,6 +161,8 @@ TEST_SUITE("tConfiguration")
             }
         }
     }
+#endif
+
 }
 
 // TODO: More comprehensive tConfiguration tests could be added, but the system
