@@ -340,30 +340,7 @@ void nBandwidthSceduler::RemoveArbitrator	( nBandwidthArbitrator& arbitrator )
     arbitrator.sceduler_ = NULL;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #ifdef DEBUG
-
 
 //static PriorizingTester tester;
 

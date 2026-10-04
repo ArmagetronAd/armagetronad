@@ -162,7 +162,6 @@ TEST_SUITE("tConfiguration")
         }
     }
 #endif
-
 }
 
 // TODO: More comprehensive tConfiguration tests could be added, but the system
