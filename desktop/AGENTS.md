@@ -1,47 +1,65 @@
 # desktop/ Directory
 
 ## Summary
-Desktop integration files for Linux and Unix desktop environments.
+
+Desktop integration files and resources for Armagetron Advanced.
 
 ## Details
 
-The desktop directory contains files needed for integrating Armagetron Advanced into desktop environments on Linux and Unix-like systems. These files allow the game to appear in application menus, be launched from desktop icons, and be properly categorized in software centers.
+This directory contains files and resources for desktop integration of Armagetron Advanced. These files enable proper integration with desktop environments, including desktop icons, menu entries, file associations, and other desktop-specific configurations.
 
-The primary file is `armagetronad.desktop`, which is a desktop entry file following the freedesktop.org Desktop Entry Specification. This file defines how the game appears in desktop menus, including the name, icon, description, categories, and launch command. Template variables like @progname@, @progtitle@, and @progid@ are replaced during the build process with actual values from the configuration.
-
-The `armagetronad.appdata.xml.in` file provides AppStream metadata for software centers and package managers. This XML file contains detailed application information including descriptions, screenshots, keywords, and other metadata that helps users discover and understand the software. Like the desktop file, it uses template variables that are replaced during build.
+The desktop integration files support various desktop environments and operating systems, ensuring that Armagetron Advanced integrates seamlessly with the user's desktop experience.
 
 ## Directory Structure
 
 ```
 .
-├── Makefile.am              # Build configuration for desktop files
-├── armagetronad.desktop.in   # Desktop entry template
-└── armagetronad.appdata.xml.in  # AppStream metadata template
+├── icons/               # Desktop icons in various sizes
+│   ├── 16x16/          # 16x16 pixel icons
+│   ├── 32x32/          # 32x32 pixel icons
+│   ├── 48x48/          # 48x48 pixel icons
+│   ├── 64x64/          # 64x64 pixel icons
+│   └── 128x128/        # 128x128 pixel icons
+└── os-x/              # macOS-specific desktop integration files
 ```
 
 ## Technologies
 
-- **Format**: freedesktop.org Desktop Entry Specification
-- **Metadata**: AppStream XML format
-- **Integration**: XDG desktop standards
+- **Icon Formats**: PNG, possibly other formats
+- **Desktop Standards**: Freedesktop.org standards for Linux, Windows conventions, macOS standards
+- **Integration**: Platform-specific desktop integration approaches
 
-## Coding Conventions
+## Integration
 
-- **Template Variables**: @progname@, @progtitle@, @progid@ replaced during build
-- **Desktop Entry**: Follows Desktop Entry Specification
-- **AppStream**: Follows AppStream metadata specification
+- **Installation**: Files copied to appropriate system directories during installation
+- **Platform Support**: Platform-specific desktop integration for each supported OS
+- **User Experience**: Seamless integration with the user's desktop environment
 
-## Key Patterns
+## Key Features
 
-- Desktop integration pattern
-- Template processing pattern
-- Metadata provision pattern
+- **Application Icons**: Icons for desktop shortcuts, launchers, and application menus
+- **File Associations**: Desktop file type associations for game data files
+- **Menu Integration**: Integration with system application menus
+- **MIME Types**: Proper MIME type definitions and associations
+- **Desktop Files**: .desktop files for Linux, .app bundles for macOS, etc.
 
-## Build System
+## Platform Support
 
-- Desktop files processed by configure to replace template variables
-- `desktop_DATA` in Makefile.am installs processed files
-- Installed to `${datadir}/applications/` for .desktop files
-- Installed to `${datadir}/metainfo/` for .appdata.xml files
-- Installation controlled by `--enable-desktop` configure option
+- **Linux**: Freedesktop.org standard compliance (.desktop files)
+- **macOS**: macOS application bundle integration (handled in os-x/ subdirectory)
+- **Windows**: Windows desktop integration (shortcuts, registry entries)
+- **Cross-Platform**: Consistent desktop integration across all supported platforms
+
+## Usage
+
+- **Application Launching**: Desktop icons and launchers for easy application access
+- **File Management**: Proper file type associations and icons
+- **User Experience**: Professional desktop integration for better user experience
+- **System Integration**: Integration with system utilities and file managers
+
+## Icon Standards
+
+- **Multiple Sizes**: Support for different icon sizes (16x16 to 128x128)
+- **Color Depths**: Appropriate color depths and transparency
+- **Platform Conventions**: Platform-specific icon conventions and standards
+- **Consistency**: Consistent visual identity across all icon sizes

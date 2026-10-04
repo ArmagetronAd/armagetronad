@@ -1,59 +1,68 @@
 # textures/ Directory
 
 ## Summary
-Texture and image asset storage for Armagetron Advanced.
+
+Texture resources for Armagetron Advanced, including game graphics, UI elements, and visual assets.
 
 ## Details
 
-The textures directory is intended to store texture image files used for rendering various elements in Armagetron Advanced. These textures are applied to 3D models, walls, floors, and other game objects to provide visual detail.
+This directory contains texture files used throughout Armagetron Advanced for rendering game elements, user interfaces, backgrounds, and other visual components. Textures are a fundamental part of the game's visual presentation and are loaded by the rendering system.
 
-Currently, this directory appears to be empty or not populated in this repository version. Texture files may be:
-- Bundled with the resource directory (in resource/proto/)
-- Distributed separately in binary packages
-- Created by the resource processing system during build
-
-When populated, the directory would typically contain:
-- `.png` files for texture images with transparency
-- `.jpg` files for background and full-color textures
-- Subdirectories organizing textures by use (cycle, wall, floor, ui, etc.)
-
-Common textures in a Tron game include:
-- Cycle body and wheel textures
-- Wall textures for different wall types
-- Floor textures for arena surfaces
-- HUD and UI element textures
-- Font textures for text rendering
+The textures include various formats (PNG, JPG) and cover all visual aspects of the game from cycle trails to menu backgrounds.
 
 ## Directory Structure
 
 ```
 .
-└── [texture files when present]
+└── tutorials/           # Tutorial-specific textures and visual guides
+    ├── clipart/         # Clipart-style tutorial graphics
+    ├── conquest/        # Conquest mode tutorials
+    ├── doublegrind/     # Double Grind mode tutorials
+    ├── grinding/        # Grinding tutorial graphics
+    ├── navigation/      # Navigation tutorial graphics
+    ├── speedkill/       # Speed kill tutorial graphics
+    ├── speedkilldefense/# Speed kill defense tutorials
+    ├── survival/        # Survival mode tutorials
+    └── teamstart/       # Team start tutorials
 ```
 
 ## Technologies
 
-- **Formats**: PNG (with alpha), JPEG (full color), potentially others
-- **Loading**: SDL_image via `rTexture` class in src/render/
-- **Rendering**: OpenGL texture mapping
+- **Image Formats**: PNG, JPG (primary formats)
+- **Graphics**: 2D textures for OpenGL rendering
+- **Tools**: Image editing software for texture creation
+- **Rendering**: Loaded and rendered by the OpenGL-based rendering system
 
-## Coding Conventions
+## Integration
 
-- **File Naming**: Descriptive names for texture purposes
-- **Power of Two**: Textures typically use power-of-two dimensions for OpenGL compatibility
-- **Alpha Channels**: PNG files for textures requiring transparency
+- **Resource System**: Managed by the game's resource management system
+- **Rendering Layer**: Used by src/render/ for texture rendering
+- **Game Objects**: Applied to various game objects and UI elements
+- **Configuration**: Texture paths and settings configurable through game configuration
 
-## Key Patterns
+## Key Features
 
-- Texture resource pattern
-- Mipmapping pattern for distance textures
-- Texture atlas pattern for UI elements
-- Fallback texture pattern
+- **Texture Atlas**: May include texture atlases for efficient rendering
+- **Multiple Resolutions**: Support for different screen resolutions and quality settings
+- **Compression**: Texture compression for optimal performance
+- **Alpha Channels**: Support for transparency and blending effects
+- **Mipmapping**: Mipmap generation for distance-appropriate texture quality
 
-## Build System
+## Usage
 
-- Texture files may be installed to `${datadir}/textures/`
-- Alternatively bundled in resource/included/ directory
-- Loading handled by `rTexture` class at runtime
-- Supports user-provided texture overrides
-- Fallback to default textures if custom ones unavailable
+- **Game Visuals**: Cycle trails, walls, floors, and other game elements
+- **UI Elements**: Menus, buttons, dialogs, and HUD components
+- **Backgrounds**: Game and menu background images
+- **Effects**: Visual effects and animations
+- **Tutorials**: Visual guides and instructional graphics
+
+## Resource Management
+
+- Loaded on demand by the resource manager
+- Cached for performance optimization
+- May have fallback textures for missing files
+- Configurable texture quality and filtering options
+
+## Tutorial Textures
+
+The tutorials/ subdirectory contains specialized textures for the game's tutorial system, providing visual guides and examples for different game modes and techniques.

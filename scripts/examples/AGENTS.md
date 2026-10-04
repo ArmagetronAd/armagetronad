@@ -1,55 +1,49 @@
 # scripts/examples/ Directory
 
 ## Summary
-Example server administration and utility scripts.
+
+Example scripts and templates for Armagetron Advanced development and automation.
 
 ## Details
 
-The examples directory contains example scripts that demonstrate how to extend, customize, and automate server administration tasks for Armagetron Advanced. These scripts are primarily focused on server-side functionality.
-
-Key scripts include:
-- `flexban.sh` - An advanced, flexible player banning system that provides sophisticated ban management capabilities. It supports GeoIP-based banning (using `geoiplookup` if available), WhoIS lookups, and a configurable rule system for defining ban criteria.
-- `flexban_cfg.sh` - Configuration file for the flexban system, allowing server operators to customize ban rules, thresholds, and behavior.
-
-These example scripts are designed to be:
-- Used as-is for common server administration tasks
-- Customized for specific server needs
-- Extended with additional functionality
-- Studied as examples of how to integrate with Armagetron server events
-
-The scripts are typically called by the Armagetron server on various player events (join, chat, etc.) and can perform automated actions based on those events.
+This directory contains example scripts that demonstrate various development, build, and automation patterns for Armagetron Advanced. These examples serve as templates, documentation, and starting points for developers working on the project.
 
 ## Directory Structure
 
 ```
-.
-├── flexban.sh       # Flexible ban system
-└── flexban_cfg.sh   # Ban configuration
+. (Example script files demonstrating various development patterns)
 ```
 
 ## Technologies
 
-- **Language**: POSIX shell scripts
-- **Dependencies**: Optional: geoiplookup (GeoIP), whois (domain lookup)
-- **Integration**: Called by Armagetron server on player events
+- **Languages**: Shell scripts, Python, and other scripting languages
+- **Purpose**: Educational examples and templates
+- **Usage**: Reference and starting point for development tasks
 
-## Coding Conventions
+## Key Examples
 
-- **Shell Syntax**: POSIX-compliant where possible
-- **Modular**: Designed to be sourced and extended
-- **Configuration**: Separate .cfg files for parameters
-- **Comments**: Documented for administrator understanding
+- **Build Examples**: Example build configurations and compilation scripts
+- **Test Examples**: Example test scripts and validation patterns
+- **Deployment Examples**: Example deployment and distribution scripts
+- **Development Examples**: Example development workflows and patterns
 
-## Key Patterns
+## Integration
 
-- Server administration automation pattern
-- Event-driven script execution
-- Modular configuration pattern
-- GeoIP integration pattern
+- **Reference**: Used as reference for developers creating new scripts
+- **Templates**: Starting points for new development tasks
+- **Documentation**: Practical examples of development patterns
+- **Education**: Learning resource for project-specific development practices
 
-## Build System
+## Usage Patterns
 
-- Example scripts installed to `${datadir}/scripts/examples/`
-- `scripts_DATA` or `example_Scripts_DATA` in Makefile.am
-- Can be customized by server operators
-- Used as templates for creating custom scripts
+- **Learning**: Understanding how to perform specific development tasks
+- **Adaptation**: Modifying examples for specific use cases
+- **Best Practices**: Demonstrating recommended development practices
+- **Troubleshooting**: Reference for resolving common development issues
+
+## Development Considerations
+
+- **Commenting**: Well-commented examples explaining development concepts
+- **Modularity**: Examples demonstrating modular and reusable patterns
+- **Error Handling**: Examples of robust error handling and validation
+- **Cross-Platform**: Examples working across different platforms

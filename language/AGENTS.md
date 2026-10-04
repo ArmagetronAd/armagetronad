@@ -1,58 +1,59 @@
 # language/ Directory
 
 ## Summary
-Localization and translation files for multi-language support.
+
+Localization and language support files for Armagetron Advanced's internationalization system.
 
 ## Details
 
-The language directory contains all localization files for Armagetron Advanced. These files provide translations of all user-facing strings in the game, allowing players from different regions to use the software in their preferred language.
+This directory contains language files that provide translations of the game's text content into various languages. The localization system allows Armagetron Advanced to support multiple languages, making it accessible to a global audience.
 
-Each language file is a text file containing key-value pairs where the key is an internal string identifier and the value is the translated text. The base English strings are in `english_base.txt`, and variant English versions exist in `american.txt` and `british.txt`. Other supported languages include `deutsch.txt` (German), `french.txt` (French), and potentially others.
-
-The special file `english_base_notranslate.txt` contains strings that are intentionally not translated. These include:
-- Deprecated settings that should not be used
-- Internal hacks and debugging aids
-- User-should-not-touch configuration options
-- Undocumented features
-- Technical strings that don't benefit from translation
-
-The `languages.txt` file serves as an index, listing all available language files and their corresponding language names and codes.
+Language files typically contain key-value pairs mapping string identifiers to their translations in the target language.
 
 ## Directory Structure
 
 ```
-.
-├── american.txt              # American English strings
-├── british.txt              # British English strings
-├── deutsch.txt              # German strings
-├── english_base.txt         # Base English strings
-├── english_base_notranslate.txt  # Non-translatable English strings
-├── french.txt               # French strings
-└── languages.txt            # Language index/registry
+. (Language translation files, typically with .txt or .po extensions)
 ```
 
 ## Technologies
 
-- **Format**: Custom key-value text format
-- **Parsing**: `tLocale` class in src/tools/
-- **Usage**: `tOutput` streaming with language support
+- **Format**: Custom text-based localization format
+- **System**: Custom localization system with fallback support
+- **Encoding**: UTF-8 for international character support
 
-## Coding Conventions
+## Integration
 
-- **String IDs**: Descriptive identifiers for each translatable string
-- **Placeholders**: `%s`, `%d`, etc. for dynamic content insertion
-- **Context**: Comments may provide context for translators
-- **Escaping**: Special characters handled appropriately
+- **Localization System**: Managed by tLocale class in tools layer
+- **String Management**: Localized strings used throughout the UI and game
+- **Fallback**: Fallback to base language (English) for missing translations
+- **Runtime Switching**: Support for changing languages without restarting
 
-## Key Patterns
+## Key Features
 
-- Localization pattern with fallback to base language
-- String catalog pattern
-- Language index pattern
+- **Multi-Language Support**: Translations for multiple languages
+- **String Externalization**: All user-visible text separated from code
+- **Dynamic Loading**: Language files loaded on demand
+- **Placeholder Support**: Support for dynamic placeholders in translated strings
+- **Context Awareness**: String context for disambiguation
 
-## Build System
+## Language Files
 
-- Language files are installed to `${datadir}/language/`
-- `language_DATA` in Makefile.am handles installation
-- `languages.txt` is generated/updated as needed
-- Supports runtime language switching
+- **Base Language**: English (typically american or british variants)
+- **Additional Languages**: German (deutsch), French (french), and potentially others
+- **File Naming**: Language-specific filenames (e.g., deutsch.txt, french.txt)
+- **Language Index**: languages.txt file indexing available languages
+
+## Usage Patterns
+
+- **UI Localization**: All menu text, dialogs, and interface elements
+- **Game Messages**: In-game messages and notifications
+- **Documentation**: Help text and tutorial content
+- **Error Messages**: Localized error and status messages
+
+## Development Considerations
+
+- **String IDs**: Consistent string identifiers across all languages
+- **Context**: Appropriate context for ambiguous terms
+- **Updates**: Coordination between code changes and translation updates
+- **New Languages**: Process for adding support for new languages

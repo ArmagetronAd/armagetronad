@@ -1,56 +1,51 @@
 # scripts/ Directory
 
 ## Summary
-Utility scripts for server administration and game management.
+
+Utility scripts and automation tools for Armagetron Advanced development and deployment.
 
 ## Details
 
-The scripts directory contains utility scripts primarily focused on server administration, player management, and automated tasks. These scripts are designed to be used by server operators to manage their Armagetron Advanced servers.
-
-The `examples/` subdirectory contains example scripts demonstrating how to extend and customize server behavior:
-- `flexban.sh` - An advanced player banning script that provides flexible ban management
-- `flexban_cfg.sh` - Configuration for the flexban system
-
-The flexban system provides:
-- GeoIP-based banning using `geoiplookup` (if available)
-- WhoIS lookup support for additional player information
-- Flexible rule system for defining ban criteria
-- Operates on the last player to enter the server
-- Shell function library for ban, kick, and other administrative commands
-
-These scripts are called by the server on various player events (join, chat, etc.) and can be customized or extended for specific server needs.
+This directory contains various utility scripts used for development, build automation, deployment, and maintenance of Armagetron Advanced. These scripts support tasks such as build configuration, testing, resource processing, and other development workflows.
 
 ## Directory Structure
 
 ```
 .
-└── examples/              # Example server administration scripts
-    ├── flexban.sh       # Flexible ban system
-    └── flexban_cfg.sh   # Ban configuration
+└── examples/           # Example scripts and templates
 ```
 
 ## Technologies
 
-- **Language**: POSIX shell scripts
-- **Dependencies**: Optional: geoiplookup (for GeoIP), whois (for domain lookups)
-- **Integration**: Called by Armagetron server on player events
+- **Languages**: Shell scripts, Python, and potentially other scripting languages
+- **Purpose**: Development automation and utility functions
+- **Platform**: Cross-platform where possible, with platform-specific variations as needed
 
-## Coding Conventions
+## Integration
 
-- **Shell Scripts**: Standard POSIX shell syntax
-- **Modular**: Scripts designed to be sourced and extended
-- **Configuration**: Separate .cfg files for customizable parameters
+- **Build System**: May be used by or integrated with the main build system
+- **Development**: Used during development and maintenance workflows
+- **Deployment**: Support for deployment and distribution tasks
+- **Testing**: May include test automation and validation scripts
 
-## Key Patterns
+## Key Script Categories
 
-- Server administration script pattern
-- Event-driven script execution
-- Modular configuration pattern
-- GeoIP integration pattern
+- **Build Scripts**: Scripts for building, configuring, and compiling the project
+- **Test Scripts**: Automated testing and validation utilities
+- **Deployment Scripts**: Packaging, distribution, and installation scripts
+- **Development Tools**: Utilities for code generation, formatting, and analysis
+- **Maintenance Scripts**: Project maintenance and administration utilities
 
-## Build System
+## Usage Patterns
 
-- Scripts installed to `${datadir}/scripts/` or `${prefix}/share/games/armagetronad/scripts/`
-- `scripts_DATA` in Makefile.am handles installation
-- Examples in `scripts/examples/` subdirectory
-- Can be customized by server operators
+- **Build Automation**: Automated build processes and configurations
+- **Development Workflow**: Support for common development tasks and patterns
+- **Testing**: Automated test execution and result processing
+- **Deployment**: Package creation and distribution management
+- **Maintenance**: Project maintenance and housekeeping tasks
+
+## Platform Support
+
+- **Cross-Platform**: Scripts designed to work across different operating systems
+- **Platform-Specific**: Platform-specific scripts with appropriate conditional logic
+- **Portability**: Considerations for portability and compatibility

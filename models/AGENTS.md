@@ -1,54 +1,58 @@
 # models/ Directory
 
 ## Summary
-3D model definitions and geometry data for game assets.
+
+3D model definitions and resources for Armagetron Advanced's rendering system.
 
 ## Details
 
-The models directory contains 3D model files used for rendering various game elements in Armagetron Advanced. These models define the geometry for lightcycles, walls, and other in-game objects.
+This directory contains 3D model files and definitions used for rendering various game objects and elements in Armagetron Advanced. These models define the geometry, textures, and rendering properties of 3D objects in the game world.
 
-The model files use a custom `.mod` format which is parsed by the `rModel` class in the render subsystem. This format is designed to be simple and efficient for the game's rendering needs.
-
-Key model files include:
-- `cycle_body.mod` - The main lightcycle body model
-- Additional models for cycle parts (wheels, front, rear, etc.)
-- Models for various game objects and effects
-
-Each `.mod` file contains vertex and face definitions that describe the 3D geometry. The format supports:
-- Vertex definitions with coordinates (x, y, z)
-- Face definitions referencing vertices
-- Normal calculations for lighting
-- Texture coordinate support
+The model system allows for complex 3D visual elements beyond the basic game geometry, enhancing the visual richness of the game experience.
 
 ## Directory Structure
 
 ```
-.
-└── cycle_body.mod    # Main lightcycle 3D model
+. (3D model files, typically with .mod extension or other model formats)
 ```
 
 ## Technologies
 
-- **Format**: Custom .mod 3D model format
-- **Parsing**: `rModel` class in src/render/
-- **Rendering**: OpenGL 1.x
+- **Model Formats**: Custom .mod format or other 3D model formats
+- **Rendering**: OpenGL-based rendering of 3D models
+- **Dependencies**: Rendering system in src/render/
 
-## Coding Conventions
+## Integration
 
-- **File Format**: `.mod` extension for model files
-- **Vertex Format**: `v <id> <x> <y> <z>` for vertex definitions
-- **Face Format**: `f <v1> <v2> <v3>` for triangular faces
-- **Comments**: Lines starting with `#` are ignored
+- **Resource System**: Model files loaded and managed by the resource management system
+- **Rendering Layer**: Used by the rendering system for 3D model rendering
+- **Game Objects**: Associated with specific game objects and entities
+- **Configuration**: Model usage and properties configurable through game settings
 
-## Key Patterns
+## Key Features
 
-- Custom 3D model format
-- Efficient geometry storage
-- Direct OpenGL rendering
+- **3D Geometry**: Complex 3D shapes and structures
+- **Texturing**: Support for textured 3D models
+- **Lighting**: Integration with the game's lighting system
+- **Animation**: Support for animated 3D models
+- **Performance**: Optimized for real-time rendering performance
 
-## Build System
+## Model Types
 
-- Model files installed to `${datadir}/models/`
-- Loaded at runtime by `rModel` class
-- Can be overridden by user-provided models
-- Supports fallback to built-in models
+- **Game Objects**: 3D models for game entities and objects
+- **Environment**: Environmental models for game arenas and backgrounds
+- **UI Elements**: 3D UI elements and decorative objects
+- **Effects**: 3D elements for visual effects and animations
+
+## Usage
+
+- **Visual Enhancement**: Rich 3D visuals for game elements
+- **Customization**: Custom 3D models for game modification
+- **Theming**: Model variations for different visual themes
+- **Performance**: Efficient rendering of complex 3D geometry
+
+## File Formats
+
+- **Custom Format**: .mod files for Armagetron-specific model definitions
+- **Standard Formats**: May support standard 3D model formats
+- **Conversion**: Tools for converting between different model formats
