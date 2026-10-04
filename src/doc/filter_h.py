@@ -8,24 +8,30 @@ def get_topic(filepath):
     """Determine the topic based on the file path."""
     path_lower = filepath.lower()
     
-    if '/tools/' in path_lower:
+    if '/src/tools/' in path_lower:
         return 'Tools'
-    elif '/network/' in path_lower:
+    elif '/src/network/' in path_lower:
         return 'Network'
-    elif '/engine/' in path_lower:
+    elif '/src/engine/' in path_lower:
         return 'Engine'
-    elif '/game/' in path_lower:
-        return 'Game'
-    elif '/ui/' in path_lower:
+    elif '/src/ui/' in path_lower:
         return 'UI'
-    elif '/render/' in path_lower:
+    elif '/src/render/' in path_lower:
         return 'Render'
-    elif '/test/' in path_lower:
+    elif '/src/test/' in path_lower:
         return 'Tests'
-    elif '/thirdparty/' in path_lower:
+    elif '/src/thirdparty/binreloc' in path_lower:
+        return 'Thirdparty_binreloc'
+    elif '/src/thirdparty/particles' in path_lower:
+        return 'Thirdparty_particles'
+    elif '/src/thirdparty/doctest' in path_lower:
+        return 'Thirdparty_doctest'
+    elif '/src/thirdparty/' in path_lower:
         return 'Thirdparty'
-    elif '/doc/' in path_lower:
+    elif '/src/doc/' in path_lower:
         return 'Doc'
+    elif '/src/tron/' in path_lower:
+        return 'Game'
     else:
         return 'Misc'
 
