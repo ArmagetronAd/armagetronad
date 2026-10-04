@@ -2,7 +2,7 @@
 // This file contains doctest-based tests for memory manager functionality
 // Original: src/tools/memtest.cpp
 
-#include <cmath>  // for fabs
+#include <cmath> // for fabs
 #include "tMemManager.h"
 #include "tLinkedList.h"
 #include "tDefer.h"
@@ -28,12 +28,12 @@ test3* test3::first{};
 // Original: lines 1-13, static initialization
 // Note: test3 class and anchor are from the original file
 // ============================================================================
-TEST_CASE("Memory: Linked List Node Creation") 
+TEST_CASE("Memory: Linked List Node Creation")
 {
     // anchor should start and end empty
     INVARIANT_CHECK(!test3::first);
 
-    // GIVEN: anchor and test3 class   
+    // GIVEN: anchor and test3 class
     WHEN("we create four linked objects")
     {
         test3 a, b, c, d;
@@ -91,51 +91,62 @@ TEST_CASE("Memory: Virtual Inheritance")
 // Original: lines 158-171 in memtest.cpp
 // Purpose: Stress test our custom memory manager, which is not in use much any more
 // ============================================================================
-TEST_CASE("Memory: Allocation and Deallocation") {
+TEST_CASE("Memory: Allocation and Deallocation")
+{
     // GIVEN: memory manager
     // Classes from original file
-    class test_base {
+    class test_base
+    {
         int x;
+
     public:
         virtual ~test_base() {}
         tMEMMANAGER(test_base);
     };
-    
-    class test_derived : public test_base {
+
+    class test_derived : public test_base
+    {
         int y;
+
     public:
         virtual ~test_derived() {}
         tMEMMANAGER(test_derived);
     };
-    
-    #define MAX 100
-    
+
+#define MAX 100
+
     // WHEN: allocate and free objects
-    test_base *x[MAX];
-    
-    test_derived *y = new test_derived;
+    test_base* x[MAX];
+
+    test_derived* y = new test_derived;
     delete y;
-    
-    for (int i = 0; i < MAX; i++) {
+
+    for (int i = 0; i < MAX; i++)
+    {
         x[i] = new test_base;
     }
-    
-    for (int i = 0; i < MAX; i++) {
-        if (i % 4 != 0) {
+
+    for (int i = 0; i < MAX; i++)
+    {
+        if (i % 4 != 0)
+        {
             delete x[i];
             x[i] = NULL;
         }
     }
-    
-    for (int i = 0; i < MAX; i++) {
-        if (!x[i]) {
+
+    for (int i = 0; i < MAX; i++)
+    {
+        if (!x[i])
+        {
             x[i] = new test_base;
         }
     }
-    
-    for (int i = 0; i < MAX; i++) {
+
+    for (int i = 0; i < MAX; i++)
+    {
         delete x[i];
     }
-    
+
     // THEN: no leaks (implicit - if we get here, no crashes)
 }
