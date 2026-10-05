@@ -7,7 +7,8 @@
 /// @remark The value read at construction time is written back in the destructor.
 ConfItemTempValueBase::ConfItemTempValueBase(char const* name) : item_{Find(tString{name})}
 {
-    REQUIRE(item_);
+    bool const valid = item_;
+    REQUIRE(valid);
 
     if (item_)
     {

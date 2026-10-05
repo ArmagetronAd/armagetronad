@@ -59,7 +59,7 @@ If it's not in there, it's not terribly important. Not everything IN there is te
  - indentation: 4 spaces
  - curly braces on their own lines
  - in general, classes are CamelCase with a single lowercase letter prefix designating the library they are from, methods are CamelCase, variables camelCase, member variables with a _ at the end
- - following well established best practices is a good iead
+ - following well established best practices is a good idea
 
 ## Submitting
 
@@ -85,7 +85,8 @@ Do not use AI generators to:
  - Make Images, Sound, Music. Many reasons, but the easiest to point out is that there seems to be a general consensus among gamers: They hate that stuff.
  - Write texts to be read by humans, gamers and developers alike. Write your documentation yourself. Exceptions:
    - AI grammar and spell checkers are fine.
-   - Code comments and commit messages written along with the code are fine.
+   - Code comments (even for doxygen) and commit messages written along with the code are fine, but do read them yourself to ensure they make sense and are brief; 
+     AIs like to waffle on about pointless details, edit that down.
    - Translation tools are fine when communicating on forums and chats. They're not fine for generating translation texts for the game, or translating documentation.
    - What should you to if the AI wrote some texts it should not have? 
      You can read it yourself if you want, but then the best thing to do is to delete it and write it again in your own voice.
@@ -94,7 +95,9 @@ Do not use AI generators to:
 
 We do allow AI tools for coding tasks, with these rules:
  - Disclose your use.
- - No pure vibe coding. You are ultimately responsible for the code you write. Read the output, understand it, fix it where it is lacking (or tell the AI to fix it). Only then can you be sure other humans can understand it, too.
+ - No pure vibe coding. You are ultimately responsible for the code you write. 
+   Read the output, understand it, fix it where it is lacking (or tell the AI to fix it). 
+   Only then can you be sure other humans can understand it, too.
  - We have unit tests, make use of them. AI generated or modified code should be covered by tests whenever possible.
  - If the systems you want to work on do not yet have tests, your first job,
    before doing anything else, is to create tests that document the status quo (or ask the regulars to do it). 
