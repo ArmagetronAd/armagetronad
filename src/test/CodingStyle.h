@@ -285,6 +285,8 @@ Let clang-format do its thing on them.
 
 HUGE comment blocks before function declarations in cpp files with lots of whitespace and asterisks.
 
+The tNEW macro. If you are filling a smart pointer (and you should), use tRefPtr<>::Make() now.
+
 */
 
 #endif // ArmageTron_CODING_STYLE_H
