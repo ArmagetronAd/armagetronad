@@ -39,6 +39,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include <vector>
 
+namespace
+{
+static BOOLRETFUNC* pMoviePack;
+}
+bool se_MoviePack()
+{
+    return pMoviePack && (*pMoviePack)();
+}
+void se_RegisterMoviePackFunc(BOOLRETFUNC* pFunc)
+{
+    pMoviePack = pFunc;
+}
+
 /* **********************************************
    RimWall
    ********************************************** */
@@ -122,8 +135,6 @@ static tSettingItem<bool> se_RimWrapYConf
 #ifndef DEDICATED
 static rDisplayList se_rimDisplayList;
 
-extern bool sg_MoviePack();
-
 static rFileTexture se_RimWallNoWrap(rTextureGroups::TEX_WALL,"textures/rim_wall.png",1,0);
 static rFileTexture se_RimWallWrap(rTextureGroups::TEX_WALL,"textures/rim_wall.png",1,1);
 
@@ -148,8 +159,8 @@ void eWallRim::RenderAll( eCamera * camera )
 
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
-    
-    if ( !sg_MoviePack() )
+
+    if (!se_MoviePack())
     {
         ( se_RimWrapY ? se_RimWallWrap : se_RimWallNoWrap).Select();
     }

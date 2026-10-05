@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //includes math headers
 #include <cmath>
 #include "defs.h"
+#include "tError.h"
 
 #ifdef SOLARIS
 #include <ieeefp.h>

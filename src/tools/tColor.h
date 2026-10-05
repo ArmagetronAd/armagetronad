@@ -95,7 +95,7 @@ inline bool operator!=(const tColor &lColor, const tColor &rColor) {
 }
 
 inline bool operator==(const tShortColor &lColor, const tShortColor &rColor) {
-    return ( fabs(lColor.r_ - rColor.r_) < EPS && fabs(lColor.g_ - rColor.g_) < EPS && fabs(lColor.b_ - rColor.b_) < EPS );
+    return (lColor.r_ == rColor.r_ && lColor.g_ == rColor.g_ && lColor.b_ == rColor.b_);
 }
 
 inline bool operator!=(const tShortColor &lColor, const tShortColor &rColor) {

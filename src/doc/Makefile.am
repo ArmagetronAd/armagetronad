@@ -47,3 +47,13 @@ localtest: all Howto-Maps.txt ${docfiles}
 
 Howto-Maps.txt:
 	ln -s ${srcdir}/Content_Creation/$@ $@
+
+assemble/MAIN_README.md: ${top_srcdir}/README.md Makefile
+	mkdir -p assemble
+	sed -e 's/^# .*/# Main README/' < $< > $@
+
+doxygen: Doxyfile assemble/MAIN_README.md
+	rm -rf doxygen/*
+	doxygen
+
+.PHONY: doxygen

@@ -152,8 +152,9 @@ eGameObject::~eGameObject(){
 void eGameObject::InteractWith(eGameObject *,REAL,int){}
 
 // what happens if we pass eWall w?
-eGameObject::ePassEdgeResult eGameObject::PassEdge(const eWall *w,REAL,REAL,int){
-    if (w)
+eGameObject::ePassEdgeResult eGameObject::PassEdge(const eWall* w, REAL time, REAL alpha, int recursion)
+{
+    if (EdgeIsDangerous(w, time, alpha))
     {
         Kill();
         return eAbort;

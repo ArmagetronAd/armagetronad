@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 // #include "defs.h"
 #include <vector>
+#include <tuple> // for std::ignore
 #include "tError.h"
 // #include "tSafePTR.h"
 
@@ -143,6 +144,7 @@ public:
     {
         int newLen = this->Len()-1;
         T keep = (*this)[ index ];
+        std::ignore = keep; // purpose of keep is to keep reference counted objects alive for a bit
         if ( index < newLen )
             (*this)[ index ] = (*this)[ newLen ];
         this->SetLen( newLen );

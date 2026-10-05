@@ -208,7 +208,7 @@ tResourceManager::Result tResourceManager::FetchURI(const char* URI, std::ostrea
             long http_code = 0;
             curl_easy_getinfo(handle, CURLINFO_RESPONSE_CODE, &http_code);
             // If the request failed, print an error message
-            std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(result) << std::endl;
+            con << "curl_easy_perform() failed: " << curl_easy_strerror(result) << "\n";
             return Result::ERROR_Unknown;
         }
 
@@ -327,6 +327,9 @@ tString tResourceManager::locateResource(const char *file, const char *uri, bool
     tString filepath, a_uri = tString(), savepath, resourcepath;
     int rv;
 
+    if (!file)
+        return tString{};
+
     char * to_free = NULL; // string to delete later
 
     {
@@ -365,12 +368,12 @@ tString tResourceManager::locateResource(const char *file, const char *uri, bool
     if (!file || file[0] == '\0') {
         con << tOutput( "$resource_no_filename" );
         free( to_free );
-        return (tString) NULL;
+        return tString{};
     }
     if (file[0] == '/' || file[0] == '\\') {
         con << tOutput( "$resource_abs_path" );
         free( to_free );
-        return (tString) NULL;
+        return tString{};
     }
 
     if( !forceFetch )
@@ -396,7 +399,7 @@ tString tResourceManager::locateResource(const char *file, const char *uri, bool
     if (savepath == "") {
         con << tOutput( "$resource_no_writepath" );
         free( to_free );
-        return (tString) NULL;
+        return tString{};
     }
 
     // Some sort of File not found
@@ -416,7 +419,7 @@ tString tResourceManager::locateResource(const char *file, const char *uri, bool
         free( to_free );
 
     if (rv)
-        return (tString) NULL;
+        return tString{};
 
     if( fullPath )
         return savepath;

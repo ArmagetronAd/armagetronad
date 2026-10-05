@@ -34,5 +34,6 @@ double tRealSysTimeFloat();                   //! returns the current frame's ti
 void tAdvanceFrame( int usecdelay = 0);       //! andvances one frame: updates the system time
 void tDelay( int usecdelay );                 //! delays for the specified number of microseconds
 void tDelayForce( int usecdelay );            //! delays for the specified number of microseconds, even when playing back
+void tMockAdvanceFrame(double seconds);       //! for automated tests: pretend the given number of seconds passed
 
 #endif

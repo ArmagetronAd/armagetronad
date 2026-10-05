@@ -28,6 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef ArmageTron_eRECTANGLE_H
 #define ArmageTron_eRECTANGLE_H
 
+#include "eCoord.h" // another legacy definition
 #include "tRectangle.h"
 #define eRectangle tRectangle //!< Legacy definition, use tRectangle
 

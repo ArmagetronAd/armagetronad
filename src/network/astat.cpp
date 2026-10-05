@@ -78,8 +78,7 @@ int main(int argc, char **argv)
     //  std::cout << "LAN:\n";
     //  Poll();
 
-    tCommandLineData commandLine;
-    commandLine.programVersion_  = &st_programVersion;
+    tCommandLineData commandLine{st_programVersion};
     commandLine.Analyse(argc, argv);
     tLocale::Load("languages.txt");
 

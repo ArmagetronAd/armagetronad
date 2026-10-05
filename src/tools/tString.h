@@ -101,8 +101,9 @@ public:
     void ReadLine(std::istream &s, bool enableEscapeSequences=false,
         int indent=-1, int * eatenWhitespace=0); //!< read a whole line from a stream into this string
 
-    void Clear();                       //!< clears the string
-    void SetPos( int len, bool cut );   //!< makes this string exactly of length len.
+    void Clear();                            //!< clears the string
+    void SetPos(int len, bool cut) noexcept; //!< makes this string exactly of length len, not counting the trailing \0.
+    //!<  This is meant for output formatting; padding is done with spaces, and (unless len==0) the string always ends in a space.
 
     bool StartsWith( const tString & other ) const; //!< determines whether this string starts with the argument string
     bool StartsWith( const CHAR * other ) const;    //!< determines whether this string starts with the argument string

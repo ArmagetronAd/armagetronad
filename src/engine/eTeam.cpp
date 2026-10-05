@@ -1472,7 +1472,7 @@ ePlayerNetID*	eTeam::OldestPlayer	(		) const
 {
     ePlayerNetID* ret = NULL;
 
-    for (int i= players.Len()-1; i>=0; i--)
+    for (int i = players.Len() - 1; i >= 0; i--)
     {
         ePlayerNetID* p = players(i);
         if (!ret || ret->timeJoinedTeam > p->timeJoinedTeam || se_centerPlayerIsBoss )
@@ -1537,7 +1537,7 @@ ePlayerNetID*	eTeam::YoungestPlayer	(		) const
 {
     ePlayerNetID* ret = NULL;
 
-    for (int i= players.Len(); i>=0; i--)
+    for (int i = players.Len() - 1; i >= 0; i--)
     {
         ePlayerNetID* p = players(i);
         if (!ret || ret->timeJoinedTeam < p->timeJoinedTeam )

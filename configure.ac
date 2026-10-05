@@ -145,6 +145,17 @@ dnl [  --enable-glout          enable graphical output; otherwise, compile
 dnl                          a dedicated server (default=enabled)],,
 dnl enable_glout=yes)
 
+AC_ARG_ENABLE(tests,
+     AC_HELP_STRING([--disable-tests],
+		[disables building and executing unit tests; to be used on systems where they cannot possibly work]),
+     [case "${enableval}" in
+       yes) tests=true ;;
+       no)  tests=false ;;
+       *) AC_MSG_ERROR(bad value ${enableval} for --enable-master) ;;
+     esac],[tests=true])
+
+AM_CONDITIONAL(BUILDTESTS, test x$tests = xtrue)
+
 AC_ARG_ENABLE(master,
      AC_HELP_STRING([--enable-master],
 		[Build the master server]),
@@ -164,6 +175,15 @@ AC_ARG_ENABLE(main,
        no)  armamain=false ;;
        *) AC_MSG_ERROR(bad value ${enableval} for --enable-main) ;;
      esac],[armamain=true])
+
+AC_ARG_ENABLE(coverage,
+     AC_HELP_STRING([--enable-coverage],
+		[enable code coverage collection (gcov for GCC, llvm-cov for Clang)]),
+     [case "${enableval}" in
+       yes) enable_coverage=yes ;;
+       no)  enable_coverage=no ;;
+       *) AC_MSG_ERROR(bad value ${enableval} for --enable-coverage) ;;
+     esac],[enable_coverage=no])
 
 AC_ARG_ENABLE(glout,
      AC_HELP_STRING([--enable-glout],
@@ -461,17 +481,6 @@ AC_ARG_ENABLE(games,
 		[decorates all installation paths with "games" (default=enabled)]),,
 enable_games=yes)
 
-AC_ARG_ENABLE(enginecoredebug,
-     AC_HELP_STRING([--enable-enginecoredebug],
-		[Apply debugging options to engine core (for DEBUGLEVEL>0, defaults to enabled)]),
-     [case "${enableval}" in
-       yes) enginecoredebug=true ;;
-       no)  enginecoredebug=false ;;
-       *) AC_MSG_ERROR(bad value ${enableval} for --enable-enginecoredebug) ;;
-     esac],[enginecoredebug=true])
-	 
-AM_CONDITIONAL(ENGINECOREDEBUG, test x$enginecoredebug = xtrue)
-
 if test x$enable_respawn = xyes; then
 AC_DEFINE(RESPAWN_HACK,,enables hacky support for deathmatch mode)
 fi
@@ -521,7 +530,7 @@ test -z "$CODELEVEL" && CODELEVEL=0
 dnl default CXX flags: optimize a bit if no optimization optimization has been selected yet
 test -z "`echo $CXXFLAGS | grep "\-O"`" && CXXFLAGS="$CXXFLAGS -O2"
 
-test $DEBUGLEVEL -ge 1 && CXXFLAGS="`echo $CXXFLAGS | sed -e 's,-O.,,'` -g -O0"
+test $DEBUGLEVEL -ge 1 && CXXFLAGS="`echo $CXXFLAGS | sed -e 's,-O.,,'` -g -Og"
 test $DEBUGLEVEL -ge 2 && CXXFLAGS="$CXXFLAGS -DDEBUG"
 dnl test $DEBUGLEVEL -ge 3 && enable_memmanager=yes CXXFLAGS="$CXXFLAGS -DNO_MALLOC_REPLACEMENT"
 test $DEBUGLEVEL -ge 4 && CXXFLAGS="$CXXFLAGS -DDEBUG_EXPENSIVE"
@@ -919,6 +928,8 @@ if test x$use_curl = xtrue; then
     )
 fi
 
+AC_LANG([C++])
+
 dnl *************************************************
 dnl         Threading
 dnl *************************************************
@@ -1072,7 +1083,7 @@ if test x$use_sdl1 = xtrue ; then
     fi
 
     CPPFLAGS="$CPPFLAGS `${SDL_CONFIG} --cflags`"
-    LIBS="${SDLLIBS} $LIBS"
+    dnl LIBS="${SDLLIBS} $LIBS"
 
     AC_CHECK_FUNC(SDL_GL_GetAttribute,
     AC_DEFINE(HAVE_LIBSDL,,[Define if you have the library SDL]),
@@ -1541,6 +1552,68 @@ echo ${progname} | grep -q "\." && progid=org.${progname}
 echo ${progname} | grep -q "\..*\." && progid=${progname}
 AC_SUBST(progid)
 
+dnl this special file is created when we SHOULD be able to generate coverage data
+rm -f .coverage_available
+USING_CLANG_COVERAGE=no
+
+if test x$enable_coverage = xyes; then
+    FACTUAL_CXX=$CXX
+
+    dnl Check for coverage tools and set appropriate flags
+    for run in first second; do
+        case "${FACTUAL_CXX}_${run}" in
+            *clang++*|*clang*)
+                dnl Clang compiler
+                AC_MSG_RESULT([Adding coverage flags for clang...])
+                dnl Use GCC-compatible flags to generate .gcda/.gcno files
+                CXXFLAGS="$CXXFLAGS -fprofile-arcs -ftest-coverage"
+                echo "clang" > .coverage_available
+                USING_CLANG_COVERAGE=yes
+                break                    
+                ;;
+            *g++*|*gcc*)
+                dnl GCC compiler
+                AC_CHECK_PROG([GCOV_FOUND], [gcov], [yes], [no])
+                if test x$GCOV_FOUND = xno; then
+                    AC_MSG_WARN([gcov not found; coverage may not work properly with GCC])
+                fi
+                AC_MSG_RESULT([Adding coverage flags for gcc...])
+                CXXFLAGS="$CXXFLAGS --coverage"
+                echo "gcc" > .coverage_available
+                break
+                ;;
+            *_first)
+                # unknown at first, auto-detect
+                if c++ --version | grep clang > /dev/null; then
+                    FACTUAL_CXX=clang
+                fi
+                if c++ --version | grep GCC > /dev/null; then
+                    FACTUAL_CXX=gcc
+                fi
+                ;;
+            *)
+                AC_MSG_WARN([Unknown compiler $FACTUAL_CXX; not adding coverage flags])
+                enable_coverage=no
+                ;;
+        esac
+    done
+fi
+
+dnl check for lcov
+if test x$enable_coverage = xyes; then
+    AC_CHECK_PROG([LCOV_FOUND], [lcov], [yes], [no])
+    if test x$LCOV_FOUND = xno; then
+        AC_MSG_WARN([lcov not found; processing coverage for human consumption will not work.])
+        enable_coverage=no
+    fi
+fi
+
+AC_SUBST(USING_CLANG_COVERAGE)
+
+dnl this conditional is only active if coverage is enabled and we can process it
+AM_CONDITIONAL(ENABLE_COVERAGE, test x$enable_coverage = xyes)
+AM_CONDITIONAL(USING_CLANG_COVERAGE, test x$USING_CLANG_COVERAGE = xyes)
+
 # all include directories added via -I so far should be system level inlcudes, divide them from those added by individual makefiles
 # CPPFLAGS="-I- $CPPFLAGS"
 
@@ -1596,6 +1669,7 @@ echo "Options selected are:"
 echo "     Build Regular Game Client: $build_regular"
 echo "     Build Dedicated Server: $build_dedicated"
 echo "     Build Master Server: $armamaster"
+echo "     Build Unit Tests: $tests"
 echo ""
 echo "Installation options:"
 echo "     Prefix: $prefix"

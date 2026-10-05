@@ -461,33 +461,27 @@ void tString::Clear( void )
 //!
 // *******************************************************************************************
 
-void tString::SetPos(int l, bool cut){
-    int i;
-    if ( l < Len() )
+void tString::SetPos(int l, bool cut) noexcept
+{
+    if (l < 0)
+        l = 0;
+
+    if (cut && static_cast<size_t>(l) < Size())
     {
-        if ( cut )
-        {
-            if ( l > 0 )
-            {
-                SetSize( l-1 );
-                operator+=(' ');
-            }
-            else
-            {
-                Clear();
-            }
-        }
-        else
-        {
+        // shrink
+        SetSize(l);
+    }
+    else
+    {
+        // pad to length
+        for (int i = Size(); i < l; i++)
             operator+=(' ');
-        }
     }
-    if( l == Len() && !cut)
-    {
-        operator+=(' ');
-    }
-    for(i=Len();i<l;i++)
-        operator+=(' ');
+
+    // ensure trailing space by cutting
+    int const lastRealChar = Size() - 1;
+    if (lastRealChar >= 0 && !isspace(operator[](lastRealChar)))
+        operator[](lastRealChar) = ' ';
 }
 
 //added by me (Tank Program)
@@ -1484,7 +1478,7 @@ void tString::SetLen( int len )
     while ( len > Len() )
         *this += ' ';
     if ( len < Len() )
-        *this = SubStr( 0, len );
+        *this = SubStr(0, len - 1);
 
     tASSERT( Len() == len );
 }

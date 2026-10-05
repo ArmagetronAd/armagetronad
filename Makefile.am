@@ -13,7 +13,7 @@ musicdir=${armadatadir}
 include $(top_srcdir)/Makefile.manual
 
 # what goes into the distribution
-EXTRA_DIST = README-DEVELOPER README-Subversion README-SDL \
+EXTRA_DIST = README.md README-DEVELOPER README-Subversion README-SDL \
 armagetron.kdevelop armagetron.kdevelop.pcs armagetron.kdevses tron.ico \
 models sound textures bootstrap.sh music \
 acinclude.d/accustomdir.m4 acinclude.d/ax_boost_base.m4 acinclude.d/ax_boost_system.m4 acinclude.d/ax_boost_thread.m4\
@@ -244,10 +244,67 @@ install-first:
 	test -n "$(uninstall_location)" && test -x "$(uninstall_location)" && "$(uninstall_location)" || true
 
 distclean-local:
-	rm -f uninstall.sh batch/relocate.in universal_variable* extrapaths src/tUniversalVariables.h* src/tTrueVersion.h* .changetag
+	rm -rf uninstall.sh batch/relocate.in universal_variable* extrapaths src/tUniversalVariables.h* src/tTrueVersion.h* .changetag .coverage_available coverage
+	find . -name *.gcda -exec rm \{\} \;
+	find . -name *.gcno -exec rm \{\} \;
 
 # remove files left over by distcheck
 distcheck-clean:
 	chmod 755 -R @progname@-$(VERSION)*
 	rm -rf @progname@-$(VERSION)*
 
+##############
+# Unit Tests #
+##############
+
+unit_tests:
+if BUILDTESTS
+	find src -name "*.gcda" -exec rm -f \{\} \; # clear previous coverage data
+	rm -f coverage/*.info
+	$(MAKE) -C src unit_tests
+	./src/unit_tests -ni
+endif
+
+###############
+# Coverage    #
+###############
+
+coverage: unit_tests process_coverage
+process_coverage: coverage/lcov.info coverage/html/index.html
+
+# Set up coverage flags based on compiler
+if USING_CLANG_COVERAGE
+GCOV_TOOL = --gcov-tool "$(abs_top_srcdir)/batch/llvm-gcov.sh"
+else
+GCOV_TOOL =
+endif
+
+COV_FLAGS = --ignore-errors inconsistent,format
+if USING_CLANG_COVERAGE
+COV_FLAGS += --ignore-errors unused
+endif
+
+coverage/lcov.info:
+if ENABLE_COVERAGE
+	@echo "Generating coverage report..."
+	@mkdir -p coverage
+	lcov -j 4 $(GCOV_TOOL) $(COV_FLAGS) --capture --directory . --exclude '/src/thirdparty/' --output-file $@
+endif
+
+coverage/html/index.html: coverage/lcov.info
+if ENABLE_COVERAGE
+	genhtml --ignore-errors inconsistent,format,corrupt,category $< --output-directory coverage/html
+	@echo "Coverage report generated in coverage/html/index.html"
+endif
+
+coverage-clean:
+	rm -rf coverage
+
+.PHONY: coverage coverage-clean process_coverage unit_tests
+
+##########
+# README #
+##########
+
+README: Makefile
+	echo "Check README.md instead" > $@

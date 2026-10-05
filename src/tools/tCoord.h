@@ -67,8 +67,7 @@ public:
         return(a.x*b.x+a.y*b.y);
     }
 
-    //! change coordinates, so that a is at zero and c is at one.
-    //! gives the coordinate of b.
+    // V(a, b, c) gives X coordinate of b in an orthogonal coordinate system when a is at (0,0) and c is at (1,0)
     static REAL V(const tCoord &a,const tCoord &b,const tCoord &c){
         tCoord ab=b-a;
         tCoord ac=c-a;

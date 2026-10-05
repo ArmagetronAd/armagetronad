@@ -35,8 +35,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #endif
 
 #include "tError.h"
-
 #include "tMutex.h"
+
+#include <utility>
 
 class tCheckedPTRBase{
     friend class tPTRList;
@@ -199,7 +200,6 @@ public:
     tControlledPTR(const tControlledPTR<T> &x):target(x.target){AddRef();}
     tControlledPTR():target(NULL){}
 
-
     tControlledPTR<T> &operator=(T *x){
         if (target!=x){
             Release();
@@ -312,8 +312,16 @@ public:
     tJUST_CONTROLLED_PTR(T *x):target(x){AddRef();}
     tJUST_CONTROLLED_PTR(const tCheckedPTR<T> &x):target(x.operator->()){AddRef();}
     tJUST_CONTROLLED_PTR(const tJUST_CONTROLLED_PTR<T> &x):target(x.target){AddRef();}
+    template <typename S>
+    tJUST_CONTROLLED_PTR(tJUST_CONTROLLED_PTR<S>&& x) : target(x.Drop()) {}
     tJUST_CONTROLLED_PTR():target(NULL){}
 
+    // like std::make_shared, directly create a filled smart pointer
+    template <typename... ARGS>
+    static tJUST_CONTROLLED_PTR<T> Make(ARGS&&... args) noexcept
+    {
+        return new T(std::forward<ARGS>(args)...);
+    }
 
     tJUST_CONTROLLED_PTR<T> &operator=(T *x){
         if (target!=x){
@@ -327,6 +335,25 @@ public:
     tJUST_CONTROLLED_PTR<T> &operator=(const tJUST_CONTROLLED_PTR<T> &x){
         operator=(x.target);
         return *this;
+    }
+
+    template <typename S>
+    tJUST_CONTROLLED_PTR<T>& operator=(tJUST_CONTROLLED_PTR<S>&& x)
+    {
+        tASSERT(&x != this); // self move assignment is illegal
+        Release();
+
+        target = x.Drop();
+
+        return *this;
+    }
+
+    // transfer ownership to caller; nulls this without Release(), return former content
+    T* Drop() noexcept
+    {
+        auto ret = target;
+        target = nullptr;
+        return ret;
     }
 
     T * get() const {
@@ -386,7 +413,6 @@ public:
     }
 };
 
-
 template<class T> bool operator==(const T *x, const tJUST_CONTROLLED_PTR<T> &y)
 {
     return (x == static_cast<const T*>(y));
@@ -406,6 +432,10 @@ template<class T> bool operator==(T *x, tJUST_CONTROLLED_PTR<T> &y)
 {
     return (x == static_cast<const T*>(y));
 }
+
+// this should be your go-to smart pointer
+template <typename T>
+using tRefPtr = tJUST_CONTROLLED_PTR<T>;
 
 template< class T > class tStackObject: public T
 {

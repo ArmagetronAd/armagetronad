@@ -41,6 +41,7 @@ libtools_a_SOURCES = ${tools_extra} tools/tVersion.cpp tools/tVersion.h tTrueVer
 	tools/tArray.cpp tools/tArray.h \
 	tools/tCallback.cpp tools/tCallback.h tools/tCallbackString.h tools/tColor.cpp tools/tColor.h\
 	tools/tConfiguration.cpp tools/tConfiguration.h tools/tConsole.cpp tools/tConsole.h \
+	tools/tDefer.h tools/tFlagEnums.h\
 	tools/tDirectories.cpp tools/tDirectories.h tools/tError.cpp tools/tError.h tools/tEventQueue.cpp\
 	tools/tEventQueue.h tools/tHeap.cpp tools/tHeap.h tools/tInitExit.h tools/tLinkedList.cpp tools/tLinkedList.h\
 	tools/tList.h tools/tLocale.cpp tools/tLocale.h tools/tMath.h \
@@ -103,13 +104,13 @@ libnetwork_a_SOURCES=network/nAuthentication.cpp\
 	network/nSocket.h network/nSpamProtection.cpp network/nSpamProtection.h
 
 if BUILDMAIN
-libenginecore_a_SOURCES=engine/eGameObject.cpp engine/eGameObject.h \
-	engine/eGrid.cpp engine/eGrid.h
 
 libengine_a_SOURCES=engine/eAdvWall.cpp engine/eAdvWall.h engine/eAuthentication.cpp\
-	engine/eAuthentication.h engine/eAxis.cpp	engine/eAxis.h engine/eCamera.cpp engine/eCamera.h\
+	engine/eAuthentication.h engine/eAxis.cpp engine/eAxis.h engine/eCamera.cpp engine/eCamera.h\
 	engine/eCoord.h engine/eDebugLine.cpp engine/eDebugLine.h engine/eDisplay.cpp engine/eFloor.cpp\
 	engine/eFloor.h \
+	engine/eGameObject.cpp engine/eGameObject.h \
+	engine/eGrid.cpp engine/eGrid.h \
 	engine/eKrawall.cpp engine/eKrawall.h engine/eNetGameObject.cpp engine/eNetGameObject.h\
 	engine/ePath.cpp engine/ePath.h engine/ePlayer.cpp engine/ePlayer.h engine/eSensor.cpp\
 	engine/eSensor.h engine/eSpawn.cpp engine/eSpawn.h engine/eTeam.cpp engine/eTeam.h engine/eTess2.h\
@@ -144,7 +145,7 @@ librender_a_SOURCES=${render_extra} render/rConsole.cpp render/rConsoleGraph.cpp
 	render/rTextureRenderTarget.cpp render/rTextureRenderTarget.h render/rGLuintObject.cpp render/rGLuintObject.h
 
 libtron_a_SOURCES=tron/gAIBase.cpp tron/gAIBase.h tron/gAICharacter.cpp tron/gAICharacter.h tron/gArena.cpp tron/gArena.h\
-	tron/gArmagetron.cpp tron/gCamera.cpp tron/gCamera.h tron/gCycle.cpp tron/gCycle.h tron/gCycleMovement.cpp\
+	tron/gCamera.cpp tron/gCamera.h tron/gCycle.cpp tron/gCycle.h tron/gCycleMovement.cpp\
 	tron/gJoystick.h tron/gJoystick.cpp\
 	tron/gCycleMovement.h tron/gExplosion.cpp tron/gExplosion.h tron/gGame.cpp tron/gGame.h\
 	tron/gTutorial.h tron/gTutorial.cpp\
@@ -226,14 +227,6 @@ libengine_a_OBJCXXFLAGS =$(libengine_a_CXXFLAGS)
 libtron_a_OBJCXXFLAGS   =$(libtron_a_CXXFLAGS)
 endif
 
-# core engine files can get compiled with optimization turned on for more painless debugging
-# on weak computers
-if ENGINECOREDEBUG
-libenginecore_a_CXXFLAGS =$(libengine_a_CXXFLAGS)
-else
-libenginecore_a_CXXFLAGS =$(libengine_a_CXXFLAGS) -O2
-endif
-
 if BUILDMASTER
 buildthemaster = armagetronad_main_master$(EXEEXT)
 else
@@ -260,6 +253,10 @@ endif
 #librubywrap_a_SOURCES    = 
 #endif
 
+if BUILDTESTS
+noinst_PROGRAMS = unit_tests chat_prefix_test
+endif
+
 if BUILDFAKERELEASE
 BUILDFAKE=echo -e "\#!/bin/sh\necho Running FAKE \"\$$0\" \"\$$@\"\ntest \"\$$1\" = "--doc" || test \"\$$1\" = "--help" || sleep 5" > $@; chmod 755 $@
 armagetronad_main$(EXEEXT): Makefile
@@ -269,7 +266,7 @@ armagetronad_main_master$(EXEEXT): Makefile
 	${BUILDFAKE}
 else
 if BUILDMAIN
-noinst_LIBRARIES = libtools.a libnetwork.a libenginecore.a libengine.a librender.a  libtron.a libui.a
+noinst_LIBRARIES = libtools.a libnetwork.a libengine.a librender.a  libtron.a libui.a
 # librubywrap.a
 else
 noinst_LIBRARIES = libtools.a libnetwork.a
@@ -285,11 +282,11 @@ endif
 endif
 
 armagetronad_main_SOURCES = \
-	tron/gFloor.cpp \
+	tron/gFloor.cpp tron/gArmagetron.cpp \
 	tron/cockpit/cCockpit.cpp tron/cockpit/cMap.cpp tron/cockpit/cCamview.cpp \
 	$(INCLUDED_MODULE_SOURCES)
 armagetronad_main_CXXFLAGS =$(libtron_a_CXXFLAGS)
-armagetronad_main_LDADD= libtron.a libenginecore.a libengine.a libnetwork.a libui.a librender.a libtools.a protobuf/libprotobuf.a thirdparty/mathexpr/libmathexpr.a ${extralibs}
+armagetronad_main_LDADD= libtron.a libengine.a libnetwork.a libui.a librender.a libtools.a protobuf/libprotobuf.a thirdparty/mathexpr/libmathexpr.a ${extralibs}
 #  librubywrap.a
 
 armagetronad_main_master_SOURCES = network/master.cpp
@@ -301,7 +298,48 @@ armagetronad_serverquery_SOURCES = serverquery/serverquery.cpp serverquery/jsonc
 armagetronad_serverquery_CXXFLAGS = $(AM_CXXFLAGS) -iquote @srcdir@ -iquote @srcdir@/serverquery -iquote @srcdir@/tools -iquote @srcdir@/network
 armagetronad_serverquery_LDADD = libnetwork.a libtools.a protobuf/libprotobuf.a
 endif
-endif
+
+if BUILDTESTS
+unit_tests_SOURCES = thirdparty/doctest/doctest.h \
+	test/MockConsole.h test/Statics.h \
+	test/ConfItemTempValue.h test/ConfItemTempValue.cpp \
+	test/eCoord_test.cpp test/eGameObject_test.cpp test/tArray_test.cpp \
+	test/tList_test.cpp test/tString_test.cpp test/tLinkedList_test.cpp \
+	test/tRing_test.cpp test/tHeap_test.cpp test/tMemStack_test.cpp \
+	test/tColor_test.cpp test/tException_test.cpp test/tCallback_test.cpp \
+	test/tCallbackString_test.cpp test/tRandomizer_test.cpp \
+	test/eRectangle_test.cpp test/eAxis_test.cpp \
+	test/tMath_test.cpp test/tSysTime_test.cpp test/tCommandLine_test.cpp \
+	test/tEventQueue_test.cpp test/tDirectories_test.cpp test/md5_test.cpp test/memtest_adhoc_test.cpp \
+	test/eTimer_test.cpp test/eGrid_test.cpp test/eGrid_adhoc_test.cpp \
+	test/ePath_test.cpp \
+	test/ePlayer_test.cpp test/ePlayerNetID_test.cpp test/eTeam_test.cpp \
+	test/nSocket_test.cpp test/nNetwork_test.cpp test/nMessage_test.cpp \
+	test/nNetObject_test.cpp test/nServerInfo_test.cpp test/tCrypt_test.cpp \
+	test/tConfiguration_test.cpp \
+	test/tConsole_test.cpp \
+	test/tLocale_test.cpp \
+	test/tResourceManager_test.cpp \
+	test/nPriorizing_test.cpp \
+	test/network_integration_test.cpp test/engine_integration_test.cpp test/configuration_integration_test.cpp \
+	test/geometry_system_test.cpp test/memory_management_test.cpp test/time_system_test.cpp \
+	test/performance_test.cpp \
+	test/CodingStyle.h test/CodingStyle.cpp test/CodingStyle_test.cpp \
+	test/unit_tests_main.cpp
+unit_tests_CXXFLAGS =$(libtron_a_CXXFLAGS) -iquote @srcdir@/thirdparty/doctest
+unit_tests_LDADD=libtron.a libengine.a libnetwork.a libui.a librender.a libtools.a protobuf/libprotobuf.a thirdparty/mathexpr/libmathexpr.a ${extralibs}
+
+chat_prefix_test_SOURCES = test/chat_prefix_test.cpp
+chat_prefix_test_CXXFLAGS = $(libtron_a_CXXFLAGS)
+chat_prefix_test_LDADD=libtron.a libengine.a libnetwork.a libui.a librender.a libtools.a protobuf/libprotobuf.a thirdparty/mathexpr/libmathexpr.a ${extralibs}
+
+# At least my AI seems to be stubborn about adding these nonsense patterns
+all-local:
+	@if grep -n "CHECK(true)\|VERIFY(true)" ${srcdir}/test/*.cpp; then echo "ERROR: No tautological tests! Check grep output above."; false; fi
+
+endif # BUILDTESTS
+
+endif # BUILDFAKERELEASE
 
 ## Note: tron/gFloor.cpp is not referenced from the outside, but required anyway. So it can't be put into
 ## a library. Adding it to armagetronad_SOURCES has the additional advantage of telling automake that

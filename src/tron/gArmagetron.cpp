@@ -691,6 +691,10 @@ int main(int argc,char **argv){
     //std::cout << "enter\n";
     //  net_test();
 
+    // inject functions into lower levels
+    se_RegisterMoviePackFunc(&sg_MoviePack);
+    sg_RegisterStartupPlayerMenu(&sg_StartupPlayerMenu);
+
     bool dedicatedServer = false;
 
     //  std::cout << "Running " << argv[0] << "...\n";

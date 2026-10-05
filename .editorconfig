@@ -15,7 +15,7 @@ indent_style = space
 indent_size = 4
 
 # Tab indentation for Makefiles (no size specified)
-[Makefile{,.am,.in}]
+[Makefile{,.am,.in,.manual}]
 indent_style = tab
 
 # Tab indentation for shell scripts

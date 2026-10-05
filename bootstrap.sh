@@ -42,6 +42,11 @@ $AUTOCONF || { rm configure; exit 1; }
 echo "Running automake..."
 $AUTOMAKE -a -Wno-portability || { echo "Automake failed"; exit 1; }
 
+# check for unstable nixos links; use copies instead
+if ls ylwrap install-sh -alt | grep /nix/store > /dev/null; then
+    $AUTOMAKE -f -a -c -Wno-portability || exit 1
+fi
+
 echo "Flagging scripts as executable..."
 chmod a+x $MYDIR/*.sh || exit 1
 echo "Done!  You may now run configure and start building."

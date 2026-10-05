@@ -266,6 +266,9 @@ void tConsole::CenterDisplay(tString s,REAL timeout,REAL r,REAL g,REAL b)
         DoCenterDisplay(s,timeout,r,g,b);
 }
 
+/// @brief Prints a line to the console.
+/// @param s the line to print
+/// @return self-reference for chaining
 tConsole & tConsole::DoPrint(const tString& s){
     std::cout << tColoredString::RemoveColors(s);
     std::cout.flush();

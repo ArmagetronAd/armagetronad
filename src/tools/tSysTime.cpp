@@ -352,6 +352,7 @@ public:
 
 static struct tTime timeStart;        // the time at the start of the program
 static struct tTime timeRelative;     // the time since the system start ( eventually from a playback )
+static bool timeInitialized{};        // flag indicating we initialized the start time
 
 void tAdvanceFrameSys( tTime & start, tTime & relative )
 {
@@ -364,8 +365,9 @@ void tAdvanceFrameSys( tTime & start, tTime & relative )
     // time.seconds -= time.seconds/10;
 
     // record starting point
-    if ( start.microseconds == 0 && start.seconds == 0 )
+    if (!timeInitialized)
     {
+        timeInitialized = true;
         start = time;
     }
 
@@ -422,6 +424,22 @@ void tDelayForce( int usecdelay )
     }
 
     s_delayedInPlayback = false;
+}
+
+void tMockAdvanceFrame(double seconds)
+{
+    tASSERT(seconds >= 0);
+
+    if (!timeInitialized)
+        tAdvanceFrame(); // this initializes timeStart
+
+    // move the start time backwards
+    int secondsInt = ceil(seconds); // ceil, not floor, because we want microsecods to go up
+    int microSecondsInt = (seconds - secondsInt) * 1000000;
+    timeStart.seconds -= secondsInt;
+    timeStart.microseconds -= microSecondsInt;
+    timeStart.Normalize();
+    tAdvanceFrame();
 }
 
 void tAdvanceFrame( int usecdelay )
@@ -533,12 +551,11 @@ double tSysTimeFloat ()
     return ( timeRelative.seconds + timeRelative.microseconds*1E-6 ) * st_timeFactor;
 }
 
-static struct tTime timeRealStart;    // the real time at the start of the program
 static struct tTime timeRealRelative; // the time since the system start
 
 double tRealSysTimeFloat ()
 {
     // get real time from real OS
-    tAdvanceFrameSys( timeRealStart, timeRealRelative );
+    tAdvanceFrameSys(timeStart, timeRealRelative);
     return ( timeRealRelative.seconds + timeRealRelative.microseconds*1E-6 ) * st_timeFactor;
 }
