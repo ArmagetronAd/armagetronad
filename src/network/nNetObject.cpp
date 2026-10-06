@@ -885,6 +885,16 @@ static void net_destroy_handler(nMessage &m){
 #ifdef DEBUG
         sn_BreakOnObjectID( id );
 #endif
+        // only the owner of an object is allowed to destroy it; the server
+        // (sender 0) may destroy any object
+        nNetObject *o = sn_netObjects[id];
+        if ( o ){
+            if ( sender.SenderID()!=o->Owner() && sender.SenderID()!=0 )
+            {
+                Cheater( sender.SenderID() );
+                return; // do not consume the rest of this message
+            }
+        }
         // see if there was a local destruction; if yes, ignore.
         if (sn_WasDeletedLocally( id ))
             continue;
