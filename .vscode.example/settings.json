@@ -1,3 +1,4 @@
 {
+    "coverage-gutters.coverageReportFileName": "build/test_vs_**/coverage/**/index.html",
     "testMate.cpp.test.executables": "build/test_vs_*/**/*{test,Test,TEST}*"
 }
