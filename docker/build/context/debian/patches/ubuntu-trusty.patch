@@ -10,3 +10,15 @@ index 414cc8b56..fd3b8f29d 100644
   libgl1-mesa-dev,
   libglu1-mesa-dev,
   libpng-dev,
+diff --git a/debian/rules b/debian/rules
+index 339136e79..324a31895 100755
+--- a/debian/rules
++++ b/debian/rules
+@@ -21,6 +21,7 @@ SHARED_OPTS += --build=$(DEB_BUILD_GNU_TYPE) --prefix=/usr
+ SHARED_OPTS += --mandir=\$${prefix}/share/man --sysconfdir=/etc --disable-etc
+ SHARED_OPTS += --datadir=/usr/share --disable-games --bindir=/usr/games
+ SHARED_OPTS += --enable-binreloc
++SHARED_OPTS += --disable-tests
+ SERVER_OPTS := --disable-glout --disable-useradd --disable-init --enable-authentication
+ CLIENT_OPTS := --enable-glout
+ 
