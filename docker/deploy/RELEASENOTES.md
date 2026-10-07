@@ -16,3 +16,6 @@ System Setup/Display Settings/Screen Mode. We decided to default it to 360 FPS,
 which should be inoffensive. [This article](/blog/2026/04/18/framerate-limit) 
 describes how you can set it up to benefit you even more. And of course, you 
 can completely disable it.
+
+0.2.9.3.1 has a security fix, users were able to delete objects owned by other
+clients. Thank arcsinx (Thomas Karpiniec) for that fix!
