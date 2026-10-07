@@ -902,9 +902,9 @@ static void net_destroy_handler(nMessage &m){
         info.timeout=tSysTimeFloat()+nDeletedTimeout;
 
         // notify object of pending deletion
-        if (sn_netObjects[id])
+        if (no)
         {
-            tASSERT( !no->Owned() );
+            tASSERT(!no->Owned());
 
             no->ActionOnDelete();
             info.actionOnDeleteExecuted=true;
