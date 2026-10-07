@@ -3,5 +3,8 @@ usr/games/armagetronad.real
 usr/share/games/armagetronad/models
 usr/share/games/armagetronad/sound
 usr/share/games/armagetronad/textures
-usr/share/icons/hicolor
+usr/share/icons/hicolor/128x128/apps
+usr/share/armagetronad/desktop/icons/16x16/armagetronad.png usr/share/icons/hicolor/16x16/apps
+usr/share/armagetronad/desktop/icons/32x32/armagetronad.png usr/share/icons/hicolor/32x32/apps
+usr/share/armagetronad/desktop/icons/48x48/armagetronad.png usr/share/icons/hicolor/48x48/apps
 usr/share/applications
