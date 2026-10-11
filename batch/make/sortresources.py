@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 # sorts resources by their included name and version information
 # usage: call from the directory containing the resources or
 # call
