@@ -21,7 +21,7 @@ class Pkg(ConanFile):
             "libxml2/[>=2.9.10]"
 
     # we need the -config binaries from these dependencies at build time
-    build_requires = \
+    tool_requires = \
             "sdl_aa/[>=1.2.15 <2.0.0]"
 
     keep_imports = True
