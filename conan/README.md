@@ -9,7 +9,8 @@ all the stuff we do not need.
 
 Conan is a system that can provide these builds, if properly
 configured. Warning, though: It takes a long time to build
-the dependencies, and they take up quite a bit of space.
+the dependencies, and they take up quite a bit of space, and
+building eats all of your CPU and memory.
 
 ## For the Impatient
 
