@@ -103,13 +103,22 @@ dnl [  --enable-glout          enable graphical output; otherwise, compile
 dnl                          a dedicated server (default=enabled)],,
 dnl enable_glout=yes)
 
+AC_ARG_ENABLE(conan,
+     AC_HELP_STRING([--enable-conan],
+		[enables use of conan for all dependencies (read conan/README.md for details)]),
+     [case "${enableval}" in
+       yes) conan=true ;;
+       no)  conan=false ;;
+       *) AC_MSG_ERROR(bad value ${enableval} for --enable-conan) ;;
+     esac],[conan=false])
+
 AC_ARG_ENABLE(tests,
      AC_HELP_STRING([--disable-tests],
 		[disables building and executing unit tests; to be used on systems where they cannot possibly work]),
      [case "${enableval}" in
        yes) tests=true ;;
        no)  tests=false ;;
-       *) AC_MSG_ERROR(bad value ${enableval} for --enable-master) ;;
+       *) AC_MSG_ERROR(bad value ${enableval} for --enable-tests) ;;
      esac],[tests=true])
 
 AM_CONDITIONAL(BUILDTESTS, test x$tests = xtrue)
@@ -620,9 +629,17 @@ esac
 
 AC_CACHE_SAVE
 
-dnl load conan settings if they exist
-test -r $(dirname $0)/conan/conanautotoolstoolchain.sh && source $(dirname $0)/conan/conanautotoolstoolchain.sh
-test -r $(dirname $0)/conan/conanbuildenv.sh && source $(dirname $0)/conan/conanbuildenv.sh
+dnl build conan and load config
+if test x$conan = xtrue; then
+    AC_MSG_CHECKING(Conan)
+    pushd $(dirname $0)/conan
+    if ! test -r ./conanautotoolstoolchain.sh; then
+        conan build ./conanfile.py --build=missing || exit $?
+    fi
+    source ./conanautotoolstoolchain.sh || exit $?
+    source ./conanbuildenv.sh || exit $?
+    popd
+fi
 
 dnl *************************************************
 dnl         libxml2

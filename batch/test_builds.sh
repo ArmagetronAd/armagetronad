@@ -100,6 +100,7 @@ elif [ "$1" = "help" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     echo "  FORCE_RECONFIGURE=1 - Force re-run of configure step"
     echo "  VERBOSE=1          - Show full build output (not just summary)"
     echo "  DOXYGEN=1          - Generate doxygen documentation"
+    echo "  CONAN=1            - Use dependencies from Conan"
     echo "  COVERAGE=1         - Generate human readable code coverage report (requires lcov)"
     echo "  COVERAGE=2         - Silently generate code coverage report, do not fail on error (for AI Agents)"
     echo "  JOBS=N             - Number of parallel jobs (default: auto)"
@@ -195,6 +196,37 @@ FAILURES=0
 TOTAL=0
 FAILED_CONFIGS=()
 
+# Conan build suffix
+CONAN_KEY=""
+if [ "$CONAN" = "1" ]; then
+	# pick different directory and configure flags
+	CONAN_KEY=_conan
+	COMMON_FLAGS="$COMMON_FLAGS --enable-conan"
+
+	# For all: see conan/README.md for detauls
+
+	# prepare environment (separately for different non-conan settings)
+	CONAN_DIR="${ROOT}/conan"
+	export CONAN_SYSREQUIRES_MODE=verify
+	export CONAN_HOME="$CONAN_DIR/.conan_home${WORKSPACE_KEY}${CXX_KEY}"
+
+	pushd "${CONAN_DIR}"
+		if ! test -r ${CONAN_HOME}/profiles/default; then
+			# initialize profile with austere default options
+			mkdir -p "${CONAN_HOME}"
+			conan profile detect --force || exit $?
+			cat conanoptions.ini >> ${CONAN_HOME}/profiles/default
+		fi
+
+		# build dependencies
+		if ! test -r ./conanautotoolstoolchain.sh && ! conan build ./conanfile.py --build=missing; then
+			# build prerequisites not officially available in Conan
+			./prerequisites/build.sh || exit $?
+			conan build ./conanfile.py --build=missing || exit $?
+		fi
+	popd
+fi
+
 # Process each configuration
 for config in "${SELECTED_CONFIGS[@]}"; do
     NAME="${config%%:*}"
@@ -205,7 +237,7 @@ for config in "${SELECTED_CONFIGS[@]}"; do
     # the root directory is in there to force rebuild on container/host switches
     BUILD_KEY="$SPECIFIC_FLAGS $COMMON_FLAGS $ROOT"
 
-    BUILD_DIR_BASE=test_${NAME}${WORKSPACE_KEY}${CXX_KEY}
+    BUILD_DIR_BASE=test_${NAME}${WORKSPACE_KEY}${CONAN_KEY}${CXX_KEY}
     BUILD_DIR="$ROOT/build/${BUILD_DIR_BASE}"
 
     echo ""
@@ -229,7 +261,7 @@ for config in "${SELECTED_CONFIGS[@]}"; do
 
 	if echo $config | grep _debug > /dev/null; then
         cd "${ROOT}/build"
-        # link output directory to canonical build directory where VS code will be able to find it
+        # link output directory to canonical build directory where VS Code will be able to find it
         CANONICAL_BUILD_DIR_BASE="./test_vs_${NAME}"
         rm -rf "${CANONICAL_BUILD_DIR_BASE}" # it's a directory link, if we do not remove it, ln below will create a link inside of it
         ln -sf "${BUILD_DIR_BASE}" "${CANONICAL_BUILD_DIR_BASE}"

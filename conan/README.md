@@ -8,7 +8,13 @@ dependencies in a configuration where they are stripped of
 all the stuff we do not need.
 
 Conan is a system that can provide these builds, if properly
-configured.
+configured. Warning, though: It takes a long time to build
+the dependencies, and they take up quite a bit of space.
+
+## For the Impatient
+
+Just run `CONAN=1 ./batch/test_builds.sh`, this does everything outlined below,
+using a local conanhome directory. Results will be in `build/*conan*`.
 
 ## Configure it Properly
 
@@ -46,14 +52,6 @@ to erase them again.
 
 ## Activate Conan
 
-in this directory, invoke
-
-```
-conan build ./conanfile.py --build=missing
-```
-
-This will now also build `libcurl` and `libxml2`.
-
-before calling the configure script. With conan configured, it will pick up
-the dependencies from here.
+Pass the `--enable-conan` flag to the configure script; this will build remaining 
+missing dependencies and use them.
 
