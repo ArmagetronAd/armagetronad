@@ -84,7 +84,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/test_vs_client_debug/armagetronad",
-            "args": ["--playback", "bug.aarec"],
+            "args": ["--benchmark", "--playback", "bug.aarec"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/build/test_vs_client_debug",
             "environment": [],
