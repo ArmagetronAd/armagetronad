@@ -450,7 +450,11 @@ static rFastForwardCommandLineAnalyzer analyzer;
 rSysDep::rSwapMode rSysDep::swapMode_ = rSysDep::rSwap_glFlush;
 //rSysDep::rSwapMode rSysDep::swapMode_ = rSysDep::rSwap_60Hz;
 
+#ifdef DEBUG
+int sr_maxFPS = 60;
+#else
 int sr_maxFPS = 360;
+#endif
 
 // buffer swap:
 #ifndef DEDICATED
