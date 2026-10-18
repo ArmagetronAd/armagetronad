@@ -162,6 +162,7 @@ if BUILDTESTS
 	find src -name "*.gcda" -exec rm -f \{\} \; # clear previous coverage data
 	rm -f coverage/*.info
 	$(MAKE) -C src unit_tests
+	if test -r @conan_dir@/conanrunenv.sh; then source @conan_dir@/conanrunenv.sh; fi; \
 	./src/unit_tests -ni
 endif
 

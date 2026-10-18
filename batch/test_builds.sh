@@ -212,10 +212,10 @@ FAILED_CONFIGS=()
 
 # Conan build suffix
 CONAN_KEY=""
+CONAN_OUTPUT=""
 if [ "$CONAN" = "1" ]; then
 	# pick different directory and configure flags
 	CONAN_KEY=_conan
-	#COMMON_FLAGS="$COMMON_FLAGS --enable-conan"
 
 	# For all: see conan/README.md for detauls
 
@@ -224,6 +224,8 @@ if [ "$CONAN" = "1" ]; then
 		export CONAN_SYSREQUIRES_MODE=verify
 	fi
 	export CONAN_HOME="$CONAN_DIR/.conan_home${WORKSPACE_KEY}${CXX_KEY}"
+	CONAN_OUTPUT="$CONAN_HOME/output"
+	COMMON_FLAGS="$COMMON_FLAGS --enable-conan --with-conan-dir=\"$CONAN_OUTPUT\""
 
 	mkdir -p "${CONAN_HOME}"
 	pushd "${CONAN_HOME}"
@@ -232,18 +234,6 @@ if [ "$CONAN" = "1" ]; then
 			conan profile detect --force || exit $?
 			cat ../conanoptions.ini >> profiles/default
 		fi
-
-		# build dependencies
-		mkdir -p output
-		if ! test -r ./output/conanautotoolstoolchain.sh && ! conan build ../conanfile.py -of ./output --build=missing; then
-			# build prerequisites not officially available in Conan
-			../prerequisites/build.sh || exit $?
-			conan build ../conanfile.py -of ./output --build=missing || exit $?
-		fi
-
-		source ./output/conanautotoolstoolchain.sh || exit $?
-		source ./output/conanbuildenv.sh || exit $?
-		source ./output/conanrunenv.sh || exit $?
 	popd
 
 	# STRUCTURE: conan home in conan/.conan_home_*, output with configuration scripts in conan/.conan_home_*/output
@@ -349,6 +339,9 @@ for config in "${SELECTED_CONFIGS[@]}"; do
             }
         fi
     fi
+
+	# activate conan run environment
+	test -z "$CONAN_OUTPUT" || source "$CONAN_OUTPUT"/conanrunenv.sh
 
 	echo "Unknown Failure, no log" > /tmp/test_${NAME}.log
     if [ "$BUILD_ONLY" != "1" ]; then
