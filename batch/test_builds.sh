@@ -62,6 +62,9 @@ if [ ! -z "$CXX" ] && [ ! "$CXX" = "c++" ]; then
     CXX_KEY=_${CXX};
 fi
 
+# main conan configuration
+CONAN_DIR="${ROOT}/conan"
+
 WORKSPACE_KEY=""
 if [[ $ROOT == /work* ]]; then
     # looks like we are in a devcontainer
@@ -117,6 +120,17 @@ elif [ "$1" = "clean" ]; then
             rm -rf "$BUILD_DIR"
         fi
     done
+
+	if [ "$CONAN" = "1" ]; then
+		rm -f "${CONAN_DIR}"/conan*.sh
+		for CONAN_HOME in ${CONAN_DIR}/.conan_home*; do
+			if [ -d "$CONAN_HOME" ]; then
+				echo "Cleaning $CONAN_HOME..."
+				rm -rf "$CONAN_HOME/profiles/default"
+			fi
+		done
+	fi
+
     exit 0
 elif [ "$1" = "full" ]; then
     # set -x
@@ -206,25 +220,29 @@ if [ "$CONAN" = "1" ]; then
 	# For all: see conan/README.md for detauls
 
 	# prepare environment (separately for different non-conan settings)
-	CONAN_DIR="${ROOT}/conan"
-	export CONAN_SYSREQUIRES_MODE=verify
+	if [ -z "$CONAN_SYSREQUIRES_MODE" ]; then
+		export CONAN_SYSREQUIRES_MODE=verify
+	fi
 	export CONAN_HOME="$CONAN_DIR/.conan_home${WORKSPACE_KEY}${CXX_KEY}"
 
-	pushd "${CONAN_DIR}"
-		if ! test -r ${CONAN_HOME}/profiles/default; then
+	mkdir -p "${CONAN_HOME}"
+	pushd "${CONAN_HOME}"
+		if ! test -r profiles/default; then
 			# initialize profile with austere default options
-			mkdir -p "${CONAN_HOME}"
 			conan profile detect --force || exit $?
-			cat conanoptions.ini >> ${CONAN_HOME}/profiles/default
+			cat ../conanoptions.ini >> profiles/default
 		fi
 
 		# build dependencies
-		if ! test -r ./conanautotoolstoolchain.sh && ! conan build ./conanfile.py --build=missing; then
+		mkdir -p output
+		if ! test -r ./output/conanautotoolstoolchain.sh && ! conan build ../conanfile.py -of ./output --build=missing; then
 			# build prerequisites not officially available in Conan
-			./prerequisites/build.sh || exit $?
-			conan build ./conanfile.py --build=missing || exit $?
+			../prerequisites/build.sh || exit $?
+			conan build ../conanfile.py -of ./output --build=missing || exit $?
 		fi
 	popd
+
+	# STRUCTURE: conan home in conan/.conan_home_*, output with configuration scripts in conan/.conan_home_*/output
 fi
 
 # Process each configuration
