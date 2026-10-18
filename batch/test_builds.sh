@@ -236,6 +236,8 @@ if [ "$CONAN" = "1" ]; then
 		fi
 	popd
 
+	# reconfigure to rebuild conan
+	test -r $CONAN_OUTPUT/conanrunenv.sh || FORCE_RECONFIGURE=1
 	# STRUCTURE: conan home in conan/.conan_home_*, output with configuration scripts in conan/.conan_home_*/output
 fi
 
