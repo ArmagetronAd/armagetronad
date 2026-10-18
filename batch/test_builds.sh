@@ -240,6 +240,8 @@ if [ "$CONAN" = "1" ]; then
 			../prerequisites/build.sh || exit $?
 			conan build ../conanfile.py -of ./output --build=missing || exit $?
 		fi
+		
+		source ./output/conanrunenv.sh || exit $?
 	popd
 
 	# STRUCTURE: conan home in conan/.conan_home_*, output with configuration scripts in conan/.conan_home_*/output
@@ -346,6 +348,7 @@ for config in "${SELECTED_CONFIGS[@]}"; do
         fi
     fi
 
+	echo "Unknown Failure, no log" > /tmp/test_${NAME}.log
     if [ "$BUILD_ONLY" != "1" ]; then
         # Run tests
         echo "[3/3] Testing..."
