@@ -215,7 +215,7 @@ CONAN_KEY=""
 if [ "$CONAN" = "1" ]; then
 	# pick different directory and configure flags
 	CONAN_KEY=_conan
-	COMMON_FLAGS="$COMMON_FLAGS --enable-conan"
+	#COMMON_FLAGS="$COMMON_FLAGS --enable-conan"
 
 	# For all: see conan/README.md for detauls
 
@@ -240,7 +240,9 @@ if [ "$CONAN" = "1" ]; then
 			../prerequisites/build.sh || exit $?
 			conan build ../conanfile.py -of ./output --build=missing || exit $?
 		fi
-		
+
+		source ./output/conanautotoolstoolchain.sh || exit $?
+		source ./output/conanbuildenv.sh || exit $?
 		source ./output/conanrunenv.sh || exit $?
 	popd
 
