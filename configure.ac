@@ -751,11 +751,6 @@ PKG_CHECK_MODULES([SDL], [sdl < 2], [
 
     CPPFLAGS="$CPPFLAGS `${SDL_CONFIG} --cflags`"
     dnl LIBS="${SDLLIBS} $LIBS"
-
-    AC_CHECK_FUNC(SDL_Init,
-    AC_DEFINE(HAVE_LIBSDL,,[Define if you have the library SDL]),
-    AC_MSG_ERROR([You need the library SDL to compile ${progtitle}. Read the file doc/install_linux.html.])
-    ,)
 ])
 
 dnl *************************************************
