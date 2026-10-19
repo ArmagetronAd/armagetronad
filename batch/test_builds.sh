@@ -229,7 +229,7 @@ if [ "$CONAN" = "1" ]; then
 
 	mkdir -p "${CONAN_HOME}"
 	pushd "${CONAN_HOME}"
-		if ! test -r profiles/default || diff last_conanoptions.ini ../conanoptions.ini; then
+		if ! test -r profiles/default || ! diff last_conanoptions.ini ../conanoptions.ini; then
 			# initialize profile with austere default options
 			conan profile detect --force || exit $?
 			cat ../conanoptions.ini >> profiles/default
