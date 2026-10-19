@@ -764,7 +764,7 @@ PKG_CHECK_MODULES([SDL], [sdl < 2], [
     fi
 
     CPPFLAGS="$CPPFLAGS `${SDL_CONFIG} --cflags`"
-    dnl LIBS="${SDLLIBS} $LIBS"
+    LIBS="${SDLLIBS} $LIBS"
 ])
 
 dnl *************************************************
@@ -1144,6 +1144,21 @@ AM_CONDITIONAL(USING_CLANG_COVERAGE, test x$USING_CLANG_COVERAGE = xyes)
 
 # all include directories added via -I so far should be system level inlcudes, divide them from those added by individual makefiles
 # CPPFLAGS="-I- $CPPFLAGS"
+
+dnl Remove redundant LIBS entries
+ALL_LIBS=$LIBS
+LIBS=""
+for newlib in $ALL_LIBS; do
+    dnl echo newlib=$newlib
+    add=true
+    for oldlib in $LIBS; do
+        test "$oldlib" = "$newlib" && add=false
+    done
+    if test $add = true; then
+        dnl echo add $newlib
+        LIBS="$LIBS $newlib"
+    fi
+done
 
 export CPPFLAGS
 export CXXFLAGS
