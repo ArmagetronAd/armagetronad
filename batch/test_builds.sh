@@ -223,16 +223,17 @@ if [ "$CONAN" = "1" ]; then
 	if [ -z "$CONAN_SYSREQUIRES_MODE" ]; then
 		export CONAN_SYSREQUIRES_MODE=verify
 	fi
-	export CONAN_HOME="$CONAN_DIR/.conan_home${WORKSPACE_KEY}${CXX_KEY}"
+	export CONAN_HOME="$CONAN_DIR/.conan_home${WORKSPACE_KEY}${CXX_KEY}_oldprofile"
 	CONAN_OUTPUT="$CONAN_HOME/output"
 	COMMON_FLAGS="$COMMON_FLAGS --enable-conan --with-conan-dir=\"$CONAN_OUTPUT\""
 
 	mkdir -p "${CONAN_HOME}"
 	pushd "${CONAN_HOME}"
-		if ! test -r profiles/default; then
+		if ! test -r profiles/default || diff last_conanoptions.ini ../conanoptions.ini; then
 			# initialize profile with austere default options
 			conan profile detect --force || exit $?
 			cat ../conanoptions.ini >> profiles/default
+			cp ../conanoptions.ini last_conanoptions.ini
 		fi
 	popd
 
