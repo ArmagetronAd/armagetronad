@@ -234,6 +234,10 @@ if [ "$CONAN" = "1" ]; then
 			conan profile detect --force || exit $?
 			cat ../conanoptions.ini >> profiles/default
 			cp ../conanoptions.ini last_conanoptions.ini
+
+            # force rebuild
+            rm -rf $CONAN_OUTPUT
+            ../prerequisites/build.sh
 		fi
 	popd
 
