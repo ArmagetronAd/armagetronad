@@ -14,3 +14,4 @@ yes | conan remove aa_libsdl_image
 yes | conan remove libsdl_image
 yes | conan remove sdl_image
 
+true
