@@ -38,7 +38,15 @@ You can try with any other profile, of course; the one created above is
 quite fat free and should work, vanilla profiles might not. We have to
 compile some stuff that is not really prepared for conan.
 
+## Activate Conan
+
+Pass the `--enable-conan` flag to the configure script; this will build remaining 
+missing dependencies and use them.
+
 ## Build Prerequisites
+
+This is not usually required as it happens automatically, but for debug
+purposes, you might want to trigger this.
 
 We need to build and install our own version of SDL and SDL_Image, they're
 too old to be included in the standard library. Just invoke
@@ -50,9 +58,4 @@ to build them and
 `./prerequisites/clean.sh`
 
 to erase them again.
-
-## Activate Conan
-
-Pass the `--enable-conan` flag to the configure script; this will build remaining 
-missing dependencies and use them.
 
