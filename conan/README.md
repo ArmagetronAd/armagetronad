@@ -8,7 +8,14 @@ dependencies in a configuration where they are stripped of
 all the stuff we do not need.
 
 Conan is a system that can provide these builds, if properly
-configured.
+configured. Warning, though: It takes a long time to build
+the dependencies, and they take up quite a bit of space, and
+building eats all of your CPU and memory.
+
+## For the Impatient
+
+Just run `CONAN=1 ./batch/test_builds.sh`, this does everything outlined below,
+using a local conanhome directory. Results will be in `build/*conan*`.
 
 ## Configure it Properly
 
@@ -31,7 +38,15 @@ You can try with any other profile, of course; the one created above is
 quite fat free and should work, vanilla profiles might not. We have to
 compile some stuff that is not really prepared for conan.
 
+## Activate Conan
+
+Pass the `--enable-conan` flag to the configure script; this will build remaining 
+missing dependencies and use them.
+
 ## Build Prerequisites
+
+This is not usually required as it happens automatically, but for debug
+purposes, you might want to trigger this.
 
 We need to build and install our own version of SDL and SDL_Image, they're
 too old to be included in the standard library. Just invoke
@@ -43,17 +58,4 @@ to build them and
 `./prerequisites/clean.sh`
 
 to erase them again.
-
-## Activate Conan
-
-in this directory, invoke
-
-```
-conan build ./conanfile.py --build=missing
-```
-
-This will now also build `libcurl` and `libxml2`.
-
-before calling the configure script. With conan configured, it will pick up
-the dependencies from here.
 

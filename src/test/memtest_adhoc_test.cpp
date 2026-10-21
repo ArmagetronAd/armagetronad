@@ -100,7 +100,7 @@ TEST_CASE("Memory: Allocation and Deallocation")
         int x;
 
     public:
-        virtual ~test_base() {}
+        virtual ~test_base() { std::ignore = x; }
         tMEMMANAGER(test_base);
     };
 
@@ -109,7 +109,7 @@ TEST_CASE("Memory: Allocation and Deallocation")
         int y;
 
     public:
-        virtual ~test_derived() {}
+        virtual ~test_derived() { std::ignore = y; }
         tMEMMANAGER(test_derived);
     };
 

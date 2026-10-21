@@ -62,6 +62,9 @@ if [ ! -z "$CXX" ] && [ ! "$CXX" = "c++" ]; then
     CXX_KEY=_${CXX};
 fi
 
+# main conan configuration
+CONAN_DIR="${ROOT}/conan"
+
 WORKSPACE_KEY=""
 if [[ $ROOT == /work* ]]; then
     # looks like we are in a devcontainer
@@ -100,6 +103,7 @@ elif [ "$1" = "help" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     echo "  FORCE_RECONFIGURE=1 - Force re-run of configure step"
     echo "  VERBOSE=1          - Show full build output (not just summary)"
     echo "  DOXYGEN=1          - Generate doxygen documentation"
+    echo "  CONAN=1            - Use dependencies from Conan"
     echo "  COVERAGE=1         - Generate human readable code coverage report (requires lcov)"
     echo "  COVERAGE=2         - Silently generate code coverage report, do not fail on error (for AI Agents)"
     echo "  JOBS=N             - Number of parallel jobs (default: auto)"
@@ -116,6 +120,18 @@ elif [ "$1" = "clean" ]; then
             rm -rf "$BUILD_DIR"
         fi
     done
+
+	if [ "$CONAN" = "1" ]; then
+		rm -f "${CONAN_DIR}"/conan*.sh
+		for CONAN_HOME in $ROOT/build/conan_home*; do
+			if [ -d "$CONAN_HOME" ]; then
+				echo "Cleaning $CONAN_HOME..."
+				rm -rf "$CONAN_HOME/profiles/default"
+				rm -rf "$CONAN_HOME/output"
+			fi
+		done
+	fi
+
     exit 0
 elif [ "$1" = "full" ]; then
     # set -x
@@ -195,6 +211,42 @@ FAILURES=0
 TOTAL=0
 FAILED_CONFIGS=()
 
+# Conan build suffix
+CONAN_KEY=""
+CONAN_OUTPUT=""
+if [ "$CONAN" = "1" ]; then
+	# pick different directory and configure flags
+	CONAN_KEY=_conan
+
+	# For all: see conan/README.md for detauls
+
+	# prepare environment (separately for different non-conan settings)
+	if [ -z "$CONAN_SYSREQUIRES_MODE" ]; then
+		export CONAN_SYSREQUIRES_MODE=verify
+	fi
+	export CONAN_HOME="$ROOT/build/conan_home${WORKSPACE_KEY}${CXX_KEY}"
+	CONAN_OUTPUT="$CONAN_HOME/output"
+	COMMON_FLAGS="$COMMON_FLAGS --enable-conan --with-conan-dir=\"$CONAN_OUTPUT\""
+
+	mkdir -p "${CONAN_HOME}"
+	pushd "${CONAN_HOME}"
+		if ! test -r profiles/default || ! diff last_conanoptions.ini $ROOT/conan/conanoptions.ini; then
+			# initialize profile with austere default options
+			conan profile detect --force || exit $?
+			cat $ROOT/conan/conanoptions.ini >> profiles/default
+			cp $ROOT/conan/conanoptions.ini last_conanoptions.ini
+
+            # force rebuild
+            rm -rf $CONAN_OUTPUT
+            $ROOT/conan/prerequisites/build.sh
+		fi
+	popd
+
+	# reconfigure to rebuild conan
+	test -r $CONAN_OUTPUT/conanrunenv.sh || FORCE_RECONFIGURE=1
+	# STRUCTURE: conan home in conan/.conan_home_*, output with configuration scripts in conan/.conan_home_*/output
+fi
+
 # Process each configuration
 for config in "${SELECTED_CONFIGS[@]}"; do
     NAME="${config%%:*}"
@@ -205,7 +257,7 @@ for config in "${SELECTED_CONFIGS[@]}"; do
     # the root directory is in there to force rebuild on container/host switches
     BUILD_KEY="$SPECIFIC_FLAGS $COMMON_FLAGS $ROOT"
 
-    BUILD_DIR_BASE=test_${NAME}${WORKSPACE_KEY}${CXX_KEY}
+    BUILD_DIR_BASE=test_${NAME}${WORKSPACE_KEY}${CONAN_KEY}${CXX_KEY}
     BUILD_DIR="$ROOT/build/${BUILD_DIR_BASE}"
 
     echo ""
@@ -229,7 +281,7 @@ for config in "${SELECTED_CONFIGS[@]}"; do
 
 	if echo $config | grep _debug > /dev/null; then
         cd "${ROOT}/build"
-        # link output directory to canonical build directory where VS code will be able to find it
+        # link output directory to canonical build directory where VS Code will be able to find it
         CANONICAL_BUILD_DIR_BASE="./test_vs_${NAME}"
         rm -rf "${CANONICAL_BUILD_DIR_BASE}" # it's a directory link, if we do not remove it, ln below will create a link inside of it
         ln -sf "${BUILD_DIR_BASE}" "${CANONICAL_BUILD_DIR_BASE}"
@@ -296,6 +348,10 @@ for config in "${SELECTED_CONFIGS[@]}"; do
         fi
     fi
 
+	# activate conan run environment
+	test -z "$CONAN_OUTPUT" || source "$CONAN_OUTPUT"/conanrunenv.sh
+
+	echo "Unknown Failure, no log" > /tmp/test_${NAME}.log
     if [ "$BUILD_ONLY" != "1" ]; then
         # Run tests
         echo "[3/3] Testing..."

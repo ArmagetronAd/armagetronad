@@ -24,7 +24,7 @@ class SdlImageConan(ConanFile):
             "libjpeg/[9f]", \
             "libpng/[>=1.0.0 <2.0.0]"
 
-    build_requires = \
+    tool_requires = \
             "sdl/[>=2.0.0 <3.0.0]", \
             "sdl_aa/[>=1.2.15 <2.0.0]"
 

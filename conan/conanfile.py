@@ -21,7 +21,7 @@ class Pkg(ConanFile):
             "libxml2/[>=2.9.10]"
 
     # we need the -config binaries from these dependencies at build time
-    build_requires = \
+    tool_requires = \
             "sdl_aa/[>=1.2.15 <2.0.0]"
 
     keep_imports = True
@@ -51,7 +51,7 @@ Cflags:
             print(dirs)
             for dir in dirs:
                 for extension in [ "*.so", "*.so.*", "*.dylib", "*.dylib*", "*.dll" ]:
-                    copy(self, extension, dir, libs_path)
+                    copy(self, extension, dir, libs_path, keep_path=False)
 
         # fix sdl pkg-config files; standard conan puts SDL2 config as sdl.pc, usually sdl.pc would be reserved for SDL 1.2
         # shutil.copy(os.path.join(self.build_folder, "sdl_aa.pc"), os.path.join(self.build_folder, "sdl.pc"))

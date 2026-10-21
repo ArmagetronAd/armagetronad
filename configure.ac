@@ -79,7 +79,7 @@ PKG_PROG_PKG_CONFIG
 build_regular=true
 
 have_lzma=false
-    AC_ARG_WITH(maxclients, AC_HELP_STRING([--with-maxclients],[sets the hardcoded limit for the number of connected clients (default: 16 for clients and 32 for dedicated servers)]),
+AC_ARG_WITH(maxclients, AC_HELP_STRING([--with-maxclients],[sets the hardcoded limit for the number of connected clients (default: 16 for clients and 32 for dedicated servers)]),
 [ 
     AC_DEFINE_UNQUOTED(MAXCLIENTS,${withval},maximal number of clients)
 ])
@@ -103,13 +103,30 @@ dnl [  --enable-glout          enable graphical output; otherwise, compile
 dnl                          a dedicated server (default=enabled)],,
 dnl enable_glout=yes)
 
+AC_ARG_ENABLE(conan,
+     AC_HELP_STRING([--enable-conan],
+		[enables use of conan for all dependencies (read conan/README.md for details)]),
+     [case "${enableval}" in
+       yes) conan=true ;;
+       no)  conan=false ;;
+       *) AC_MSG_ERROR(bad value ${enableval} for --enable-conan) ;;
+     esac],[conan=false])
+
+conan_dir=`pwd`/conan/output
+AC_ARG_WITH(conan-dir, AC_HELP_STRING([--with-conan-dir],[sets the directory to write conan output files to (build environment...)]),
+[ 
+    conan_dir=${withval}
+])
+AC_DEFINE_UNQUOTED(CONAN_DIR,${conan_dir}, directory where conan stores the output files in)
+AC_SUBST(conan_dir)
+
 AC_ARG_ENABLE(tests,
      AC_HELP_STRING([--disable-tests],
 		[disables building and executing unit tests; to be used on systems where they cannot possibly work]),
      [case "${enableval}" in
        yes) tests=true ;;
        no)  tests=false ;;
-       *) AC_MSG_ERROR(bad value ${enableval} for --enable-master) ;;
+       *) AC_MSG_ERROR(bad value ${enableval} for --enable-tests) ;;
      esac],[tests=true])
 
 AM_CONDITIONAL(BUILDTESTS, test x$tests = xtrue)
@@ -620,9 +637,23 @@ esac
 
 AC_CACHE_SAVE
 
-dnl load conan settings if they exist
-test -r $(dirname $0)/conan/conanautotoolstoolchain.sh && source $(dirname $0)/conan/conanautotoolstoolchain.sh
-test -r $(dirname $0)/conan/conanbuildenv.sh && source $(dirname $0)/conan/conanbuildenv.sh
+dnl build conan and load config
+if test x$conan = xtrue; then
+    AC_MSG_CHECKING(Conan)
+    pushd $(dirname $0)/conan
+    if ! test -r ${conan_dir}/conanautotoolstoolchain.sh; then
+        # naive attempt at building conan
+        if ! conan build ./conanfile.py -of ${conan_dir} --build=missing; then
+            # we are probably missing prerequisites
+			./prerequisites/build.sh || exit $?
+            # try again
+            conan build ./conanfile.py -of ${conan_dir} --build=missing || exit $?
+        fi
+    fi
+    source ${conan_dir}/conanautotoolstoolchain.sh || exit $?
+    source ${conan_dir}/conanbuildenv.sh || exit $?
+    popd
+fi
 
 dnl *************************************************
 dnl         libxml2
@@ -733,12 +764,7 @@ PKG_CHECK_MODULES([SDL], [sdl < 2], [
     fi
 
     CPPFLAGS="$CPPFLAGS `${SDL_CONFIG} --cflags`"
-    dnl LIBS="${SDLLIBS} $LIBS"
-
-    AC_CHECK_FUNC(SDL_Init,
-    AC_DEFINE(HAVE_LIBSDL,,[Define if you have the library SDL]),
-    AC_MSG_ERROR([You need the library SDL to compile ${progtitle}. Read the file doc/install_linux.html.])
-    ,)
+    LIBS="${SDLLIBS} $LIBS"
 ])
 
 dnl *************************************************
@@ -1118,6 +1144,21 @@ AM_CONDITIONAL(USING_CLANG_COVERAGE, test x$USING_CLANG_COVERAGE = xyes)
 
 # all include directories added via -I so far should be system level inlcudes, divide them from those added by individual makefiles
 # CPPFLAGS="-I- $CPPFLAGS"
+
+dnl Remove redundant LIBS entries
+ALL_LIBS=$LIBS
+LIBS=""
+for newlib in $ALL_LIBS; do
+    dnl echo newlib=$newlib
+    add=true
+    for oldlib in $LIBS; do
+        test "$oldlib" = "$newlib" && add=false
+    done
+    if test $add = true; then
+        dnl echo add $newlib
+        LIBS="$LIBS $newlib"
+    fi
+done
 
 export CPPFLAGS
 export CXXFLAGS
