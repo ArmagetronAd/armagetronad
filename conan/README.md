@@ -10,7 +10,12 @@ all the stuff we do not need.
 Conan is a system that can provide these builds, if properly
 configured. Warning, though: It takes a long time to build
 the dependencies, and they take up quite a bit of space, and
-building eats all of your CPU and memory.
+building eats all of your CPU and memory. Usually, it is much
+easier to just use system installed libraries.
+
+The main intention of this is to simplify pipeline builds.
+With system provided libraries, you get what you get; Conan
+allows very flexible customization.
 
 ## For the Impatient
 
@@ -33,6 +38,9 @@ Then let your profile autodetect and add the configuration from `conanoptions.in
 conan profile detect --force
 cat conanoptions.ini >> ${CONAN_HOME}/profiles/default
 ```
+
+If you only want to take some of the dependencies from Conan, check
+`conanoptions.ini` on how.
 
 You can try with any other profile, of course; the one created above is
 quite fat free and should work, vanilla profiles might not. We have to

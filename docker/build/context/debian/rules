@@ -21,6 +21,7 @@ SHARED_OPTS += --build=$(DEB_BUILD_GNU_TYPE) --prefix=/usr
 SHARED_OPTS += --mandir=\$${prefix}/share/man --sysconfdir=/etc --disable-etc
 SHARED_OPTS += --datadir=/usr/share --disable-games --bindir=/usr/games
 SHARED_OPTS += --enable-binreloc
+SHARED_OPTS += --disable-tests
 SERVER_OPTS := --disable-glout --disable-useradd --disable-init --enable-authentication
 CLIENT_OPTS := --enable-glout
 
