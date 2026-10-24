@@ -43,6 +43,10 @@ class gNetPlayerWall;
 class eTempEdge;
 
 namespace Game { class PlayerWallSync; }
+namespace gLightwallAttachment
+{
+struct Curve;
+}
 
 class gWallRim:public eWallRim{
 public:
@@ -243,7 +247,7 @@ public:
     // virtual void Render(const eCamera *cam);
     void RenderList(bool list, gWallRenderMode );
     virtual void RenderNormal(const eCoord &x1,const eCoord &x2,REAL ta,REAL te,REAL r,REAL g,REAL b,REAL a, gWallRenderMode mode );
-    virtual void RenderBegin(const eCoord &x1,const eCoord &x2,REAL ta,REAL te,REAL ra,REAL rb,REAL r,REAL g,REAL b,REAL a, gWallRenderMode mode );
+    virtual void RenderBegin(const eCoord& x1, const eCoord& x2, REAL ta, REAL te, REAL ra, REAL rb, REAL r, REAL g, REAL b, REAL a, gWallRenderMode mode, gLightwallAttachment::Curve const* attachment = nullptr);
 #endif
 
     virtual bool ActionOnQuit();

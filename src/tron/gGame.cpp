@@ -841,8 +841,7 @@ static gCycle *Cycle(int id){
 #endif
 
 #include "rRender.h"
-
-
+#include "rBloom.h"
 
 void exit_game_grid(eGrid *grid){
     grid->Clear();
@@ -1413,6 +1412,9 @@ void RenderAllViewports(eGrid *grid){
 
         }
 
+        // every viewport's scene is complete and nothing flat is drawn yet: let it glow
+        sr_Bloom();
+
         // glDisable( GL_FOG );
     }
 
@@ -1447,9 +1449,11 @@ void Render(eGrid *grid, REAL time, bool swap=true){
         }
 
         static bool lastMoviePack=sg_MoviePack();
-        if(lastMoviePack!=sg_MoviePack())
+        static bool lastBlacklightVisuals = sg_blacklightVisuals;
+        if (lastMoviePack != sg_MoviePack() || lastBlacklightVisuals != sg_blacklightVisuals)
         {
             lastMoviePack=sg_MoviePack();
+            lastBlacklightVisuals = sg_blacklightVisuals;
             rDisplayList::ClearAll();
         }
 

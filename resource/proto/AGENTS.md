@@ -36,3 +36,7 @@ The proto directory contains prototype resource files including textures, models
 - Contributor-organized resource structure
 - Prototype to production resource pipeline
 - Resource categorization by type and author
+
+## Optional Legacy cockpit
+
+`Romil/blacklight.aacockpit.xml` supplies the compact HUD selected by the Legacy profile. Classic selects the existing Anonymous standard cockpit.

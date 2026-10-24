@@ -558,6 +558,23 @@ private:
 };
 
 extern tList<ePlayerNetID> se_PlayerNetIDs;
+
+//! Local presentation choice; raw player RGB and team membership stay unchanged.
+bool se_IndividualPlayerColors();
+
+//! Notify game-specific visuals when a player's displayed colour needs refreshing.
+class eCallbackPlayerColor : public tListItem<eCallbackPlayerColor>
+{
+public:
+    typedef void Callback(ePlayerNetID*);
+    explicit eCallbackPlayerColor(Callback* callback);
+    static void Exec(ePlayerNetID* player);
+
+private:
+    static eCallbackPlayerColor* anchor_;
+    Callback* callback_;
+};
+
 extern int    sr_viewportBelongsToPlayer[MAX_VIEWPORTS];
 extern bool se_assignTeamAutomatically;
 

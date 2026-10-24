@@ -171,6 +171,7 @@ private:
     int group_;             //!< the texture group (determines rendering options)
 
     int textureModeLast_;   //!< the last texture storage mode this texture was used with
+    int anisotropyLast_ = -1; //!< reload cached parameters when the local quality setting changes
 
     rGLuintObjectTexture tint_;   //!< the OpenGL id of this texture
     bool repx_,repy_;             //!< flags indicating whether the texture repeats in x and y direction

@@ -89,6 +89,7 @@ The directory contains extensive platform-specific code (win32, win32_ded, macos
 - Tests cover: geometry (eAxis, eCoord, eRectangle), data structures (tArray, tList, tLinkedList, tRing), memory management (tHeap, tMemStack), utilities (tString, tColor, tCallback, tRandomizer), exception handling, and XML parsing
 - Tests integrated with build system via src/Makefile.am
 - Uses doctest framework for most tests, custom harness for legacy chat_prefix_test
+- Optional graphics implementations use small public headers and compiled sources in `src/tron/`; configuration lifecycle callbacks remain in `src/tools/`.
 
 ## Cross-Platform Support
 

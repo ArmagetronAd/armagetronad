@@ -40,6 +40,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tRecorder.h"
 #include "eSensor.h"
 #include "eCamera.h"
+#include "eCameraMotion.h"
 #include "rScreen.h"
 #include "eGameObject.h"
 #include "uInputQueue.h"
@@ -2102,25 +2103,41 @@ void eCamera::Timestep(REAL ts){
             REAL turnSpeed = ( newmode == CAMERA_IN || newmode == CAMERA_SMART_IN ) ? s_inTurnSpeed : customTurnSpeed;
 
             eCoord cycleDir = CenterCamDir();
-            newdir=dir+cycleDir*(turnSpeed*ts);
-
-            // test if we're looking against the current driving direction
-            REAL wrongDirection = -eCoord::F( cycleDir, newdir );
-            if ( Center() &&  wrongDirection > 0 )
+#ifndef DEDICATED
+            if (se_LegacyGraphics() && effectiveMode == CAMERA_CUSTOM && newmode == CAMERA_CUSTOM)
             {
-                // if so, turn to the side using the last driving direction
-                eCoord normedLastDir = Center()->LastDirection();
-                REAL wrongWrongDirection = -eCoord::F(cycleDir, normedLastDir);
-                if( wrongWrongDirection > 0)
+                eCoord previousDirection = Center() ? Center()->LastDirection() : dir;
+                if (Center())
+                    cycleDir = Center()->CamDirTarget();
+                double angle = eCameraMotion::Follow(std::atan2(dir.y, dir.x),
+                                                     std::atan2(cycleDir.y, cycleDir.x),
+                                                     std::atan2(previousDirection.y, previousDirection.x), ts,
+                                                     turnSpeed, customTurnSpeed180);
+                newdir = eCoord(std::cos(angle), std::sin(angle));
+            }
+            else
+#endif
+            {
+                newdir = dir + cycleDir * (turnSpeed * ts);
+
+                // test if we're looking against the current driving direction
+                REAL wrongDirection = -eCoord::F(cycleDir, newdir);
+                if (Center() && wrongDirection > 0)
                 {
-                    normedLastDir = normedLastDir + cycleDir * (wrongWrongDirection/cycleDir.NormSquared());
-                    REAL n = normedLastDir.NormSquared();
-                    if(n > 0)
+                    // if so, turn to the side using the last driving direction
+                    eCoord normedLastDir = Center()->LastDirection();
+                    REAL wrongWrongDirection = -eCoord::F(cycleDir, normedLastDir);
+                    if (wrongWrongDirection > 0)
                     {
-                        normedLastDir *= 1/sqrt(n);
+                        normedLastDir = normedLastDir + cycleDir * (wrongWrongDirection / cycleDir.NormSquared());
+                        REAL n = normedLastDir.NormSquared();
+                        if (n > 0)
+                        {
+                            normedLastDir *= 1 / sqrt(n);
+                        }
                     }
+                    newdir = newdir + normedLastDir * (wrongDirection * ts * turnSpeed * customTurnSpeed180);
                 }
-                newdir = newdir + normedLastDir*(wrongDirection*ts*turnSpeed*customTurnSpeed180);
             }
         }
         else

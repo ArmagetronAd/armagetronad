@@ -102,3 +102,7 @@ The engine heavily uses the tools library for data structures and utilities. It 
 ## Automated Tests
 - Unit tests: `eCoord.cpp` in `src/test/` (from fn-1 and fn-3)
 - Unit tests: `eRectangle.cpp`, `eAxis.cpp` in `src/test/` (from fn-3)
+
+## Legacy presentation hooks
+
+The game registers `se_LegacyGraphics()` through `se_RegisterLegacyGraphicsFunc`, following the moviepack callback boundary. Engine code must not link directly to game globals. `RenderEarly` supplies depth-tested ribbon edges before translucent objects. `eCameraMotion.h` smooths presentation direction without changing simulation steering.

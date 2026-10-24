@@ -63,6 +63,17 @@ tCONFIG_ENUM( rVSync );
 SDL_Window   *sr_screen=NULL;
 #ifndef DEDICATED
 SDL_GLContext sr_glcontext=NULL;
+
+//! The context belongs to its window; dispose it before destroying/replacing that window.
+static void sr_DestroySDLWindow()
+{
+    if (sr_glcontext)
+        SDL_GL_DeleteContext(sr_glcontext);
+    sr_glcontext = nullptr;
+    if (sr_screen)
+        SDL_DestroyWindow(sr_screen);
+    sr_screen = nullptr;
+}
 #endif
 #else
 SDL_Surface  *sr_screen=NULL; // our window
@@ -83,6 +94,7 @@ static int default_texturemode = GL_LINEAR_MIPMAP_LINEAR;
 
 rDisplayListUsage sr_useDisplayLists=rDisplayList_Off;
 bool              sr_blacklistDisplayLists=false;
+bool sr_hiddenWindow = false;
 
 static int width[ArmageTron_Custom+2]  = {0, 320, 320, 400, 512, 640, 800, 1024	, 1280, 1280, 1280, 1600, 1680, 2048,800,320};
 static int height[ArmageTron_Custom+2] = {0, 200, 240, 300, 384, 480, 600,  768	,  800,  854, 1024, 1200, 1050, 1572,600,200};
@@ -171,6 +183,10 @@ static tConfItem<rResolution> winsizeLast("ARMAGETRON_LAST_WINDOWSIZE",lastSucce
 
 static tConfItem<rVSync> vSync("ARMAGETRON_VSYNC",currentScreensetting.vSync);
 static tConfItem<rVSync> vSyncLast("ARMAGETRON_VSYNC_LAST",lastSuccess.vSync);
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+static tConfItem<int> multisamplesConf("ANTIALIAS_SAMPLES", currentScreensetting.multisamples);
+static tConfItem<int> multisamplesLastConf("LAST_ANTIALIAS_SAMPLES", lastSuccess.multisamples);
+#endif
 
 static tConfItem<int> screenres_w("ARMAGETRON_SCREENMODE_W",currentScreensetting.res.width);
 static tConfItem<int> screenresLast_w("ARMAGETRON_LAST_SCREENMODE_W", lastSuccess.res.width);
@@ -384,8 +400,8 @@ int rScreenSize::Compare( rScreenSize const & other ) const
 //!
 // *******************************************************************************************
 
-rScreenSettings::rScreenSettings( rResolution r, bool fs, rColorDepth cd, bool ce )
-:res(r), windowSize(r), fullscreen(fs), colorDepth(cd), zDepth( ArmageTron_ColorDepth_Desktop ), checkErrors(true), displayIndex(0), refreshRate(0), vSync( ArmageTron_VSync_Default ), aspect (1)
+rScreenSettings::rScreenSettings(rResolution r, bool fs, rColorDepth cd, bool ce)
+    : res(r), windowSize(r), fullscreen(fs), colorDepth(cd), zDepth(ArmageTron_ColorDepth_Desktop), checkErrors(true), displayIndex(0), refreshRate(0), vSync(ArmageTron_VSync_Default), multisamples(0), aspect(1)
 {
     // special case for desktop resolution: window size of 640x480
     if ( r == ArmageTron_Desktop )
@@ -506,6 +522,10 @@ static void sr_SetGLAttributes( int rDepth, int gDepth, int bDepth, int zDepth )
 #endif
     SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, zDepth );
     SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, currentScreensetting.multisamples > 0 ? 1 : 0);
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, currentScreensetting.multisamples);
+#endif
 }
 
 // to be called after screen initialization
@@ -513,8 +533,8 @@ static void sr_CompleteGLAttributes()
 {
     sr_SetSwapControlAuto( true );
 }
-    #endif // SDL_OPENGL
-    #endif // DEDICATED
+#endif // SDL_OPENGL
+#endif // DEDICATED
 
 // flag indicating whether directX is supposed to be used for input (defaults to false, crashes on my Win7)
 // bool sr_useDirectX = false;
@@ -524,6 +544,8 @@ static void sr_CompleteGLAttributes()
 #if SDL_VERSION_ATLEAST(2,0,0)
 
 bool IsWindowActive(void) {
+    if (sr_hiddenWindow)
+        return true; // a deliberate hidden capture must not wait forever to become visible
     Uint32 flags = 0;
 
     flags = SDL_GetWindowFlags(sr_screen);
@@ -572,7 +594,13 @@ static int CountBits(int toCount)
 static bool lowlevel_sr_InitDisplay(){
     rCallbackBeforeScreenModeChange::Exec();
 
-    rScreenSize & res = currentScreensetting.fullscreen ? currentScreensetting.res : currentScreensetting.windowSize;
+    // Capture mode is always a hidden window; leave the saved fullscreen preference intact.
+    bool fullscreen = currentScreensetting.fullscreen && !sr_hiddenWindow;
+    if (currentScreensetting.multisamples < 2)
+        currentScreensetting.multisamples = 0;
+    else if (currentScreensetting.multisamples > 16)
+        currentScreensetting.multisamples = 16;
+    rScreenSize& res = fullscreen ? currentScreensetting.res : currentScreensetting.windowSize;
 
     // update pixel aspect ratio
     if ( res.res != ArmageTron_Invalid && size_t(res.res) < sizeof(aspect)/sizeof(aspect[0]) )
@@ -654,7 +682,7 @@ static bool lowlevel_sr_InitDisplay(){
     // default start window size and position
     int defaultWidth = sr_desktopWidth;
     int defaultHeight = sr_desktopHeight;
-    if(!currentScreensetting.fullscreen)
+    if (!fullscreen)
     {
         defaultWidth = sr_screenWidthInPoints;
         defaultHeight = sr_screenHeightInPoints;
@@ -663,8 +691,7 @@ static bool lowlevel_sr_InitDisplay(){
     int defaultX = screenBounds.x + (screenBounds.w-defaultWidth)/2;
     int defaultY = screenBounds.y + (screenBounds.h-defaultHeight)/2;
 
-    if(!currentScreensetting.fullscreen && (
-           lastWindowX != SDL_WINDOWPOS_CENTERED || lastWindowY != SDL_WINDOWPOS_CENTERED))
+    if (!fullscreen && (lastWindowX != SDL_WINDOWPOS_CENTERED || lastWindowY != SDL_WINDOWPOS_CENTERED))
     {
         defaultX = lastWindowX;
         defaultY = lastWindowY;
@@ -678,19 +705,19 @@ static bool lowlevel_sr_InitDisplay(){
     }
 #endif
     static bool lastHighDPI = highDPI;
+    static int lastMultisamples = -1;
+    static bool lastHiddenWindow = false;
 
     // reinit on color/z depth or resolution change
-    if(currentScreensetting.zDepth != lastSuccess.zDepth ||
-       currentScreensetting.colorDepth != lastSuccess.colorDepth ||
-       lastHighDPI != highDPI
-       )
+    if (currentScreensetting.zDepth != lastSuccess.zDepth ||
+        currentScreensetting.colorDepth != lastSuccess.colorDepth ||
+        lastHighDPI != highDPI || lastMultisamples != currentScreensetting.multisamples ||
+        lastHiddenWindow != sr_hiddenWindow)
     {
-        if(sr_screen)
-        {
-            SDL_DestroyWindow(sr_screen);
-            sr_screen=nullptr;
-        }
+        sr_DestroySDLWindow();
         lastHighDPI = highDPI;
+        lastMultisamples = currentScreensetting.multisamples;
+        lastHiddenWindow = sr_hiddenWindow;
     }
 
     if (!sr_screen)
@@ -734,6 +761,8 @@ static bool lowlevel_sr_InitDisplay(){
         sr_SetGLAttributes( singleCD_R, singleCD_G, singleCD_B, zDepth );
 
         int attrib=SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
+        if (sr_hiddenWindow)
+            attrib |= SDL_WINDOW_HIDDEN;
 
         if(highDPI)
         {
@@ -761,7 +790,7 @@ static bool lowlevel_sr_InitDisplay(){
 #endif
 
         // try fullscreen first if requested and sensible (only display 0 is supported)
-        if (currentScreensetting.fullscreen && currentScreensetting.displayIndex == 0)
+        if (fullscreen && currentScreensetting.displayIndex == 0)
         {
             sr_screen = SDL_CreateWindow("", defaultX, defaultY, sr_desktopWidth, sr_desktopHeight, attrib | SDL_WINDOW_FULLSCREEN_DESKTOP);
         }
@@ -781,16 +810,16 @@ static bool lowlevel_sr_InitDisplay(){
 
         sr_SetWindowTitle();
 
-        SDL_EnableUNICODE(1);
+        if (!sr_hiddenWindow)
+            SDL_EnableUNICODE(1);
     }
 
     if(!sr_screen)
         return false;
 
-    if (SDL_GetWindowDisplayIndex(sr_screen) != currentScreensetting.displayIndex ||
-        (sr_lastDisplayIndex >= 0 && sr_lastDisplayIndex != currentScreensetting.displayIndex) ||
-        (currentScreensetting.fullscreen && !lastSuccess.fullscreen)
-        )
+    if (!sr_hiddenWindow && (SDL_GetWindowDisplayIndex(sr_screen) != currentScreensetting.displayIndex ||
+                             (sr_lastDisplayIndex >= 0 && sr_lastDisplayIndex != currentScreensetting.displayIndex) ||
+                             (fullscreen && !lastSuccess.fullscreen)))
     {
         // go to window mode, position window on center of selected display
         SDL_SetWindowFullscreen(sr_screen, 0);
@@ -802,7 +831,7 @@ static bool lowlevel_sr_InitDisplay(){
     }
 
     // SDL2 can resize window or toggle fullscreen without recreating a new window and therefore keeping existing GL context.
-    if (currentScreensetting.fullscreen)
+    if (fullscreen)
     {
         bool fullscreenSuccess = true;
 
@@ -900,12 +929,20 @@ static bool lowlevel_sr_InitDisplay(){
             std::cerr << lastError << '\n';
 
             currentScreensetting.fullscreen = false;
+            fullscreen = false;
 
             sr_screenWidthInPoints  = currentScreensetting.windowSize.width;
             sr_screenHeightInPoints = currentScreensetting.windowSize.height;
         }
     }
-    if (!currentScreensetting.fullscreen)
+    if (sr_hiddenWindow)
+    {
+        // Never maximize, restore, focus or enter fullscreen while capturing. Those operations
+        // may show an otherwise hidden window on macOS.
+        SDL_SetWindowSize(sr_screen, sr_screenWidthInPoints, sr_screenHeightInPoints);
+        SDL_SetRelativeMouseMode(SDL_FALSE);
+    }
+    else if (!fullscreen)
     {
         // Set windowed mode and size accordingly
         if (!SDL_SetWindowFullscreen(sr_screen, 0))
@@ -956,13 +993,8 @@ static bool lowlevel_sr_InitDisplay(){
     }
 
     {
-        static SDL_Window *lastScreen = NULL;
-        if(lastScreen != sr_screen)
-        {
-            if(sr_glcontext)
-                SDL_GL_DeleteContext(sr_glcontext);
+        if (!sr_glcontext)
             sr_glcontext = SDL_GL_CreateContext( sr_screen );
-        }
         if(!sr_glcontext)
         {
             lastError.Clear();
@@ -973,9 +1005,36 @@ static bool lowlevel_sr_InitDisplay(){
         }
 
         sr_CompleteGLAttributes();
+        int sampleBuffers = 0, samples = 0;
+        SDL_GL_GetAttribute(SDL_GL_MULTISAMPLEBUFFERS, &sampleBuffers);
+        SDL_GL_GetAttribute(SDL_GL_MULTISAMPLESAMPLES, &samples);
+        if (sampleBuffers > 0 && samples > 0)
+            glEnable(GL_MULTISAMPLE);
+        else
+            glDisable(GL_MULTISAMPLE);
+        int drawableWidth = 0, drawableHeight = 0;
+        SDL_GL_GetDrawableSize(sr_screen, &drawableWidth, &drawableHeight);
+        std::cerr << "OpenGL multisampling: requested " << currentScreensetting.multisamples
+                  << ", active " << (sampleBuffers > 0 ? samples : 0)
+                  << ", drawable " << drawableWidth << "x" << drawableHeight
+                  << (sr_hiddenWindow ? " (hidden capture)" : "") << '\n';
+        GLint maxTexture = 0, maxRenderbuffer = 0, maxSamples = 0, maxViewport[2] = {0, 0};
+        glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTexture);
+        glGetIntegerv(GL_MAX_VIEWPORT_DIMS, maxViewport);
+        char const* extensions = reinterpret_cast<char const*>(glGetString(GL_EXTENSIONS));
+#ifdef GL_MAX_RENDERBUFFER_SIZE_EXT
+        if (extensions && (std::string(extensions).find("GL_EXT_framebuffer_object") != std::string::npos || std::string(extensions).find("GL_ARB_framebuffer_object") != std::string::npos))
+            glGetIntegerv(GL_MAX_RENDERBUFFER_SIZE_EXT, &maxRenderbuffer);
+#endif
+#ifdef GL_MAX_SAMPLES_EXT
+        if (extensions && (std::string(extensions).find("GL_EXT_framebuffer_multisample") != std::string::npos || std::string(extensions).find("GL_ARB_framebuffer_object") != std::string::npos))
+            glGetIntegerv(GL_MAX_SAMPLES_EXT, &maxSamples);
+#endif
+        std::cerr << "OpenGL limits: texture=" << maxTexture << " renderbuffer=" << maxRenderbuffer
+                  << " viewport=" << maxViewport[0] << "x" << maxViewport[1] << " samples=" << maxSamples << '\n';
     }
 
-    #ifndef DEDICATED
+#ifndef DEDICATED
     gl_vendor.Clear();
     gl_renderer.Clear();
     gl_version.Clear();
@@ -1561,6 +1620,19 @@ bool sr_InitDisplay(){
             return Success();
         }
 
+#if !defined(DEDICATED) && SDL_VERSION_ATLEAST(2, 0, 0)
+        if (currentScreensetting.multisamples > 0)
+        {
+            // Some drivers reject the multisampled framebuffer during window creation, others
+            // at context creation. Recreate both without MSAA before changing resolution/depth.
+            std::cerr << "Multisampled display initialization failed; retrying without MSAA.\n";
+            currentScreensetting.multisamples = 0;
+            sr_DestroySDLWindow();
+            if (lowlevel_sr_InitDisplay())
+                return Success();
+        }
+#endif
+
         st_SaveConfig();
 
         if (lowlevel_sr_InitDisplay())
@@ -1594,9 +1666,10 @@ void sr_ExitDisplay(){
     if (sr_screen){
         sr_LockSDL();
 #if SDL_VERSION_ATLEAST(2,0,0)
-        SDL_SetWindowFullscreen(sr_screen, 0);
+        if (!sr_hiddenWindow)
+            SDL_SetWindowFullscreen(sr_screen, 0);
         SDL_SetRelativeMouseMode(SDL_FALSE);
-        SDL_DestroyWindow(sr_screen);
+        sr_DestroySDLWindow();
 #else
         // z-man: according to man SDL_SetVideoSurface, screen should not bee freed.
         // SDL_FreeSurface(sr_screen);
@@ -1607,9 +1680,7 @@ void sr_ExitDisplay(){
     }
 
 #if SDL_VERSION_ATLEAST(2,0,0)
-    if(sr_glcontext)
-        SDL_GL_DeleteContext(sr_glcontext);
-    sr_glcontext = nullptr;
+    sr_DestroySDLWindow();
 #endif
 
     #endif
@@ -1829,7 +1900,11 @@ void sr_DepthOffset(bool offset){
 void sr_Activate(bool active)
 {
     #ifndef DEDICATED
-    if ( !currentScreensetting.fullscreen && !active && sr_keepWindowActive )
+    if (sr_hiddenWindow)
+    {
+        sr_glOut = true;
+    }
+    else if (!currentScreensetting.fullscreen && !active && sr_keepWindowActive)
     {
         sr_glOut=!active;
     }

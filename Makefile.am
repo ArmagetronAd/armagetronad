@@ -16,6 +16,9 @@ include $(top_srcdir)/Makefile.manual
 EXTRA_DIST = README.md README-DEVELOPER README-Subversion README-SDL \
 armagetron.kdevelop armagetron.kdevelop.pcs armagetron.kdevses tron.ico \
 models sound textures bootstrap.sh music \
+art/lightcycle-authored/lightcycle.blend art/lightcycle-authored/export_game.py \
+art/lightcycle-authored/CREDITS.md art/lightcycle-authored/source/original.blend \
+art/lightcycle-authored/source/BLENDSWAP_LICENSE.txt \
 acinclude.d/accustomdir.m4 acinclude.d/ax_boost_base.m4 acinclude.d/ax_boost_system.m4 acinclude.d/ax_boost_thread.m4\
 acinclude.d/ax_cxx_have_align.m4\
 fingerprint \
@@ -47,7 +50,7 @@ nobase_language_DATA=language/languages.txt language/english_base.txt language/e
 
 if NEEDDATA
 # install media data only when it is needed
-nobase_texture_DATA=textures/cycle_body.png textures/cycle_wheel.png textures/dir_wall.png\
+nobase_texture_DATA=textures/cycle_body.png textures/cycle_wheel.png textures/lightcycle_suit_mask.png textures/dir_wall.png\
 	textures/floor_a.png textures/floor_b.png textures/floor.png textures/font_extra.png\
 	textures/font.png textures/font_s.png textures/icon.png textures/rim_wall.png\
 	textures/shadow.png textures/sky.png textures/title.jpg\
@@ -118,7 +121,8 @@ nobase_music_DATA=music/titletrack.ogg  music/when.ogg music/doIknowyou.ogg\
 	music/fortresswalk.ogg music/default.m3u music/fortresswalk.aatrack
 
 
-nobase_model_DATA=models/cycle_body.mod models/cycle_front.mod models/cycle_rear.mod
+nobase_model_DATA=models/cycle_body.mod models/cycle_front.mod models/cycle_rear.mod \
+	models/lightcycle-authored.bin models/lightcycle-CREDITS.txt models/lightcycle-LICENSE.txt
 endif
 
 doxy:

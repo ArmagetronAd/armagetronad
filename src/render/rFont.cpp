@@ -411,7 +411,7 @@ void rTextField::FlushLine(int len,bool newline){
         // render bright background
         if ( color_.IsDark() )
         {
-            if ( sr_alphaBlend && !str.empty() )
+            if (sr_alphaBlend && darkBackdrop_ && !str.empty())
             {
 
                 glDisable(GL_TEXTURE_2D);
@@ -861,6 +861,7 @@ void rTextField::SetBlendColor( tColor const & blendColor )
 
 tColor rTextField::defaultColor_;
 tColor rTextField::blendColor_;
+bool rTextField::darkBackdrop_ = true;
 
 #ifndef DEDICATED
 //! @param str the string to be used

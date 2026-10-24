@@ -84,6 +84,7 @@ public:
     int                 displayIndex;   // display to use
     int                 refreshRate;    // screen refresh rate
     rVSync              vSync;          // whether to wait for vsync
+    int multisamples;                   // requested framebuffer samples; 0 disables MSAA
     REAL				aspect;			// aspect ratio of pixels ( width/height )
 
     rScreenSettings(rResolution r,
@@ -108,6 +109,9 @@ extern SDL_Surface  *sr_screen;
 
 // screen/window dimensions in pixels
 extern int sr_screenWidth,sr_screenHeight;
+
+//! Explicit command-line capture mode: create a hidden SDL2 OpenGL window without taking focus.
+extern bool sr_hiddenWindow;
 
 extern bool sr_alphaBlend;
 extern bool sr_screenshotIsPlanned;

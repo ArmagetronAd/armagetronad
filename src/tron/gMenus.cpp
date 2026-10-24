@@ -38,6 +38,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "rRender.h"
 #include "rModel.h"
 #include "gGame.h"
+#include "gStuff.h"
 #include "gCycle.h"
 #include "tRecorder.h"
 #include "rSysdep.h"
@@ -76,6 +77,25 @@ static uMenuItemSubmenu smp(&sg_screenMenu,&screen_menu_prefs,
                             "$preferences_menu_help");
 static uMenuItemFunction smm(&sg_screenMenu,"$screen_mode_menu",
                              "$screen_mode_menu_help", sg_ScreenModeMenu );
+
+static int sg_menuGraphicsStyle = 0;
+
+static void sg_RefreshGraphicsStyleMenu()
+{
+    sg_menuGraphicsStyle = sg_blacklightVisuals ? 1 : 0;
+}
+static uCallbackMenuEnter sg_graphicsStyleMenuEnter(sg_RefreshGraphicsStyleMenu);
+
+static void sg_GraphicsStyleSelected(int const& style)
+{
+    sg_SelectGraphicsStyle(style);
+    st_SaveConfig();
+}
+
+static uMenuItemSelection<int> graphicsStyleMenu(&sg_screenMenu, "$graphics_style_text", "$graphics_style_help",
+                                                 sg_menuGraphicsStyle, sg_GraphicsStyleSelected);
+static uSelectEntry<int> graphicsClassic(graphicsStyleMenu, "$graphics_style_classic_text", "$graphics_style_classic_help", 0);
+static uSelectEntry<int> graphicsLegacy(graphicsStyleMenu, "$graphics_style_legacy_text", "$graphics_style_legacy_help", 1);
 
 static tConfItemLine c_ext("GL_EXTENSIONS",gl_extensions);
 static tConfItemLine c_ver("GL_VERSION",gl_version);

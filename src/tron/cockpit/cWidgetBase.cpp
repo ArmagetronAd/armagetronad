@@ -361,7 +361,8 @@ void WithTable::ProcessTable(tXmlParser::node cur) {
 }
 
 void WithTable::ProcessRow(tXmlParser::node cur) {
-    for (cur = cur.GetFirstChild(); ++cur; ++cur) {
+    for (cur = cur.GetFirstChild(); cur; ++cur)
+    {
         tString name = cur.GetName();
         if(name == "Cell") {
             m_table.back().push_back(std::deque<tValue::Set>());

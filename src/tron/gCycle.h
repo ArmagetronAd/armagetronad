@@ -39,6 +39,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "rDisplayList.h"
 
 #include "gCycleMovement.h"
+#include "gLightcycleMotion.h"
 
 class rModel;
 class gTextureCycle;
@@ -125,6 +126,13 @@ class gCycleWallsDisplayListManager
     friend class gNetPlayerWall;
 
 public:
+    enum RenderPass
+    {
+        AllPass,
+        EdgePass,
+        MembranePass
+    };
+
     gCycleWallsDisplayListManager();
     ~gCycleWallsDisplayListManager();
 
@@ -132,10 +140,13 @@ public:
     static bool CannotHaveList( REAL distance, gCycle const * cycle );
 
     //! renders all walls scheduled for display list usage
-    void RenderAllWithDisplayList( eCamera const * camera, gCycle * cycle );
+    void RenderAllWithDisplayList(eCamera const* camera, gCycle* cycle, RenderPass pass = AllPass);
 
     //! render all walls in a list
-    static void RenderAll( eCamera const * camera, gCycle * cycle, gNetPlayerWall * list );
+    static void RenderAll(eCamera const* camera, gCycle* cycle, gNetPlayerWall* list, RenderPass pass = AllPass);
+
+    //! globally early Blacklight edge phase; normal rendering draws membranes later
+    void RenderEdges(eCamera const* camera, gCycle* cycle);
 
     //! render all walls
     void RenderAll( eCamera const * camera, gCycle * cycle );
@@ -147,13 +158,19 @@ public:
     void Clear( int inhibit = 0 )
     {
         displayList_.Clear( inhibit );
+        edgeDisplayList_.Clear(inhibit);
+        prepared_ = false;
     }
 private:
+    void PrepareLists(gCycle* cycle);
+    void RenderPassWithState(eCamera const* camera, gCycle* cycle, RenderPass pass);
     gNetPlayerWall *                wallList_;                      //!< linked list of all walls
-    gNetPlayerWall *                wallsWithDisplayList_;          //!< linked list of all walls with display list    
-    rDisplayList                    displayList_;                   //!< combined display list
+    gNetPlayerWall *                wallsWithDisplayList_;          //!< linked list of all walls with display list
+    rDisplayList displayList_;                                      //!< classic combined or Blacklight membrane list
+    rDisplayList edgeDisplayList_;                                  //!< Blacklight early edge list
     REAL                            wallsWithDisplayListMinDistance_; //!< minimal distance of the walls with display list
     int                             wallsInDisplayList_;            //!< number of walls in the current display list
+    bool prepared_;                                                 //!< shared membership prepared by the early phase
 };
 #endif
 
@@ -175,11 +192,17 @@ class gCycle: public gCycleMovement
     friend class gCycleChatBot;
     std::unique_ptr< gCycleChatBot > chatBot_;
 
+    int requestedVisualStyle_ = -1;
+    bool RefreshVisuals();
+
     bool dropWallRequested_; //!< flag indicating that someone requested a wall drop
 public:
     eCoord            lastGoodPosition_;    // the location of the last known good position
 
     REAL skew,skewDot;						// leaning to the side
+    gLightcycleMotion::State renderMotion_; // model-only pose; never used by the camera
+    gLightcycleMotion::AssemblyClock renderAssembly_;
+    void UpdateRenderPose();
 
     bool 				mp; 				// use moviepack or not?
 
@@ -342,6 +365,7 @@ public:
     eCoord PredictPosition() const override;
     eCoord  CamTop() const override;
     eCoord CamDir() const override;
+    eCoord CamDirTarget() const override;
     eCoord Direction() const override;
 
     void RightBeforeDeath( int numTries ) override;

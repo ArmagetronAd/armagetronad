@@ -91,5 +91,7 @@ extern tList<eWallRim> se_rimWalls;
 // we need to know here whether the moviepack is active, give game layer a chance to register it
 bool se_MoviePack();
 void se_RegisterMoviePackFunc(BOOLRETFUNC* pFunc);
+bool se_LegacyGraphics();
+void se_RegisterLegacyGraphicsFunc(BOOLRETFUNC* pFunc);
 
 #endif

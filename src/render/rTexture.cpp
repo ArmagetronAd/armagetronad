@@ -38,13 +38,18 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tConsole.h"
 #include "tException.h"
 #include "tResourceManager.h"
+#include "tConfiguration.h"
 
 #include <sstream>
 #include <set>
+#include <algorithm>
 
 #ifndef DEDICATED
 #include "rRender.h"
 #include "rGL.h"
+
+static int sr_textureAnisotropy = 1;
+static tSettingItem<int> textureAnisotropyConf("TEXTURE_ANISOTROPY", sr_textureAnisotropy);
 
 // Load the right SDL_IMAGE header
 
@@ -810,7 +815,7 @@ void rISurfaceTexture::OnSelect( bool enforce )
         int texmod=rTextureGroups::TextureMode[group_];
         if (enforce && texmod<0) texmod=GL_NEAREST_MIPMAP_NEAREST;
 
-        if(textureModeLast_!=texmod)
+        if (textureModeLast_ != texmod || anisotropyLast_ != sr_textureAnisotropy)
         {
             // unload texture if the mode changed
             Unload();
@@ -847,6 +852,15 @@ void rISurfaceTexture::OnSelect( bool enforce )
                     break;
                 }
 
+#ifdef HAVE_GLEW
+                if (GLEW_EXT_texture_filter_anisotropic && group_ != rTextureGroups::TEX_FONT)
+                {
+                    GLfloat maximum = 1.f;
+                    glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maximum);
+                    GLfloat requested = std::max(1.f, std::min(maximum, GLfloat(sr_textureAnisotropy)));
+                    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, requested);
+                }
+#endif
             }
             else
             {
@@ -866,6 +880,7 @@ void rISurfaceTexture::OnSelect( bool enforce )
             }
         }
         textureModeLast_=texmod;
+        anisotropyLast_ = sr_textureAnisotropy;
     }
     rITexture::OnSelect(enforce);
 #endif

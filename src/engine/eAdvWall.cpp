@@ -42,6 +42,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 namespace
 {
 static BOOLRETFUNC* pMoviePack;
+static BOOLRETFUNC* pLegacyGraphics;
 }
 bool se_MoviePack()
 {
@@ -50,6 +51,16 @@ bool se_MoviePack()
 void se_RegisterMoviePackFunc(BOOLRETFUNC* pFunc)
 {
     pMoviePack = pFunc;
+}
+
+bool se_LegacyGraphics()
+{
+    return pLegacyGraphics && (*pLegacyGraphics)();
+}
+
+void se_RegisterLegacyGraphicsFunc(BOOLRETFUNC* pFunc)
+{
+    pLegacyGraphics = pFunc;
 }
 
 /* **********************************************
@@ -150,27 +161,33 @@ static rFileTexture se_RimWallWrap(rTextureGroups::TEX_WALL,"textures/rim_wall.p
 void eWallRim::RenderAll( eCamera * camera )
 {
 #ifndef DEDICATED
-    // call or fill display list
-    if ( se_rimDisplayList.Call() )
+    // The stadium retains its own geometry, but its light sweep and GL state
+    // must be evaluated for each view. A surrounding display list would freeze
+    // time and bake the first view's material state into every later frame.
+    auto drawRim = [&]()
+    {
+        glEnable(GL_DEPTH_TEST);
+        glDisable(GL_CULL_FACE);
+        if (!se_MoviePack())
+            (se_RimWrapY ? se_RimWallWrap : se_RimWallNoWrap).Select();
+        for (int i = se_rimWalls.Len() - 1; i >= 0; --i)
+            se_rimWalls(i)->RenderReal(rDisplayList::IsRecording() ? 0 : camera);
+        RenderEnd();
+        glEnable(GL_CULL_FACE);
+    };
+    if (se_LegacyGraphics())
+    {
+        drawRim();
+        return;
+    }
+    // Classic rims keep the original display-list path.
+    if (se_rimDisplayList.Call())
     {
         return;
     }
-    rDisplayListFiller filler( se_rimDisplayList );
+    rDisplayListFiller filler(se_rimDisplayList);
 
-    glEnable(GL_DEPTH_TEST);
-    glDisable(GL_CULL_FACE);
-
-    if (!se_MoviePack())
-    {
-        ( se_RimWrapY ? se_RimWallWrap : se_RimWallNoWrap).Select();
-    }
-
-    for(int i=se_rimWalls.Len()-1;i>=0;i--){
-        se_rimWalls(i)->RenderReal( rDisplayList::IsRecording() ? 0 : camera );
-    }
-    RenderEnd();
-    
-    glEnable(GL_CULL_FACE);
+    drawRim();
 #endif
 }
 

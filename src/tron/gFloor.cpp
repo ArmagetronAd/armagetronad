@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "defs.h"
 #include "gStuff.h"
+#include "gArenaMaterial.h"
 #include "gLogo.h"
 #include "eFloor.h"
 #include "tConfiguration.h"
@@ -123,7 +124,12 @@ public:
 
 
     virtual void glFloorTexture(){
-        if (sg_MoviePack())
+        if (sg_blacklightVisuals && !sg_MoviePack())
+        {
+            static gArenaMaterial material(gArenaMaterial::Floor);
+            material.Select();
+        }
+        else if (sg_MoviePack())
             ArmageTron_mp_floor.Select();
         else
             ArmageTron_floor.Select();
