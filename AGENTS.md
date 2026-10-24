@@ -87,7 +87,7 @@ The game features single-player mode with AI opponents, multiplayer client-serve
 - **Testing**: doctest framework, custom test harness
 - **Documentation**: Doxygen
 - **Code Coverage**: lcov, genhtml, gcov (GCC), llvm-cov (Clang)
-- **CI/CD**: GitLab CI, Docker-based workflows
+- **CI/CD**: GitLab CI, Docker-based workflows; `.github/workflows/graphics-build.yml` also checks Linux client/server builds for the graphics contribution.
 
 ## Coding Conventions
 

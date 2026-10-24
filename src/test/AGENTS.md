@@ -119,7 +119,7 @@ Tests are compiled as separate programs that link against the relevant project l
 
 ## Legacy renderer tests
 
-`gLightwallAttachment_test.cpp` covers collapsed connections, rapid direction changes and constant ribbon height. `gLightcycleMotion_test.cpp`, `eCameraMotion_test.cpp` and `gImpactAnimation_test.cpp` cover deterministic presentation sampling. `gLightcycleAsset_test.cpp` reads the shipped asset and verifies transactional rejection of malformed data. `gGraphicsStyle_test.cpp` verifies saved-choice precedence and preservation of display quality without writing configuration.
+`gLightwallAttachment_test.cpp` covers collapsed connections, rapid direction changes and constant ribbon height. `gLightcycleMotion_test.cpp`, `eCameraMotion_test.cpp` and `gImpactAnimation_test.cpp` cover deterministic presentation sampling. `gLightcycleAsset_test.cpp` reads the shipped asset and verifies transactional rejection of malformed data. `gGraphicsStyle_test.cpp` covers repeated selection, saved appearance values, resource-default precedence, explicit autoexec overrides and unchanged display quality. `gCycleVisuals_test.cpp` exercises real resource loading and texture/model ownership transfer without an OpenGL context or game simulation. Linux client/server checks run in `.github/workflows/graphics-build.yml`.
 
 ## Notes from Humans
 ### MAIN GUARDRAIL: The AI Agents keep out of this section.

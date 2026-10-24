@@ -197,6 +197,27 @@ public:
     }
 };
 
+//! Ordered configuration-loading phases; explicit autoexec values are loaded last.
+enum class tConfigLoadPhase
+{
+    Begin,
+    User,
+    Defaults,
+    Complete
+};
+
+class tCallbackConfigLoad : public tListItem<tCallbackConfigLoad>
+{
+public:
+    typedef void Callback(tConfigLoadPhase);
+    explicit tCallbackConfigLoad(Callback* callback);
+    static void Exec(tConfigLoadPhase phase);
+
+private:
+    static tCallbackConfigLoad* anchor_;
+    Callback* callback_;
+};
+
 //! just to do some work in static initializers, to modify default access levels:
 class tAccessLevelSetter
 {

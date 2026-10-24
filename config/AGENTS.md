@@ -53,4 +53,4 @@ The configuration files use a custom format with `SETTING_NAME value` syntax, su
 
 ## Graphics profiles
 
-`graphics_classic.cfg` and `graphics_legacy.cfg` contain appearance settings for the Display Settings selector. Keep resolution, frame limits, anti-aliasing and gameplay settings out of these presets. `GRAPHICS_STYLE` is applied after autoexec so older presets cannot undo an explicit menu choice.
+`graphics_classic.cfg` and `graphics_legacy.cfg` contain appearance defaults for the Display Settings selector. Keep resolution, frame limits, anti-aliasing and gameplay settings out of these presets. `GRAPHICS_PREF_*` entries persist appearance values that resource-pack settings otherwise do not save. They restore before autoexec, not after it. Older startup presets should use `GRAPHICS_STYLE_DEFAULT` to avoid replacing an explicit menu choice.

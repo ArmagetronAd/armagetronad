@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "eEventNotification.h"
 #include "gCycle.h"
+#include "gCycleVisuals.h"
 #include "gArenaMaterial.h"
 #include "nConfig.h"
 #include "rModel.h"
@@ -242,78 +243,6 @@ static tSettingItem<int> s_s("SCORE_SUICIDE",score_suicide);
 uActionPlayer gCycle::s_brake("CYCLE_BRAKE", -9);
 static uActionPlayer s_brakeToggle("CYCLE_BRAKE_TOGGLE", -9);
 uActionTooltip sg_brakeTooltip( uActionTooltip::Level_Advanced, gCycle::s_brake, 2, &ePlayer::VetoActiveTooltip );
-
-// a class of textures where the transparent part of the
-// image is replaced by the player color
-class gTextureCycle: public rSurfaceTexture
-{
-    gRealColor color_; // player color
-    bool wheel; // wheel or body
-public:
-    gTextureCycle(rSurface const & surface, const gRealColor& color,bool repx=0,bool repy=0,bool wheel=false);
-
-    virtual void ProcessImage(SDL_Surface *im);
-
-    virtual void OnSelect(bool enforce);
-    using rSurfaceTexture::OnSelect;
-
-    void SetColor(gRealColor const& color)
-    {
-        if (color_ != color)
-        {
-            color_ = color;
-            Unload();
-        }
-    }
-};
-
-gTextureCycle::gTextureCycle(rSurface const & surface, const gRealColor& color,bool repx,bool repy,bool w)
-        :rSurfaceTexture(rTextureGroups::TEX_OBJ,surface,repx,repy),
-        color_(color),wheel(w)
-{
-    Select();
-}
-
-void gTextureCycle::ProcessImage(SDL_Surface *im)
-{
-#ifndef DEDICATED
-    // blend transparent texture parts with cycle color
-    tVERIFY(im->format->BytesPerPixel == 4);
-    GLubyte R=int(color_.r_*255);
-    GLubyte G=int(color_.g_*255);
-    GLubyte B=int(color_.b_*255);
-
-    GLubyte *pixels =reinterpret_cast<GLubyte *>(im->pixels);
-
-    for(int i=im->w*im->h-1;i>=0;i--){
-        GLubyte alpha=pixels[4*i+3];
-        pixels[4*i  ] = (alpha * pixels[4*i  ] + (255-alpha)*R) >> 8;
-        pixels[4*i+1] = (alpha * pixels[4*i+1] + (255-alpha)*G) >> 8;
-        pixels[4*i+2] = (alpha * pixels[4*i+2] + (255-alpha)*B) >> 8;
-        pixels[4*i+3] = 255;
-    }
-#endif
-}
-
-void gTextureCycle::OnSelect(bool enforce){
-#ifndef DEDICATED
-    rISurfaceTexture::OnSelect(enforce);
-
-    if(rTextureGroups::TextureMode[rTextureGroups::TEX_OBJ]<0){
-        REAL R=color_.r_,G=color_.g_,B=color_.b_;
-        if(wheel){
-            R*=.7;
-            G*=.7;
-            B*=.7;
-        }
-        glColor3f(R,G,B);
-        GLfloat color[4]={R,G,B,1};
-
-        glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,color);
-        glMaterialfv(GL_FRONT_AND_BACK,GL_DIFFUSE,color);
-    }
-#endif
-}
 
 // from gCycleMovement.cpp
 extern void sg_RubberValues( ePlayerNetID const * player, REAL speed, REAL & max, REAL & effectiveness );
@@ -2102,142 +2031,6 @@ static tString lala_bikeTexture("Anonymous/original/moviepack/bike.png");
 static nSettingItem<tString> lalala_bikeTexture("TEXTURE_MP_BIKE", lala_bikeTexture);
 */
 
-// HACK! Flexible model loader that eats anything a moviepack currently can throw at it.
-#ifndef DEDICATED
-struct gCycleVisuals
-{
-    rModel *customModel, *bodyModel, *frontModel, *rearModel; // cycle models
-    gTextureCycle *customTexture, *bodyTexture, *wheelTexture; // cycle textures
-    gRealColor color; // cycle color
-    bool mpType;      // true if moviepack type model/texture can be used
-    int  mpPreference; // the user preference for the texture/model search path
-
-    gCycleVisuals( gRealColor const & a_color )
-    {
-        customModel = bodyModel = frontModel = rearModel = 0;
-        customTexture = bodyTexture = wheelTexture = 0;
-
-        color = a_color;
-
-        mpType = false;
-        mpPreference = 0;
-    }
-
-    ~gCycleVisuals()
-    {
-        delete customTexture;
-        delete bodyTexture;
-        delete wheelTexture;
-    }
-
-    enum Slot{ SLOT_CUSTOM=0, SLOT_BODY=1, SLOT_WHEEL=2, SLOT_MAX=3 };
-
-    // loads a specific texture from a specific folder
-    static rSurface * LoadTextureSafe2( Slot slot, int mp )
-    {
-        static std::unique_ptr<rSurface> cache[SLOT_MAX][2];
-        std::unique_ptr<rSurface> & surface = cache[slot][mp];
-        if ( surface.get() == NULL )
-        {
-            static char const * names[SLOT_MAX]={"bike.png","cycle_body.png", "cycle_wheel.png"};
-            char const * name = names[slot];
-
-            char const * folder = mp ? "moviepack" : "textures";
-            tString file = tString(folder) + tString("/") + tString( name );
-
-            surface.reset( tNEW( rSurface( file ) ) );
-        }
-
-        if ( surface->GetSurface() )
-            return surface.get();
-        else
-            return NULL;
-    }
-
-    // load one texture from the prefered folder (or the other one as fallback)
-    gTextureCycle * LoadTextureSafe( Slot slot, bool wheel )
-    {
-        rSurface * surface = LoadTextureSafe2( slot, mpPreference );
-        if ( !surface )
-            surface = LoadTextureSafe2( slot, 1-mpPreference );
-
-        if ( surface )
-            return tNEW( gTextureCycle )( *surface, color, 0, 0, wheel );
-
-        return NULL;
-    }
-
-    // load textures from the specified folder (or the other one) and the format the model has just been read for
-    bool LoadTextures()
-    {
-        if ( mpType )
-        {
-            if ( !customTexture )
-                customTexture = LoadTextureSafe( SLOT_CUSTOM, false );
-
-            return customTexture;
-        }
-        else
-        {
-            if ( !bodyTexture )
-                bodyTexture = LoadTextureSafe( SLOT_BODY, false );
-            if ( !wheelTexture )
-                wheelTexture = LoadTextureSafe( SLOT_WHEEL, true );
-
-            return bodyTexture && wheelTexture;
-        }
-    }
-
-    // loads a model, checking before if the file exists
-    static rModel * LoadModelSafe( char const * filename )
-    {
-        return rModel::GetModel(filename);
-    }
-
-    // load a model of specified type from a specified directory
-    bool LoadModel( bool a_mpType, bool mpFolder )
-    {
-        mpType = a_mpType;
-        char const * folder = mpFolder ? "moviepack" : "models";
-
-        if ( mpType )
-        {
-            tString base = tString(folder);
-            base << "/cycle";
-            if (!customModel) customModel = LoadModelSafe( base + ".ASE" );
-            if (!customModel) customModel = LoadModelSafe( base + ".ase" );
-
-            return customModel && LoadTextures();
-        }
-        else
-        {
-            tString base = tString(folder) + "/cycle_";
-
-            if (!bodyModel) bodyModel = LoadModelSafe( base + "body.mod" );
-            if (!frontModel) frontModel = LoadModelSafe( base + "front.mod" );
-            if (!rearModel) rearModel = LoadModelSafe( base + "rear.mod" );
-
-            return bodyModel && frontModel && rearModel && LoadTextures();
-        }
-    }
-
-    // tries to load everything from the given data folder
-    bool LoadModel2( bool mp )
-    {
-        // first, try the right type, then the 'unnatural' choice
-        return LoadModel( mp, mp ) || LoadModel( !mp, mp );
-    }
-
-    // top level load function: tries to load all variations, starting with passed moviepack folder flag
-    bool LoadModel( bool mp )
-    {
-        mpPreference = mp ? 1 : 0;
-
-        // delegate to try loading both formats from both directories
-        return LoadModel2( mp ) || LoadModel2( !mp );
-    }
-};
-#endif
 
 #ifndef DEDICATED
 // renders a cycle even after it died
@@ -2348,6 +2141,32 @@ void sg_RefreshPlayerCycleColor(ePlayerNetID* player)
 static eCallbackPlayerColor sg_playerCycleColorChanged(&sg_RefreshPlayerCycleColor);
 } // namespace
 
+bool gCycle::RefreshVisuals()
+{
+#ifndef DEDICATED
+    int const requested = sg_MoviePack() ? 2 : sg_blacklightVisuals ? 1
+                                                                    : 0;
+    if (requestedVisualStyle_ == requested)
+        return body || customModel;
+    requestedVisualStyle_ = requested;
+    sg_RefreshPlayerCycleColor(Player());
+    gCycleVisuals visuals(color_);
+    if (!visuals.LoadModel(requested == 2))
+    {
+        con << "Cycle style could not be loaded; retaining the previous model.\n";
+        return body || customModel;
+    }
+    visuals.Commit(body, front, rear, customModel, bodyTex, wheelTex, customTexture, mp);
+    renderMotion_.Reset();
+    displayList_.Clear();
+    if (sr_hiddenWindow)
+        std::cerr << "Cycle visuals: requested=" << requested << " moviepack=" << mp << '\n';
+    return true;
+#else
+    return true;
+#endif
+}
+
 void gCycle::MyInitAfterCreation(){
     renderMotion_.Reset();
     renderAssembly_.Reset();
@@ -2428,42 +2247,9 @@ void gCycle::MyInitAfterCreation(){
 
     // load model and texture
 #ifndef DEDICATED
-    gCycleVisuals visuals( color_ );
-    if ( !visuals.LoadModel( mp ) )
+    if (!RefreshVisuals())
     {
-        tERR_ERROR( "Neither classic style nor moviepack style model and textures found. "
-                    "The folders \"textures\" and \"moviepack\" need to contain either "
-                    "cycle.ase and bike.png or body.mod, front.mod, rear.mod, cycle_body.png and cycle_wheel.png." );
-    }
-
-    mp = visuals.mpType;
-
-    // transfer models and textures
-    if ( mp )
-    {
-        // use moviepack style body and texture
-        customModel = visuals.customModel;
-        visuals.customModel = 0;
-        customTexture = visuals.customTexture;
-        visuals.customTexture = 0;
-    }
-    else
-    {
-        // use classic style body and texture
-        body = visuals.bodyModel;
-        visuals.bodyModel = 0;
-        front = visuals.frontModel;
-        visuals.frontModel = 0;
-        rear = visuals.rearModel;
-        visuals.rearModel = 0;
-        bodyTex = visuals.bodyTexture;
-        visuals.bodyTexture = 0;
-        wheelTex = visuals.wheelTexture;
-        visuals.wheelTexture = 0;
-
-        tASSERT ( body && front && rear && bodyTex && wheelTex );
-
-        mp = false;
+        tERR_ERROR("Neither Classic nor moviepack cycle resources could be loaded.");
     }
 
     // Start the cycle engine sound
@@ -2587,13 +2373,9 @@ gCycle::~gCycle(){
 
     this->RemoveFromGame();
 
-    if (mp){
-        delete customTexture;
-    }
-    else{
-        delete wheelTex;
-        delete bodyTex;
-    }
+    delete customTexture;
+    delete wheelTex;
+    delete bodyTex;
 #ifdef DEBUG
     //con << "Deleted cycle.\n";
 #endif
@@ -4517,115 +4299,6 @@ void gCycleWallsDisplayListManager::RenderPassWithState(eCamera const* camera, g
     RenderAll(camera, cycle, wallList_, pass);
 }
 
-namespace
-{
-void LightcycleGroundLight(gRealColor const& colour, float assembly)
-{
-    RenderEnd();
-    glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |
-                 GL_CURRENT_BIT | GL_TEXTURE_BIT | GL_POLYGON_BIT | GL_LIGHTING_BIT);
-#ifdef HAVE_GLEW
-    GLint oldProgram = 0;
-    if (GLEW_VERSION_2_0)
-    {
-        glGetIntegerv(GL_CURRENT_PROGRAM, &oldProgram);
-        glUseProgram(0);
-    }
-#endif
-    glDisable(GL_LIGHTING);
-    glDisable(GL_TEXTURE_2D);
-    glDisable(GL_ALPHA_TEST);
-    glDisable(GL_CULL_FACE);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glDepthMask(GL_FALSE);
-    glDepthFunc(GL_LEQUAL);
-    glShadeModel(GL_SMOOTH);
-
-    // Fit contact occlusion to the actual axles and chassis. This replaces the
-    // old bike's rectangular shadow; it follows visual yaw without banking off
-    // the floor. Fade it with assembly so no full-bike shadow precedes the bike.
-    auto contact = [&](float x, float radiusX, float radiusY, float opacity)
-    {
-        for (int band = 0; band < 6; ++band)
-        {
-            float inner = band / 6.f, outer = (band + 1) / 6.f;
-            glBegin(GL_QUAD_STRIP);
-            for (int i = 0; i <= 40; ++i)
-            {
-                float a = i * (2.f * M_PI / 40.f), c = std::cos(a), s = std::sin(a);
-                auto vertex = [&](float radius)
-                {
-                    float fade = 1.f - radius * radius;
-                    glColor4f(0, 0, 0, opacity * assembly * fade * fade);
-                    glVertex3f(x + radiusX * radius * c, radiusY * radius * s, .010f);
-                };
-                vertex(inner);
-                vertex(outer);
-            }
-            glEnd();
-        }
-    };
-    contact(.05f, 1.65f, .58f, .25f);
-    contact(gLightcycleModel::RearAxle, .52f, .58f, .64f);
-    contact(gLightcycleModel::FrontAxle, .52f, .58f, .64f);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-
-    // Smooth local pools, strongest at the wheels and falling to zero before
-    // they reach the next cycle. They follow heading but stay on the ground
-    // when the visual bike leans into a turn.
-    auto pool = [&](float x, float radiusX, float radiusY, float power)
-    {
-        auto energy = [power, assembly](float r)
-        { return power * assembly * std::exp(-4.f * r * r) * (1.f - r * r); };
-        for (int band = 0; band < 6; ++band)
-        {
-            float inner = band / 6.f, outer = (band + 1) / 6.f;
-            glBegin(GL_QUAD_STRIP);
-            for (int i = 0; i <= 48; ++i)
-            {
-                float a = i * (2.f * M_PI / 48.f), c = std::cos(a), s = std::sin(a);
-                glColor4f(colour.r_, colour.g_, colour.b_, energy(inner));
-                glVertex3f(x + radiusX * inner * c, radiusY * inner * s, .014f);
-                glColor4f(colour.r_, colour.g_, colour.b_, energy(outer));
-                glVertex3f(x + radiusX * outer * c, radiusY * outer * s, .014f);
-            }
-            glEnd();
-        }
-    };
-    pool(gLightcycleModel::RearAxle, 1.25f, .95f, .055f);
-    pool(gLightcycleModel::FrontAxle, 1.25f, .95f, .055f);
-    pool(.15f, 1.55f, .78f, .015f);
-
-    // The white nose lamps project a short, soft cone onto the polished floor.
-    // This is local illumination; it does not blur the scene or HUD.
-    auto beamVertex = [assembly](float u, float v)
-    {
-        float width = .24f + u * .90f;
-        float fade = (1.f - u) * (1.f - u) * std::exp(-2.5f * u);
-        fade *= std::min(1.f, u * 18.f) * (1.f - v * v) * (1.f - v * v);
-        glColor4f(.68f, .88f, 1.f, .12f * fade * assembly);
-        glVertex3f(gLightcycleModel::FrontAxle + .62f + u * 6.f, v * width, .016f);
-    };
-    for (int row = 0; row < 20; ++row)
-    {
-        float u0 = row / 20.f, u1 = (row + 1) / 20.f;
-        glBegin(GL_QUAD_STRIP);
-        for (int col = 0; col <= 16; ++col)
-        {
-            float v = -1.f + col / 8.f;
-            beamVertex(u0, v);
-            beamVertex(u1, v);
-        }
-        glEnd();
-    }
-#ifdef HAVE_GLEW
-    if (GLEW_VERSION_2_0)
-        glUseProgram(oldProgram);
-#endif
-    glPopAttrib();
-}
-} // namespace
 
 void gCycle::Render(const eCamera *cam){
     /*
@@ -4664,6 +4337,8 @@ void gCycle::Render(const eCamera *cam){
             || !std::isfinite(skew))
         st_Breakpoint();
     if (Alive()){
+        if (!RefreshVisuals())
+            return;
         //con << "Drawing cycle at " << pos << '\n';
 
 #ifdef DEBUG
@@ -4748,7 +4423,7 @@ void gCycle::Render(const eCamera *cam){
         if (blacklightCycle && !blinking && visualBirthAge >= 0)
         {
             if (!cam || cam->RenderingMain())
-                LightcycleGroundLight(color_, std::max(0.f, std::min(1.f, float(visualBirthAge / 1.25f))));
+                gLightcycleEffects::GroundLight(color_.r_, color_.g_, color_.b_, std::max(0.f, std::min(1.f, float(visualBirthAge / 1.25f))));
             gLightcycleEffects::Render(color_.r_, color_.g_, color_.b_, se_GameTime(), Speed(),
                                        GetBraking() != 0, renderMotion_.Bank(), visualBirthAge);
         }

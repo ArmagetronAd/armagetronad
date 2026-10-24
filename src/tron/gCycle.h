@@ -192,6 +192,9 @@ class gCycle: public gCycleMovement
     friend class gCycleChatBot;
     std::unique_ptr< gCycleChatBot > chatBot_;
 
+    int requestedVisualStyle_ = -1;
+    bool RefreshVisuals();
+
     bool dropWallRequested_; //!< flag indicating that someone requested a wall drop
 public:
     eCoord            lastGoodPosition_;    // the location of the last known good position

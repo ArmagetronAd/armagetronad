@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 
 #include "rSDL.h"
+#include "gGraphicsStyle.h"
 
 #ifdef _MSC_VER
 // disable nasty conversion complains of MSVC++
@@ -64,8 +65,6 @@ extern bool sg_moviepackUse;       // do we use it?
 
 extern bool sg_blacklightVisuals; // clean arena materials; rendering only
 bool sg_LegacyGraphics();
-void sg_ApplyGraphicsStyle();                  // apply the saved choice after startup presets
-void sg_SelectGraphicsStyle(int const& style); // 0 = Classic, 1 = Legacy
 REAL sg_LightcycleScale();                     // drawn bike size against the classic one; 1 outside the blacklight look
 
 bool sg_MoviePack();

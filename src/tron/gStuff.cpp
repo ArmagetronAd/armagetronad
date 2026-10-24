@@ -39,7 +39,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "rScreen.h"
 #ifndef DEDICATED
 #include "rRender.h"
-#include "rDisplayList.h"
 #ifdef MACOSX
 #   include <ApplicationServices/ApplicationServices.h>
 #endif
@@ -58,37 +57,9 @@ bool sg_moviepackInstalled=false; // do we have the mp on disk?
 bool sg_moviepackUse=true;       // do we use it?
 static tConfItem<bool> ump("MOVIEPACK",sg_moviepackUse);
 
-bool sg_blacklightVisuals = false;
-static tConfItem<bool> arenaVisuals("BLACKLIGHT_VISUALS", sg_blacklightVisuals);
-
 bool sg_LegacyGraphics()
 {
     return sg_blacklightVisuals && !sg_MoviePack();
-}
-
-// -1 keeps existing configurations working until a style is chosen in the menu.
-static int sg_graphicsStyle = -1;
-static tConfItem<int> graphicsStyle("GRAPHICS_STYLE", sg_graphicsStyle);
-
-void sg_ApplyGraphicsStyle()
-{
-#ifndef DEDICATED
-    if (sg_graphicsStyle != 0 && sg_graphicsStyle != 1)
-        return;
-
-    tCurrentAccessLevel level(tAccessLevel_Owner, true);
-    st_Include(tString(sg_graphicsStyle == 1 ? "graphics_legacy.cfg" : "graphics_classic.cfg"));
-    rDisplayList::ClearAll();
-#endif
-}
-
-void sg_SelectGraphicsStyle(int const& style)
-{
-    if (style != 0 && style != 1)
-        return;
-
-    sg_graphicsStyle = style;
-    sg_ApplyGraphicsStyle();
 }
 
 // The sculpted lightcycle is drawn larger than the classic bike so its rider

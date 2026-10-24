@@ -1,0 +1,41 @@
+name: Graphics build checks
+
+on:
+  push:
+    branches: ['codex/optional-legacy-graphics']
+  pull_request:
+    branches: [trunk]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: graphics-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  linux:
+    name: Linux ${{ matrix.configuration }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        configuration: [client_debug, server_debug]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y autoconf automake libtool pkg-config bison flex \
+            libgl1-mesa-dev libglu1-mesa-dev libpng-dev libsdl2-dev \
+            libsdl2-mixer-dev libsdl2-image-dev libboost-dev libboost-thread-dev \
+            libftgl-dev libglew-dev libprotobuf-dev protobuf-compiler \
+            libxml2-dev libcurl4-openssl-dev
+      - name: Build and run production tests
+        env:
+          JOBS: '4'
+        run: batch/test_builds.sh "${{ matrix.configuration }}"

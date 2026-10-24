@@ -418,6 +418,19 @@ void tConfItemBase::SaveAll(std::ostream &s){
     }
 }
 
+tCallbackConfigLoad* tCallbackConfigLoad::anchor_ = nullptr;
+
+tCallbackConfigLoad::tCallbackConfigLoad(Callback* callback)
+    : tListItem<tCallbackConfigLoad>(anchor_), callback_(callback)
+{
+}
+
+void tCallbackConfigLoad::Exec(tConfigLoadPhase phase)
+{
+    for (auto* entry = anchor_; entry; entry = entry->Next())
+        entry->callback_(phase);
+}
+
 int tConfItemBase::EatWhitespace(std::istream &s){
     int c=' ';
 
@@ -980,6 +993,8 @@ void st_LoadConfig( bool printChange )
     // default include files are executed at owner level
     tCurrentAccessLevel level( tAccessLevel_Owner, true );
 
+    tCallbackConfigLoad::Exec(tConfigLoadPhase::Begin);
+
     st_InstallSigHupHandler();
 
     const tPath& config = tDirectories::Config();
@@ -990,6 +1005,7 @@ void st_LoadConfig( bool printChange )
     tConfItemBase::printErrors=false;
 #endif
     st_LoadUserConfigs( st_userConfigs, false ) || st_LoadUserConfigs( st_userConfigsLatin1, true );
+    tCallbackConfigLoad::Exec(tConfigLoadPhase::User);
 
     tConfItemBase::printErrors=true;
 
@@ -1014,11 +1030,15 @@ void st_LoadConfig( bool printChange )
     Load( data, "textures/settings_textures.cfg" );
     Load( data, "moviepack/settings.cfg" );
 
+    tCallbackConfigLoad::Exec(tConfigLoadPhase::Defaults);
+
     Load( config, "autoexec.cfg" );
 
     // load configuration from playback
     tConfItemBase::LoadPlayback();
     st_settingsFromRecording = tRecorder::IsPlayingBack();
+
+    tCallbackConfigLoad::Exec(tConfigLoadPhase::Complete);
 
     tConfItemBase::printChange=true;
 }

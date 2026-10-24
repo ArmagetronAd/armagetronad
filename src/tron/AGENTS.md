@@ -107,4 +107,6 @@ The `gGame` class inherits from `nNetObject` for network synchronization. Game s
 
 ## Optional Legacy graphics
 
-`GRAPHICS_STYLE` selects the persisted Classic (0) or Legacy (1) preset after startup configuration. Its default (-1) respects existing `BLACKLIGHT_VISUALS` configurations. `gLightcycle*`, `gLightwall*` and `gImpactAnimation.h` implement presentation only; keep simulation and collision paths unchanged. Ribbons use an early edge pass followed by translucent membranes. Preserve the shared colour path and the bounded, full-height emitter connection.
+`gGraphicsStyle.cpp` owns the Classic/Legacy choice and appearance preference persistence. Presets are applied on a real style change; selecting the current style is idempotent. Saved appearance values are restored after resource defaults and before autoexec, so explicit configuration overrides still work. `GRAPHICS_STYLE_DEFAULT` applies a fallback preset only while no style is selected.
+
+`gCycleVisuals.cpp` owns Classic/moviepack loading and texture ownership transfer. A live cycle refreshes these resources when its requested presentation changes; keep requested preference separate from the actual fallback format. Model, stadium and optical-effect implementations are in `.cpp` files behind their small public headers. Simulation steering and collision geometry remain separate.

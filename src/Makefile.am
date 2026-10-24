@@ -196,7 +196,9 @@ endif
 
 # Optional Legacy renderer and model animation.
 librender_a_SOURCES += render/rBloom.cpp render/rBloom.h
-libtron_a_SOURCES += tron/gArenaMaterial.h \
+libtron_a_SOURCES += tron/gGraphicsStyle.cpp tron/gGraphicsStyle.h \
+    tron/gCycleVisuals.cpp tron/gCycleVisuals.h \
+    tron/gLightcycleModel.cpp tron/gArenaBackdrop.cpp tron/gLightcycleEffects.cpp tron/gArenaMaterial.h \
     tron/gArenaBackdrop.h \
     tron/gLightColour.h \
     tron/gLightcycleModel.h \
@@ -343,7 +345,7 @@ unit_tests_SOURCES = thirdparty/doctest/doctest.h \
 	test/unit_tests_main.cpp \
     test/gLightwallAttachment_test.cpp test/gLightcycleMotion_test.cpp \
     test/eCameraMotion_test.cpp test/gImpactAnimation_test.cpp \
-    test/gLightcycleAsset_test.cpp test/gGraphicsStyle_test.cpp tron/gFloor.cpp
+    test/gLightcycleAsset_test.cpp test/gGraphicsStyle_test.cpp test/gCycleVisuals_test.cpp tron/gFloor.cpp
 unit_tests_CXXFLAGS =$(libtron_a_CXXFLAGS) -iquote @srcdir@/thirdparty/doctest
 unit_tests_LDADD=libtron.a libengine.a libnetwork.a libui.a librender.a libtools.a protobuf/libprotobuf.a thirdparty/mathexpr/libmathexpr.a ${extralibs}
 

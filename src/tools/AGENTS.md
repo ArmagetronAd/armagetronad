@@ -119,3 +119,7 @@ Build produces `libtools.a` static library. Includes `defs.h` for global definit
 - Test: `chat_prefix_test.cpp` in `src/test/` uses libtools
 - Unit tests: `tArray_test.cpp`, `tColor_test.cpp`, `tCallback_test.cpp`, `tCallbackString_test.cpp`, `tCrypt_test.cpp`, `tDirectories_test.cpp`, `tEventQueue_test.cpp`, `tException_test.cpp`, `tHeap_test.cpp`, `tLinkedList_test.cpp`, `tList_test.cpp`, `tLocale_test.cpp`, `tMath_test.cpp`, `tMemStack_test.cpp`, `tRandomizer_test.cpp`, `tReferenceHolder_test.cpp`, `tRing_test.cpp`, `tString_test.cpp`, `tSysTime_test.cpp`
 - Integration tests in `src/test/` use tools from this library
+
+## Configuration lifecycle
+
+`tCallbackConfigLoad` observes Begin, User, Defaults and Complete phases in `st_LoadConfig`. Resource-specific preference restoration belongs in Defaults, before explicit autoexec overrides. The tools layer dispatches these callbacks without depending on game or rendering code.
