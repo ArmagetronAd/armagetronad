@@ -171,6 +171,7 @@ Tools/Utilities (src/tools/)
 - **Autotools**: `configure.ac`, `Makefile.am` hierarchy
 - **Build Targets**: Static libraries and executables for client, server, master server
 - **Environment Variables**: `DEBUGLEVEL=0-5`, `CODELEVEL=0-4`, `COVERAGE=1|2`
+- C library feature checks in `configure.ac` explicitly use C mode and discover libm, including in dedicated builds that omit the graphics dependency checks.
 
 ### Configure Options
 

@@ -38,6 +38,5 @@ jobs:
       - name: Build and run production tests
         env:
           JOBS: '4'
-          # Dedicated C feature probes do not inherit libm from graphics libraries.
-          LIBS: '-lm'
+          VERBOSE: '1'
         run: batch/test_builds.sh "${{ matrix.configuration }}"
