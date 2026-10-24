@@ -79,6 +79,7 @@ protected:
 
 private:
     REAL        createTime;
+    REAL visualCreateTime_; // receive-time presentation; physics keeps createTime
 
     //	gRealColor	color_;
     REAL		explosion_r;
@@ -97,5 +98,8 @@ private:
     tJUST_CONTROLLED_PTR< gCycle > owner_; // the owner/victim of the explosion
     
     REAL radius_;
+    // Snapshot at contact; a later owner update cannot rotate an existing burst.
+    eCoord impactDirection_;
+    REAL impactSpeed_;
 };
 #endif

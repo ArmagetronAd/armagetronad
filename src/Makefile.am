@@ -106,7 +106,7 @@ libnetwork_a_SOURCES=network/nAuthentication.cpp\
 if BUILDMAIN
 
 libengine_a_SOURCES=engine/eAdvWall.cpp engine/eAdvWall.h engine/eAuthentication.cpp\
-	engine/eAuthentication.h engine/eAxis.cpp engine/eAxis.h engine/eCamera.cpp engine/eCamera.h\
+	engine/eAuthentication.h engine/eAxis.cpp engine/eAxis.h engine/eCamera.cpp engine/eCamera.h engine/eCameraMotion.h\
 	engine/eCoord.h engine/eDebugLine.cpp engine/eDebugLine.h engine/eDisplay.cpp engine/eFloor.cpp\
 	engine/eFloor.h \
 	engine/eGameObject.cpp engine/eGameObject.h \
@@ -193,6 +193,21 @@ if BUILDZONESV1
 libtron_a_SOURCES +=\
 	tron/gWinZone.h            tron/gWinZone.cpp
 endif
+
+# Optional Legacy renderer and model animation.
+librender_a_SOURCES += render/rBloom.cpp render/rBloom.h
+libtron_a_SOURCES += tron/gArenaMaterial.h \
+    tron/gArenaBackdrop.h \
+    tron/gLightColour.h \
+    tron/gLightcycleModel.h \
+    tron/gLightcycleAsset.h \
+    tron/gLightcycleProfile.h \
+    tron/gLightcycleMaterial.h \
+    tron/gLightcycleEffects.h \
+    tron/gLightcycleMotion.h \
+    tron/gLightwallMaterial.h \
+    tron/gLightwallAttachment.h \
+    tron/gImpactAnimation.h
 
 libui_a_SOURCES=ui/uInput.cpp ui/uInput.h ui/uInputQueue.cpp ui/uInputQueue.h ui/uMenu.cpp ui/uMenu.h
 
@@ -325,7 +340,10 @@ unit_tests_SOURCES = thirdparty/doctest/doctest.h \
 	test/geometry_system_test.cpp test/memory_management_test.cpp test/time_system_test.cpp \
 	test/performance_test.cpp \
 	test/CodingStyle.h test/CodingStyle.cpp test/CodingStyle_test.cpp \
-	test/unit_tests_main.cpp
+	test/unit_tests_main.cpp \
+    test/gLightwallAttachment_test.cpp test/gLightcycleMotion_test.cpp \
+    test/eCameraMotion_test.cpp test/gImpactAnimation_test.cpp \
+    test/gLightcycleAsset_test.cpp test/gGraphicsStyle_test.cpp tron/gFloor.cpp
 unit_tests_CXXFLAGS =$(libtron_a_CXXFLAGS) -iquote @srcdir@/thirdparty/doctest
 unit_tests_LDADD=libtron.a libengine.a libnetwork.a libui.a librender.a libtools.a protobuf/libprotobuf.a thirdparty/mathexpr/libmathexpr.a ${extralibs}
 

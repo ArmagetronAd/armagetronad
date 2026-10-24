@@ -693,6 +693,7 @@ int main(int argc,char **argv){
 
     // inject functions into lower levels
     se_RegisterMoviePackFunc(&sg_MoviePack);
+    se_RegisterLegacyGraphicsFunc(&sg_LegacyGraphics);
     sg_RegisterStartupPlayerMenu(&sg_StartupPlayerMenu);
 
     bool dedicatedServer = false;
@@ -824,6 +825,7 @@ int main(int argc,char **argv){
 
         eLadderLogInitializer ladderlog;
         st_LoadConfig();
+        sg_ApplyGraphicsStyle();
 
         // migrate user configuration from previous versions
         if(sn_configurationSavedInVersion != st_programVersion)

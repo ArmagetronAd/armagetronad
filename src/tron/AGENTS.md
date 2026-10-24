@@ -104,3 +104,7 @@ The `gGame` class inherits from `nNetObject` for network synchronization. Game s
 - `armagetronad_main_master` sources: `network/master.cpp`
 - LDADD: `libtron.a libenginecore.a libengine.a libnetwork.a libui.a librender.a libtools.a`
 - Includes `-I${top_srcdir}/src/thirdparty/particles -I${top_srcdir}/src/tron`
+
+## Optional Legacy graphics
+
+`GRAPHICS_STYLE` selects the persisted Classic (0) or Legacy (1) preset after startup configuration. Its default (-1) respects existing `BLACKLIGHT_VISUALS` configurations. `gLightcycle*`, `gLightwall*` and `gImpactAnimation.h` implement presentation only; keep simulation and collision paths unchanged. Ribbons use an early edge pass followed by translucent membranes. Preserve the shared colour path and the bounded, full-height emitter connection.

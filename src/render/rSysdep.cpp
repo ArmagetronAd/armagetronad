@@ -48,6 +48,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "tRecorder.h"
 #include "rTextureRenderTarget.h"
 #include <memory>
+#include <algorithm>
+#include <cerrno>
+#include <cmath>
+#include <numeric>
+#include <sstream>
+#include <vector>
 
 #ifndef DEDICATED
 #include "SDL_thread.h"
@@ -194,6 +200,8 @@ bool sr_screenshotIsPlanned=false;
 tString sr_screenshotName("screenshot");
 static bool   s_videoout    =false;
 static int    s_videooutDest=fileno(stdout);
+static double s_videooutInterval = 0;
+static double s_nextVideoout = 0;
 
 static bool png_screenshot=true;
 static tConfItem<bool> pns("PNG_SCREENSHOT",png_screenshot);
@@ -256,32 +264,44 @@ static void make_screenshot(){
     int number=0;
 
     SDL_Surface *image;
-    SDL_Surface *temp;
+    SDL_Surface* temp = nullptr;
     int idx;
     image = SDL_CreateRGBSurface(SDL_SWSURFACE, sr_screenWidth, sr_screenHeight,
                                  24, 0x0000FF, 0x00FF00, 0xFF0000 ,0);
-    temp = SDL_CreateRGBSurface(SDL_SWSURFACE, sr_screenWidth, sr_screenHeight,
-                                24, 0x0000FF, 0x00FF00, 0xFF0000, 0);
+    if (!image)
+    {
+        std::cerr << "Screenshot allocation failed: " << SDL_GetError() << '\n';
+        return;
+    }
 
     // make upside down screenshot (make sure it comes from the screen)
 
     glReadPixels(0,0,sr_screenWidth, sr_screenHeight, GL_RGB,
                  GL_UNSIGNED_BYTE, image->pixels);
 
-    // turn image around
-    for (idx = 0; idx < sr_screenHeight; idx++)
-    {
-        memcpy(reinterpret_cast<char *>(temp->pixels) + temp->pitch * idx,
-               reinterpret_cast<char *>(image->pixels)
-               + image->pitch*(sr_screenHeight - idx-1),
-               3*sr_screenWidth); // Optionally, use the pitch of either surface here
-    }
-
     if (s_videoout)
     {
+        // Write the rows in display order directly. An 8K RGB frame occupies
+        // nearly 100 MB; video and PNG output do not need a second flipped copy.
         for (idx = 0; idx < sr_screenHeight; idx++)
         {
-            Ignore( write(s_videooutDest, reinterpret_cast<char *>(temp->pixels) + temp->pitch * idx, sr_screenWidth * 3) );
+            char const* row = reinterpret_cast<char const*>(image->pixels) + image->pitch * (sr_screenHeight - idx - 1);
+            size_t remaining = size_t(sr_screenWidth) * 3;
+            while (remaining > 0)
+            {
+                ssize_t written = write(s_videooutDest, row, remaining);
+                if (written < 0 && errno == EINTR)
+                    continue;
+                if (written <= 0)
+                {
+                    s_videoout = false;
+                    break;
+                }
+                row += written;
+                remaining -= written;
+            }
+            if (!s_videoout)
+                break;
         }
     }
 
@@ -316,7 +336,19 @@ static void make_screenshot(){
                 SDL_SavePNG(image, tDirectories::Screenshot().GetWritePath( fileName ));
             else
 #endif
-                SDL_SaveBMP(temp, tDirectories::Screenshot().GetWritePath( fileName ) );
+            {
+                temp = SDL_CreateRGBSurface(SDL_SWSURFACE, sr_screenWidth, sr_screenHeight,
+                                            24, 0x0000FF, 0x00FF00, 0xFF0000, 0);
+                if (temp)
+                {
+                    for (idx = 0; idx < sr_screenHeight; idx++)
+                        memcpy(reinterpret_cast<char*>(temp->pixels) + temp->pitch * idx,
+                               reinterpret_cast<char*>(image->pixels) + image->pitch * (sr_screenHeight - idx - 1), 3 * sr_screenWidth);
+                    SDL_SaveBMP(temp, tDirectories::Screenshot().GetWritePath(fileName));
+                }
+                else
+                    std::cerr << "Screenshot allocation failed: " << SDL_GetError() << '\n';
+            }
             done = true;
         }
     }
@@ -404,6 +436,29 @@ private:
         }
 
 #ifndef DEDICATED
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+        if (parser.GetSwitch("--hidden-window"))
+        {
+            sr_hiddenWindow = true;
+#ifdef SDL_HINT_MAC_BACKGROUND_APP
+            SDL_SetHint(SDL_HINT_MAC_BACKGROUND_APP, "1");
+#endif
+            return true;
+        }
+#endif
+        tString interval;
+        if (parser.GetOption(interval, "--videoout-interval"))
+        {
+            std::stringstream value(static_cast<char const*>(interval));
+            double seconds;
+            if (!(value >> seconds) || !(value >> std::ws).eof() || !std::isfinite(seconds) || seconds < 0)
+            {
+                std::cerr << "--videoout-interval requires a finite, nonnegative number of seconds\n";
+                throw -1;
+            }
+            s_videooutInterval = seconds;
+            return true;
+        }
         if ( parser.GetSwitch( "--videoout" ) )
         {
             // redirect all regular output to stderr
@@ -430,6 +485,10 @@ private:
         s << "--benchmark                  : renders frames as they were recorded\n";
 #ifndef DEDICATED
         s << "--videoout                   : writes a raw video stream of frames to stdout\n";
+        s << "--videoout-interval <seconds>: minimum time between readbacks (0 captures every frame)\n";
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+        s << "--hidden-window              : render without a visible or focused window (for capture)\n";
+#endif
 #endif
     }
 };
@@ -1505,8 +1564,13 @@ void rSysDep::SwapGL(){
         make_screenshot();
         sr_screenshotIsPlanned=false;
     }
-    else if (s_videoout)
+    else if (s_videoout && (s_videooutInterval == 0 || tRealSysTimeFloat() >= s_nextVideoout))
+    {
         make_screenshot();
+        // Start the interval after readback: slow output must not queue a burst
+        // of stale frames while a still-image consumer catches up.
+        s_nextVideoout = tRealSysTimeFloat() + s_videooutInterval;
+    }
 
     // actiate motion blur (does not use the game state, so it's OK to call here )
     bool shouldSwap = sr_MotionBlur( time, blurTarget );

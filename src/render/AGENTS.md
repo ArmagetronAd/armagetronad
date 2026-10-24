@@ -76,3 +76,7 @@ The renderer uses a state-stack pattern for managing OpenGL state changes (matri
 - Platform-specific: `render_extra` variable for macOS Objective-C files (currently empty)
 - Dependencies: `-iquote @srcdir@/render`, requires libtools.a
 - `rConsoleCout.cpp` in `EXTRA_DIST` (not compiled into library)
+
+## Optional effects
+
+`rBloom.cpp/h` runs after the 3D viewports and before the HUD. Its shader and framebuffer resources are released on context changes, with a fixed-function fallback on unsupported hardware. SDL2 MSAA and texture anisotropy are configurable; defaults preserve Classic rendering. `--hidden-window` and `--videoout-interval` support native renderer captures without taking focus.

@@ -66,3 +66,7 @@ The textures include various formats (PNG, JPG) and cover all visual aspects of 
 ## Tutorial Textures
 
 The tutorials/ subdirectory contains specialized textures for the game's tutorial system, providing visual guides and examples for different game modes and techniques.
+
+## Legacy light mask
+
+`lightcycle_suit_mask.png` stores scalar optical coverage baked from the credited Blender model. Player colour is supplied by the renderer, so do not bake a fixed cyan or amber tint into the mask.

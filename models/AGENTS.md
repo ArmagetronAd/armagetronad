@@ -56,3 +56,7 @@ The model system allows for complex 3D visual elements beyond the basic game geo
 - **Custom Format**: .mod files for Armagetron-specific model definitions
 - **Standard Formats**: May support standard 3D model formats
 - **Conversion**: Tools for converting between different model formats
+
+## Authored Legacy model
+
+`lightcycle-authored.bin` is a bounded LCMESH1 export with separate wheel groups and optical coverage. Retain `lightcycle-CREDITS.txt` and `lightcycle-LICENSE.txt` when distributing it. Editable Blender sources and the exporter are in `art/lightcycle-authored/`. Code remains GPL; the authored model is CC BY 3.0.

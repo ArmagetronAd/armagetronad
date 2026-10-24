@@ -697,6 +697,7 @@ bool eGameObject::DiedWhileMoving()
 
 // draws it to the screen using OpenGL
 void eGameObject::Render(const eCamera *){}
+void eGameObject::RenderEarly(const eCamera*) {}
 void eGameObject::Render2D(tCoord scale) const {}
 
 // *******************************************************************************
@@ -923,9 +924,36 @@ eGameObject *displayed_gameobject = 0;
 #endif
 
 void eGameObject::RenderAll(eGrid *grid, const eCamera *cam){
+
     //if (!sr_glOut)
     //    return;
-    
+
+    // Opaque subparts of otherwise translucent objects must precede all normal
+    // renders. Each view, including its mirror pass, gets this phase once.
+    if (sr_glOut)
+        for (int i = grid->gameObjects.Len() - 1; i >= 0; --i)
+            grid->gameObjects(i)->RenderEarly(cam);
+
+#ifndef DEDICATED
+    if (sr_glOut && se_LegacyGraphics())
+    {
+        // Opaque bikes must precede the translucent ribbons from the first
+        // frame, rather than waiting for the old renderer to reorder its list.
+        for (int phase = 0; phase < 2; ++phase)
+        {
+            for (int i = grid->gameObjects.Len() - 1; i >= 0; --i)
+            {
+                eGameObject* object = grid->gameObjects(i);
+                if (object->RendersAlpha() != (phase != 0))
+                    continue;
+                su_FetchAndStoreSDLInput();
+                object->Render(cam);
+            }
+        }
+        return;
+    }
+#endif
+
     // first, we need to render all the non-alpha blended objects.
     // if we encounter non-alpha blended objects after alpha blended objects
     // have already been rendered, we need to re-sort them to the back.

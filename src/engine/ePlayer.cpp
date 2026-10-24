@@ -130,6 +130,39 @@ tCONFIG_ENUM( eCamMode );
 tList<ePlayerNetID> se_PlayerNetIDs;
 static ePlayer* se_Players = NULL;
 
+eCallbackPlayerColor* eCallbackPlayerColor::anchor_ = NULL;
+
+eCallbackPlayerColor::eCallbackPlayerColor(Callback* callback)
+    : tListItem<eCallbackPlayerColor>(anchor_), callback_(callback)
+{
+}
+
+void eCallbackPlayerColor::Exec(ePlayerNetID* player)
+{
+    for (eCallbackPlayerColor* callback = anchor_; callback; callback = callback->Next())
+        callback->callback_(player);
+}
+
+static bool se_individualPlayerColors = false;
+
+bool se_IndividualPlayerColors()
+{
+    return se_individualPlayerColors;
+}
+
+static void se_RefreshPlayerColors()
+{
+    for (int i = se_PlayerNetIDs.Len() - 1; i >= 0; --i)
+    {
+        ePlayerNetID* player = se_PlayerNetIDs(i);
+        player->UpdateName();
+        eCallbackPlayerColor::Exec(player);
+    }
+}
+
+static tConfItem<bool> se_individualPlayerColorsConf(
+    "INDIVIDUAL_PLAYER_COLORS", se_individualPlayerColors, &se_RefreshPlayerColors);
+
 // tracking play time (in minutes). These times are tracked on the client and yes, you can "cheat" and increase them to get access to servers you are not ready for.
 
 // total play time, network or not
@@ -6677,6 +6710,7 @@ void ePlayerNetID::ReadSync( Engine::PlayerNetIDSync const & sync, nSenderInfo c
 
     nNetObject::ReadSync( sync.base(), sender );
 
+    tShortColor previousColor = color;
     color.ReadSync( sync.color() );
 
     if ( !se_bugColorOverflow )
@@ -6837,6 +6871,9 @@ void ePlayerNetID::ReadSync( Engine::PlayerNetIDSync const & sync, nSenderInfo c
     {
         greeted = true;
     }
+
+    if (se_IndividualPlayerColors() && previousColor != color)
+        eCallbackPlayerColor::Exec(this);
 }
 
 //! creates a netobject form sync data
@@ -6897,6 +6934,8 @@ void ePlayerNetID::ControlObject(eNetGameObject *c){
 
     if (bool(object))
         object->SetPlayer(this);
+    if (se_IndividualPlayerColors())
+        eCallbackPlayerColor::Exec(this);
 #ifdef DEBUG
     //con << "Player " << name << " controlles new object.\n";
 #endif
@@ -7567,6 +7606,7 @@ void ePlayerNetID::Update(){
                 p->favoriteNumberOfPlayersPerTeam=ePlayer::PlayerConfig(i)->favoriteNumberOfPlayersPerTeam;
                 p->nameTeamAfterMe=ePlayer::PlayerConfig(i)->nameTeamAfterMe;
 
+                tShortColor previousColor = p->color;
                 if ( se_randomizeColor )
                 {
                     se_RandomizeColor(local_p,p);
@@ -7575,6 +7615,8 @@ void ePlayerNetID::Update(){
                 p->color.r_=ePlayer::PlayerConfig(i)->rgb[0];
                 p->color.g_=ePlayer::PlayerConfig(i)->rgb[1];
                 p->color.b_=ePlayer::PlayerConfig(i)->rgb[2];
+                if (se_IndividualPlayerColors() && previousColor != p->color)
+                    eCallbackPlayerColor::Exec(p);
 
                 sg_ClampPingCharity();
                 p->pingCharity=::pingCharity;
@@ -8745,7 +8787,8 @@ nProtoBuf const * ePlayerNetID::ExtractControl( Network::NetObjectControl const 
 
 void ePlayerNetID::Color( REAL&a_r, REAL&a_g, REAL&a_b ) const
 {
-    if ( ( static_cast<bool>(currentTeam) ) && ( ( currentTeam->IsHuman() || currentTeam->TeamNamedAfterColor() ) ) )
+    if (!se_IndividualPlayerColors() && (static_cast<bool>(currentTeam)) &&
+        (currentTeam->IsHuman() || currentTeam->TeamNamedAfterColor()))
     {
         REAL w = 5;
         REAL r_w = 2;

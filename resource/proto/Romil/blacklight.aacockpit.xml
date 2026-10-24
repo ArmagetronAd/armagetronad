@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE Resource SYSTEM "cockpit.dtd">
+
+<Resource type="aacockpit" name="blacklight" version="1.0" author="Romil" category="">
+    <Cockpit version="1.0">
+        <WidgetTemplate id="meter">
+            <Size height="0.007" width="0.155" />
+            <ShowCurrent value="false" />
+            <ShowMaximum value="false" />
+            <ShowMinimum value="false" />
+            <Caption location="off" />
+            <Background>
+                <Solid><Color r="0.16" g="0.22" b="0.27" alpha="0.72" /></Solid>
+            </Background>
+            <Foreground>
+                <Solid><Color r="0.48" g="0.73" b="0.79" alpha="0.96" /></Solid>
+            </Foreground>
+            <LineColor>
+                <Solid><Color r="0" g="0" b="0" alpha="0" /></Solid>
+            </LineColor>
+        </WidgetTemplate>
+        <WidgetTemplate id="caption">
+            <Size height="0.025" width="0.012" />
+            <Caption location="off" />
+        </WidgetTemplate>
+
+        <!-- Quiet backing keeps the readouts legible over trails and explosions. -->
+        <Rectangle>
+            <DataSet>
+                <AtomicData field="source" source="0" />
+                <AtomicData field="minimum" source="0" />
+                <AtomicData field="maximum" source="1" />
+            </DataSet>
+            <Position x="-0.31" y="-0.897" />
+            <Size width="0.64" height="0.079" />
+            <Background>
+                <Solid><Color r="0.025" g="0.037" b="0.05" alpha="0.78" /></Solid>
+            </Background>
+        </Rectangle>
+
+        <Label usetemplate="caption">
+            <Position x="-0.92" y="-0.845" />
+            <Face><Table><Row><Cell><Text value="0x8ca2afSPEED" /></Cell></Row></Table></Face>
+        </Label>
+        <Label>
+            <DataSet id="speed"><AtomicData source="player_speed" precision="0" /></DataSet>
+            <Position x="-0.92" y="-0.882" />
+            <Size width="0.012" height="0.047" />
+            <Caption location="off" />
+            <Face><Table><Row><Cell><Text value="0xe8eef2" /><GameData data="speed" /></Cell></Row></Table></Face>
+        </Label>
+        <BarGauge usetemplate="meter">
+            <DataSet>
+                <AtomicData field="source" source="player_speed" />
+                <AtomicData field="minimum" source="0" />
+                <AtomicData field="maximum" source="max_speed" />
+            </DataSet>
+            <Position x="-0.765" y="-0.955" />
+        </BarGauge>
+
+        <Label usetemplate="caption">
+            <Position x="-0.48" y="-0.845" />
+            <Face><Table><Row><Cell><Text value="0x8ca2afRUBBER USED" /></Cell></Row></Table></Face>
+        </Label>
+        <Label>
+            <DataSet id="used"><AtomicData source="player_rubber" precision="1" /></DataSet>
+            <DataSet id="budget"><AtomicData source="cycle_rubber" precision="1" /></DataSet>
+            <Position x="-0.48" y="-0.887" />
+            <Size width="0.012" height="0.036" />
+            <Caption location="off" />
+            <Face><Table><Row><Cell>
+                <Text value="0xe8eef2" /><GameData data="used" />
+                <Text value="0x8ca2af / " /><GameData data="budget" />
+            </Cell></Row></Table></Face>
+        </Label>
+        <BarGauge usetemplate="meter">
+            <DataSet>
+                <AtomicData field="source" source="player_rubber" />
+                <AtomicData field="minimum" source="0" />
+                <AtomicData field="maximum" source="cycle_rubber" />
+            </DataSet>
+            <Position x="-0.325" y="-0.955" />
+        </BarGauge>
+
+        <Label usetemplate="caption">
+            <Position x="-0.04" y="-0.845" />
+            <Face><Table><Row><Cell><Text value="0x8ca2afBRAKE RESERVE" /></Cell></Row></Table></Face>
+        </Label>
+        <Label>
+            <DataSet id="reserve">
+                <Math type="product" lvalue="player_brakes" rvalue="100" precision="0" />
+            </DataSet>
+            <Position x="-0.04" y="-0.882" />
+            <Size width="0.012" height="0.047" />
+            <Caption location="off" />
+            <Face><Table><Row><Cell><Text value="0xe8eef2" /><GameData data="reserve" /><Text value="%" /></Cell></Row></Table></Face>
+        </Label>
+        <BarGauge usetemplate="meter">
+            <DataSet>
+                <AtomicData field="source" source="player_brakes" />
+                <AtomicData field="minimum" source="0" />
+                <AtomicData field="maximum" source="1" />
+            </DataSet>
+            <Position x="0.115" y="-0.955" />
+        </BarGauge>
+
+        <Label usetemplate="caption">
+            <DataSet id="score"><AtomicData source="current_score" precision="0" /></DataSet>
+            <DataSet id="leader"><AtomicData source="top_score" precision="0" /></DataSet>
+            <DataSet id="enemies"><AtomicData source="enemies_alive" precision="0" /></DataSet>
+            <DataSet id="team"><AtomicData source="friends_alive" precision="0" /></DataSet>
+            <Position x="-0.94" y="-0.76" />
+            <Face><Table><Row><Cell>
+                <Text value="0x8ca2afSCORE  0xe8eef2" /><GameData data="score" />
+                <Text value="0x8ca2af    LEADER  0xe8eef2" /><GameData data="leader" />
+                <Text value="0x8ca2af    ENEMIES  0xe8eef2" /><GameData data="enemies" />
+                <Text value="0x8ca2af    TEAM ALIVE  0xe8eef2" /><GameData data="team" />
+            </Cell></Row></Table></Face>
+        </Label>
+
+        <Label usetemplate="caption">
+            <Position x="0.72" y="-0.602" />
+            <Face><Table><Row><Cell><Text value="0x8ca2afARENA" /></Cell></Row></Table></Face>
+        </Label>
+        <Map>
+            <Position x="0.835" y="-0.765" />
+            <Size width="0.115" height="0.135" />
+            <Background>
+                <Solid><Color r="0.025" g="0.037" b="0.05" alpha="0.82" /></Solid>
+            </Background>
+            <MapModes toggleKey="1">
+                <MapMode mode="full" rotation="spawn" />
+                <MapMode mode="cycle" rotation="cycle" zoomFactor="3" clipMode="rectangle" />
+                <MapMode mode="full" rotation="fixed" />
+            </MapModes>
+        </Map>
+        <Label>
+            <DataSet id="ping"><AtomicData source="current_ping" precision="0" /></DataSet>
+            <Position x="0.72" y="-0.94" />
+            <Size width="0.01" height="0.022" />
+            <Caption location="off" />
+            <Face><Table><Row><Cell>
+                <Text value="0x8ca2afPING  0xe8eef2" /><GameData data="ping" /><Text value="0x8ca2af ms" />
+            </Cell></Row></Table></Face>
+        </Label>
+    </Cockpit>
+</Resource>

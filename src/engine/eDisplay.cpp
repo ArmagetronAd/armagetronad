@@ -30,11 +30,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "rSDL.h"
 
 #include "tConfiguration.h"
+#include <algorithm>
 
 // floor mirror
 #ifndef DEDICATED
 static REAL sr_floorMirror_strength=.1;
 static tSettingItem<REAL> f_m("FLOOR_MIRROR_INT",sr_floorMirror_strength);
+static REAL sr_floorReflectionSoftness = 0;
+static tSettingItem<REAL> f_soft("FLOOR_REFLECTION_SOFTNESS", sr_floorReflectionSoftness);
 
 #include "tEventQueue.h"
 #include "uInputQueue.h"
@@ -55,6 +58,7 @@ static tSettingItem<REAL> f_m("FLOOR_MIRROR_INT",sr_floorMirror_strength);
 #include "eDebugLine.h"
 #include "tDirectories.h"
 #include "eRectangle.h"
+#include "tConsole.h"
 
 #define eWall_h 4
 #define view_h 2.7
@@ -70,6 +74,343 @@ static tSettingItem<REAL> sec_upperSkyHeight("UPPER_SKY_HEIGHT",se_upperSkyHeigh
 static tSettingItem<REAL> sec_lowerSkyHeight("LOWER_SKY_HEIGHT",se_lowerSkyHeight);
 
 #ifndef DEDICATED
+
+#ifdef HAVE_GLEW
+namespace
+{
+GLuint se_floorReflectionProgram = 0;
+bool se_floorReflectionFailed = false;
+GLuint se_floorReflectionTexture = 0;
+int se_floorReflectionWidth = 0, se_floorReflectionHeight = 0;
+bool se_floorReflectionCopyFailed = false;
+bool se_floorReflectionPriorErrorReported = false;
+
+void se_UnloadFloorReflection()
+{
+    if (se_floorReflectionProgram)
+        glDeleteProgram(se_floorReflectionProgram);
+    se_floorReflectionProgram = 0;
+    se_floorReflectionFailed = false;
+    if (se_floorReflectionTexture)
+        glDeleteTextures(1, &se_floorReflectionTexture);
+    se_floorReflectionTexture = 0;
+    se_floorReflectionWidth = se_floorReflectionHeight = 0;
+    se_floorReflectionCopyFailed = false;
+    se_floorReflectionPriorErrorReported = false;
+}
+
+static rCallbackBeforeScreenModeChange se_floorReflectionUnload(&se_UnloadFloorReflection);
+
+GLuint se_CompileFloorShader(GLenum type, char const* source)
+{
+    GLuint shader = glCreateShader(type);
+    glShaderSource(shader, 1, &source, NULL);
+    glCompileShader(shader);
+    GLint compiled = GL_FALSE;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
+    if (!compiled)
+    {
+        char message[1024] = "";
+        glGetShaderInfoLog(shader, sizeof(message) - 1, NULL, message);
+        con << "Floor material: " << message << "\n";
+        glDeleteShader(shader);
+        return 0;
+    }
+    return shader;
+}
+
+bool se_PrepareFloorReflection()
+{
+    if (se_floorReflectionFailed)
+        return false;
+    if (se_floorReflectionProgram)
+        return true;
+    char const* vertexSource =
+        "#version 120\n"
+        "varying vec4 eyePosition;\n"
+        "varying vec3 floorNormal;\n"
+        "void main() {\n"
+        "    eyePosition = gl_ModelViewMatrix * gl_Vertex;\n"
+        "    floorNormal = gl_NormalMatrix * vec3(0.0, 0.0, 1.0);\n"
+        "    gl_Position = ftransform();\n"
+        "    gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;\n"
+        "    gl_FrontColor = gl_Color;\n"
+        "    gl_BackColor = gl_Color;\n"
+        "}\n";
+    char const* fragmentSource =
+        "#version 120\n"
+        "uniform sampler2D floorTexture;\n"
+        "uniform sampler2D reflectedScene;\n"
+        "uniform vec2 inverseFrame;\n"
+        "uniform vec4 reflectionViewport;\n"
+        "uniform float reflectionSoftness;\n"
+        "uniform float capturedReflection;\n"
+        "uniform float reflectance;\n"
+        "uniform float gridWorld;\n"
+        "uniform vec4 arenaBounds;\n"
+        "varying vec4 eyePosition;\n"
+        "varying vec3 floorNormal;\n"
+        "float inlay(float d, float radius) {\n"
+        "    float aa = max(fwidth(d), 0.008);\n"
+        "    float lo = max(d - aa * 0.5, -radius);\n"
+        "    float hi = min(d + aa * 0.5, radius);\n"
+        "    return max(hi - lo, 0.0) / aa;\n"
+        "}\n"
+        "float gridLines(vec2 distance, vec2 footprint, float radius) {\n"
+        // Differentiate the world coordinate before wrapping it. At a grid
+        // seam, differentiating abs(mod(...)) can cancel and flash a thin line.
+        "    vec2 lo = max(distance - footprint * 0.5, vec2(-radius));\n"
+        "    vec2 hi = min(distance + footprint * 0.5, vec2(radius));\n"
+        "    vec2 coverage = max(hi - lo, vec2(0.0)) / footprint;\n"
+        "    return 1.0 - (1.0 - coverage.x) * (1.0 - coverage.y);\n"
+        "}\n"
+        "float roundedPanel(vec2 p, vec2 size, float radius) {\n"
+        "    vec2 q = abs(p) - size + radius;\n"
+        "    return length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - radius;\n"
+        "}\n"
+        "vec3 reflectionAt(vec2 uv) {\n"
+        "    return texture2D(reflectedScene, clamp(uv, reflectionViewport.xy, reflectionViewport.zw)).rgb;\n"
+        "}\n"
+        "void main() {\n"
+        // Homogeneous horizon vertices have W=0. Divide the interpolated value
+        // before distance attenuation; normalizing XYZ alone is only a direction.
+        "    vec3 eye = eyePosition.xyz / max(abs(eyePosition.w), 0.000001);\n"
+        "    float distance = length(eye);\n"
+        "    float cosine = clamp(abs(dot(normalize(eye), normalize(floorNormal))), 0.0, 1.0);\n"
+        "    float fresnel = pow(1.0 - cosine, 5.0);\n"
+        "    float reflected = reflectance + (1.0 - reflectance) * fresnel;\n"
+        "    vec3 surface = texture2DProj(floorTexture, gl_TexCoord[0]).rgb * gl_Color.rgb;\n"
+        // Projective coordinates remain valid on the homogeneous infinity plane.
+        // All inlays are fixed to the floor; camera motion never drags the pattern.
+        "    vec2 world = gl_TexCoord[0].xy / gl_TexCoord[0].w * gridWorld;\n"
+        "    vec2 center = (arenaBounds.xy + arenaBounds.zw) * 0.5;\n"
+        "    vec2 halfArena = max((arenaBounds.zw - arenaBounds.xy) * 0.5, vec2(2.0));\n"
+        "    float rail = 0.0;\n"
+        "    for (int i = 0; i < 3; ++i) {\n"
+        "        vec2 size = max(halfArena - vec2(4.5 + float(i) * 2.8), vec2(1.0));\n"
+        "        float d = roundedPanel(world - center, size, min(8.0, min(size.x, size.y) * 0.25));\n"
+        "        rail += inlay(d, i == 0 ? 0.11 : 0.040) * (i == 0 ? 1.0 : 0.38);\n"
+        "    }\n"
+        // The glass between circuits stays black. Only the inlays emit;
+        // reflected objects retain their own colours in the separate pass.
+        "    vec2 layout = world - center;\n"
+        "    float spacing = max(gridWorld, 4.0);\n"
+        "    vec2 major = abs(mod(layout + spacing * 0.5, spacing) - spacing * 0.5);\n"
+        "    vec2 minor = abs(mod(layout + spacing * 0.125, spacing * 0.25) - spacing * 0.125);\n"
+        "    vec2 footprint = max(fwidth(world), vec2(0.008));\n"
+        "    float panels = gridLines(major, footprint, 0.045);\n"
+        "    float subdivisions = gridLines(minor, footprint, 0.018);\n"
+        "    float junctions = inlay(major.x, 0.025) * (1.0 - smoothstep(0.40, 0.70, major.y));\n"
+        "    junctions += inlay(major.y, 0.025) * (1.0 - smoothstep(0.40, 0.70, major.x));\n"
+        "    float distanceFade = 1.0 - smoothstep(90.0, 280.0, distance);\n"
+        "    float grid = panels * 0.42 + subdivisions * 0.11 + junctions * 0.35;\n"
+        "    vec2 panelIndex = floor((layout + spacing * 0.5) / spacing);\n"
+        "    float panelShade = fract(sin(dot(panelIndex, vec2(127.1, 311.7))) * 43758.5453);\n"
+        // Broad panel variation is stable in world space. Fade it before a tile
+        // becomes subpixel, preserving a quiet surface through camera movement.
+        "    float panelResolved = 1.0 - smoothstep(spacing * 0.20, spacing * 0.65, max(footprint.x, footprint.y));\n"
+        "    panelShade = mix(0.5, panelShade, panelResolved);\n"
+        "    float roughness = 0.72 + panelShade * 0.28;\n"
+        "    float roomLight = 1.0 - smoothstep(0.0, 1.4, length(layout / halfArena));\n"
+        "    surface = surface * 0.04 + vec3(0.001, 0.002, 0.003) * (0.70 + panelShade * 0.30);\n"
+        "    surface += vec3(0.0004, 0.0007, 0.001) * roomLight;\n"
+        "    surface *= 1.0 - subdivisions * 0.24;\n"
+        "    float bevel = gridLines(abs(minor - vec2(0.075)), footprint, 0.035);\n"
+        "    surface += vec3(0.001, 0.002, 0.003) * bevel;\n"
+        "    vec2 circuitLayout = layout;\n"
+        "    circuitLayout.x += mod(floor((layout.y + 36.0) / 72.0), 2.0) * 40.0;\n"
+        "    vec2 cell = mod(circuitLayout + vec2(40.0, 36.0), vec2(80.0, 72.0)) - vec2(40.0, 36.0);\n"
+        "    float circuit = roundedPanel(cell, vec2(30.0, 25.0), 8.0);\n"
+        "    float inner = roundedPanel(cell, vec2(22.0, 17.0), 5.0);\n"
+        "    float routes = inlay(circuit, 0.11) + 0.30 * inlay(circuit + 0.75, 0.035);\n"
+        "    routes += 0.38 * inlay(inner, 0.045);\n"
+        "    vec3 emission = vec3(0.22, 0.65, 0.76) * (rail * 0.82 + grid * 0.46 + routes * 0.85) * distanceFade;\n"
+        "    float air = 1.0 - exp(-distance * 0.003);\n"
+        "    surface = mix(surface, vec3(0.0005, 0.001, 0.0015), air * 0.55);\n"
+        "    reflected *= 1.0 - min(reflectionSoftness, 1.0) * roughness * 0.32 * (1.0 - fresnel);\n"
+        "    float opacity = max(1.0 - reflected, air * 0.12);\n"
+        "    if (capturedReflection > 0.5) {\n"
+        // A compact, normalized optical filter softens only the mirrored scene.
+        // The real bikes, walls and HUD are drawn later at full resolution.
+        "        vec2 uv = gl_FragCoord.xy * inverseFrame;\n"
+        "        float radius = reflectionSoftness * roughness * (2.0 + min(distance * 0.10, 5.0));\n"
+        "        vec2 step = inverseFrame * radius / (inverseFrame.y * 1080.0);\n"
+        "        vec3 reflection = reflectionAt(uv) * 0.20;\n"
+        "        reflection += (reflectionAt(uv + vec2(step.x, 0.0)) + reflectionAt(uv - vec2(step.x, 0.0))) * 0.12;\n"
+        "        reflection += (reflectionAt(uv + vec2(0.0, step.y)) + reflectionAt(uv - vec2(0.0, step.y))) * 0.12;\n"
+        "        reflection += (reflectionAt(uv + step) + reflectionAt(uv - step)) * 0.08;\n"
+        "        reflection += (reflectionAt(uv + vec2(step.x, -step.y)) + reflectionAt(uv + vec2(-step.x, step.y))) * 0.08;\n"
+        "        gl_FragColor = vec4(surface * opacity + reflection * (1.0 - opacity) + emission, 1.0);\n"
+        "    } else {\n"
+        "        gl_FragColor = vec4(surface * opacity + emission, opacity);\n"
+        "    }\n"
+        "}\n";
+    GLuint vertex = se_CompileFloorShader(GL_VERTEX_SHADER, vertexSource);
+    GLuint fragment = se_CompileFloorShader(GL_FRAGMENT_SHADER, fragmentSource);
+    if (vertex && fragment)
+    {
+        se_floorReflectionProgram = glCreateProgram();
+        glAttachShader(se_floorReflectionProgram, vertex);
+        glAttachShader(se_floorReflectionProgram, fragment);
+        glLinkProgram(se_floorReflectionProgram);
+        GLint linked = GL_FALSE;
+        glGetProgramiv(se_floorReflectionProgram, GL_LINK_STATUS, &linked);
+        if (!linked)
+        {
+            char message[1024] = "";
+            glGetProgramInfoLog(se_floorReflectionProgram, sizeof(message) - 1, NULL, message);
+            con << "Floor material link: " << message << "\n";
+            glDeleteProgram(se_floorReflectionProgram);
+            se_floorReflectionProgram = 0;
+        }
+    }
+    if (vertex)
+        glDeleteShader(vertex);
+    if (fragment)
+        glDeleteShader(fragment);
+    if (!se_floorReflectionProgram)
+    {
+        se_floorReflectionFailed = true;
+        con << "Floor reflection: shaders unavailable; using the classic reflection.\n";
+    }
+    return se_floorReflectionProgram != 0;
+}
+
+// Copy the mirrored scene once for this viewport. One full-size texture is
+// reused across views; sampling is clamped so split-screen players never bleed
+// into each other's reflections. The driver's copy resolves window MSAA.
+bool se_CopyFloorReflection(GLint const* viewport)
+{
+    if (se_floorReflectionCopyFailed || sr_screenWidth <= 0 || sr_screenHeight <= 0)
+        return false;
+    // Attribute failure only to this optional copy, not to an earlier draw.
+    // Preserve an actionable diagnostic rather than silently swallowing it.
+    for (int count = 0; count < 16; ++count)
+    {
+        GLenum prior = glGetError();
+        if (prior == GL_NO_ERROR)
+            break;
+        if (!se_floorReflectionPriorErrorReported)
+        {
+            con << "Floor material: pre-existing OpenGL error " << int(prior) << " before reflection capture.\n";
+            se_floorReflectionPriorErrorReported = true;
+        }
+    }
+    if (!se_floorReflectionTexture)
+        glGenTextures(1, &se_floorReflectionTexture);
+    glBindTexture(GL_TEXTURE_2D, se_floorReflectionTexture);
+    if (se_floorReflectionWidth != sr_screenWidth || se_floorReflectionHeight != sr_screenHeight)
+    {
+        GLint maximum = 0;
+        glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maximum);
+        if (sr_screenWidth > maximum || sr_screenHeight > maximum)
+            return false;
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, sr_screenWidth, sr_screenHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        if (glGetError() != GL_NO_ERROR)
+        {
+            se_floorReflectionCopyFailed = true;
+            con << "Floor material: reflection texture allocation failed; using the unfiltered reflection.\n";
+            return false;
+        }
+        se_floorReflectionWidth = sr_screenWidth;
+        se_floorReflectionHeight = sr_screenHeight;
+    }
+    glCopyTexSubImage2D(GL_TEXTURE_2D, 0, viewport[0], viewport[1], viewport[0], viewport[1], viewport[2], viewport[3]);
+    if (glGetError() != GL_NO_ERROR)
+    {
+        se_floorReflectionCopyFailed = true;
+        con << "Floor material: using the unfiltered reflection.\n";
+        return false;
+    }
+    return true;
+}
+} // namespace
+#endif
+
+// The mirrored scene is already below the floor. Schlick's Fresnel response
+// changes only its visibility through the polished surface: the configured
+// strength is normal-incidence reflectance, increasing at grazing angles.
+// Eye-space directions also support the existing homogeneous infinity plane.
+class se_FloorReflection
+{
+public:
+    explicit se_FloorReflection(REAL alpha)
+    {
+#ifdef HAVE_GLEW
+        if (sr_hiddenWindow && se_LegacyGraphics())
+        {
+            static bool reported = false;
+            if (!reported)
+            {
+                reported = true;
+                std::cerr << "Floor material: mirror=" << sr_floorMirror << " alpha=" << alpha
+                          << " grid=" << se_GridSize() << " fog=" << int(glIsEnabled(GL_FOG)) << '\n';
+            }
+        }
+        if (!se_LegacyGraphics() || !sr_alphaBlend ||
+            !sr_floorMirror || alpha >= 1 || !GLEW_VERSION_2_0 || glIsEnabled(GL_FOG))
+            return;
+        RenderEnd();
+        if (!se_PrepareFloorReflection())
+            return;
+        glGetIntegerv(GL_CURRENT_PROGRAM, &previous_);
+        glGetIntegerv(GL_ACTIVE_TEXTURE, &previousTexture_);
+        glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+        glActiveTexture(GL_TEXTURE1);
+        glGetIntegerv(GL_TEXTURE_BINDING_2D, &previousReflection_);
+        GLint viewport[4];
+        glGetIntegerv(GL_VIEWPORT, viewport);
+        bool captured = sr_floorReflectionSoftness > 0 && se_CopyFloorReflection(viewport);
+        glUseProgram(se_floorReflectionProgram);
+        glUniform1i(glGetUniformLocation(se_floorReflectionProgram, "floorTexture"), 0);
+        glUniform1i(glGetUniformLocation(se_floorReflectionProgram, "reflectedScene"), 1);
+        glUniform1f(glGetUniformLocation(se_floorReflectionProgram, "capturedReflection"), captured ? 1.f : 0.f);
+        glUniform1f(glGetUniformLocation(se_floorReflectionProgram, "reflectionSoftness"),
+                    std::max(REAL(0), std::min(REAL(2), sr_floorReflectionSoftness)));
+        glUniform2f(glGetUniformLocation(se_floorReflectionProgram, "inverseFrame"), 1.f / sr_screenWidth, 1.f / sr_screenHeight);
+        glUniform4f(glGetUniformLocation(se_floorReflectionProgram, "reflectionViewport"),
+                    (viewport[0] + .5f) / sr_screenWidth, (viewport[1] + .5f) / sr_screenHeight,
+                    (viewport[0] + viewport[2] - .5f) / sr_screenWidth, (viewport[1] + viewport[3] - .5f) / sr_screenHeight);
+        glUniform1f(glGetUniformLocation(se_floorReflectionProgram, "reflectance"),
+                    std::max(REAL(0), std::min(REAL(1), 1 - alpha)));
+        glUniform1f(glGetUniformLocation(se_floorReflectionProgram, "gridWorld"), se_GridSize());
+        eRectangle const& bounds = eWallRim::GetBounds();
+        glUniform4f(glGetUniformLocation(se_floorReflectionProgram, "arenaBounds"),
+                    bounds.GetLow().x, bounds.GetLow().y, bounds.GetHigh().x, bounds.GetHigh().y);
+        glActiveTexture(GL_TEXTURE0);
+        active_ = true;
+#else
+        (void)alpha;
+#endif
+    }
+    ~se_FloorReflection()
+    {
+#ifdef HAVE_GLEW
+        if (active_)
+        {
+            RenderEnd();
+            glUseProgram(previous_);
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, previousReflection_);
+            glPopAttrib();
+            glActiveTexture(previousTexture_);
+        }
+#endif
+    }
+
+private:
+#ifdef HAVE_GLEW
+    GLint previous_ = 0;
+    GLint previousTexture_ = GL_TEXTURE0, previousReflection_ = 0;
+    bool active_ = false;
+#endif
+};
 
 // select the lower sky
 static rFileTexture & se_Sky()
@@ -476,6 +817,7 @@ void eGrid::display_simple( eCamera* cam, int viewer,bool floor,
             break;
 
         case rFLOOR_TEXTURE:
+        {
             TexMatrix();
             glLoadIdentity();
             glScalef(1/se_GridSize(),1/se_GridSize(),1.);
@@ -483,6 +825,7 @@ void eGrid::display_simple( eCamera* cam, int viewer,bool floor,
             se_glFloorTexture();
             se_glFloorColor(flooralpha);
 
+            se_FloorReflection reflection(flooralpha);
             infinity_xy_plane( cam->CameraPos(), cam->CameraDir()); 
 
             /* old way: draw every triangle
@@ -500,6 +843,7 @@ void eGrid::display_simple( eCamera* cam, int viewer,bool floor,
             */
 
             break;
+        }
 
         case rFLOOR_TWOTEXTURE:
             se_glFloorColor(flooralpha);

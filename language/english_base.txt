@@ -701,6 +701,10 @@ camera_in_max_focus_distance_help     This, multiplied by the current speed, det
 #********************************************
 
 cycle_sound_mach_help                   Doppler effect strength; this is the mach number a cyle is moving at if it is driving at CYCLE_SOUND_SPEED
+bloom_help                              Let the bright parts of the scene glow (needs shaders)
+bloom_intensity_help                    Strength of the glow; 0 turns it off
+bloom_threshold_help                    Brightness, 0 to 1, from which a pixel starts to glow
+bloom_radius_help                       Width of the glow, as blur spacing in glow buffer pixels
 sound_self_factor_help                  Amplitude suppression factor for your own engine sound or other looped sounds from game objects
 sound_receiver_size_help                Basic size of the virtual microphone in meters
 sound_receiver_size_distance_help       Additional size of the virtual microphone from the distance of the camera to its target
@@ -955,7 +959,7 @@ max_fps_help                If set to something greater than 0, keep framerate a
 use_displaylists_help		Use display lists for rendering the cycles?
 
 #walls
-simple_trail_help           If set to 1, trails are rendered simplified for better performance.
+simple_trail_help           Simplifies classic trails for better performance. Blacklight ribbons keep their fitted connection in either mode.
 
 #********************************************
 #********************************************
@@ -2359,6 +2363,12 @@ screen_mode_menu		Screen Mode
 screen_mode_menu_help		Screen resolution and stuff.
 
 preferences_menu		Preferences
+graphics_style_text                     Graphics Style
+graphics_style_help                     Switch the bike, arena and light ribbons. The choice is saved; resolution and frame rate stay unchanged.
+graphics_style_classic_text             Classic
+graphics_style_classic_help             Original Armagetron bikes, grid and trails.
+graphics_style_legacy_text              TRON Legacy
+graphics_style_legacy_help              Sculpted black bikes, luminous strips and translucent light ribbons.
 preferences_menu_help		Options that depend more on your personal preferences than on performance issues.
 
 hud_menu                    HUD Options
@@ -2509,7 +2519,7 @@ detail_floor_mirror_ev_text	Everything!
 detail_floor_mirror_ev_help	(Currently no difference to "Objects and Walls".)
 
 detail_simple_trail_text    Simple Trails:
-detail_simple_trail_help    If activated, cycle trails are displayed in a simplified form without the buildup after the cycle.
+detail_simple_trail_help    Removes the buildup from classic trails. Blacklight ribbons stay attached to the bike in either mode.
 
 detail_dither_text		Dithering:
 detail_dither_help		If the colour depth of your current graphic mode does not directly allow the colour that is to be drawn, it is simulated by mixing other colours. Turning it of will improve software rendering performance on some systems; in low resolution modes, turning it off will even improve the visual quality (IMHO).

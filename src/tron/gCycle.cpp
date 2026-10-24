@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "eEventNotification.h"
 #include "gCycle.h"
+#include "gArenaMaterial.h"
 #include "nConfig.h"
 #include "rModel.h"
 //#include "eTess.h"
@@ -68,6 +69,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #ifndef DEDICATED
 #define DONTDOIT
 #include "rRender.h"
+#include "gLightcycleModel.h"
+#include "gLightcycleMaterial.h"
+#include "gLightcycleEffects.h"
+#include "gLightwallMaterial.h"
 #endif
 
 // TODO: get rid of this
@@ -251,6 +256,15 @@ public:
 
     virtual void OnSelect(bool enforce);
     using rSurfaceTexture::OnSelect;
+
+    void SetColor(gRealColor const& color)
+    {
+        if (color_ != color)
+        {
+            color_ = color;
+            Unload();
+        }
+    }
 };
 
 gTextureCycle::gTextureCycle(rSurface const & surface, const gRealColor& color,bool repx,bool repy,bool w)
@@ -2248,12 +2262,25 @@ public:
     }
 #endif
 private:
-    virtual void Render( eCamera const * camera )
+    bool RendersAlpha() const override
+    {
+        // The membrane stays translucent; its depth-tested edges use the early
+        // phase so a different cycle cannot draw rear edges over a front sheet.
+        return sg_blacklightVisuals && !sg_MoviePack();
+    }
+
+    void RenderEarly(eCamera const* camera) override
+    {
+        if (sg_blacklightVisuals && !sg_MoviePack())
+            cycle_->displayList_.RenderEdges(camera, cycle_);
+    }
+
+    void Render(eCamera const* camera) override
     {
         cycle_->displayList_.RenderAll( camera, cycle_ );
     }
 
-    virtual bool Timestep( REAL currentTime )
+    bool Timestep(REAL currentTime) override
     {
         if ( !cycle_ )
         {
@@ -2271,7 +2298,59 @@ private:
 
 static eLegacyWavData cycle_run("moviesounds/engine.wav","sound/cyclrun.wav");
 
+namespace
+{
+#ifndef DEDICATED
+static bool sg_captureModelView = false;
+static tConfItem<bool> sg_captureModelViewConf("CAPTURE_MODEL_VIEW", sg_captureModelView);
+#endif
+void sg_ValidateCycleColours(gRealColor& body, gRealColor& trail)
+{
+    se_MakeColorValid(body.r_, body.g_, body.b_, 1.0f);
+    if (sg_blacklightVisuals && !sg_MoviePack())
+        trail = body;
+    else
+        se_MakeColorValid(trail.r_, trail.g_, trail.b_, .5f);
+#ifndef DEDICATED
+    if (sr_hiddenWindow)
+        std::cerr << "Lightcycle palette: bike=" << body.r_ << ',' << body.g_ << ',' << body.b_
+                  << " trail=" << trail.r_ << ',' << trail.g_ << ',' << trail.b_ << '\n';
+#endif
+}
+
+void sg_RefreshPlayerCycleColor(ePlayerNetID* player)
+{
+    gCycle* cycle = player ? dynamic_cast<gCycle*>(player->Object()) : NULL;
+    // ControlObject can run before the cycle's visual initialization. Its own
+    // initialization below handles that case without touching uninitialized textures.
+    if (!cycle || cycle->GOID() < 0)
+        return;
+    gRealColor body, trail;
+    player->Color(body.r_, body.g_, body.b_);
+    player->TrailColor(trail.r_, trail.g_, trail.b_);
+    sg_ValidateCycleColours(body, trail);
+    if (cycle->color_ == body && cycle->trailColor_ == trail)
+        return;
+    cycle->color_ = body;
+    cycle->trailColor_ = trail;
+#ifndef DEDICATED
+    if (cycle->customTexture)
+        cycle->customTexture->SetColor(body);
+    if (cycle->bodyTex)
+        cycle->bodyTex->SetColor(body);
+    if (cycle->wheelTex)
+        cycle->wheelTex->SetColor(body);
+    // Wall lists contain the colour, so invalidate only on an actual change.
+    rDisplayList::ClearAll();
+#endif
+}
+
+static eCallbackPlayerColor sg_playerCycleColorChanged(&sg_RefreshPlayerCycleColor);
+} // namespace
+
 void gCycle::MyInitAfterCreation(){
+    renderMotion_.Reset();
+    renderAssembly_.Reset();
 #ifndef DEDICATED
     joystick_ = tNEW( gJoystick( this ) );
 #else
@@ -2325,7 +2404,8 @@ void gCycle::MyInitAfterCreation(){
         }
     }
 
-    if (sn_GetNetState()!=nCLIENT){
+    if (sn_GetNetState() != nCLIENT || (se_IndividualPlayerColors() && player))
+    {
         if(!player)
         { // distribute AI colors
             // con << current_ai << ':' << take_ai << ':' << maxmindist <<  "\n\n\n";
@@ -2343,8 +2423,7 @@ void gCycle::MyInitAfterCreation(){
             player->TrailColor(trailColor_.r_,trailColor_.g_,trailColor_.b_);
         }
 
-        se_MakeColorValid( color_.r_, color_.g_, color_.b_, 1.0f );
-        se_MakeColorValid( trailColor_.r_, trailColor_.g_, trailColor_.b_, .5f );
+        sg_ValidateCycleColours(color_, trailColor_);
     }
 
     // load model and texture
@@ -4125,7 +4204,13 @@ static rFileTexture dir_eWall_moviepack(rTextureGroups::TEX_WALL,"moviepack/dir_
 
 static void dir_eWall_select()
 {
-    if (sg_MoviePack()){
+    if (sg_blacklightVisuals && !sg_MoviePack())
+    {
+        static gArenaMaterial material(gArenaMaterial::Trail);
+        material.Select();
+    }
+    else if (sg_MoviePack())
+    {
         TexMatrix();
         IdentityMatrix();
         ScaleMatrix(1/mp_eWall_stretch,1,1);
@@ -4138,10 +4223,7 @@ static void dir_eWall_select()
 }
 
 gCycleWallsDisplayListManager::gCycleWallsDisplayListManager()
-    : wallList_(0)
-    , wallsWithDisplayList_(0)
-    , wallsWithDisplayListMinDistance_(0)
-    , wallsInDisplayList_(0)
+    : wallList_(0), wallsWithDisplayList_(0), wallsWithDisplayListMinDistance_(0), wallsInDisplayList_(0), prepared_(false)
 {
 }
 
@@ -4164,12 +4246,8 @@ bool gCycleWallsDisplayListManager::CannotHaveList( REAL distance, gCycle const 
             ( cycle->ThisWallsLength() > 0 && cycle->GetDistance() - cycle->ThisWallsLength() > distance );
 }
 
-void gCycleWallsDisplayListManager::RenderAllWithDisplayList( eCamera const * camera, gCycle * cycle )
+void gCycleWallsDisplayListManager::PrepareLists(gCycle* cycle)
 {
-    dir_eWall_select();
-
-    glDisable(GL_CULL_FACE);
-    
     gNetPlayerWall * run = 0;
     // transfer walls with display list into their list
 
@@ -4199,21 +4277,25 @@ void gCycleWallsDisplayListManager::RenderAllWithDisplayList( eCamera const * ca
     if ( CannotHaveList( wallsWithDisplayListMinDistance_, cycle ) )
     {
         tailExpired=true;
-        displayList_.Clear(0);
+        Clear(0);
     }
     // check if enough new walls are present to warrant altering the display list
     else if ( wallsWithPossibleDisplayList >= 3 ||
          wallsWithPossibleDisplayList * 5 > wallsInDisplayList_ )
     {
         // yes? Ok, rebuild the list in this case, too
-        displayList_.Clear(0);
+        Clear(0);
     }
 
-    // call display list
-    if ( displayList_.Call() )
+    // Both Blacklight lists share exactly one wall membership. Rebuild both if
+    // either cache is missing; otherwise an old edge list could outlive a changed
+    // membrane list (or a newly inhibited wall could be recorded as static).
+    bool const energy = sg_blacklightVisuals && !sg_MoviePack();
+    if (displayList_.IsSet() && (!energy || edgeDisplayList_.IsSet()))
     {
         return;
     }
+    Clear(0);
 
     // remove and render walls without display list
     run = wallsWithDisplayList_;
@@ -4245,63 +4327,99 @@ void gCycleWallsDisplayListManager::RenderAllWithDisplayList( eCamera const * ca
         }
     }
 
-    if ( !wallsWithDisplayList_ )
+    wallsWithDisplayListMinDistance_ = 1E+30;
+    wallsInDisplayList_ = 0;
+    run = wallsWithDisplayList_;
+    while (run)
     {
-        return;
+        wallsWithDisplayListMinDistance_ = std::min(wallsWithDisplayListMinDistance_, run->BegPos());
+        ++wallsInDisplayList_;
+        run = run->Next();
     }
-
-    // fill display list
-    rDisplayListFiller filler( displayList_ );
-
-    if ( rDisplayList::IsRecording() )
-    {
-        wallsWithDisplayListMinDistance_ = 1E+30;
-        wallsInDisplayList_ = 0;
-
-        // bookkeeping of walls in the display list
-        run = wallsWithDisplayList_;
-        while( run )
-        {
-            gNetPlayerWall * next = run->Next();
-            if ( run->BegPos() < wallsWithDisplayListMinDistance_ )
-            {
-                wallsWithDisplayListMinDistance_ = run->BegPos();
-            }
-            wallsInDisplayList_++;
-            run = next;
-        }
-    }
-
-    // render walls with display list
-    RenderAll( camera, cycle, wallsWithDisplayList_ );
 }
 
-void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * cycle, gNetPlayerWall * list )
+void gCycleWallsDisplayListManager::RenderAllWithDisplayList(eCamera const* camera, gCycle* cycle, RenderPass pass)
+{
+    dir_eWall_select();
+    glDisable(GL_CULL_FACE);
+    if (!wallsWithDisplayList_)
+        return;
+    rDisplayList& cache = pass == EdgePass ? edgeDisplayList_ : displayList_;
+    if (cache.Call())
+        return;
+    rDisplayListFiller filler(cache);
+
+    // render walls with display list
+    RenderAll(camera, cycle, wallsWithDisplayList_, pass);
+}
+
+void gCycleWallsDisplayListManager::RenderAll(eCamera const* camera, gCycle* cycle, gNetPlayerWall* list, RenderPass pass)
 {
     if( !list )
     {
         return;
     }
 
-    // first, render all lines
-    sr_DepthOffset(true);
-    if ( rTextureGroups::TextureMode[rTextureGroups::TEX_WALL] != 0 )
-        glDisable(GL_TEXTURE_2D);
-    
-    gNetPlayerWall * run = list;
-    while( run )
+    bool const energy = sg_blacklightVisuals && !sg_MoviePack();
+    if (energy)
     {
-        gNetPlayerWall * next = run->Next();
-        run->RenderList( true, gNetPlayerWall::gWallRenderMode_Lines );
-        run = next;
+        RenderEnd();
+        glDisable(GL_LIGHTING);
+        glDisable(GL_ALPHA_TEST);
+        glEnable(GL_BLEND);
+        // The shader supplies premultiplied colour. The fixed-function path
+        // supplies straight colour; both preserve same-hue overlaps.
+        glBlendFunc(gLightwallMaterial::IsActive() ? GL_ONE : GL_SRC_ALPHA,
+                    GL_ONE_MINUS_SRC_ALPHA);
+        glDepthMask(GL_TRUE);
+        glDisable(GL_LINE_SMOOTH);
+        glShadeModel(GL_SMOOTH);
     }
 
-    RenderEnd();
+    if (pass != MembranePass)
+    {
+        // All cycles' crisp edges are drawn in the early phase, before any
+        // membrane can attenuate them. Classic retains its combined pass.
+        sr_DepthOffset(true);
+        if (energy || rTextureGroups::TextureMode[rTextureGroups::TEX_WALL] != 0)
+            glDisable(GL_TEXTURE_2D);
+        if (energy)
+            glLineWidth(std::max(1.f, sr_screenHeight / 1000.f));
+        gNetPlayerWall* run = list;
+        while (run)
+        {
+            gNetPlayerWall* next = run->Next();
+            if (run->BegPos() + EPS < run->EndPos())
+                run->RenderList(true, gNetPlayerWall::gWallRenderMode_Lines);
+            run = next;
+        }
+
+        RenderEnd();
+        if (energy)
+            glLineWidth(1);
+    }
     sr_DepthOffset(false);
-    if ( rTextureGroups::TextureMode[rTextureGroups::TEX_WALL] != 0 )
+    if (pass == EdgePass)
+        return;
+    if (energy)
+    {
+        if (rTextureGroups::TextureMode[rTextureGroups::TEX_WALL] > 0)
+            glEnable(GL_TEXTURE_2D);
+        else
+            glDisable(GL_TEXTURE_2D);
+    }
+    else if (rTextureGroups::TextureMode[rTextureGroups::TEX_WALL] != 0)
         glEnable(GL_TEXTURE_2D);
-    
-    run = list;
+    if (energy)
+    {
+        // A light field must not mask other walls or the bikes behind it.
+        // This state is recorded with the geometry, so cached and new trails
+        // agree without shader uniforms or display-list special cases.
+        glDepthMask(GL_FALSE);
+        glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    }
+
+    gNetPlayerWall* run = list;
     while( run )
     {
         gNetPlayerWall * next = run->Next();
@@ -4312,14 +4430,202 @@ void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * 
     RenderEnd();
 }
 
+void gCycleWallsDisplayListManager::RenderEdges(eCamera const* camera, gCycle* cycle)
+{
+    if (sg_blacklightVisuals && !sg_MoviePack())
+        RenderPassWithState(camera, cycle, EdgePass);
+}
+
 void gCycleWallsDisplayListManager::RenderAll( eCamera const * camera, gCycle * cycle )
 {
-    // render everything you can with a display list
-    RenderAllWithDisplayList( camera, cycle );
+    RenderPassWithState(camera, cycle, sg_blacklightVisuals && !sg_MoviePack() ? MembranePass : AllPass);
+}
+
+void gCycle::UpdateRenderPose()
+{
+    renderMotion_.Update(se_GameTime(), std::atan2(dirDrive.y, dirDrive.x), GetLastTurnTime(), Speed());
+}
+
+void gCycleWallsDisplayListManager::RenderPassWithState(eCamera const* camera, gCycle* cycle, RenderPass pass)
+{
+    bool const energy = sg_blacklightVisuals && !sg_MoviePack();
+    bool const textured = rTextureGroups::TextureMode[rTextureGroups::TEX_WALL] > 0;
+    static bool previousEnergy = energy;
+    static bool previousTextured = textured;
+    if (previousEnergy != energy || (energy && previousTextured != textured))
+    {
+        // Material and blend commands are cached alongside the wall vertices.
+        // Switching looks must not replay the previous look's rendering state.
+        rDisplayList::ClearAll();
+        previousEnergy = energy;
+        previousTextured = textured;
+    }
+    struct TrailState
+    {
+        bool active;
+        explicit TrailState(bool energy) : active(energy)
+        {
+            if (active)
+            {
+                RenderEnd();
+                glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |
+                             GL_LINE_BIT | GL_CURRENT_BIT | GL_TEXTURE_BIT |
+                             GL_POLYGON_BIT | GL_LIGHTING_BIT);
+            }
+        }
+        ~TrailState()
+        {
+            if (active)
+            {
+                RenderEnd();
+                glPopAttrib();
+            }
+        }
+    } state(energy);
+
+    // Dynamic uniforms are set once per cycle, outside its cached wall lists.
+    if (energy)
+        cycle->UpdateRenderPose();
+    eCoord facing(std::cos(cycle->renderMotion_.Yaw()), std::sin(cycle->renderMotion_.Yaw()));
+    REAL modelScale = .5f * sg_LightcycleScale();
+    REAL rearDistance = modelScale * (1.5f - gLightcycleModel::RearEmitterX());
+    eCoord emitter = cycle->PredictPosition() - facing * rearDistance +
+                     eCoord(cycle->renderMotion_.VisualOffsetX(), cycle->renderMotion_.VisualOffsetY());
+    gLightwallMaterial::Scope flow(energy && textured,
+                                   se_GameTime(), cycle->GetDistance() / 2.5f, emitter.x, emitter.y, facing.x, facing.y, modelScale,
+                                   gLightcycleModel::RearAxle - gLightcycleModel::RearEmitterX(), gLightcycleModel::ModelWheelRadius(0), cycle->renderMotion_.Bank());
+    bool const premultiplied = gLightwallMaterial::IsActive();
+    static bool previousPremultiplied = premultiplied;
+    if (previousPremultiplied != premultiplied)
+    {
+        // Cached GL blend commands must follow shader success/fallback and
+        // context changes, rather than replaying the other colour convention.
+        rDisplayList::ClearAll();
+        previousPremultiplied = premultiplied;
+    }
+
+    // Membership is prepared once per view by the edge phase. If drawing an
+    // animated edge invalidates it, the membrane phase prepares it again safely.
+    if (pass != MembranePass || !prepared_)
+        PrepareLists(cycle);
+    prepared_ = pass == EdgePass;
+
+    // Each phase retains its own cache; no membrane is redrawn in the edge pass.
+    RenderAllWithDisplayList(camera, cycle, pass);
 
     // then, render the rest
-    RenderAll( camera, cycle, wallList_ );
+    RenderAll(camera, cycle, wallList_, pass);
 }
+
+namespace
+{
+void LightcycleGroundLight(gRealColor const& colour, float assembly)
+{
+    RenderEnd();
+    glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |
+                 GL_CURRENT_BIT | GL_TEXTURE_BIT | GL_POLYGON_BIT | GL_LIGHTING_BIT);
+#ifdef HAVE_GLEW
+    GLint oldProgram = 0;
+    if (GLEW_VERSION_2_0)
+    {
+        glGetIntegerv(GL_CURRENT_PROGRAM, &oldProgram);
+        glUseProgram(0);
+    }
+#endif
+    glDisable(GL_LIGHTING);
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_ALPHA_TEST);
+    glDisable(GL_CULL_FACE);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDepthMask(GL_FALSE);
+    glDepthFunc(GL_LEQUAL);
+    glShadeModel(GL_SMOOTH);
+
+    // Fit contact occlusion to the actual axles and chassis. This replaces the
+    // old bike's rectangular shadow; it follows visual yaw without banking off
+    // the floor. Fade it with assembly so no full-bike shadow precedes the bike.
+    auto contact = [&](float x, float radiusX, float radiusY, float opacity)
+    {
+        for (int band = 0; band < 6; ++band)
+        {
+            float inner = band / 6.f, outer = (band + 1) / 6.f;
+            glBegin(GL_QUAD_STRIP);
+            for (int i = 0; i <= 40; ++i)
+            {
+                float a = i * (2.f * M_PI / 40.f), c = std::cos(a), s = std::sin(a);
+                auto vertex = [&](float radius)
+                {
+                    float fade = 1.f - radius * radius;
+                    glColor4f(0, 0, 0, opacity * assembly * fade * fade);
+                    glVertex3f(x + radiusX * radius * c, radiusY * radius * s, .010f);
+                };
+                vertex(inner);
+                vertex(outer);
+            }
+            glEnd();
+        }
+    };
+    contact(.05f, 1.65f, .58f, .25f);
+    contact(gLightcycleModel::RearAxle, .52f, .58f, .64f);
+    contact(gLightcycleModel::FrontAxle, .52f, .58f, .64f);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+
+    // Smooth local pools, strongest at the wheels and falling to zero before
+    // they reach the next cycle. They follow heading but stay on the ground
+    // when the visual bike leans into a turn.
+    auto pool = [&](float x, float radiusX, float radiusY, float power)
+    {
+        auto energy = [power, assembly](float r)
+        { return power * assembly * std::exp(-4.f * r * r) * (1.f - r * r); };
+        for (int band = 0; band < 6; ++band)
+        {
+            float inner = band / 6.f, outer = (band + 1) / 6.f;
+            glBegin(GL_QUAD_STRIP);
+            for (int i = 0; i <= 48; ++i)
+            {
+                float a = i * (2.f * M_PI / 48.f), c = std::cos(a), s = std::sin(a);
+                glColor4f(colour.r_, colour.g_, colour.b_, energy(inner));
+                glVertex3f(x + radiusX * inner * c, radiusY * inner * s, .014f);
+                glColor4f(colour.r_, colour.g_, colour.b_, energy(outer));
+                glVertex3f(x + radiusX * outer * c, radiusY * outer * s, .014f);
+            }
+            glEnd();
+        }
+    };
+    pool(gLightcycleModel::RearAxle, 1.25f, .95f, .055f);
+    pool(gLightcycleModel::FrontAxle, 1.25f, .95f, .055f);
+    pool(.15f, 1.55f, .78f, .015f);
+
+    // The white nose lamps project a short, soft cone onto the polished floor.
+    // This is local illumination; it does not blur the scene or HUD.
+    auto beamVertex = [assembly](float u, float v)
+    {
+        float width = .24f + u * .90f;
+        float fade = (1.f - u) * (1.f - u) * std::exp(-2.5f * u);
+        fade *= std::min(1.f, u * 18.f) * (1.f - v * v) * (1.f - v * v);
+        glColor4f(.68f, .88f, 1.f, .12f * fade * assembly);
+        glVertex3f(gLightcycleModel::FrontAxle + .62f + u * 6.f, v * width, .016f);
+    };
+    for (int row = 0; row < 20; ++row)
+    {
+        float u0 = row / 20.f, u1 = (row + 1) / 20.f;
+        glBegin(GL_QUAD_STRIP);
+        for (int col = 0; col <= 16; ++col)
+        {
+            float v = -1.f + col / 8.f;
+            beamVertex(u0, v);
+            beamVertex(u1, v);
+        }
+        glEnd();
+    }
+#ifdef HAVE_GLEW
+    if (GLEW_VERSION_2_0)
+        glUseProgram(oldProgram);
+#endif
+    glPopAttrib();
+}
+} // namespace
 
 void gCycle::Render(const eCamera *cam){
     /*
@@ -4382,6 +4688,17 @@ void gCycle::Render(const eCamera *cam){
         	   } */
 #endif
 
+        bool const blacklightCycle = sg_blacklightVisuals && !mp;
+        eCoord modelDirection = dir;
+        REAL modelSkew = skew;
+        if (blacklightCycle)
+        {
+            UpdateRenderPose();
+            modelDirection = eCoord(std::cos(renderMotion_.Yaw()), std::sin(renderMotion_.Yaw()));
+            modelSkew = std::tan(renderMotion_.Bank());
+        }
+        else
+            renderMotion_.Reset();
         GLfloat color[4]={1,1,1,1};
         static GLfloat lposa[4] = { 320, 240, 200,0};
         static GLfloat lposb[4] = { -240, -100, 200,0};
@@ -4400,25 +4717,41 @@ void gCycle::Render(const eCamera *cam){
 
 
         ModelMatrix();
+        GLfloat cycleWorldToView[16];
+        glGetFloatv(GL_MODELVIEW_MATRIX, cycleWorldToView);
         glPushMatrix();
         eCoord p = PredictPosition();
+        if (blacklightCycle)
+            p += eCoord(renderMotion_.VisualOffsetX(), renderMotion_.VisualOffsetY());
         glTranslatef(p.x,p.y,0);
-        glScalef(.5f,.5f,.5f);
+        REAL const modelScale = .5f * (blacklightCycle ? sg_LightcycleScale() : 1);
+        glScalef(modelScale, modelScale, modelScale);
 
-
-        eCoord ske(1,skew);
+        eCoord ske(1, modelSkew);
         ske=ske*(1/sqrt(ske.NormSquared()));
 
-        GLfloat m[4][4]={{dir.x,dir.y,0,0},
-                         {-dir.y,dir.x,0,0},
-                         {0,0,1,0},
-                         {0,0,0,1}};
+        GLfloat m[4][4] = {{modelDirection.x, modelDirection.y, 0, 0},
+                           {-modelDirection.y, modelDirection.x, 0, 0},
+                           {0, 0, 1, 0},
+                           {0, 0, 0, 1}};
         glMultMatrixf(&m[0][0]);
 
         glPushMatrix();
         //glTranslatef(-1.84,0,0);
         if (!mp)
             glTranslatef(-1.5,0,0);
+
+        // Round countdown assembles the first bike; later respawns use their own
+        // age. First-spawn invulnerability uses a sentinel and is not an age.
+        REAL const actualBirthAge = std::min(REAL(se_GameTime() + 1.25f), REAL(se_GameTime() - spawnTime_));
+        REAL const visualBirthAge = renderAssembly_.Sample(se_GameTime(), actualBirthAge);
+        if (blacklightCycle && !blinking && visualBirthAge >= 0)
+        {
+            if (!cam || cam->RenderingMain())
+                LightcycleGroundLight(color_, std::max(0.f, std::min(1.f, float(visualBirthAge / 1.25f))));
+            gLightcycleEffects::Render(color_.r_, color_.g_, color_.b_, se_GameTime(), Speed(),
+                                       GetBraking() != 0, renderMotion_.Bank(), visualBirthAge);
+        }
 
         glPushMatrix();
 
@@ -4461,37 +4794,69 @@ void gCycle::Render(const eCamera *cam){
 
             if ( !blinking )
             {
-                bodyTex->Select();
-                body->Render();
+                if (blacklightCycle)
+                {
+                    RenderEnd();
+                    // Opt-in capture metadata permits an exact Blender camera
+                    // comparison without changing the player's camera settings.
+                    static bool modelViewReported = false;
+                    if (sr_hiddenWindow && sg_captureModelView && !modelViewReported && se_GameTime() > 2 && (!cam || cam->RenderingMain()) && Player() && Player()->IsHuman() && Owner() == sn_myNetID)
+                    {
+                        GLfloat view[16], projection[16];
+                        glGetFloatv(GL_MODELVIEW_MATRIX, view);
+                        glGetFloatv(GL_PROJECTION_MATRIX, projection);
+                        std::cerr << "Capture model view:";
+                        for (float value : view)
+                            std::cerr << ' ' << value;
+                        std::cerr << "\nCapture model projection:";
+                        for (float value : projection)
+                            std::cerr << ' ' << value;
+                        std::cerr << '\n';
+                        modelViewReported = true;
+                    }
+                    gLightcycleMaterial::Scope material(color_.r_, color_.g_, color_.b_,
+                                                        gLightcycleModel::RearAxle, gLightcycleModel::FrontAxle, gLightcycleModel::WheelRadius,
+                                                        se_GameTime(), std::max(REAL(0), std::min(REAL(1), Speed() / 60.f)),
+                                                        std::max(REAL(0), std::min(REAL(1), visualBirthAge / 1.25f)), cycleWorldToView);
+                    REAL rearAngle = gLightcycleMotion::WheelAngle(GetDistance(),
+                                                                   gLightcycleModel::ModelWheelRadius(0), sg_LightcycleScale());
+                    REAL frontAngle = gLightcycleMotion::WheelAngle(GetDistance(),
+                                                                    gLightcycleModel::ModelWheelRadius(1), sg_LightcycleScale());
+                    gLightcycleModel::Render(color_.r_, color_.g_, color_.b_, rearAngle, frontAngle);
+                }
+                else
+                {
+                    bodyTex->Select();
+                    body->Render();
 
-                wheelTex->Select();
-                
-                glPushMatrix();
-                glTranslatef(0,0,.73);
-                
-                GLfloat mr[4][4]={{rotationRearWheel.x,0,rotationRearWheel.y,0},
-                                  {0,1,0,0},
-                                  {-rotationRearWheel.y,0,rotationRearWheel.x,0},
-                                  {0,0,0,1}};
-                
-                
-                glMultMatrixf(&mr[0][0]);
-                
-                rear->Render();
-                glPopMatrix();
+                    wheelTex->Select();
 
-                glPushMatrix();
-                glTranslatef(1.84,0,.43);
+                    glPushMatrix();
+                    glTranslatef(0, 0, .73);
 
-                GLfloat mf[4][4]={{rotationFrontWheel.x,0,rotationFrontWheel.y,0},
-                                  {0,1,0,0},
-                                  {-rotationFrontWheel.y,0,rotationFrontWheel.x,0},
-                                  {0,0,0,1}};
-                
-                glMultMatrixf(&mf[0][0]);
+                    GLfloat mr[4][4] = {{rotationRearWheel.x, 0, rotationRearWheel.y, 0},
+                                        {0, 1, 0, 0},
+                                        {-rotationRearWheel.y, 0, rotationRearWheel.x, 0},
+                                        {0, 0, 0, 1}};
 
-                front->Render();
-                glPopMatrix();
+                    glMultMatrixf(&mr[0][0]);
+
+                    rear->Render();
+                    glPopMatrix();
+
+                    glPushMatrix();
+                    glTranslatef(1.84, 0, .43);
+
+                    GLfloat mf[4][4] = {{rotationFrontWheel.x, 0, rotationFrontWheel.y, 0},
+                                        {0, 1, 0, 0},
+                                        {-rotationFrontWheel.y, 0, rotationFrontWheel.x, 0},
+                                        {0, 0, 0, 1}};
+
+                    glMultMatrixf(&mf[0][0]);
+
+                    front->Render();
+                    glPopMatrix();
+                }
             }
             
             glPopMatrix();
@@ -4512,7 +4877,6 @@ void gCycle::Render(const eCamera *cam){
         glDisable(GL_LIGHT0);
         glDisable(GL_LIGHT1);
         glDisable(GL_LIGHTING);
-
         //glDisable(GL_TEXTURE);
         glDisable(GL_TEXTURE_2D);
         glColor3f(1,1,1);
@@ -4668,7 +5032,6 @@ void gCycle::Render(const eCamera *cam){
         // Name
         RenderName( cam );
 
-
         // shadow:
 
         sr_DepthOffset(true);
@@ -4678,7 +5041,8 @@ void gCycle::Render(const eCamera *cam){
 
         glEnable(GL_CULL_FACE);
 
-        if(!blinking && sr_floorDetail>rFLOOR_GRID && rTextureGroups::TextureMode[rTextureGroups::TEX_FLOOR]>0 && sr_alphaBlend){
+        if (!blacklightCycle && !blinking && sr_floorDetail > rFLOOR_GRID && rTextureGroups::TextureMode[rTextureGroups::TEX_FLOOR] > 0 && sr_alphaBlend)
+        {
             glColor3f(0,0,0);
             cycle_shad.Select();
             BeginQuads();
@@ -4916,7 +5280,11 @@ void gCycle::RenderName( const eCamera* cam ) {
             name << *this->player;
         else
             name << this->player->GetName();
+        // A white plate behind a dark name glares over the black arena; the
+        // blacklight look lifts the dark colour to a readable tint instead.
+        rTextField::SetDarkBackdrop(!sg_blacklightVisuals || sg_MoviePack());
         DisplayText(0, 0, rCHEIGHT_NORMAL, name, sr_fontCycleLabel, 0, 0);
+        rTextField::SetDarkBackdrop(true);
         rTextField::SetDefaultColor(tColor(1,1,1));
     }
     static cCockpit cycleCockpit(cCockpit::VIEWPORT_CYCLE);
@@ -5028,6 +5396,15 @@ eCoord gCycle::CamDir() const
     }
 }
 
+eCoord gCycle::CamDirTarget() const
+{
+    // Cameras that own their smoothing follow this stable heading, without
+    // inheriting the speed-dependent visual direction used by older modes.
+    if (joystick_ && joystick_->cameraDirection_.NormSquared() > .25)
+        return joystick_->cameraDirection_;
+    return dirDrive;
+}
+
 eCoord gCycle::Direction() const
 {
     return gCycleMovement::Direction();
@@ -5103,8 +5480,15 @@ gCycle::gCycle( Game::CycleSync const & sync, nSenderInfo const & sender )
     color_.ReadSync( sync.color() );
     trailColor_ = color_;
 
-    se_MakeColorValid( color_.r_, color_.g_, color_.b_, 1.0f );
-    se_MakeColorValid( trailColor_.r_, trailColor_.g_, trailColor_.b_, .5f );
+    if (se_IndividualPlayerColors() && player)
+    {
+        // Native clients can display each rider's RGB even when the server
+        // sends a team-mixed cycle colour. Missing players retain the sync fallback.
+        player->Color(color_.r_, color_.g_, color_.b_);
+        player->TrailColor(trailColor_.r_, trailColor_.g_, trailColor_.b_);
+    }
+
+    sg_ValidateCycleColours(color_, trailColor_);
 
     // set last time so that the first read_sync will not think this is old
     lastTimeAnim = lastTime = -EPS;

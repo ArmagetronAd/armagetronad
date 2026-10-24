@@ -117,6 +117,10 @@ Tests are compiled as separate programs that link against the relevant project l
   - Validates prefix formatting
   - Ensures proper handling of special characters
 
+## Legacy renderer tests
+
+`gLightwallAttachment_test.cpp` covers collapsed connections, rapid direction changes and constant ribbon height. `gLightcycleMotion_test.cpp`, `eCameraMotion_test.cpp` and `gImpactAnimation_test.cpp` cover deterministic presentation sampling. `gLightcycleAsset_test.cpp` reads the shipped asset and verifies transactional rejection of malformed data. `gGraphicsStyle_test.cpp` verifies saved-choice precedence and preservation of display quality without writing configuration.
+
 ## Notes from Humans
 ### MAIN GUARDRAIL: The AI Agents keep out of this section.
 

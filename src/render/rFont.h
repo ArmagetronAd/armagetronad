@@ -108,6 +108,7 @@ class rTextField{
     tColor color_;               //!< current color
     static tColor defaultColor_; //!< default color
     static tColor blendColor_;   //!< color all other colors are multiplied with
+    static bool darkBackdrop_;   //!< dark text gets a bright plate (else its colour is lifted)
 
     int cursor; // display mode of the cursor; 0: disabled, 1: low, 2: high
     int cursorPos; // position of the cursor (number of FTGL_CHARs to come)
@@ -214,6 +215,7 @@ public:
     static void SetBlendColor( tColor const & blendColor );	//!< Sets color all other colors are multiplied with
     static tColor const & GetBlendColor( void );	//!< Gets color all other colors are multiplied with
     static void GetBlendColor( tColor & blendColor );	//!< Gets color all other colors are multiplied with
+    static void SetDarkBackdrop(bool plate) { darkBackdrop_ = plate; } //!< Bright plate behind dark text, or lift its colour
 
     static float GetTextLength (std::string const &str, float height, bool stripColors=false, bool useNewline=true, float *resultingHeight=0); //!< Predict the dimenstions of a string
     static float GetTextLengthRaw (FTGL_STRING const &str, float height, bool useNewline=true, float *resultingHeight=0); //!< Predict the dimenstions of a string

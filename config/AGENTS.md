@@ -50,3 +50,7 @@ The configuration files use a custom format with `SETTING_NAME value` syntax, su
 - `config_DATA` in Makefile.am lists files to install
 - System-wide defaults can be overridden with `--enable-automakedefaults` or similar options
 - Supports per-user configuration in `~/.armagetronad/` or similar
+
+## Graphics profiles
+
+`graphics_classic.cfg` and `graphics_legacy.cfg` contain appearance settings for the Display Settings selector. Keep resolution, frame limits, anti-aliasing and gameplay settings out of these presets. `GRAPHICS_STYLE` is applied after autoexec so older presets cannot undo an explicit menu choice.

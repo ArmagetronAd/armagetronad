@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 #include "gAIBase.h"
+#include "gStuff.h"
 #include "gArena.h"
 #include "eGrid.h"
 #include "ePath.h"
@@ -1093,6 +1094,12 @@ static REAL rgb_ai[MAXAI_COLOR][3]={
                                        {.5,.5,.5}
                                    };
 
+// Local opponents use the warm spectrum from the Legacy reference against the
+// cyan human rider. These are the players' real colours, so bikes, walls, names
+// and the minimap agree. This palette does not affect the classic presentation.
+static REAL const rgb_lightcycle[MAXAI_COLOR][3] = {
+    {1, .34, .02}, {1, .58, .02}, {1, .16, .015}, {1, .45, .025}, {.90, .23, .02}, {.90, .50, .025}, {.80, .20, .01}, {1, .65, .035}, {1, .40, .04}, {.80, .36, .02}, {1, .54, .035}, {.88, .14, .025}, {.95, .29, .03}};
+
 static nNetObjectDescriptor<gAIPlayer,Game::AIPlayerSync> gAIPlayer_init(330);
 
 nNetObjectDescriptorBase const & gAIPlayer::DoGetDescriptor() const
@@ -1131,6 +1138,7 @@ gAIPlayer::gAIPlayer():
     log       = NULL;
 
     // find a good color
+    REAL const(*palette)[3] = sg_blacklightVisuals ? rgb_lightcycle : rgb_ai;
 
     current_ai=(current_ai+1) % MAXAI_COLOR;
     int take_ai=current_ai;
@@ -1160,10 +1168,10 @@ gAIPlayer::gAIPlayer():
             {
                 se_FloorColor(R, G, B);
             }
-            REAL dist=
-                fabs(R - rgb_ai[try_ai][0])+
-                fabs(G - rgb_ai[try_ai][1])+
-                fabs(B - rgb_ai[try_ai][2]);
+            REAL dist =
+                fabs(R - palette[try_ai][0]) +
+                fabs(G - palette[try_ai][1]) +
+                fabs(B - palette[try_ai][2]);
 
             score+=exp(-dist*dist*4);
 
@@ -1190,11 +1198,9 @@ gAIPlayer::gAIPlayer():
         try_ai = ((try_ai+1) % MAXAI_COLOR);
     }
 
-
-    color.r_ = static_cast<int>(rgb_ai[take_ai][0] * 15);
-    color.g_ = static_cast<int>(rgb_ai[take_ai][1] * 15);
-    color.b_ = static_cast<int>(rgb_ai[take_ai][2] * 15);
-
+    color.r_ = static_cast<int>(palette[take_ai][0] * 15);
+    color.g_ = static_cast<int>(palette[take_ai][1] * 15);
+    color.b_ = static_cast<int>(palette[take_ai][2] * 15);
 
     ping = 0;
     pingCharity = 300;

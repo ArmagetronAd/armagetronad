@@ -26,9 +26,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 #include "gSparks.h"
+#include "gStuff.h"
 #include "eTimer.h"
 #include "rRender.h"
 #include "tRandom.h"
+#include <algorithm>
+#include <cmath>
 
 #ifdef USEPARTICLES
 #include "papi.h"
@@ -157,6 +160,112 @@ void gSpark::Kill(){createTime=lastTime-100000;}
 
 #ifndef DEDICATED
 void gSpark::Render(const eCamera *cam){
+    if (sg_blacklightVisuals && !sg_MoviePack())
+    {
+        REAL age = lastTime - createTime;
+        if (!std::isfinite(age) || age < 0 || age >= .65f)
+            return;
+        REAL fade = 1 - age / .65f;
+        fade *= fade;
+        RenderEnd();
+        glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT |
+                     GL_DEPTH_BUFFER_BIT | GL_TEXTURE_BIT | GL_LINE_BIT |
+                     GL_POLYGON_BIT | GL_LIGHTING_BIT);
+#ifdef HAVE_GLEW
+        GLint program = 0, texture = GL_TEXTURE0;
+        if (GLEW_VERSION_2_0)
+        {
+            glGetIntegerv(GL_CURRENT_PROGRAM, &program);
+            glUseProgram(0);
+        }
+        if (GLEW_VERSION_1_3)
+        {
+            glGetIntegerv(GL_ACTIVE_TEXTURE, &texture);
+            GLint units = 1;
+            glGetIntegerv(GL_MAX_TEXTURE_UNITS, &units);
+            for (GLint unit = 0; unit < units; ++unit)
+            {
+                glActiveTexture(GL_TEXTURE0 + unit);
+                glDisable(GL_TEXTURE_1D);
+                glDisable(GL_TEXTURE_2D);
+                glDisable(GL_TEXTURE_3D);
+                glDisable(GL_TEXTURE_CUBE_MAP);
+            }
+            glActiveTexture(GL_TEXTURE0);
+        }
+        if (GLEW_VERSION_1_4)
+            glBlendEquation(GL_FUNC_ADD);
+#endif
+        glDisable(GL_TEXTURE_1D);
+        glDisable(GL_TEXTURE_2D);
+        glDisable(GL_LIGHTING);
+        glDisable(GL_ALPHA_TEST);
+        glDisable(GL_CULL_FACE);
+        glDisable(GL_LINE_SMOOTH);
+        glEnable(GL_DEPTH_TEST);
+        glDepthMask(GL_FALSE);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+        glShadeModel(GL_SMOOTH);
+        glLineWidth(1.25f);
+#ifndef USEPARTICLES
+        BeginLines();
+        for (int i = 0; i < SPARKS; ++i)
+        {
+            REAL ago = std::max(REAL(0), std::min(REAL(.05f), lastTime - lastBreak[i]));
+            REAL r = i % 2 ? sparkowncolor_r : sparkenemycolor_r;
+            REAL g = i % 2 ? sparkowncolor_g : sparkenemycolor_g;
+            REAL b = i % 2 ? sparkowncolor_b : sparkenemycolor_b;
+            if (white_sparks)
+            {
+                r = 1;
+                g = .88f;
+                b = .62f;
+            }
+            glColor4f(r, g, b, .95f * fade);
+            glVertex3f(x[i].x[0], x[i].x[1], x[i].x[2]);
+            glColor4f(r, g, b, 0);
+            glVertex3f(x[i].x[0] - xDot[i].x[0] * ago * .8f,
+                       x[i].x[1] - xDot[i].x[1] * ago * .8f,
+                       std::max(REAL(.006f), REAL(x[i].x[2] - xDot[i].x[2] * ago * .8f)));
+        }
+#else
+        // Keep optional particle simulation untouched; only a small, bounded
+        // read-only subset supplies its short visual streaks.
+        pCurrentGroup(particle_handle);
+        float* ptr = NULL;
+        size_t stride, pos3, posB3, size3, velocity3, velocityB3, colour3, alpha1, age1;
+        int count = pGetParticlePointer(ptr, stride, pos3, posB3, size3, velocity3, velocityB3, colour3, alpha1, age1);
+        BeginLines();
+        for (int i = 0; i < std::min(count, 16); ++i)
+        {
+            float const* particle = ptr + i * stride;
+            float const* p = particle + pos3;
+            float const* velocity = particle + velocity3;
+            float const* colour = particle + colour3;
+            if (!std::isfinite(p[0]) || !std::isfinite(p[1]) || !std::isfinite(p[2]) ||
+                !std::isfinite(velocity[0]) || !std::isfinite(velocity[1]) || !std::isfinite(velocity[2]) ||
+                (p[0] - pos.x) * (p[0] - pos.x) + (p[1] - pos.y) * (p[1] - pos.y) > 4 || p[2] < 0 || p[2] > 2)
+                continue;
+            float speed = std::sqrt(velocity[0] * velocity[0] + velocity[1] * velocity[1] + velocity[2] * velocity[2]);
+            float tail = std::min(.05f, .12f / std::max(.001f, speed));
+            glColor4f(colour[0], colour[1], colour[2], fade);
+            glVertex3f(p[0], p[1], p[2]);
+            glColor4f(colour[0], colour[1], colour[2], 0);
+            glVertex3f(p[0] - velocity[0] * tail, p[1] - velocity[1] * tail,
+                       std::max(.006f, p[2] - velocity[2] * tail));
+        }
+#endif
+        RenderEnd();
+        glPopAttrib();
+#ifdef HAVE_GLEW
+        if (GLEW_VERSION_2_0)
+            glUseProgram(program);
+        if (GLEW_VERSION_1_3)
+            glActiveTexture(texture);
+#endif
+        return;
+    }
 #ifndef USEPARTICLES
     glBlendFunc(GL_SRC_ALPHA,GL_ONE);
 

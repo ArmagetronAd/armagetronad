@@ -28,16 +28,22 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "gExplosion.h"
 #include "rModel.h"
 #include "rRender.h"
+#include "rScreen.h"
 #include "tInitExit.h"
 #include "gWall.h"
 #include "gCycle.h"
+#include "gImpactAnimation.h"
+#include "gStuff.h"
 #include "nConfig.h"
 #include "eGrid.h"
+#include "eTimer.h"
 #include "eTeam.h"
 #include "tRandom.h"
 #include "tMath.h"
 #include "eLadderLog.h"
 #include "eSoundMixer.h"
+#include <algorithm>
+#include <cmath>
 #ifdef USEPARTICLES
 #include "papi.h"
 #endif
@@ -154,14 +160,25 @@ static void S_Sync( eWall * w )
 }
 */
 
-gExplosion::gExplosion(eGrid *grid, const eCoord &pos,REAL time, gRealColor& color, gCycle * owner )
-        :eReferencableGameObject(grid, pos, eCoord(0,0), NULL, true),
-        createTime(time),
-        expansion(0),
-        listID(-1),
-        owner_(owner)
+gExplosion::gExplosion(eGrid* grid, const eCoord& pos, REAL time, gRealColor& color, gCycle* owner)
+    : eReferencableGameObject(grid, pos, eCoord(0, 0), NULL, true),
+      createTime(time),
+      visualCreateTime_(std::max(time, REAL(se_GameTime()))),
+      expansion(0),
+      listID(-1),
+      owner_(owner)
 {
     radius_ = gCycle::ExplosionRadius() + owner_->Speed() * sg_explosionSpeedFactor;
+    impactDirection_ = owner_->Direction();
+    if (impactDirection_.NormSquared() < .00001f)
+        impactDirection_ = eCoord(1, 0);
+    impactDirection_.Normalize();
+    impactSpeed_ = owner_->Speed();
+#ifndef DEDICATED
+    if (sr_hiddenWindow && sg_blacklightVisuals)
+        std::cerr << "Legacy impact: received_age=" << se_GameTime() - time
+                  << " speed=" << impactSpeed_ << " presentation_start=" << visualCreateTime_ << '\n';
+#endif
     eSoundMixer& mixer = eSoundMixer::GetMixer();
     mixer.PushButton(CYCLE_EXPLOSION, *this, 4.0);
     //std::cout << "explosion sound effect\n";
@@ -353,6 +370,7 @@ eGameObject::ePassEdgeResult gExplosion::PassEdge(const eWall *,REAL ,REAL ,int)
 
 void gExplosion::Kill(){
     createTime=lastTime-100;
+    visualCreateTime_ = createTime;
 }
 
 bool gExplosion::AccountForHole()
@@ -416,7 +434,398 @@ bool sg_crashExplosion = true;
 bool sg_crashExplosionHud = true;
 
 #ifndef DEDICATED
+namespace
+{
+class ExplosionVisualState
+{
+public:
+    explicit ExplosionVisualState(bool world)
+    {
+        RenderEnd();
+        glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT |
+                     GL_DEPTH_BUFFER_BIT | GL_TEXTURE_BIT | GL_LINE_BIT |
+                     GL_POLYGON_BIT | GL_LIGHTING_BIT);
+#ifdef HAVE_GLEW
+        if (GLEW_VERSION_2_0)
+        {
+            glGetIntegerv(GL_CURRENT_PROGRAM, &program_);
+            glUseProgram(0);
+        }
+        if (GLEW_VERSION_1_3)
+        {
+            glGetIntegerv(GL_ACTIVE_TEXTURE, &texture_);
+            GLint units = 1;
+            glGetIntegerv(GL_MAX_TEXTURE_UNITS, &units);
+            for (GLint unit = 0; unit < units; ++unit)
+            {
+                glActiveTexture(GL_TEXTURE0 + unit);
+                glDisable(GL_TEXTURE_1D);
+                glDisable(GL_TEXTURE_2D);
+                glDisable(GL_TEXTURE_3D);
+                glDisable(GL_TEXTURE_CUBE_MAP);
+            }
+            glActiveTexture(GL_TEXTURE0);
+        }
+        if (GLEW_VERSION_1_4)
+            glBlendEquation(GL_FUNC_ADD);
+#endif
+        glDisable(GL_TEXTURE_1D);
+        glDisable(GL_TEXTURE_2D);
+        glDisable(GL_LIGHTING);
+        glDisable(GL_ALPHA_TEST);
+        glDisable(GL_CULL_FACE);
+        glDisable(GL_LINE_SMOOTH);
+        glDisable(GL_POLYGON_OFFSET_FILL);
+        if (world)
+            glEnable(GL_DEPTH_TEST);
+        else
+            glDisable(GL_DEPTH_TEST);
+        glDepthMask(GL_FALSE);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+        glShadeModel(GL_SMOOTH);
+        glLineWidth(1.25f);
+    }
+    ~ExplosionVisualState()
+    {
+        RenderEnd();
+        glPopAttrib();
+#ifdef HAVE_GLEW
+        if (GLEW_VERSION_2_0)
+            glUseProgram(program_);
+        if (GLEW_VERSION_1_3)
+            glActiveTexture(texture_);
+#endif
+    }
+
+private:
+#ifdef HAVE_GLEW
+    GLint program_ = 0, texture_ = GL_TEXTURE0;
+#endif
+};
+} // namespace
+
 void gExplosion::Render(const eCamera *cam){
+    if (sg_blacklightVisuals && !sg_MoviePack())
+    {
+        REAL age = se_GameTime() - visualCreateTime_;
+        if (!sg_crashExplosion || !std::isfinite(age) || age < 0 || age >= gImpactAnimation::Duration)
+            return;
+        ExplosionVisualState state(true);
+        REAL r = explosion_r, g = explosion_g, b = explosion_b;
+        clamp01(r);
+        clamp01(g);
+        clamp01(b);
+
+        // A very short, local ion flash replaces the arena-spanning spokes.
+        // World-space planes also work under the mirrored scene transform.
+        if (age < .30f)
+        {
+            REAL fade = 1 - age / .30f;
+            REAL radius = .18f + .95f * (1 - std::exp(-age * 17.f));
+            for (int plane = 0; plane < 3; ++plane)
+            {
+                BeginTriangleFan();
+                glColor4f(r * .32f + .68f, g * .32f + .68f, b * .32f + .68f, .95f * fade);
+                glVertex3f(pos.x, pos.y, .55f);
+                glColor4f(r, g, b, 0);
+                for (int point = 0; point <= 16; ++point)
+                {
+                    REAL angle = point * (6.2831853f / 16);
+                    REAL a = radius * std::cos(angle), c = radius * std::sin(angle);
+                    glVertex3f(pos.x + (plane == 2 ? 0 : a), pos.y + (plane == 0 ? c : plane == 2 ? a
+                                                                                                  : 0),
+                               plane == 0 ? .55f : std::max(REAL(.012f), REAL(.55f + c)));
+                }
+                RenderEnd();
+            }
+        }
+
+        // The upright contact front expands across the struck wall before the
+        // shell fragments disperse. The floor pass reflects this same geometry.
+        if (age < .42f)
+        {
+            REAL u = age / .42f, radius = .12f + 1.85f * std::sqrt(u);
+            REAL fade = (1 - u) * (1 - u);
+            eCoord side(-impactDirection_.y, impactDirection_.x);
+            BeginTriangleStrip();
+            for (int i = 0; i <= 96; ++i)
+            {
+                REAL a = i * (6.2831853f / 96), c = std::cos(a), s = std::sin(a);
+                glColor4f(r * .5f + .5f, g * .5f + .5f, b * .5f + .5f, .60f * fade);
+                glVertex3f(pos.x + side.x * radius * c, pos.y + side.y * radius * c, .55f + radius * s);
+                glColor4f(r, g, b, 0);
+                glVertex3f(pos.x + side.x * (radius + .16f) * c, pos.y + side.y * (radius + .16f) * c, .55f + (radius + .16f) * s);
+            }
+            RenderEnd();
+        }
+
+        // A shallow optical shock front spreads across the glass, then gives
+        // way to the fragments. Its radius never represents collision damage.
+        if (age < .52f)
+        {
+            REAL u = age / .52f, fade = (1 - u) * (1 - u);
+            REAL radius = .16f + 2.6f * std::sqrt(u);
+            BeginTriangleStrip();
+            for (int i = 0; i <= 80; ++i)
+            {
+                REAL a = i * (6.2831853f / 80), c = std::cos(a), s = std::sin(a);
+                glColor4f(r * .7f + .3f, g * .7f + .3f, b * .7f + .3f, .40f * fade);
+                glVertex3f(pos.x + radius * c, pos.y + radius * s, .022f);
+                glColor4f(r, g, b, 0);
+                glVertex3f(pos.x + (radius + .09f + .14f * u) * c, pos.y + (radius + .09f + .14f * u) * s, .022f);
+            }
+            RenderEnd();
+        }
+
+        // The body breaks into solid, tumbling facets rather than long rays.
+        // Hashes are local constants: adding a visual never advances game RNG.
+        // Sampling from absolute age makes both render passes and all FPS agree.
+        eCoord heading = impactDirection_;
+        REAL modelScale = .5f * sg_LightcycleScale();
+        gImpactAnimation::RimFragment rims[gImpactAnimation::RimFragmentCount];
+        REAL rimRotation[gImpactAnimation::RimFragmentCount][6];
+        REAL const halfSpan = .24085f;
+        REAL phaseCos[7], phaseSin[7];
+        for (int i = 0; i <= 6; ++i)
+        {
+            REAL phase = -halfSpan + 2 * halfSpan * i / 6;
+            phaseCos[i] = std::cos(phase);
+            phaseSin[i] = std::sin(phase);
+        }
+        for (unsigned i = 0; i < gImpactAnimation::RimFragmentCount; ++i)
+        {
+            auto& f = rims[i];
+            f = gImpactAnimation::SampleRim(i, age, impactSpeed_, modelScale);
+            rimRotation[i][0] = std::cos(f.angle);
+            rimRotation[i][1] = std::sin(f.angle);
+            rimRotation[i][2] = std::cos(f.pitch);
+            rimRotation[i][3] = std::sin(f.pitch);
+            rimRotation[i][4] = std::cos(f.roll);
+            rimRotation[i][5] = std::sin(f.roll);
+        }
+        auto rimVertex = [&](unsigned index, int point, REAL radialOffset, REAL depth)
+        {
+            auto const& piece = rims[index];
+            REAL const* rotation = rimRotation[index];
+            REAL ca = rotation[0], sa = rotation[1], cp = rotation[2], sp = rotation[3], cr = rotation[4], sr = rotation[5];
+            REAL radius = piece.radius + radialOffset;
+            REAL x = radius * (ca * phaseCos[point] - sa * phaseSin[point]) - piece.radius * ca;
+            REAL z = radius * (sa * phaseCos[point] + ca * phaseSin[point]) - piece.radius * sa;
+            REAL forward = x * cp + z * sp, up = -x * sp + z * cp;
+            REAL across = depth * cr - up * sr;
+            up = depth * sr + up * cr;
+            forward += piece.along;
+            across += piece.across;
+            glVertex3f(pos.x + heading.x * forward - heading.y * across,
+                       pos.y + heading.y * forward + heading.x * across,
+                       std::max(REAL(.012f), REAL(piece.height + up)));
+        };
+        struct Fragment
+        {
+            REAL x, y, z, sizeX, sizeY, sizeZ, cs, sn, fade;
+            unsigned index;
+        } fragments[gImpactAnimation::FragmentCount];
+        unsigned fragmentCount = 0;
+        for (unsigned i = 0; i < gImpactAnimation::FragmentCount; ++i)
+        {
+            gImpactAnimation::Fragment f = gImpactAnimation::Sample(i, age, impactSpeed_);
+            if (!f.Active())
+                continue;
+            REAL x = pos.x + heading.x * f.along - heading.y * f.across;
+            REAL y = pos.y + heading.y * f.along + heading.x * f.across;
+            fragments[fragmentCount++] = {x, y, f.height, f.sizeX, f.sizeY, f.sizeZ,
+                                          std::cos(f.spin), std::sin(f.spin), f.fade, i};
+        }
+        // All six faces wind outwards. The renderer already reverses its front
+        // face for the mirrored floor pass, so the same solid mesh works there.
+        static float const corners[8][3] = {
+            {-1, -1, -1}, {1, -1, -1}, {1, 1, -1}, {-1, 1, -1}, {-1, -1, 1}, {1, -1, 1}, {1, 1, 1}, {-1, 1, 1}};
+        static unsigned const faces[6][4] = {
+            {0, 4, 7, 3}, {1, 2, 6, 5}, {0, 1, 5, 4}, {3, 7, 6, 2}, {4, 5, 6, 7}, {0, 3, 2, 1}};
+        static float const normals[6][3] = {
+            {-1, 0, 0}, {1, 0, 0}, {0, -1, 0}, {0, 1, 0}, {0, 0, 1}, {0, 0, -1}};
+        static unsigned const edges[12][2] = {
+            {0, 1}, {1, 2}, {2, 3}, {3, 0}, {4, 5}, {5, 6}, {6, 7}, {7, 4}, {0, 4}, {1, 5}, {2, 6}, {3, 7}};
+        auto rotate = [](Fragment const& piece, float a, float c, float d, REAL& x, REAL& y, REAL& z)
+        {
+            REAL v = c * piece.cs - d * piece.sn;
+            x = a * piece.cs - v * piece.sn;
+            y = a * piece.sn + v * piece.cs;
+            z = c * piece.sn + d * piece.cs;
+        };
+        auto vertex = [&](Fragment const& piece, unsigned corner)
+        {
+            REAL x, y, z;
+            rotate(piece, corners[corner][0] * piece.sizeX, corners[corner][1] * piece.sizeY,
+                   corners[corner][2] * piece.sizeZ, x, y, z);
+            glVertex3f(piece.x + x, piece.y + y, piece.z + z);
+        };
+        glDisable(GL_BLEND);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+        glDepthMask(GL_TRUE);
+        glDepthFunc(GL_LEQUAL);
+        glShadeModel(GL_FLAT);
+        // Bias solid faces slightly behind their edges; the luminous pass keeps
+        // depth testing and cannot shine through the back of an opaque fragment.
+        glEnable(GL_POLYGON_OFFSET_FILL);
+        glPolygonOffset(1.f, 1.f);
+        BeginQuads();
+        for (unsigned i = 0; i < fragmentCount; ++i)
+        {
+            Fragment const& piece = fragments[i];
+            for (unsigned face = 0; face < 6; ++face)
+            {
+                REAL nx, ny, nz;
+                rotate(piece, normals[face][0], normals[face][1], normals[face][2], nx, ny, nz);
+                REAL key = std::max(REAL(0), REAL(nx * .45f - ny * .32f + nz * .83f));
+                REAL fill = std::max(REAL(0), REAL(-nx * .64f + ny * .31f + nz * .70f));
+                REAL shade = (.22f + .65f * key + .18f * fill) * (.35f + .65f * piece.fade);
+                REAL ember = (piece.index % 5 == 0 ? .65f : .18f) * piece.fade;
+                glColor4f((.055f + r * (.09f + ember)) * shade,
+                          (.065f + g * (.09f + ember)) * shade,
+                          (.080f + b * (.09f + ember)) * shade, 1);
+                for (unsigned corner = 0; corner < 4; ++corner)
+                    vertex(piece, faces[face][corner]);
+            }
+        }
+        RenderEnd();
+
+        // Curved shell pieces keep the wheel silhouette briefly recognizable.
+        // Their solid bands occlude the far-side light, including in the mirror.
+        glDisable(GL_CULL_FACE);
+        BeginQuads();
+        for (unsigned i = 0; i < gImpactAnimation::RimFragmentCount; ++i)
+        {
+            auto const& piece = rims[i];
+            if (!piece.Active())
+                continue;
+            REAL width = .050f * modelScale, depth = .018f * modelScale;
+            for (int section = 0; section < 6; ++section)
+            {
+                for (int side = -1; side <= 1; side += 2)
+                {
+                    REAL shade = side > 0 ? .80f : .55f;
+                    glColor4f((.025f + r * .055f * piece.fade) * shade,
+                              (.035f + g * .055f * piece.fade) * shade,
+                              (.045f + b * .055f * piece.fade) * shade, 1);
+                    rimVertex(i, section, -width, side * depth);
+                    rimVertex(i, section + 1, -width, side * depth);
+                    rimVertex(i, section + 1, width, side * depth);
+                    rimVertex(i, section, width, side * depth);
+                    glColor4f(.035f, .046f, .055f, 1);
+                    rimVertex(i, section, side * width, -depth);
+                    rimVertex(i, section + 1, side * width, -depth);
+                    rimVertex(i, section + 1, side * width, depth);
+                    rimVertex(i, section, side * width, depth);
+                }
+            }
+            for (int end = 0; end <= 6; end += 6)
+            {
+                glColor4f(.025f, .033f, .040f, 1);
+                rimVertex(i, end, -width, -depth);
+                rimVertex(i, end, width, -depth);
+                rimVertex(i, end, width, depth);
+                rimVertex(i, end, -width, depth);
+            }
+        }
+        RenderEnd();
+
+        glDisable(GL_POLYGON_OFFSET_FILL);
+        glDisable(GL_CULL_FACE);
+        glDepthMask(GL_FALSE);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+        glShadeModel(GL_SMOOTH);
+        BeginQuads();
+        for (unsigned i = 0; i < gImpactAnimation::RimFragmentCount; ++i)
+        {
+            auto const& piece = rims[i];
+            if (!piece.Active())
+                continue;
+            REAL fade = piece.fade * piece.fade;
+            for (int glow = 0; glow < 2; ++glow)
+            {
+                REAL width = (glow ? .025f : .075f) * modelScale;
+                REAL alpha = (glow ? .82f : .12f) * fade;
+                REAL hot = glow ? .48f : .05f;
+                glColor4f(r + (1 - r) * hot, g + (1 - g) * hot, b + (1 - b) * hot, alpha);
+                for (int section = 0; section < 6; ++section)
+                {
+                    for (int side = -1; side <= 1; side += 2)
+                    {
+                        REAL depth = side * (.018f * modelScale + .002f);
+                        rimVertex(i, section, -width, depth);
+                        rimVertex(i, section + 1, -width, depth);
+                        rimVertex(i, section + 1, width, depth);
+                        rimVertex(i, section, width, depth);
+                    }
+                }
+            }
+        }
+        RenderEnd();
+        BeginLines();
+        for (unsigned i = 0; i < fragmentCount; ++i)
+        {
+            Fragment const& piece = fragments[i];
+            REAL fade = piece.fade * piece.fade;
+            for (unsigned edge = 0; edge < 12; ++edge)
+            {
+                bool glint = piece.index % 7 == 0 && edge == piece.index % 12;
+                REAL hot = glint ? .70f : .12f;
+                glColor4f(r + (1 - r) * hot, g + (1 - g) * hot, b + (1 - b) * hot,
+                          (glint ? .85f : .38f) * fade);
+                vertex(piece, edges[edge][0]);
+                vertex(piece, edges[edge][1]);
+            }
+        }
+        RenderEnd();
+
+        BeginTriangles();
+        int count = std::min(40, expvec.Len());
+        for (int i = 0; i < count; ++i)
+        {
+            REAL life = .62f + .055f * (i % 7);
+            if (age >= life)
+                continue;
+            REAL remaining = 1 - age / life;
+            REAL fade = remaining * remaining;
+            REAL nx = expvec[i].x[0], ny = expvec[i].x[1], nz = expvec[i].x[2];
+            REAL radius = (.12f + 2.8f * (1 - std::exp(-age * 2.9f))) * (.70f + .05f * (i % 7));
+            REAL x = pos.x + nx * radius, y = pos.y + ny * radius;
+            REAL z = std::max(REAL(.025f), REAL(.18f + nz * (.35f + 1.6f * age) - 1.2f * age * age));
+            REAL angle = i * 2.3999632f + age * (4 + i % 5);
+            REAL width = (.035f + .012f * (i % 3)) * (.65f + .35f * remaining);
+            REAL length = (.075f + .035f * (i % 4)) * (.65f + .35f * remaining);
+            REAL sx = std::cos(angle) * width, sy = std::sin(angle) * width;
+            // Small tumbling triangular pieces, not long rays from the origin.
+            glColor4f(r, g, b, .90f * fade);
+            glVertex3f(x + nx * length, y + ny * length, z + nz * length);
+            glColor4f(r * .45f, g * .45f, b * .45f, .48f * fade);
+            glVertex3f(x + sx, y + sy, z + .45f * width);
+            glVertex3f(x - sx, y - sy, std::max(REAL(.012f), z - .45f * width));
+        }
+        RenderEnd();
+        BeginLines();
+        for (int i = 0; i < count; ++i)
+        {
+            REAL life = .62f + .055f * (i % 7);
+            if (age >= life)
+                continue;
+            REAL fade = 1 - age / life;
+            REAL radius = (.12f + 2.8f * (1 - std::exp(-age * 2.9f))) * (.70f + .05f * (i % 7));
+            REAL x = pos.x + expvec[i].x[0] * radius, y = pos.y + expvec[i].x[1] * radius;
+            REAL z = std::max(REAL(.025f), REAL(.18f + expvec[i].x[2] * (.35f + 1.6f * age) - 1.2f * age * age));
+            REAL tail = .035f + .10f * fade;
+            glColor4f(r, g, b, .80f * fade * fade);
+            glVertex3f(x, y, z);
+            glColor4f(r, g, b, 0);
+            glVertex3f(x - expvec[i].x[0] * tail, y - expvec[i].x[1] * tail,
+                       std::max(REAL(.012f), z - expvec[i].x[2] * tail));
+        }
+        return;
+    }
     //std::cout << "Starting render\n";
 #ifdef USEPARTICLES
     /*if(sg_crashExplosion){
@@ -504,6 +913,29 @@ void gExplosion::Render(const eCamera *cam){
 
 void gExplosion::Render2D(tCoord scale) const {
 #ifndef DEDICATED
+    if (sg_blacklightVisuals && !sg_MoviePack())
+    {
+        REAL age = lastTime - createTime;
+        if (!sg_crashExplosionHud || !std::isfinite(age) || age < 0 || age >= .75f)
+            return;
+        ExplosionVisualState state(false);
+        REAL r = explosion_r, g = explosion_g, b = explosion_b;
+        clamp01(r);
+        clamp01(g);
+        clamp01(b);
+        REAL fade = 1 - age / .75f;
+        REAL pulse = .25f + .55f * (1 - fade);
+        REAL sx = std::isfinite(scale.x) ? std::max(REAL(.4f), std::min(REAL(2.4f), REAL(std::fabs(scale.x)))) : 1;
+        REAL sy = std::isfinite(scale.y) ? std::max(REAL(.4f), std::min(REAL(2.4f), REAL(std::fabs(scale.y)))) : 1;
+        glColor4f(r, g, b, .90f * fade * fade);
+        BeginLineLoop();
+        for (int point = 0; point < 32; ++point)
+        {
+            REAL angle = point * (6.2831853f / 32);
+            glVertex2f(pos.x + sx * pulse * std::cos(angle), pos.y + sy * pulse * std::sin(angle));
+        }
+        return;
+    }
     if(sg_crashExplosionHud){
         REAL a1=(lastTime-createTime)+.01f;//+.2;
         REAL e=a1-1;

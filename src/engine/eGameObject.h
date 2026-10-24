@@ -204,6 +204,9 @@ public:
     //! draws object to the screen using OpenGL
     virtual void Render(const eCamera *cam);
 
+    //! depth-tested subparts that must precede every object's translucent render
+    virtual void RenderEarly(const eCamera* cam);
+
     // draws it to the screen in two dimensions using OpenGL (ie. for the HUD map)
     virtual void Render2D(tCoord scale) const;
 
@@ -227,6 +230,7 @@ public:
 
     // internal camera
     virtual eCoord CamDir()  const {return dir;}
+    virtual eCoord CamDirTarget() const { return CamDir(); } //!< unsmoothed target for cameras with their own response
     virtual REAL  CamRise()  const {return 0;}
     virtual eCoord CamPos()  const {return pos;}
     virtual REAL  CamZ()     const {return z;}
